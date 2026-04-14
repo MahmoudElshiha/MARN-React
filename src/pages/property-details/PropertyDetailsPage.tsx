@@ -1,1 +1,5 @@
-export { PropertyDetailsPage } from '@/app/pages/PropertyDetailsPage'
+import { PropertyDetailView } from '@/features/properties/components/PropertyDetailView'
+
+export function PropertyDetailsPage() {
+  return <PropertyDetailView />
+}

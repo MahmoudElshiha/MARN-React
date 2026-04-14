@@ -1,1 +1,5 @@
-export { SearchPage } from '@/app/pages/SearchPage'
+import { PropertySearch } from '@/features/properties/components/PropertySearch'
+
+export function SearchPage() {
+  return <PropertySearch />
+}
