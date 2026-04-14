@@ -1,1 +1,5 @@
-export { ContractPage } from '@/app/pages/ContractPage'
+import { ContractView } from '@/features/contracts/components/ContractView'
+
+export function ContractPage() {
+  return <ContractView />
+}

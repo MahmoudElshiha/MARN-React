@@ -7,7 +7,7 @@ import { mockDashboardTenantService } from './mockDashboardTenantService'
  * calls once backend endpoints are available.
  */
 export const dashboardTenantService = {
-    getDashboard(): Promise<TenantDashboardData> {
-        return mockDashboardTenantService.getDashboard()
-    },
+  getDashboard(): Promise<TenantDashboardData> {
+    return mockDashboardTenantService.getDashboard()
+  },
 }
