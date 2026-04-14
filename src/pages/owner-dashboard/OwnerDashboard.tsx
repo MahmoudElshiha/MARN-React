@@ -1,1 +1,5 @@
-export { OwnerDashboard } from '@/app/pages/OwnerDashboard'
+import { OwnerDashboardView } from '@/features/dashboard-owner/components/OwnerDashboardView'
+
+export function OwnerDashboard() {
+    return <OwnerDashboardView />
+}
