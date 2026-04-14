@@ -133,8 +133,9 @@ export function PropertyByOwnerPage() {
               <button
                 key={idx}
                 onClick={() => setCurrentImageIndex(idx)}
-                className={`rounded-2xl overflow-hidden flex-1 ${currentImageIndex === idx ? 'ring-4 ring-[#3A6EA5]' : ''
-                  }`}
+                className={`rounded-2xl overflow-hidden flex-1 ${
+                  currentImageIndex === idx ? 'ring-4 ring-[#3A6EA5]' : ''
+                }`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
               </button>

@@ -58,10 +58,11 @@ export function PropertyCard({
               className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform"
             >
               <Heart
-                className={`w-5 h-5 ${isFavorite
+                className={`w-5 h-5 ${
+                  isFavorite
                     ? 'fill-[#3A6EA5] text-[#3A6EA5]'
                     : 'text-[#1a1a1a]'
-                  }`}
+                }`}
               />
             </button>
 

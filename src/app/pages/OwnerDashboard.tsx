@@ -362,10 +362,11 @@ export function OwnerDashboard() {
                 <div className="flex justify-center gap-3 mt-4">
                   <Button
                     size="sm"
-                    className={`${view === 'monthly'
+                    className={`${
+                      view === 'monthly'
                         ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white'
                         : 'bg-[#f5f7fa] hover:bg-[#3A6EA5]/10 text-[#1a1a1a] border border-[#3A6EA5]/20'
-                      } rounded-xl`}
+                    } rounded-xl`}
                     variant={view === 'monthly' ? 'default' : 'outline'}
                     onClick={() => setView('monthly')}
                   >
@@ -373,10 +374,11 @@ export function OwnerDashboard() {
                   </Button>
                   <Button
                     size="sm"
-                    className={`${view === 'yearly'
+                    className={`${
+                      view === 'yearly'
                         ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white'
                         : 'bg-[#f5f7fa] hover:bg-[#3A6EA5]/10 text-[#1a1a1a] border border-[#3A6EA5]/20'
-                      } rounded-xl`}
+                    } rounded-xl`}
                     variant={view === 'yearly' ? 'default' : 'outline'}
                     onClick={() => setView('yearly')}
                   >
@@ -574,10 +576,11 @@ export function OwnerDashboard() {
                               </p>
                             </div>
                             <Badge
-                              className={`${property.status === 'occupied'
+                              className={`${
+                                property.status === 'occupied'
                                   ? 'bg-green-100 text-green-700 hover:bg-green-100'
                                   : 'bg-orange-100 text-orange-700 hover:bg-orange-100'
-                                }`}
+                              }`}
                             >
                               {property.status === 'occupied'
                                 ? 'Occupied'
@@ -687,10 +690,11 @@ export function OwnerDashboard() {
                 {NOTIFICATIONS.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-4 rounded-xl transition-colors ${notification.read
+                    className={`p-4 rounded-xl transition-colors ${
+                      notification.read
                         ? 'bg-[#f5f7fa]'
                         : 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
-                      }`}
+                    }`}
                   >
                     <p className="text-sm text-[#1a1a1a] mb-1">
                       {notification.message}

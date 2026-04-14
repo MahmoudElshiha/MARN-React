@@ -244,10 +244,11 @@ export function SignUpPage() {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, gender: 'male' })}
-                    className={`p-6 rounded-2xl border-2 transition-all ${formData.gender === 'male'
+                    className={`p-6 rounded-2xl border-2 transition-all ${
+                      formData.gender === 'male'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
-                      }`}
+                    }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Users className="w-6 h-6" />
@@ -259,10 +260,11 @@ export function SignUpPage() {
                     onClick={() =>
                       setFormData({ ...formData, gender: 'female' })
                     }
-                    className={`p-6 rounded-2xl border-2 transition-all ${formData.gender === 'female'
+                    className={`p-6 rounded-2xl border-2 transition-all ${
+                      formData.gender === 'female'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
-                      }`}
+                    }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Users className="w-6 h-6" />

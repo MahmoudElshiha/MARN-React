@@ -92,8 +92,9 @@ export function PropertyDetailsPage() {
               onClick={() => setIsFavorite(!isFavorite)}
             >
               <Heart
-                className={`w-5 h-5 ${isFavorite ? 'fill-[#3A6EA5] text-[#3A6EA5]' : ''
-                  }`}
+                className={`w-5 h-5 ${
+                  isFavorite ? 'fill-[#3A6EA5] text-[#3A6EA5]' : ''
+                }`}
               />
             </Button>
           </div>
@@ -130,10 +131,11 @@ export function PropertyDetailsPage() {
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === currentImageIndex
                       ? 'bg-white w-8'
                       : 'bg-white/50 hover:bg-white/75'
-                    }`}
+                  }`}
                 />
               ))}
             </div>

@@ -1115,10 +1115,11 @@ export function ProfileSettingsPage() {
                       />
                       <div className="flex justify-end mt-2">
                         <span
-                          className={`text-sm ${roommateSettings.bio.length >= bioMaxLength
+                          className={`text-sm ${
+                            roommateSettings.bio.length >= bioMaxLength
                               ? 'text-[#3A6EA5] font-semibold'
                               : 'text-[#4a5565]'
-                            }`}
+                          }`}
                         >
                           {roommateSettings.bio.length}/{bioMaxLength}
                         </span>

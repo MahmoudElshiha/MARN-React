@@ -257,10 +257,11 @@ export function AdminDashboardPage() {
                           <Icon className="w-6 h-6 text-white" />
                         </div>
                         <span
-                          className={`text-sm font-semibold ${stat.change.startsWith('+')
+                          className={`text-sm font-semibold ${
+                            stat.change.startsWith('+')
                               ? 'text-green-600'
                               : 'text-red-600'
-                            }`}
+                          }`}
                         >
                           {stat.change}
                         </span>
