@@ -1,12 +1,4 @@
-import {
-  Calendar,
-  CreditCard,
-  Heart,
-  Bell,
-  Home,
-  TrendingUp,
-  MessageSquare,
-} from 'lucide-react'
+import { CreditCard, Heart, Bell, Home, MessageSquare } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { PropertyCard } from '../components/PropertyCard'
@@ -309,19 +301,17 @@ export function TenantDashboard() {
                   {NOTIFICATIONS.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-4 rounded-2xl transition-colors ${
-                        notification.unread
+                      className={`p-4 rounded-2xl transition-colors ${notification.unread
                           ? 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
                           : 'bg-[#f5f7fa]'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <div
-                          className={`w-2 h-2 rounded-full mt-2 ${
-                            notification.unread
+                          className={`w-2 h-2 rounded-full mt-2 ${notification.unread
                               ? 'bg-[#3A6EA5]'
                               : 'bg-[#6a7282]'
-                          }`}
+                            }`}
                         />
                         <div className="flex-1">
                           <p className="text-sm text-[#1a1a1a] mb-1">

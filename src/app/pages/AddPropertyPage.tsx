@@ -63,10 +63,10 @@ export function AddPropertyPage() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
   const [customPreferences, setCustomPreferences] = useState<string[]>([])
   const [newPreference, setNewPreference] = useState('')
-  const [mapLocation, setMapLocation] = useState({
+  const mapLocation = {
     lat: 37.7749,
     lng: -122.4194,
-  }) // Default San Francisco
+  } // Default San Francisco
 
   const toggleAmenity = (amenity: string) => {
     setSelectedAmenities((prev) =>
@@ -146,22 +146,20 @@ export function AddPropertyPage() {
               return (
                 <div key={step.id} className="flex flex-col items-center">
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all ${
-                      isActive
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all ${isActive
                         ? 'bg-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : isCompleted
                           ? 'bg-[#9CBBDC] text-white'
                           : 'bg-white border-2 border-[#f5f7fa] text-[#4a5565]'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-6 h-6" />
                   </div>
                   <span
-                    className={`text-sm ${
-                      isActive
+                    className={`text-sm ${isActive
                         ? 'text-[#3A6EA5] font-semibold'
                         : 'text-[#4a5565]'
-                    }`}
+                      }`}
                   >
                     {step.title}
                   </span>
@@ -478,11 +476,10 @@ export function AddPropertyPage() {
                       <button
                         key={amenity.name}
                         onClick={() => toggleAmenity(amenity.name)}
-                        className={`p-6 rounded-2xl transition-all ${
-                          isSelected
+                        className={`p-6 rounded-2xl transition-all ${isSelected
                             ? 'bg-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                             : 'bg-white text-[#1a1a1a] hover:bg-[#9CBBDC]/20'
-                        }`}
+                          }`}
                       >
                         <Icon className="w-8 h-8 mx-auto mb-3" />
                         <p className="text-sm font-medium">{amenity.name}</p>

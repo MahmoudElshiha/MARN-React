@@ -9,16 +9,14 @@ export function OTPVerificationPage() {
   const navigate = useNavigate()
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [countdown, setCountdown] = useState(60)
-  const [canResend, setCanResend] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const canResend = countdown === 0
 
   useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
-      return () => clearTimeout(timer)
-    } else {
-      setCanResend(true)
-    }
+    if (countdown === 0) return
+
+    const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000)
+    return () => clearTimeout(timer)
   }, [countdown])
 
   const handleChange = (index: number, value: string) => {
@@ -59,7 +57,6 @@ export function OTPVerificationPage() {
 
   const handleResend = () => {
     setCountdown(60)
-    setCanResend(false)
     // Handle resend OTP logic
     console.log('Resending OTP...')
   }

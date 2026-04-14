@@ -8,19 +8,11 @@ import {
   Star,
   Heart,
   Share2,
-  Wifi,
-  Car,
-  Wind,
-  Flame,
-  Dog,
   Users,
-  Calendar,
-  DollarSign,
   CheckCircle,
-  XCircle,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
 import { Badge } from '../components/ui/badge'
 
@@ -141,9 +133,8 @@ export function PropertyByOwnerPage() {
               <button
                 key={idx}
                 onClick={() => setCurrentImageIndex(idx)}
-                className={`rounded-2xl overflow-hidden flex-1 ${
-                  currentImageIndex === idx ? 'ring-4 ring-[#3A6EA5]' : ''
-                }`}
+                className={`rounded-2xl overflow-hidden flex-1 ${currentImageIndex === idx ? 'ring-4 ring-[#3A6EA5]' : ''
+                  }`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
               </button>

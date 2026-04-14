@@ -3,21 +3,17 @@ import {
   User,
   Mail,
   Phone,
-  Globe,
   Lock,
   Bell,
   Shield,
   Camera,
   Users,
-  Home,
   Briefcase,
-  Moon,
   Volume2,
   Coffee,
   GraduationCap,
   UserPlus,
   Upload,
-  FileText,
   IdCard,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -43,7 +39,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '../components/ui/dialog'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -1120,11 +1115,10 @@ export function ProfileSettingsPage() {
                       />
                       <div className="flex justify-end mt-2">
                         <span
-                          className={`text-sm ${
-                            roommateSettings.bio.length >= bioMaxLength
+                          className={`text-sm ${roommateSettings.bio.length >= bioMaxLength
                               ? 'text-[#3A6EA5] font-semibold'
                               : 'text-[#4a5565]'
-                          }`}
+                            }`}
                         >
                           {roommateSettings.bio.length}/{bioMaxLength}
                         </span>
