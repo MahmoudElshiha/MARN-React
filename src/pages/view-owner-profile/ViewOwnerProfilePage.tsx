@@ -1,1 +1,5 @@
-export { ViewOwnerProfilePage } from '@/app/pages/ViewOwnerProfilePage'
+import { ViewOwnerProfileView } from '@/features/profile/components/ViewOwnerProfileView'
+
+export function ViewOwnerProfilePage() {
+  return <ViewOwnerProfileView />
+}

@@ -1,1 +1,5 @@
-export { ChatWithRentalRequestPage } from '@/app/pages/ChatWithRentalRequestPage'
+import { ChatWithRentalRequestView } from '@/features/chat/components/ChatWithRentalRequestView'
+
+export function ChatWithRentalRequestPage() {
+  return <ChatWithRentalRequestView />
+}

@@ -1,1 +1,5 @@
-export { ProfileSettingsPage } from '@/app/pages/ProfileSettingsPage'
+import { ProfileSettingsView } from '@/features/profile/components/ProfileSettingsView'
+
+export function ProfileSettingsPage() {
+  return <ProfileSettingsView />
+}

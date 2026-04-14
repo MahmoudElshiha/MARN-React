@@ -1,1 +1,5 @@
-export { MessagesPage } from '@/app/pages/MessagesPage'
+import { MessagesView } from '@/features/chat/components/MessagesView'
+
+export function MessagesPage() {
+  return <MessagesView />
+}

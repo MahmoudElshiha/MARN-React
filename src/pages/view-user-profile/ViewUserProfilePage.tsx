@@ -1,1 +1,5 @@
-export { ViewUserProfilePage } from '@/app/pages/ViewUserProfilePage'
+import { ViewUserProfileView } from '@/features/profile/components/ViewUserProfileView'
+
+export function ViewUserProfilePage() {
+  return <ViewUserProfileView />
+}
