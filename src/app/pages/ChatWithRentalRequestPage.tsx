@@ -1,16 +1,24 @@
-import { useState } from 'react';
-import { Send, Paperclip, MoreVertical, ChevronLeft, Calendar, MapPin, Users } from 'lucide-react';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { Card } from '../components/ui/card';
-import { useNavigate } from 'react-router';
+import { useState } from 'react'
+import {
+  Send,
+  Paperclip,
+  MoreVertical,
+  ChevronLeft,
+  Calendar,
+  MapPin,
+  Users,
+} from 'lucide-react'
+import { Input } from '../components/ui/input'
+import { Button } from '../components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
+import { Card } from '../components/ui/card'
+import { useNavigate } from 'react-router'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../components/ui/dropdown-menu';
+} from '../components/ui/dropdown-menu'
 
 const RENTAL_REQUEST = {
   apartment: {
@@ -25,11 +33,12 @@ const RENTAL_REQUEST = {
   },
   tenant: {
     name: 'Fatima Al-Masri',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
   },
   numberOfPeople: 2,
   totalPrice: 168000,
-};
+}
 
 const MESSAGES = [
   {
@@ -67,12 +76,12 @@ const MESSAGES = [
     time: '10:48 AM',
     status: 'pending',
   },
-];
+]
 
 export function ChatWithRentalRequestPage() {
-  const navigate = useNavigate();
-  const [newMessage, setNewMessage] = useState('');
-  const [messages, setMessages] = useState(MESSAGES);
+  const navigate = useNavigate()
+  const [newMessage, setNewMessage] = useState('')
+  const [messages, setMessages] = useState(MESSAGES)
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -82,21 +91,24 @@ export function ChatWithRentalRequestPage() {
           id: String(messages.length + 1),
           sender: 'me',
           text: newMessage,
-          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          time: new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
           status: 'sent',
         },
-      ]);
-      setNewMessage('');
+      ])
+      setNewMessage('')
     }
-  };
+  }
 
   const handleEditMessage = (id: string) => {
-    console.log('Edit message:', id);
-  };
+    console.log('Edit message:', id)
+  }
 
   const handleDeleteMessage = (id: string) => {
-    setMessages(messages.filter(msg => msg.id !== id));
-  };
+    setMessages(messages.filter((msg) => msg.id !== id))
+  }
 
   return (
     <div className="min-h-screen">
@@ -111,8 +123,12 @@ export function ChatWithRentalRequestPage() {
             <ChevronLeft className="w-6 h-6 text-[#1a1a1a]" />
           </Button>
           <div>
-            <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Rental Request Chat</h1>
-            <p className="text-[#6B7280]">Review request and communicate with tenant</p>
+            <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
+              Rental Request Chat
+            </h1>
+            <p className="text-[#6B7280]">
+              Review request and communicate with tenant
+            </p>
           </div>
         </div>
 
@@ -120,7 +136,9 @@ export function ChatWithRentalRequestPage() {
           {/* Rental Request Info Card */}
           <div className="lg:col-span-1">
             <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 p-6">
-              <h2 className="text-xl font-semibold text-[#1a1a1a] mb-4">Rental Request Details</h2>
+              <h2 className="text-xl font-semibold text-[#1a1a1a] mb-4">
+                Rental Request Details
+              </h2>
 
               {/* Apartment Info */}
               <div className="mb-6">
@@ -145,13 +163,17 @@ export function ChatWithRentalRequestPage() {
               <div className="mb-6 p-4 bg-white rounded-2xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Calendar className="w-5 h-5 text-[#3A6EA5]" />
-                  <h4 className="font-semibold text-[#1a1a1a]">Requested Period</h4>
+                  <h4 className="font-semibold text-[#1a1a1a]">
+                    Requested Period
+                  </h4>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-[#6B7280] mb-1">From</p>
                     <p className="font-medium text-[#1a1a1a]">
-                      {new Date(RENTAL_REQUEST.requestedPeriod.from).toLocaleDateString('en-US', {
+                      {new Date(
+                        RENTAL_REQUEST.requestedPeriod.from,
+                      ).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
@@ -161,7 +183,9 @@ export function ChatWithRentalRequestPage() {
                   <div>
                     <p className="text-[#6B7280] mb-1">To</p>
                     <p className="font-medium text-[#1a1a1a]">
-                      {new Date(RENTAL_REQUEST.requestedPeriod.to).toLocaleDateString('en-US', {
+                      {new Date(
+                        RENTAL_REQUEST.requestedPeriod.to,
+                      ).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
@@ -173,7 +197,9 @@ export function ChatWithRentalRequestPage() {
 
               {/* Booking Details */}
               <div className="mb-6 p-4 bg-white rounded-2xl">
-                <h4 className="font-semibold text-[#1a1a1a] mb-3">Booking Details</h4>
+                <h4 className="font-semibold text-[#1a1a1a] mb-3">
+                  Booking Details
+                </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-[#6B7280]">Number of People:</span>
@@ -271,8 +297,13 @@ export function ChatWithRentalRequestPage() {
                                 <MoreVertical className="w-4 h-4" />
                               </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-white rounded-xl">
-                              <DropdownMenuItem onClick={() => handleEditMessage(message.id)}>
+                            <DropdownMenuContent
+                              align="end"
+                              className="bg-white rounded-xl"
+                            >
+                              <DropdownMenuItem
+                                onClick={() => handleEditMessage(message.id)}
+                              >
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
@@ -287,14 +318,18 @@ export function ChatWithRentalRequestPage() {
                         <div className="flex items-center justify-between">
                           <p
                             className={`text-xs ${
-                              message.sender === 'me' ? 'text-white/70' : 'text-[#6B7280]'
+                              message.sender === 'me'
+                                ? 'text-white/70'
+                                : 'text-[#6B7280]'
                             }`}
                           >
                             {message.time}
                           </p>
                           <p
                             className={`text-xs ml-3 ${
-                              message.sender === 'me' ? 'text-white/70' : 'text-[#6B7280]'
+                              message.sender === 'me'
+                                ? 'text-white/70'
+                                : 'text-[#6B7280]'
                             }`}
                           >
                             {message.status === 'pending' && 'Pending'}
@@ -324,7 +359,7 @@ export function ChatWithRentalRequestPage() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
-                          handleSendMessage();
+                          handleSendMessage()
                         }
                       }}
                       placeholder="Type a message..."
@@ -344,5 +379,5 @@ export function ChatWithRentalRequestPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

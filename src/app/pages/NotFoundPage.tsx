@@ -1,7 +1,7 @@
-import { motion } from 'motion/react';
-import { Home, Search, ArrowLeft } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Link } from 'react-router';
+import { motion } from 'motion/react'
+import { Home, Search, ArrowLeft } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import { Link } from 'react-router'
 
 export function NotFoundPage() {
   return (
@@ -33,7 +33,8 @@ export function NotFoundPage() {
               Page Not Found
             </h2>
             <p className="text-xl text-[#4a5565] mb-8 max-w-md mx-auto">
-              Oops! The page you're looking for seems to have moved out. Let's help you find a new place.
+              Oops! The page you're looking for seems to have moved out. Let's
+              help you find a new place.
             </p>
           </motion.div>
 
@@ -82,7 +83,7 @@ export function NotFoundPage() {
                 { name: 'Search', path: '/search' },
                 { name: 'About Us', path: '/about' },
                 { name: 'How It Works', path: '/how-it-works' },
-                { name: 'Contact', path: '/contact' }
+                { name: 'Contact', path: '/contact' },
               ].map((link) => (
                 <Link
                   key={link.path}
@@ -113,5 +114,5 @@ export function NotFoundPage() {
         </motion.div>
       </div>
     </div>
-  );
+  )
 }

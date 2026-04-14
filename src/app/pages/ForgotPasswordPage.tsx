@@ -1,35 +1,35 @@
-import { motion } from 'motion/react';
-import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Link } from 'react-router';
-import { useState } from 'react';
+import { motion } from 'motion/react'
+import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Link } from 'react-router'
+import { useState } from 'react'
 
 export function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
 
     // Simulate API call
     setTimeout(() => {
-      setIsLoading(false);
-      setIsSubmitted(true);
-    }, 1500);
-  };
+      setIsLoading(false)
+      setIsSubmitted(true)
+    }, 1500)
+  }
 
   const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return re.test(email)
+  }
 
-  const isEmailValid = validateEmail(email);
+  const isEmailValid = validateEmail(email)
 
   if (isSubmitted) {
     return (
@@ -50,7 +50,9 @@ export function ForgotPasswordPage() {
               <CheckCircle className="w-10 h-10 text-white" />
             </motion.div>
 
-            <h2 className="text-3xl font-bold text-[#1a1a1a] mb-4">Check Your Email</h2>
+            <h2 className="text-3xl font-bold text-[#1a1a1a] mb-4">
+              Check Your Email
+            </h2>
             <p className="text-[#4a5565] mb-2">
               We've sent password reset instructions to:
             </p>
@@ -75,7 +77,7 @@ export function ForgotPasswordPage() {
           </div>
         </motion.div>
       </div>
-    );
+    )
   }
 
   return (
@@ -98,13 +100,14 @@ export function ForgotPasswordPage() {
             Forgot Your Password?
           </h1>
           <p className="text-xl text-[#4a5565] mb-8">
-            No worries! Enter your email address and we'll send you instructions to reset your password.
+            No worries! Enter your email address and we'll send you instructions
+            to reset your password.
           </p>
           <div className="space-y-4">
             {[
               'Reset link valid for 24 hours',
               'Secure password recovery',
-              'Access restored in minutes'
+              'Access restored in minutes',
             ].map((feature, index) => (
               <motion.div
                 key={feature}
@@ -137,7 +140,9 @@ export function ForgotPasswordPage() {
             </Link>
 
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2">Reset Your Password</h2>
+              <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2">
+                Reset Your Password
+              </h2>
               <p className="text-[#4a5565]">
                 Enter your email to receive reset instructions
               </p>
@@ -157,8 +162,8 @@ export function ForgotPasswordPage() {
                     required
                     value={email}
                     onChange={(e) => {
-                      setEmail(e.target.value);
-                      setError('');
+                      setEmail(e.target.value)
+                      setError('')
                     }}
                     className={`pl-12 pr-4 py-6 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${
                       error ? 'border-red-500 focus:border-red-500' : ''
@@ -167,9 +172,7 @@ export function ForgotPasswordPage() {
                     disabled={isLoading}
                   />
                 </div>
-                {error && (
-                  <p className="text-sm text-red-500 mt-2">{error}</p>
-                )}
+                {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
               </div>
 
               {/* Submit Button */}
@@ -194,7 +197,10 @@ export function ForgotPasswordPage() {
             <div className="mt-8 p-4 bg-[#F2F4F6] rounded-2xl border border-[#3A6EA5]/20">
               <p className="text-sm text-[#4a5565] text-center">
                 Remember your password?{' '}
-                <Link to="/login" className="text-[#3A6EA5] hover:underline font-semibold">
+                <Link
+                  to="/login"
+                  className="text-[#3A6EA5] hover:underline font-semibold"
+                >
                   Sign in
                 </Link>
               </p>
@@ -203,5 +209,5 @@ export function ForgotPasswordPage() {
         </motion.div>
       </div>
     </div>
-  );
+  )
 }

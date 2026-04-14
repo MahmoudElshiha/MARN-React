@@ -1,14 +1,25 @@
-import { Link, useLocation } from 'react-router';
-import { Search, Menu, User, X, Home, Building, MessageCircle, HelpCircle, Phone, Settings } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { Link, useLocation } from 'react-router'
+import {
+  Search,
+  Menu,
+  User,
+  X,
+  Home,
+  Building,
+  MessageCircle,
+  HelpCircle,
+  Phone,
+  Settings,
+} from 'lucide-react'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 
 export function Navigation() {
-  const location = useLocation();
-  const isHome = location.pathname === '/';
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation()
+  const isHome = location.pathname === '/'
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/' },
@@ -17,7 +28,7 @@ export function Navigation() {
     { icon: HelpCircle, label: 'FAQ', path: '/faq' },
     { icon: Phone, label: 'Contact', path: '/contact' },
     { icon: Settings, label: 'Settings', path: '/profile-settings' },
-  ];
+  ]
 
   return (
     <>
@@ -54,7 +65,7 @@ export function Navigation() {
               >
                 <Link to="/search">Explore</Link>
               </Button>
-              
+
               <Button
                 className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
                 asChild
@@ -134,9 +145,9 @@ export function Navigation() {
               <nav className="p-4">
                 <div className="space-y-2">
                   {menuItems.map((item, index) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path;
-                    
+                    const Icon = item.icon
+                    const isActive = location.pathname === item.path
+
                     return (
                       <motion.div
                         key={item.path}
@@ -157,7 +168,7 @@ export function Navigation() {
                           <span className="font-medium">{item.label}</span>
                         </Link>
                       </motion.div>
-                    );
+                    )
                   })}
                 </div>
 
@@ -184,7 +195,9 @@ export function Navigation() {
 
                 {/* Footer */}
                 <div className="mt-8 p-4 bg-[#f5f7fa] rounded-2xl border border-[#3A6EA5]/10">
-                  <p className="text-sm text-[#1a1a1a] mb-2 font-semibold">Need Help?</p>
+                  <p className="text-sm text-[#1a1a1a] mb-2 font-semibold">
+                    Need Help?
+                  </p>
                   <p className="text-xs text-[#6a7282] mb-3">
                     Our support team is available 24/7
                   </p>
@@ -204,5 +217,5 @@ export function Navigation() {
         )}
       </AnimatePresence>
     </>
-  );
+  )
 }

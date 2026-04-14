@@ -1,11 +1,17 @@
-import { useState } from 'react';
-import { PropertyCard } from '../components/PropertyCard';
-import { Slider } from '../components/ui/slider';
-import { Checkbox } from '../components/ui/checkbox';
-import { Label } from '../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { SlidersHorizontal, MapIcon } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import { useState } from 'react'
+import { PropertyCard } from '../components/PropertyCard'
+import { Slider } from '../components/ui/slider'
+import { Checkbox } from '../components/ui/checkbox'
+import { Label } from '../components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { SlidersHorizontal, MapIcon } from 'lucide-react'
+import { Button } from '../components/ui/button'
 
 const PROPERTIES = [
   {
@@ -112,7 +118,7 @@ const PROPERTIES = [
     baths: 1,
     guests: 2,
   },
-];
+]
 
 const AMENITIES = [
   'WiFi',
@@ -125,21 +131,21 @@ const AMENITIES = [
   'Pool',
   'Pet Friendly',
   'Balcony',
-];
+]
 
 export function SearchPage() {
-  const [priceRange, setPriceRange] = useState([1000, 5000]);
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [showMap, setShowMap] = useState(false);
-  const [rentalDuration, setRentalDuration] = useState<string>('');
+  const [priceRange, setPriceRange] = useState([1000, 5000])
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
+  const [showMap, setShowMap] = useState(false)
+  const [rentalDuration, setRentalDuration] = useState<string>('')
 
   const toggleAmenity = (amenity: string) => {
-    setSelectedAmenities(prev =>
+    setSelectedAmenities((prev) =>
       prev.includes(amenity)
-        ? prev.filter(a => a !== amenity)
-        : [...prev, amenity]
-    );
-  };
+        ? prev.filter((a) => a !== amenity)
+        : [...prev, amenity],
+    )
+  }
 
   return (
     <div className="min-h-screen">
@@ -150,7 +156,9 @@ export function SearchPage() {
             <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
               Find Your Perfect Property
             </h1>
-            <p className="text-[#4a5565]">{PROPERTIES.length} properties found</p>
+            <p className="text-[#4a5565]">
+              {PROPERTIES.length} properties found
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -188,7 +196,9 @@ export function SearchPage() {
             <div className="sticky top-24 bg-white rounded-3xl p-6 shadow-lg shadow-black/5 border border-[#3A6EA5]/10">
               <div className="flex items-center gap-2 mb-6">
                 <SlidersHorizontal className="w-5 h-5 text-[#3A6EA5]" />
-                <h2 className="text-xl font-semibold text-[#1a1a1a]">Filters</h2>
+                <h2 className="text-xl font-semibold text-[#1a1a1a]">
+                  Filters
+                </h2>
               </div>
 
               {/* Rental Duration - MOVED TO TOP */}
@@ -196,7 +206,10 @@ export function SearchPage() {
                 <Label className="text-[#1a1a1a] mb-3 block">
                   Rental Duration
                 </Label>
-                <Select value={rentalDuration} onValueChange={setRentalDuration}>
+                <Select
+                  value={rentalDuration}
+                  onValueChange={setRentalDuration}
+                >
                   <SelectTrigger className="rounded-xl bg-[#f5f7fa] border-[#3A6EA5]/20">
                     <SelectValue placeholder="Select rental duration" />
                   </SelectTrigger>
@@ -210,12 +223,16 @@ export function SearchPage() {
 
               {/* Price Range - DISABLED UNTIL RENTAL DURATION IS SELECTED */}
               <div className="mb-8">
-                <Label className={`mb-3 block ${!rentalDuration ? 'text-[#6a7282]' : 'text-[#1a1a1a]'}`}>
+                <Label
+                  className={`mb-3 block ${!rentalDuration ? 'text-[#6a7282]' : 'text-[#1a1a1a]'}`}
+                >
                   Price Range
                 </Label>
                 {!rentalDuration ? (
                   <div className="p-4 bg-[#f5f7fa] rounded-xl border-2 border-dashed border-[#3A6EA5]/20 text-center">
-                    <p className="text-sm text-[#6a7282]">Please set Rental Duration first</p>
+                    <p className="text-sm text-[#6a7282]">
+                      Please set Rental Duration first
+                    </p>
                   </div>
                 ) : (
                   <div className="mb-4">
@@ -241,22 +258,20 @@ export function SearchPage() {
                   Property Type
                 </Label>
                 <div className="space-y-3">
-                  {['Bed', 'Room', 'Apartment', 'House'].map(
-                    type => (
-                      <div key={type} className="flex items-center">
-                        <Checkbox
-                          id={type}
-                          className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5]"
-                        />
-                        <label
-                          htmlFor={type}
-                          className="ml-3 text-[#1a1a1a] cursor-pointer"
-                        >
-                          {type}
-                        </label>
-                      </div>
-                    )
-                  )}
+                  {['Bed', 'Room', 'Apartment', 'House'].map((type) => (
+                    <div key={type} className="flex items-center">
+                      <Checkbox
+                        id={type}
+                        className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5]"
+                      />
+                      <label
+                        htmlFor={type}
+                        className="ml-3 text-[#1a1a1a] cursor-pointer"
+                      >
+                        {type}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -264,7 +279,7 @@ export function SearchPage() {
               <div className="mb-8">
                 <Label className="text-[#1a1a1a] mb-3 block">Bedrooms</Label>
                 <div className="flex gap-2">
-                  {['Any', '1', '2', '3', '4+'].map(bed => (
+                  {['Any', '1', '2', '3', '4+'].map((bed) => (
                     <button
                       key={bed}
                       className="flex-1 py-2 rounded-xl bg-[#f5f7fa] hover:bg-[#3A6EA5] hover:text-white text-[#1a1a1a] transition-colors"
@@ -279,7 +294,7 @@ export function SearchPage() {
               <div className="mb-8">
                 <Label className="text-[#1a1a1a] mb-3 block">Bathrooms</Label>
                 <div className="flex gap-2">
-                  {['Any', '1', '2', '3+'].map(bath => (
+                  {['Any', '1', '2', '3+'].map((bath) => (
                     <button
                       key={bath}
                       className="flex-1 py-2 rounded-xl bg-[#f5f7fa] hover:bg-[#3A6EA5] hover:text-white text-[#1a1a1a] transition-colors"
@@ -294,7 +309,7 @@ export function SearchPage() {
               <div className="mb-8">
                 <Label className="text-[#1a1a1a] mb-3 block">Amenities</Label>
                 <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {AMENITIES.map(amenity => (
+                  {AMENITIES.map((amenity) => (
                     <div key={amenity} className="flex items-center">
                       <Checkbox
                         id={amenity}
@@ -335,14 +350,14 @@ export function SearchPage() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {PROPERTIES.map(property => (
+              {PROPERTIES.map((property) => (
                 <PropertyCard key={property.id} {...property} />
               ))}
             </div>
 
             {/* Pagination */}
             <div className="flex justify-center gap-2 mt-12">
-              {[1, 2, 3, 4, 5].map(page => (
+              {[1, 2, 3, 4, 5].map((page) => (
                 <button
                   key={page}
                   className={`w-12 h-12 rounded-xl transition-all ${
@@ -359,5 +374,5 @@ export function SearchPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

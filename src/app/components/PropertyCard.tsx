@@ -1,21 +1,21 @@
-import { Heart, MapPin, Bed, Bath, Square, Star } from 'lucide-react';
-import { useState } from 'react';
-import { motion } from 'motion/react';
-import { Link } from 'react-router';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Heart, MapPin, Bed, Bath, Square, Star } from 'lucide-react'
+import { useState } from 'react'
+import { motion } from 'motion/react'
+import { Link } from 'react-router'
+import { ImageWithFallback } from './figma/ImageWithFallback'
 
 interface PropertyCardProps {
-  id: string;
-  image: string;
-  title: string;
-  location: string;
-  price: number;
-  rating: number;
-  reviews: number;
-  type: string;
-  beds?: number;
-  baths?: number;
-  guests?: number;
+  id: string
+  image: string
+  title: string
+  location: string
+  price: number
+  rating: number
+  reviews: number
+  type: string
+  beds?: number
+  baths?: number
+  guests?: number
 }
 
 export function PropertyCard({
@@ -31,7 +31,7 @@ export function PropertyCard({
   baths,
   guests,
 }: PropertyCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false)
 
   return (
     <motion.div
@@ -48,18 +48,20 @@ export function PropertyCard({
               alt={title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
-            
+
             {/* Favorite Button */}
             <button
               onClick={(e) => {
-                e.preventDefault();
-                setIsFavorite(!isFavorite);
+                e.preventDefault()
+                setIsFavorite(!isFavorite)
               }}
               className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform"
             >
               <Heart
                 className={`w-5 h-5 ${
-                  isFavorite ? 'fill-[#3A6EA5] text-[#3A6EA5]' : 'text-[#1a1a1a]'
+                  isFavorite
+                    ? 'fill-[#3A6EA5] text-[#3A6EA5]'
+                    : 'text-[#1a1a1a]'
                 }`}
               />
             </button>
@@ -116,5 +118,5 @@ export function PropertyCard({
         </div>
       </Link>
     </motion.div>
-  );
+  )
 }
