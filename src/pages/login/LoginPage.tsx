@@ -1,1 +1,5 @@
-export { LoginPage } from '@/app/pages/LoginPage'
+import { LoginView } from '@/features/auth/components/LoginView'
+
+export function LoginPage() {
+    return <LoginView />
+}
