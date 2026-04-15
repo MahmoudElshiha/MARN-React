@@ -30,6 +30,7 @@ import { ModalTestPage } from '@/pages/modal-test/ModalTestPage'
 import { ConfirmEmailPage } from '@/pages/confirm-email/ConfirmEmailPage'
 import { EmailVerificationSentPage } from '@/pages/email-verification-sent/EmailVerificationSentPage'
 import { ResetPasswordPage } from '@/pages/reset-password/ResetPasswordPage'
+import { GuestOnlyRoute, RequireAuth } from './guards'
 
 export function AppRoutes() {
   return (
@@ -40,7 +41,14 @@ export function AppRoutes() {
       <Route path="/property/:id" element={<PropertyDetailsPage />} />
 
       {/* Dashboards */}
-      <Route path="/tenant-dashboard" element={<TenantDashboard />} />
+      <Route
+        path="/tenant-dashboard"
+        element={
+          <RequireAuth>
+            <TenantDashboard />
+          </RequireAuth>
+        }
+      />
       <Route path="/owner-dashboard" element={<OwnerDashboard />} />
       <Route path="/add-property" element={<AddPropertyPage />} />
       <Route path="/messages" element={<MessagesPage />} />
@@ -56,8 +64,23 @@ export function AppRoutes() {
       <Route path="/privacy" element={<PrivacyPage />} />
 
       {/* User Account Pages */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
+      <Route
+        path="/login"
+        element={
+          <GuestOnlyRoute>
+            <LoginPage />
+          </GuestOnlyRoute>
+        }
+      />
+
+      <Route
+        path="/signup"
+        element={
+          <GuestOnlyRoute>
+            <SignUpPage />
+          </GuestOnlyRoute>
+        }
+      />
       <Route path="/profile-settings" element={<ProfileSettingsPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />

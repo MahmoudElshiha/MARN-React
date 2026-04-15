@@ -39,7 +39,9 @@ export function Navigation() {
     { icon: MessageCircle, label: 'Chat Support', path: '/chatbot' },
     { icon: HelpCircle, label: 'FAQ', path: '/faq' },
     { icon: Phone, label: 'Contact', path: '/contact' },
-    { icon: Settings, label: 'Settings', path: '/profile-settings' },
+    ...(isLoggedIn
+      ? [{ icon: Settings, label: 'Settings', path: '/profile-settings' }]
+      : []),
   ]
 
   return (
