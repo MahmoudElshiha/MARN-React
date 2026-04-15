@@ -23,9 +23,9 @@ function unwrapResponse<T>(response: MaybeApiResponse<T>): T {
     typeof response === 'object' &&
     response !== null &&
     'data' in response &&
-    'success' in response
+    ('success' in response || 'message' in response)
   ) {
-    return (response as ApiResponse<T>).data
+    return (response as { data: T }).data
   }
 
   return response as T

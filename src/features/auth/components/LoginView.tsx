@@ -18,7 +18,7 @@ export function LoginView() {
     rememberMe: false,
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const result = await login(formData)
