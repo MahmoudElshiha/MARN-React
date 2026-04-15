@@ -34,6 +34,18 @@ export interface ForgotPasswordResponse {
   sent: boolean
 }
 
+export interface ResetPasswordRequest {
+  email: string
+  token: string
+  newPassword: string
+  confirmPassword: string
+}
+
+export interface ResetPasswordResponse {
+  success: boolean
+  message?: string
+}
+
 export interface VerifyOtpRequest {
   email: string
   otpCode: string

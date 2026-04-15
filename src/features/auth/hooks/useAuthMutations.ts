@@ -9,6 +9,8 @@ import type {
   ForgotPasswordResponse,
   LoginRequest,
   LoginResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
   ResendOtpRequest,
   ResendOtpResponse,
   SignUpRequest,
@@ -82,6 +84,31 @@ export function useForgotPassword() {
   }
 
   return { ...state, forgotPassword }
+}
+
+export function useResetPassword() {
+  const [state, setState] = useState<MutationState<ResetPasswordResponse>>({
+    data: null,
+    loading: false,
+    error: null,
+  })
+
+  async function resetPassword(
+    payload: ResetPasswordRequest,
+  ): Promise<ResetPasswordResponse | null> {
+    setState({ data: null, loading: true, error: null })
+
+    try {
+      const data = await authService.resetPassword(payload)
+      setState({ data, loading: false, error: null })
+      return data
+    } catch (err) {
+      setState({ data: null, loading: false, error: normalizeError(err) })
+      return null
+    }
+  }
+
+  return { ...state, resetPassword }
 }
 
 export function useVerifyOtp() {

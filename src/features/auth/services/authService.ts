@@ -6,6 +6,8 @@ import type {
   ForgotPasswordResponse,
   LoginRequest,
   LoginResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
   ResendOtpRequest,
   ResendOtpResponse,
   SignUpRequest,
@@ -70,6 +72,20 @@ export const authService = {
     return {
       email: payload.email,
       sent: response.data,
+    }
+  },
+
+  async resetPassword(
+    payload: ResetPasswordRequest,
+  ): Promise<ResetPasswordResponse> {
+    const response = await apiClient.post<{ message?: string; data: boolean }>(
+      '/Account/reset-password',
+      payload,
+    )
+
+    return {
+      success: response.data,
+      message: response.message,
     }
   },
 

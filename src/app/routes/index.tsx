@@ -29,6 +29,7 @@ import { PropertyByOwnerPage } from '@/pages/property-by-owner/PropertyByOwnerPa
 import { ModalTestPage } from '@/pages/modal-test/ModalTestPage'
 import { ConfirmEmailPage } from '@/pages/confirm-email/ConfirmEmailPage'
 import { EmailVerificationSentPage } from '@/pages/email-verification-sent/EmailVerificationSentPage'
+import { ResetPasswordPage } from '@/pages/reset-password/ResetPasswordPage'
 
 export function AppRoutes() {
   return (
@@ -59,6 +60,7 @@ export function AppRoutes() {
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/profile-settings" element={<ProfileSettingsPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/chatbot" element={<ChatbotPage />} />
       <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
       <Route path="/otp-verification" element={<OTPVerificationPage />} />
