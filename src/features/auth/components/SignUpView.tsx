@@ -68,7 +68,7 @@ export function SignUpView() {
       })
 
       const email = result.email || formData.email
-      navigate(`/otp-verification?email=${encodeURIComponent(email)}`)
+      navigate(`/email-verification-sent?email=${encodeURIComponent(email)}`)
     } catch {
       // error is already surfaced via the `error` state from useMutation
     }
@@ -319,11 +319,10 @@ export function SignUpView() {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, gender: 'Male' })}
-                    className={`p-6 rounded-2xl border-2 transition-all ${
-                      formData.gender === 'Male'
+                    className={`p-6 rounded-2xl border-2 transition-all ${formData.gender === 'Male'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
-                    }`}
+                      }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Users className="w-6 h-6" />
@@ -335,11 +334,10 @@ export function SignUpView() {
                     onClick={() =>
                       setFormData({ ...formData, gender: 'Female' })
                     }
-                    className={`p-6 rounded-2xl border-2 transition-all ${
-                      formData.gender === 'Female'
+                    className={`p-6 rounded-2xl border-2 transition-all ${formData.gender === 'Female'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
-                    }`}
+                      }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Users className="w-6 h-6" />
