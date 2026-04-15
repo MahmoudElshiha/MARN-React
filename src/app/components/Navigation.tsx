@@ -114,11 +114,11 @@ export function Navigation() {
 
             {/* Drawer */}
             <motion.div
-              initial={{ x: '-100%' }}
+              initial={{ x: '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
+              exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50"
+              className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50"
             >
               {/* Drawer Header */}
               <div className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] p-6">
@@ -158,11 +158,10 @@ export function Navigation() {
                         <Link
                           to={item.path}
                           onClick={() => setIsMenuOpen(false)}
-                          className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-                            isActive
-                              ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white shadow-lg shadow-[#3A6EA5]/30'
-                              : 'text-[#1a1a1a] hover:bg-[#f5f7fa] hover:translate-x-1'
-                          }`}
+                          className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${isActive
+                            ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white shadow-lg shadow-[#3A6EA5]/30'
+                            : 'text-[#1a1a1a] hover:bg-[#f5f7fa] hover:translate-x-1'
+                            }`}
                         >
                           <Icon className="w-5 h-5" />
                           <span className="font-medium">{item.label}</span>
