@@ -29,11 +29,19 @@ axiosInstance.interceptors.response.use(
       }
 
       const status = error.response?.status ?? 0
-      const serverMessage =
-        (error.response?.data as { message?: string } | undefined)?.message ??
-        error.message
+      const body = error.response?.data as
+        | {
+            message?: string
+            title?: string
+            errors?: Record<string, string[]>
+          }
+        | undefined
 
-      throw new HttpError(status, String(status), serverMessage)
+      // ASP.NET validation problem details: prefer `title`, fall back to `message`, then axios message
+      const serverMessage = body?.title ?? body?.message ?? error.message
+      const validationErrors = body?.errors
+
+      throw new HttpError(status, String(status), serverMessage, validationErrors)
     }
 
     throw error

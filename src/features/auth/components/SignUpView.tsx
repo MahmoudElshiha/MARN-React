@@ -25,6 +25,20 @@ export function SignUpView() {
     agreeToTerms: false,
   })
 
+  // Look up the first validation message for a field (case-insensitive key match).
+  // The server sends PascalCase keys e.g. "DateOfBirth"; form uses camelCase.
+  function fieldError(name: string): string | undefined {
+    if (!error?.validationErrors) return undefined
+    const key = Object.keys(error.validationErrors).find(
+      (k) => k.toLowerCase() === name.toLowerCase(),
+    )
+    return key ? error.validationErrors[key][0] : undefined
+  }
+
+  // True when the server returned validation errors (so the top banner shows the title only)
+  const hasValidationErrors =
+    error?.validationErrors && Object.keys(error.validationErrors).length > 0
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLocalError('')
@@ -122,7 +136,7 @@ export function SignUpView() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {(localError || error) && (
+              {(localError || (error && !hasValidationErrors)) && (
                 <p className="text-sm text-red-500 rounded-xl bg-red-50 px-4 py-3 border border-red-200">
                   {localError || error?.message}
                 </p>
@@ -145,10 +159,13 @@ export function SignUpView() {
                     onChange={(e) =>
                       setFormData({ ...formData, firstName: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fieldError('firstName') ? 'border-red-400' : ''}`}
                     placeholder="John"
                   />
                 </div>
+                {fieldError('firstName') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('firstName')}</p>
+                )}
               </div>
 
               <div>
@@ -165,10 +182,13 @@ export function SignUpView() {
                     onChange={(e) =>
                       setFormData({ ...formData, lastName: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fieldError('lastName') ? 'border-red-400' : ''}`}
                     placeholder="Doe"
                   />
                 </div>
+                {fieldError('lastName') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('lastName')}</p>
+                )}
               </div>
 
               <div>
@@ -185,10 +205,13 @@ export function SignUpView() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fieldError('email') ? 'border-red-400' : ''}`}
                     placeholder="you@example.com"
                   />
                 </div>
+                {fieldError('email') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('email')}</p>
+                )}
               </div>
 
               <div>
@@ -205,7 +228,7 @@ export function SignUpView() {
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    className="pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fieldError('password') ? 'border-red-400' : ''}`}
                     placeholder="Create a strong password"
                   />
                   <button
@@ -220,10 +243,14 @@ export function SignUpView() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-[#6a7282] mt-2">
-                  Must be at least 8 characters with a mix of letters and
-                  numbers
-                </p>
+                {fieldError('password') ? (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('password')}</p>
+                ) : (
+                  <p className="text-xs text-[#6a7282] mt-2">
+                    Must be at least 8 characters with a mix of letters and
+                    numbers
+                  </p>
+                )}
               </div>
 
               <div>
@@ -246,7 +273,7 @@ export function SignUpView() {
                         confirmPassword: e.target.value,
                       })
                     }
-                    className="pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fieldError('confirmPassword') ? 'border-red-400' : ''}`}
                     placeholder="Confirm your password"
                   />
                   <button
@@ -261,9 +288,11 @@ export function SignUpView() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-[#6a7282] mt-2">
-                  Must match the password
-                </p>
+                {fieldError('confirmPassword') ? (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('confirmPassword')}</p>
+                ) : (
+                  <p className="text-xs text-[#6a7282] mt-2">Must match the password</p>
+                )}
               </div>
 
               <div>
@@ -300,6 +329,9 @@ export function SignUpView() {
                     </div>
                   </button>
                 </div>
+                {fieldError('gender') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('gender')}</p>
+                )}
               </div>
 
               <div>
@@ -319,9 +351,12 @@ export function SignUpView() {
                     onChange={(e) =>
                       setFormData({ ...formData, dateOfBirth: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fieldError('dateOfBirth') ? 'border-red-400' : ''}`}
                   />
                 </div>
+                {fieldError('dateOfBirth') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('dateOfBirth')}</p>
+                )}
               </div>
 
               <div className="flex items-start gap-2">
