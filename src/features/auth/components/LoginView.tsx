@@ -15,7 +15,7 @@ export function LoginView() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    remember: false,
+    rememberMe: false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -160,9 +160,9 @@ export function LoginView() {
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="remember"
-                  checked={formData.remember}
+                  checked={formData.rememberMe}
                   onCheckedChange={(checked) =>
-                    setFormData({ ...formData, remember: checked as boolean })
+                    setFormData({ ...formData, rememberMe: checked as boolean })
                   }
                   className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5]"
                 />

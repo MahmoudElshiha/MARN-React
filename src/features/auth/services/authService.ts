@@ -32,13 +32,19 @@ function unwrapResponse<T>(response: MaybeApiResponse<T>): T {
 export const authService = {
   async login(payload: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post<MaybeApiResponse<LoginResponse>>(
-      '/auth/login',
+      '/Account/login',
       payload,
     )
     const data = unwrapResponse(response)
 
     if (data.token) {
-      localStorage.setItem('token', data.token)
+      if (payload.rememberMe) {
+        localStorage.setItem('token', data.token)
+        sessionStorage.removeItem('token')
+      } else {
+        sessionStorage.setItem('token', data.token)
+        localStorage.removeItem('token')
+      }
     }
 
     return data
