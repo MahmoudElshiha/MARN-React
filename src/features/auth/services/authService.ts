@@ -78,7 +78,7 @@ export const authService = {
   async resetPassword(
     payload: ResetPasswordRequest,
   ): Promise<ResetPasswordResponse> {
-    const response = await apiClient.post<{ message?: string; data: boolean }>(
+    const response = await apiClient.put<{ message?: string; data: boolean }>(
       '/Account/reset-password',
       payload,
     )
