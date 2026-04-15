@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { normalizeError } from '@/services/httpErrors'
 import type { ApiError } from '@/types/common'
 import { authService } from '../services/authService'
@@ -45,28 +46,16 @@ export function useLogin() {
 }
 
 export function useSignUp() {
-  const [state, setState] = useState<MutationState<SignUpResponse>>({
-    data: null,
-    loading: false,
-    error: null,
+  const mutation = useMutation<SignUpResponse, Error, SignUpRequest>({
+    mutationFn: authService.signUp,
   })
 
-  async function signUp(
-    payload: SignUpRequest,
-  ): Promise<SignUpResponse | null> {
-    setState({ data: null, loading: true, error: null })
-
-    try {
-      const data = await authService.signUp(payload)
-      setState({ data, loading: false, error: null })
-      return data
-    } catch (err) {
-      setState({ data: null, loading: false, error: normalizeError(err) })
-      return null
-    }
+  return {
+    signUp: mutation.mutateAsync,
+    loading: mutation.isPending,
+    error: mutation.error ? normalizeError(mutation.error) : null,
+    data: mutation.data ?? null,
   }
-
-  return { ...state, signUp }
 }
 
 export function useForgotPassword() {

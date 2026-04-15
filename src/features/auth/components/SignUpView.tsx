@@ -20,8 +20,8 @@ export function SignUpView() {
     email: '',
     password: '',
     confirmPassword: '',
-    gender: '',
-    birthdate: '',
+    gender: '' as 'Male' | 'Female' | '',
+    dateOfBirth: '',
     agreeToTerms: false,
   })
 
@@ -34,20 +34,27 @@ export function SignUpView() {
       return
     }
 
-    const result = await signUp({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      password: formData.password,
-      confirmPassword: formData.confirmPassword,
-      gender: formData.gender,
-      birthdate: formData.birthdate,
-    })
+    if (!formData.gender) {
+      setLocalError('Please select a gender.')
+      return
+    }
 
-    if (!result) return
+    try {
+      const result = await signUp({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        dateOfBirth: formData.dateOfBirth,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        gender: formData.gender,
+      })
 
-    const email = result.email || formData.email
-    navigate(`/otp-verification?email=${encodeURIComponent(email)}`)
+      const email = result.email || formData.email
+      navigate(`/otp-verification?email=${encodeURIComponent(email)}`)
+    } catch {
+      // error is already surfaced via the `error` state from useMutation
+    }
   }
 
   return (
@@ -264,9 +271,9 @@ export function SignUpView() {
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, gender: 'male' })}
+                    onClick={() => setFormData({ ...formData, gender: 'Male' })}
                     className={`p-6 rounded-2xl border-2 transition-all ${
-                      formData.gender === 'male'
+                      formData.gender === 'Male'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
                     }`}
@@ -279,10 +286,10 @@ export function SignUpView() {
                   <button
                     type="button"
                     onClick={() =>
-                      setFormData({ ...formData, gender: 'female' })
+                      setFormData({ ...formData, gender: 'Female' })
                     }
                     className={`p-6 rounded-2xl border-2 transition-all ${
-                      formData.gender === 'female'
+                      formData.gender === 'Female'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
                     }`}
@@ -297,20 +304,20 @@ export function SignUpView() {
 
               <div>
                 <Label
-                  htmlFor="birthdate"
+                  htmlFor="dateOfBirth"
                   className="text-[#1a1a1a] mb-2 block"
                 >
-                  Birthdate
+                  Date of Birth
                 </Label>
                 <div className="relative">
                   <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
                   <Input
-                    id="birthdate"
+                    id="dateOfBirth"
                     type="date"
                     required
-                    value={formData.birthdate}
+                    value={formData.dateOfBirth}
                     onChange={(e) =>
-                      setFormData({ ...formData, birthdate: e.target.value })
+                      setFormData({ ...formData, dateOfBirth: e.target.value })
                     }
                     className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
                   />

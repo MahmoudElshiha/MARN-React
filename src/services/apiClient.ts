@@ -1,86 +1,58 @@
+import axios from 'axios'
 import { HttpError, TimeoutError } from './httpErrors'
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
-const DEFAULT_TIMEOUT_MS = 15_000
+const BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
 
-function getAuthToken(): string | null {
-  return localStorage.getItem('token')
-}
+export const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  timeout: 15_000,
+  headers: { 'Content-Type': 'application/json' },
+})
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getAuthToken()
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string> | undefined),
-  }
-
+// Attach auth token to every request
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`
   }
+  return config
+})
 
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
-
-  try {
-    const response = await fetch(`${BASE_URL}${path}`, {
-      ...options,
-      headers,
-      signal: controller.signal,
-    })
-
-    if (!response.ok) {
-      let message = response.statusText
-      try {
-        const body = (await response.json()) as { message?: string }
-        message = body.message ?? message
-      } catch {
-        // body is not JSON — use statusText as fallback
+// Normalize errors into HttpError / TimeoutError
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED' || error.code === 'ERR_CANCELED') {
+        throw new TimeoutError()
       }
-      throw new HttpError(response.status, String(response.status), message)
+
+      const status = error.response?.status ?? 0
+      const serverMessage =
+        (error.response?.data as { message?: string } | undefined)?.message ??
+        error.message
+
+      throw new HttpError(status, String(status), serverMessage)
     }
 
-    // 204 No Content — return undefined cast to T
-    if (response.status === 204) {
-      return undefined as T
-    }
-
-    return response.json() as Promise<T>
-  } catch (err) {
-    if (err instanceof HttpError) throw err
-    if (err instanceof Error && err.name === 'AbortError')
-      throw new TimeoutError()
-    throw err
-  } finally {
-    clearTimeout(timeoutId)
-  }
-}
+    throw error
+  },
+)
 
 export const apiClient = {
-  get: <T>(path: string, options?: RequestInit) =>
-    request<T>(path, { ...options, method: 'GET' }),
+  get: <T>(path: string) =>
+    axiosInstance.get<T>(path).then((r) => r.data),
 
-  post: <T>(path: string, body: unknown, options?: RequestInit) =>
-    request<T>(path, {
-      ...options,
-      method: 'POST',
-      body: JSON.stringify(body),
-    }),
+  post: <T>(path: string, body?: unknown) =>
+    axiosInstance.post<T>(path, body).then((r) => r.data),
 
-  put: <T>(path: string, body: unknown, options?: RequestInit) =>
-    request<T>(path, {
-      ...options,
-      method: 'PUT',
-      body: JSON.stringify(body),
-    }),
+  put: <T>(path: string, body?: unknown) =>
+    axiosInstance.put<T>(path, body).then((r) => r.data),
 
-  patch: <T>(path: string, body: unknown, options?: RequestInit) =>
-    request<T>(path, {
-      ...options,
-      method: 'PATCH',
-      body: JSON.stringify(body),
-    }),
+  patch: <T>(path: string, body?: unknown) =>
+    axiosInstance.patch<T>(path, body).then((r) => r.data),
 
-  delete: <T>(path: string, options?: RequestInit) =>
-    request<T>(path, { ...options, method: 'DELETE' }),
+  delete: <T>(path: string) =>
+    axiosInstance.delete<T>(path).then((r) => r.data),
 }

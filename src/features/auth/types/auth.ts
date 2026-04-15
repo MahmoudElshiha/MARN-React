@@ -13,10 +13,10 @@ export interface SignUpRequest {
   firstName: string
   lastName: string
   email: string
+  dateOfBirth: string
   password: string
   confirmPassword: string
-  gender: string
-  birthdate: string
+  gender: 'Male' | 'Female'
 }
 
 export interface SignUpResponse {

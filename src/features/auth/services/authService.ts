@@ -45,7 +45,7 @@ export const authService = {
 
   async signUp(payload: SignUpRequest): Promise<SignUpResponse> {
     const response = await apiClient.post<MaybeApiResponse<SignUpResponse>>(
-      '/auth/signup',
+      '/Account/register',
       payload,
     )
 
