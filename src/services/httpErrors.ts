@@ -7,6 +7,7 @@ export class HttpError extends Error {
     public readonly code: string,
     message: string,
     public readonly validationErrors?: Record<string, string[]>,
+    public readonly errors?: string[],
   ) {
     super(message)
     this.name = 'HttpError'
@@ -32,6 +33,7 @@ export function normalizeError(err: unknown): ApiError {
       status: err.status,
       code: err.code,
       validationErrors: err.validationErrors,
+      errors: err.errors,
     }
   }
   if (err instanceof TimeoutError) {

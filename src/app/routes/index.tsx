@@ -27,6 +27,7 @@ import { ContractPage } from '@/pages/contract/ContractPage'
 import { EditPropertyPage } from '@/pages/edit-property/EditPropertyPage'
 import { PropertyByOwnerPage } from '@/pages/property-by-owner/PropertyByOwnerPage'
 import { ModalTestPage } from '@/pages/modal-test/ModalTestPage'
+import { ConfirmEmailPage } from '@/pages/confirm-email/ConfirmEmailPage'
 
 export function AppRoutes() {
   return (
@@ -60,6 +61,7 @@ export function AppRoutes() {
       <Route path="/chatbot" element={<ChatbotPage />} />
       <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
       <Route path="/otp-verification" element={<OTPVerificationPage />} />
+      <Route path="/confirm-email" element={<ConfirmEmailPage />} />
 
       {/* Additional Pages */}
       <Route

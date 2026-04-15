@@ -30,18 +30,21 @@ axiosInstance.interceptors.response.use(
 
       const status = error.response?.status ?? 0
       const body = error.response?.data as
-        | {
-            message?: string
-            title?: string
-            errors?: Record<string, string[]>
-          }
+        | { message?: string; title?: string; errors?: unknown }
         | undefined
 
-      // ASP.NET validation problem details: prefer `title`, fall back to `message`, then axios message
+      // Prefer ASP.NET `title`, fall back to custom `message`, then axios message
       const serverMessage = body?.title ?? body?.message ?? error.message
-      const validationErrors = body?.errors
 
-      throw new HttpError(status, String(status), serverMessage, validationErrors)
+      // `errors` is either a string[] (business logic) or Record<string,string[]> (field validation)
+      const rawErrors = body?.errors
+      const errors = Array.isArray(rawErrors) ? (rawErrors as string[]) : undefined
+      const validationErrors =
+        rawErrors && !Array.isArray(rawErrors)
+          ? (rawErrors as Record<string, string[]>)
+          : undefined
+
+      throw new HttpError(status, String(status), serverMessage, validationErrors, errors)
     }
 
     throw error

@@ -1,6 +1,7 @@
 import { apiClient } from '@/services/apiClient'
 import type { ApiResponse } from '@/types/common'
 import type {
+  ConfirmEmailResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   LoginRequest,
@@ -80,6 +81,18 @@ export const authService = {
     const response = await apiClient.post<MaybeApiResponse<ResendOtpResponse>>(
       '/auth/resend-otp',
       payload,
+    )
+
+    return unwrapResponse(response)
+  },
+
+  async confirmEmail(
+    userId: string,
+    token: string,
+  ): Promise<ConfirmEmailResponse> {
+    const qs = new URLSearchParams({ userId, token }).toString()
+    const response = await apiClient.get<MaybeApiResponse<ConfirmEmailResponse>>(
+      `/Account/confirm-email?${qs}`,
     )
 
     return unwrapResponse(response)

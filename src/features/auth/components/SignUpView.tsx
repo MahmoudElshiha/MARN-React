@@ -35,9 +35,12 @@ export function SignUpView() {
     return key ? error.validationErrors[key][0] : undefined
   }
 
-  // True when the server returned validation errors (so the top banner shows the title only)
+  // True when the server returned field-level validation errors
   const hasValidationErrors =
     error?.validationErrors && Object.keys(error.validationErrors).length > 0
+
+  // Flat list of business-logic errors (e.g. "Email is already taken.")
+  const hasErrorList = error?.errors && error.errors.length > 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -136,10 +139,25 @@ export function SignUpView() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {(localError || (error && !hasValidationErrors)) && (
+              {(localError || (error && !hasValidationErrors && !hasErrorList)) && (
                 <p className="text-sm text-red-500 rounded-xl bg-red-50 px-4 py-3 border border-red-200">
                   {localError || error?.message}
                 </p>
+              )}
+
+              {hasErrorList && (
+                <div className="rounded-xl bg-red-50 px-4 py-3 border border-red-200">
+                  <p className="text-sm font-semibold text-red-600 mb-1">
+                    {error?.message}
+                  </p>
+                  <ul className="list-disc list-inside space-y-0.5">
+                    {error!.errors!.map((msg) => (
+                      <li key={msg} className="text-sm text-red-500">
+                        {msg}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               <div>

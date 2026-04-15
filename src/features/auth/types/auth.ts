@@ -52,3 +52,8 @@ export interface ResendOtpRequest {
 export interface ResendOtpResponse {
   sent: boolean
 }
+
+export interface ConfirmEmailResponse {
+  confirmed: boolean
+  message?: string
+}

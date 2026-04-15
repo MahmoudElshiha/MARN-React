@@ -25,4 +25,9 @@ export interface ApiError {
    * e.g. { "DateOfBirth": ["Date of birth cannot be in the future."] }
    */
   validationErrors?: Record<string, string[]>
+  /**
+   * Flat list of business-logic error messages from the server.
+   * e.g. ["Username '...' is already taken.", "Email '...' is already taken."]
+   */
+  errors?: string[]
 }

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { normalizeError } from '@/services/httpErrors'
 import type { ApiError } from '@/types/common'
 import { authService } from '../services/authService'
 import type {
+  ConfirmEmailResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   LoginRequest,
@@ -131,4 +132,20 @@ export function useResendOtp() {
   }
 
   return { ...state, resendOtp }
+}
+
+export function useConfirmEmail(userId: string, token: string) {
+  const query = useQuery<ConfirmEmailResponse, Error>({
+    queryKey: ['confirm-email', userId, token],
+    queryFn: () => authService.confirmEmail(userId, token),
+    enabled: Boolean(userId && token),
+    retry: false,
+  })
+
+  return {
+    loading: query.isLoading,
+    success: query.isSuccess,
+    error: query.error ? normalizeError(query.error) : null,
+    data: query.data ?? null,
+  }
 }
