@@ -22,12 +22,13 @@ export function ForgotPasswordView() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const normalizedEmail = email.trim()
 
-    const result = await forgotPassword({ email })
+    const result = await forgotPassword({ email: normalizedEmail })
     if (!result) return
 
-    setSubmittedEmail(result.email || email)
-    setIsSubmitted(result.sent)
+    setSubmittedEmail(result.email || normalizedEmail)
+    setIsSubmitted(result.sent ?? true)
   }
 
   if (isSubmitted) {

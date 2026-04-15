@@ -62,11 +62,15 @@ export const authService = {
   async forgotPassword(
     payload: ForgotPasswordRequest,
   ): Promise<ForgotPasswordResponse> {
-    const response = await apiClient.post<
-      MaybeApiResponse<ForgotPasswordResponse>
-    >('/auth/forgot-password', payload)
+    const response = await apiClient.post<{ message: string; data: boolean }>(
+      '/Account/forgot-password',
+      payload,
+    )
 
-    return unwrapResponse(response)
+    return {
+      email: payload.email,
+      sent: response.data,
+    }
   },
 
   async verifyOtp(payload: VerifyOtpRequest): Promise<VerifyOtpResponse> {
