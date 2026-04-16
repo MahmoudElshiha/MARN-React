@@ -77,6 +77,20 @@ export function ProfileSettingsView() {
     )
   }
 
+  // Look up the first validation message for a field (case-insensitive key match).
+  function fieldError(name: string): string | undefined {
+    if (!error?.validationErrors) return undefined
+    const key = Object.keys(error.validationErrors).find(
+      (k) => k.toLowerCase() === name.toLowerCase(),
+    )
+    return key ? error.validationErrors[key][0] : undefined
+  }
+
+  const hasValidationErrors =
+    error?.validationErrors && Object.keys(error.validationErrors).length > 0
+
+  const hasErrorList = error?.errors && error.errors.length > 0
+
   async function handleSave() {
     const ok = await save()
     if (ok) {
@@ -123,9 +137,24 @@ export function ProfileSettingsView() {
           </p>
         </div>
 
-        {error && (
+        {error && !hasValidationErrors && !hasErrorList && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-600">
             {error.message}
+          </div>
+        )}
+
+        {hasErrorList && (
+          <div className="rounded-xl bg-red-50 px-4 py-3 border border-red-200">
+            <p className="text-sm font-semibold text-red-600 mb-1">
+              {error?.message}
+            </p>
+            <ul className="list-disc list-inside space-y-0.5">
+              {error!.errors!.map((msg) => (
+                <li key={msg} className="text-sm text-red-500">
+                  {msg}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -184,18 +213,24 @@ export function ProfileSettingsView() {
                 <Input
                   value={settings.firstName}
                   onChange={(e) => updateField('firstName', e.target.value)}
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('firstName') ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldError('firstName') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('firstName')}</p>
+                )}
               </div>
               <div>
                 <Label className="mb-2 block">Last Name *</Label>
                 <Input
                   value={settings.lastName}
                   onChange={(e) => updateField('lastName', e.target.value)}
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('lastName') ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldError('lastName') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('lastName')}</p>
+                )}
               </div>
               <div>
                 <Label className="mb-2 block">Email</Label>
@@ -210,9 +245,12 @@ export function ProfileSettingsView() {
                 <Input
                   value={settings.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('phone') ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldError('phone') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('phone')}</p>
+                )}
               </div>
               <div>
                 <Label className="mb-2 block">Gender *</Label>
@@ -220,8 +258,11 @@ export function ProfileSettingsView() {
                   endpoint="genders"
                   value={settings.gender}
                   onChange={(value) => updateField('gender', value)}
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('gender') ? 'border-red-400' : ''}`}
                 />
+                {fieldError('gender') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('gender')}</p>
+                )}
               </div>
               <div>
                 <Label className="mb-2 block">Language *</Label>
@@ -229,8 +270,11 @@ export function ProfileSettingsView() {
                   endpoint="languages"
                   value={settings.language}
                   onChange={(value) => updateField('language', value)}
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('language') ? 'border-red-400' : ''}`}
                 />
+                {fieldError('language') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('language')}</p>
+                )}
               </div>
               <div>
                 <Label className="mb-2 block">Country *</Label>
@@ -238,8 +282,11 @@ export function ProfileSettingsView() {
                   endpoint="countries"
                   value={settings.country}
                   onChange={(value) => updateField('country', value)}
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('country') ? 'border-red-400' : ''}`}
                 />
+                {fieldError('country') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('country')}</p>
+                )}
               </div>
               <div>
                 <Label className="mb-2 block">Date of Birth *</Label>
@@ -247,9 +294,12 @@ export function ProfileSettingsView() {
                   type="date"
                   value={settings.dateOfBirth}
                   onChange={(e) => updateField('dateOfBirth', e.target.value)}
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('dateOfBirth') ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldError('dateOfBirth') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('dateOfBirth')}</p>
+                )}
               </div>
             </div>
             <div>
@@ -443,18 +493,24 @@ export function ProfileSettingsView() {
                   onChange={(e) =>
                     updateField('arabicFullName', e.target.value)
                   }
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('arabicFullName') ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldError('arabicFullName') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('arabicFullName')}</p>
+                )}
               </div>
               <div>
                 <Label className="mb-2 block">Arabic Address *</Label>
                 <Input
                   value={settings.arabicAddress}
                   onChange={(e) => updateField('arabicAddress', e.target.value)}
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('arabicAddress') ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldError('arabicAddress') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('arabicAddress')}</p>
+                )}
               </div>
               <div>
                 <Label className="mb-2 block">National ID Number *</Label>
@@ -463,9 +519,12 @@ export function ProfileSettingsView() {
                   onChange={(e) =>
                     updateField('nationalIDNumber', e.target.value)
                   }
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                  className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('nationalIDNumber') ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldError('nationalIDNumber') && (
+                  <p className="text-xs text-red-500 mt-1">{fieldError('nationalIDNumber')}</p>
+                )}
               </div>
             </div>
 
