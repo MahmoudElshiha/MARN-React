@@ -92,10 +92,10 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  to="/pricing"
+                  to="/faq"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  Pricing
+                  FAQ
                 </Link>
               </li>
             </ul>

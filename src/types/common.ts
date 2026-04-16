@@ -20,6 +20,8 @@ export interface ApiError {
   status: number
   /** Optional machine-readable error code from the server. */
   code?: string
+  /** Optional action hint provided by backend for recovery flows. */
+  action?: string | null
   /**
    * Field-level validation errors keyed by field name (PascalCase from server).
    * e.g. { "DateOfBirth": ["Date of birth cannot be in the future."] }

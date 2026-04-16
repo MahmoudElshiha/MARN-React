@@ -1,8 +1,7 @@
 import axios from 'axios'
 import { HttpError, TimeoutError } from './httpErrors'
 
-const BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -42,7 +41,12 @@ axiosInstance.interceptors.response.use(
 
       const status = error.response?.status ?? 0
       const body = error.response?.data as
-        | { message?: string; title?: string; errors?: unknown }
+        | {
+            message?: string
+            title?: string
+            errors?: unknown
+            action?: unknown
+          }
         | undefined
 
       // Prefer ASP.NET `title`, fall back to custom `message`, then axios message
@@ -50,13 +54,27 @@ axiosInstance.interceptors.response.use(
 
       // `errors` is either a string[] (business logic) or Record<string,string[]> (field validation)
       const rawErrors = body?.errors
-      const errors = Array.isArray(rawErrors) ? (rawErrors as string[]) : undefined
+      const errors = Array.isArray(rawErrors)
+        ? (rawErrors as string[])
+        : undefined
       const validationErrors =
         rawErrors && !Array.isArray(rawErrors)
           ? (rawErrors as Record<string, string[]>)
           : undefined
+      const rawAction = body?.action
+      const action =
+        typeof rawAction === 'string' || rawAction === null
+          ? rawAction
+          : undefined
 
-      throw new HttpError(status, String(status), serverMessage, validationErrors, errors)
+      throw new HttpError(
+        status,
+        String(status),
+        serverMessage,
+        validationErrors,
+        errors,
+        action,
+      )
     }
 
     throw error
@@ -64,8 +82,7 @@ axiosInstance.interceptors.response.use(
 )
 
 export const apiClient = {
-  get: <T>(path: string) =>
-    axiosInstance.get<T>(path).then((r) => r.data),
+  get: <T>(path: string) => axiosInstance.get<T>(path).then((r) => r.data),
 
   post: <T>(path: string, body?: unknown) =>
     axiosInstance.post<T>(path, body).then((r) => r.data),

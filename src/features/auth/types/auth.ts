@@ -69,3 +69,11 @@ export interface ConfirmEmailResponse {
   confirmed: boolean
   message?: string
 }
+
+export interface ResendEmailConfirmationRequest {
+  email: string
+}
+
+export interface ResendEmailConfirmationResponse {
+  sent: boolean
+}

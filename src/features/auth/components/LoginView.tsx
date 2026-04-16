@@ -1,16 +1,30 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { motion } from 'motion/react'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  TriangleAlert,
+  MailCheck,
+  CircleCheckBig,
+} from 'lucide-react'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { Checkbox } from '@/app/components/ui/checkbox'
-import { useLogin } from '../hooks/useAuthMutations'
+import { useLogin, useResendConfirmationEmail } from '../hooks/useAuthMutations'
 
 export function LoginView() {
   const navigate = useNavigate()
-  const { login, loading, error } = useLogin()
+  const { login, loading: loginLoading, error } = useLogin()
+  const {
+    resendConfirmationEmail,
+    loading: resendLoading,
+    error: resendError,
+    data: resendData,
+  } = useResendConfirmationEmail()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -25,6 +39,13 @@ export function LoginView() {
     if (!result) return
 
     navigate(result.redirectPath ?? '/tenant-dashboard')
+  }
+
+  const handleResendConfirmationEmail = async () => {
+    const email = formData.email.trim()
+    if (!email) return
+
+    await resendConfirmationEmail({ email })
   }
 
   return (
@@ -92,9 +113,63 @@ export function LoginView() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
+              {error &&
+                (error.action === 'ResendEmailConfirmation' ? (
+                  <div className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-4 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-full bg-amber-100 p-2 text-amber-700">
+                        <TriangleAlert className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <p className="text-sm font-semibold text-amber-900">
+                          Email confirmation required
+                        </p>
+                        <p className="text-sm text-amber-800/90">
+                          {error.message}
+                        </p>
+                        <p className="text-xs text-amber-800/80">
+                          We will send a fresh confirmation link to{' '}
+                          <span className="font-medium">
+                            {formData.email || 'your email'}
+                          </span>
+                          .
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={handleResendConfirmationEmail}
+                      disabled={resendLoading || !formData.email.trim()}
+                      className="mt-4 w-full rounded-xl bg-[#3A6EA5] text-white hover:bg-[#2f5a88] disabled:bg-[#3A6EA5]/60"
+                    >
+                      <MailCheck className="mr-2 h-4 w-4" />
+                      {resendLoading
+                        ? 'Sending confirmation email...'
+                        : 'Resend confirmation email'}
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-red-500 rounded-xl bg-red-50 px-4 py-3 border border-red-200">
+                    {error.message}
+                  </p>
+                ))}
+
+              {resendData?.sent && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
+                  <p className="flex items-center gap-2 text-sm font-medium">
+                    <CircleCheckBig className="h-4 w-4" />
+                    Confirmation email sent.
+                  </p>
+                  <p className="mt-1 text-xs text-emerald-800/90">
+                    Please check your inbox and spam folder.
+                  </p>
+                </div>
+              )}
+
+              {resendError && (
                 <p className="text-sm text-red-500 rounded-xl bg-red-50 px-4 py-3 border border-red-200">
-                  {error.message}
+                  {resendError.message}
                 </p>
               )}
 
@@ -177,10 +252,10 @@ export function LoginView() {
               <Button
                 type="submit"
                 size="lg"
-                disabled={loading}
+                disabled={loginLoading}
                 className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30 disabled:opacity-50"
               >
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loginLoading ? 'Signing In...' : 'Sign In'}
               </Button>
             </form>
 

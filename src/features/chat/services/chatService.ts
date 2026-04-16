@@ -1,8 +1,8 @@
 import type {
-    ChatMessage,
-    ChatbotMessage,
-    Conversation,
-    RentalRequest,
+  ChatMessage,
+  ChatbotMessage,
+  Conversation,
+  RentalRequest,
 } from '../types/chat'
 import { mockChatService } from './mockChatService'
 
@@ -12,27 +12,27 @@ import { mockChatService } from './mockChatService'
  * calls once backend endpoints are available.
  */
 export const chatService = {
-    getConversations(): Promise<Conversation[]> {
-        return mockChatService.getConversations()
-    },
+  getConversations(): Promise<Conversation[]> {
+    return mockChatService.getConversations()
+  },
 
-    getConversationMessages(conversationId: string): Promise<ChatMessage[]> {
-        return mockChatService.getConversationMessages(conversationId)
-    },
+  getConversationMessages(conversationId: string): Promise<ChatMessage[]> {
+    return mockChatService.getConversationMessages(conversationId)
+  },
 
-    getRentalRequest(): Promise<RentalRequest> {
-        return mockChatService.getRentalRequest()
-    },
+  getRentalRequest(): Promise<RentalRequest> {
+    return mockChatService.getRentalRequest()
+  },
 
-    getRentalRequestMessages(): Promise<ChatMessage[]> {
-        return mockChatService.getRentalRequestMessages()
-    },
+  getRentalRequestMessages(): Promise<ChatMessage[]> {
+    return mockChatService.getRentalRequestMessages()
+  },
 
-    getChatbotWelcome(): Promise<ChatbotMessage[]> {
-        return mockChatService.getChatbotWelcome()
-    },
+  getChatbotWelcome(): Promise<ChatbotMessage[]> {
+    return mockChatService.getChatbotWelcome()
+  },
 
-    getChatbotReply(message: string): Promise<ChatbotMessage> {
-        return mockChatService.getChatbotReply(message)
-    },
+  getChatbotReply(message: string): Promise<ChatbotMessage> {
+    return mockChatService.getChatbotReply(message)
+  },
 }

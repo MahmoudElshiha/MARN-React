@@ -172,10 +172,11 @@ export function Navigation() {
                         <Link
                           to={item.path}
                           onClick={() => setIsMenuOpen(false)}
-                          className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${isActive
-                            ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white shadow-lg shadow-[#3A6EA5]/30'
-                            : 'text-[#1a1a1a] hover:bg-[#f5f7fa] hover:translate-x-1'
-                            }`}
+                          className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
+                            isActive
+                              ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white shadow-lg shadow-[#3A6EA5]/30'
+                              : 'text-[#1a1a1a] hover:bg-[#f5f7fa] hover:translate-x-1'
+                          }`}
                         >
                           <Icon className="w-5 h-5" />
                           <span className="font-medium">{item.label}</span>

@@ -11,6 +11,8 @@ import type {
   LoginResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  ResendEmailConfirmationRequest,
+  ResendEmailConfirmationResponse,
   ResendOtpRequest,
   ResendOtpResponse,
   SignUpRequest,
@@ -175,4 +177,31 @@ export function useConfirmEmail(userId: string, token: string) {
     error: query.error ? normalizeError(query.error) : null,
     data: query.data ?? null,
   }
+}
+
+export function useResendConfirmationEmail() {
+  const [state, setState] = useState<
+    MutationState<ResendEmailConfirmationResponse>
+  >({
+    data: null,
+    loading: false,
+    error: null,
+  })
+
+  async function resendConfirmationEmail(
+    payload: ResendEmailConfirmationRequest,
+  ): Promise<ResendEmailConfirmationResponse | null> {
+    setState({ data: null, loading: true, error: null })
+
+    try {
+      const data = await authService.resendConfirmationEmail(payload)
+      setState({ data, loading: false, error: null })
+      return data
+    } catch (err) {
+      setState({ data: null, loading: false, error: normalizeError(err) })
+      return null
+    }
+  }
+
+  return { ...state, resendConfirmationEmail }
 }

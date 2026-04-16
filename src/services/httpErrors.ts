@@ -8,6 +8,7 @@ export class HttpError extends Error {
     message: string,
     public readonly validationErrors?: Record<string, string[]>,
     public readonly errors?: string[],
+    public readonly action?: string | null,
   ) {
     super(message)
     this.name = 'HttpError'
@@ -32,6 +33,7 @@ export function normalizeError(err: unknown): ApiError {
       message: err.message,
       status: err.status,
       code: err.code,
+      action: err.action,
       validationErrors: err.validationErrors,
       errors: err.errors,
     }

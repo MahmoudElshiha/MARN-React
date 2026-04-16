@@ -2,37 +2,39 @@ import type { ReactNode } from 'react'
 import { Navigate } from 'react-router'
 
 interface GuestOnlyRouteProps {
-    children: ReactNode
-    redirectTo?: string
+  children: ReactNode
+  redirectTo?: string
 }
 
 interface RequireAuthProps {
-    children: ReactNode
-    redirectTo?: string
+  children: ReactNode
+  redirectTo?: string
 }
 
 function isLoggedIn(): boolean {
-    return Boolean(localStorage.getItem('token') ?? sessionStorage.getItem('token'))
+  return Boolean(
+    localStorage.getItem('token') ?? sessionStorage.getItem('token'),
+  )
 }
 
 export function GuestOnlyRoute({
-    children,
-    redirectTo = '/',
+  children,
+  redirectTo = '/',
 }: GuestOnlyRouteProps) {
-    if (isLoggedIn()) {
-        return <Navigate to={redirectTo} replace />
-    }
+  if (isLoggedIn()) {
+    return <Navigate to={redirectTo} replace />
+  }
 
-    return <>{children}</>
+  return <>{children}</>
 }
 
 export function RequireAuth({
-    children,
-    redirectTo = '/login',
+  children,
+  redirectTo = '/login',
 }: RequireAuthProps) {
-    if (!isLoggedIn()) {
-        return <Navigate to={redirectTo} replace />
-    }
+  if (!isLoggedIn()) {
+    return <Navigate to={redirectTo} replace />
+  }
 
-    return <>{children}</>
+  return <>{children}</>
 }

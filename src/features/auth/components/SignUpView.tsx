@@ -139,7 +139,8 @@ export function SignUpView() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {(localError || (error && !hasValidationErrors && !hasErrorList)) && (
+              {(localError ||
+                (error && !hasValidationErrors && !hasErrorList)) && (
                 <p className="text-sm text-red-500 rounded-xl bg-red-50 px-4 py-3 border border-red-200">
                   {localError || error?.message}
                 </p>
@@ -182,7 +183,9 @@ export function SignUpView() {
                   />
                 </div>
                 {fieldError('firstName') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('firstName')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('firstName')}
+                  </p>
                 )}
               </div>
 
@@ -205,7 +208,9 @@ export function SignUpView() {
                   />
                 </div>
                 {fieldError('lastName') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('lastName')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('lastName')}
+                  </p>
                 )}
               </div>
 
@@ -228,7 +233,9 @@ export function SignUpView() {
                   />
                 </div>
                 {fieldError('email') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('email')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('email')}
+                  </p>
                 )}
               </div>
 
@@ -262,7 +269,9 @@ export function SignUpView() {
                   </button>
                 </div>
                 {fieldError('password') ? (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('password')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('password')}
+                  </p>
                 ) : (
                   <p className="text-xs text-[#6a7282] mt-2">
                     Must be at least 8 characters with a mix of letters and
@@ -307,9 +316,13 @@ export function SignUpView() {
                   </button>
                 </div>
                 {fieldError('confirmPassword') ? (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('confirmPassword')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('confirmPassword')}
+                  </p>
                 ) : (
-                  <p className="text-xs text-[#6a7282] mt-2">Must match the password</p>
+                  <p className="text-xs text-[#6a7282] mt-2">
+                    Must match the password
+                  </p>
                 )}
               </div>
 
@@ -319,10 +332,11 @@ export function SignUpView() {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, gender: 'Male' })}
-                    className={`p-6 rounded-2xl border-2 transition-all ${formData.gender === 'Male'
+                    className={`p-6 rounded-2xl border-2 transition-all ${
+                      formData.gender === 'Male'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
-                      }`}
+                    }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Users className="w-6 h-6" />
@@ -334,10 +348,11 @@ export function SignUpView() {
                     onClick={() =>
                       setFormData({ ...formData, gender: 'Female' })
                     }
-                    className={`p-6 rounded-2xl border-2 transition-all ${formData.gender === 'Female'
+                    className={`p-6 rounded-2xl border-2 transition-all ${
+                      formData.gender === 'Female'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
-                      }`}
+                    }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Users className="w-6 h-6" />
@@ -346,7 +361,9 @@ export function SignUpView() {
                   </button>
                 </div>
                 {fieldError('gender') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('gender')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('gender')}
+                  </p>
                 )}
               </div>
 
@@ -371,7 +388,9 @@ export function SignUpView() {
                   />
                 </div>
                 {fieldError('dateOfBirth') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('dateOfBirth')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('dateOfBirth')}
+                  </p>
                 )}
               </div>
 

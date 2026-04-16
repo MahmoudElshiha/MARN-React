@@ -8,6 +8,8 @@ import type {
   LoginResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  ResendEmailConfirmationRequest,
+  ResendEmailConfirmationResponse,
   ResendOtpRequest,
   ResendOtpResponse,
   SignUpRequest,
@@ -117,10 +119,18 @@ export const authService = {
     token: string,
   ): Promise<ConfirmEmailResponse> {
     const qs = new URLSearchParams({ userId, token }).toString()
-    const response = await apiClient.get<MaybeApiResponse<ConfirmEmailResponse>>(
-      `/Account/confirm-email?${qs}`,
-    )
+    const response = await apiClient.get<
+      MaybeApiResponse<ConfirmEmailResponse>
+    >(`/Account/confirm-email?${qs}`)
 
     return unwrapResponse(response)
+  },
+
+  async resendConfirmationEmail(
+    payload: ResendEmailConfirmationRequest,
+  ): Promise<ResendEmailConfirmationResponse> {
+    await apiClient.post('/Account/resend-confirmation-email', payload)
+
+    return { sent: true }
   },
 }
