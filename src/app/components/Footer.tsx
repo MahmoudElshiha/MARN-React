@@ -90,14 +90,6 @@ export function Footer() {
                   How It Works
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/faq"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  FAQ
-                </Link>
-              </li>
             </ul>
           </div>
 
