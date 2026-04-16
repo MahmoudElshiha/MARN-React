@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Camera, IdCard, Shield, Upload, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/app/components/ui/button'
@@ -12,6 +12,7 @@ import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { Switch } from '@/app/components/ui/switch'
 import { Textarea } from '@/app/components/ui/textarea'
+import { EnumSelect } from '@/components/EnumSelect'
 import { useProfileSettings } from '../hooks/useProfileSettings'
 
 export function ProfileSettingsView() {
@@ -29,21 +30,36 @@ export function ProfileSettingsView() {
   } = useProfileSettings()
 
   const [verificationCode, setVerificationCode] = useState('')
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const avatarPreview = useMemo(
+    () => (files.avatar ? URL.createObjectURL(files.avatar) : null),
+    [files.avatar],
+  )
+  const frontIdPreview = useMemo(
+    () => (files.frontIdCard ? URL.createObjectURL(files.frontIdCard) : null),
+    [files.frontIdCard],
+  )
+  const backIdPreview = useMemo(
+    () => (files.backIdCard ? URL.createObjectURL(files.backIdCard) : null),
+    [files.backIdCard],
+  )
 
   useEffect(() => {
-    if (!files.avatar) {
-      setAvatarPreview(null)
-      return
-    }
-
-    const nextPreview = URL.createObjectURL(files.avatar)
-    setAvatarPreview(nextPreview)
-
     return () => {
-      URL.revokeObjectURL(nextPreview)
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview)
     }
-  }, [files.avatar])
+  }, [avatarPreview])
+
+  useEffect(() => {
+    return () => {
+      if (frontIdPreview) URL.revokeObjectURL(frontIdPreview)
+    }
+  }, [frontIdPreview])
+
+  useEffect(() => {
+    return () => {
+      if (backIdPreview) URL.revokeObjectURL(backIdPreview)
+    }
+  }, [backIdPreview])
 
   if (loading) {
     return (
@@ -79,7 +95,18 @@ export function ProfileSettingsView() {
     }
   }
 
+  function getDocumentName(file: File | null, remoteUrl: string) {
+    if (file) return file.name
+    if (!remoteUrl) return 'No document selected yet'
+
+    const [cleanUrl] = remoteUrl.split('?')
+    const lastPart = cleanUrl.split('/').filter(Boolean).pop()
+    return lastPart ? decodeURIComponent(lastPart) : 'Uploaded document'
+  }
+
   const avatarSrc = avatarPreview ?? (settings.profileImageUrl || null)
+  const frontIdSrc = frontIdPreview ?? (settings.frontIdPhotoUrl || null)
+  const backIdSrc = backIdPreview ?? (settings.backIdPhotoUrl || null)
 
   return (
     <div className="min-h-screen py-20">
@@ -189,29 +216,29 @@ export function ProfileSettingsView() {
               </div>
               <div>
                 <Label className="mb-2 block">Gender *</Label>
-                <Input
+                <EnumSelect
+                  endpoint="genders"
                   value={settings.gender}
-                  onChange={(e) => updateField('gender', e.target.value)}
+                  onChange={(value) => updateField('gender', value)}
                   className="bg-white rounded-xl border-[#3A6EA5]/20"
-                  required
                 />
               </div>
               <div>
                 <Label className="mb-2 block">Language *</Label>
-                <Input
+                <EnumSelect
+                  endpoint="languages"
                   value={settings.language}
-                  onChange={(e) => updateField('language', e.target.value)}
+                  onChange={(value) => updateField('language', value)}
                   className="bg-white rounded-xl border-[#3A6EA5]/20"
-                  required
                 />
               </div>
               <div>
                 <Label className="mb-2 block">Country *</Label>
-                <Input
+                <EnumSelect
+                  endpoint="countries"
                   value={settings.country}
-                  onChange={(e) => updateField('country', e.target.value)}
+                  onChange={(value) => updateField('country', value)}
                   className="bg-white rounded-xl border-[#3A6EA5]/20"
-                  required
                 />
               </div>
               <div>
@@ -298,18 +325,11 @@ export function ProfileSettingsView() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
-              <label className="p-4 bg-white rounded-2xl border border-[#3A6EA5]/20 cursor-pointer hover:border-[#3A6EA5]">
-                <div className="flex items-center gap-2 mb-2">
-                  <Upload className="w-5 h-5 text-[#3A6EA5]" />
-                  <p className="font-medium text-[#1a1a1a]">Front ID</p>
-                </div>
-                <p className="text-sm text-[#6B7280] truncate">
-                  {files.frontIdCard?.name ??
-                    settings.frontIdPhotoUrl ??
-                    'Upload front side'}
-                </p>
+              <div>
                 <input
+                  id="front-id-upload"
                   type="file"
+                  accept="image/*"
                   className="hidden"
                   onChange={async (e) => {
                     const file = e.target.files?.[0]
@@ -322,20 +342,50 @@ export function ProfileSettingsView() {
                     }
                   }}
                 />
-              </label>
+                <label
+                  htmlFor="front-id-upload"
+                  className="block p-4 bg-white rounded-2xl border border-[#3A6EA5]/20 cursor-pointer hover:border-[#3A6EA5]"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Upload className="w-5 h-5 text-[#3A6EA5]" />
+                      <p className="font-medium text-[#1a1a1a]">Front ID</p>
+                    </div>
+                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#3A6EA5]/10 text-[#3A6EA5]">
+                      {files.frontIdCard
+                        ? 'Selected'
+                        : settings.frontIdPhotoUrl
+                          ? 'Uploaded'
+                          : 'Required'}
+                    </span>
+                  </div>
+                  <div className="h-36 rounded-xl border border-dashed border-[#3A6EA5]/25 bg-[#F8FAFC] overflow-hidden mb-3">
+                    {frontIdSrc ? (
+                      <img
+                        src={frontIdSrc}
+                        alt="Front ID preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-sm text-[#6B7280]">
+                        Click to upload front side
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm text-[#4a5565] truncate">
+                    {getDocumentName(
+                      files.frontIdCard,
+                      settings.frontIdPhotoUrl,
+                    )}
+                  </p>
+                </label>
+              </div>
 
-              <label className="p-4 bg-white rounded-2xl border border-[#3A6EA5]/20 cursor-pointer hover:border-[#3A6EA5]">
-                <div className="flex items-center gap-2 mb-2">
-                  <Upload className="w-5 h-5 text-[#3A6EA5]" />
-                  <p className="font-medium text-[#1a1a1a]">Back ID</p>
-                </div>
-                <p className="text-sm text-[#6B7280] truncate">
-                  {files.backIdCard?.name ??
-                    settings.backIdPhotoUrl ??
-                    'Upload back side'}
-                </p>
+              <div>
                 <input
+                  id="back-id-upload"
                   type="file"
+                  accept="image/*"
                   className="hidden"
                   onChange={async (e) => {
                     const file = e.target.files?.[0]
@@ -348,7 +398,41 @@ export function ProfileSettingsView() {
                     }
                   }}
                 />
-              </label>
+                <label
+                  htmlFor="back-id-upload"
+                  className="block p-4 bg-white rounded-2xl border border-[#3A6EA5]/20 cursor-pointer hover:border-[#3A6EA5]"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Upload className="w-5 h-5 text-[#3A6EA5]" />
+                      <p className="font-medium text-[#1a1a1a]">Back ID</p>
+                    </div>
+                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#3A6EA5]/10 text-[#3A6EA5]">
+                      {files.backIdCard
+                        ? 'Selected'
+                        : settings.backIdPhotoUrl
+                          ? 'Uploaded'
+                          : 'Required'}
+                    </span>
+                  </div>
+                  <div className="h-36 rounded-xl border border-dashed border-[#3A6EA5]/25 bg-[#F8FAFC] overflow-hidden mb-3">
+                    {backIdSrc ? (
+                      <img
+                        src={backIdSrc}
+                        alt="Back ID preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-sm text-[#6B7280]">
+                        Click to upload back side
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm text-[#4a5565] truncate">
+                    {getDocumentName(files.backIdCard, settings.backIdPhotoUrl)}
+                  </p>
+                </label>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-3 gap-4">
