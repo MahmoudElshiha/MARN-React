@@ -88,7 +88,31 @@ export function useProfileSettings() {
 
         setState((prev) => ({ ...prev, saving: true, error: null }))
         try {
-            const next = await profileService.updateProfileSettings(state.settings)
+            const next = await profileService.updateProfileSettings(
+                state.settings,
+                state.files.avatar,
+            )
+            setState((prev) => ({ ...prev, settings: next, saving: false }))
+            return true
+        } catch (err) {
+            setState((prev) => ({
+                ...prev,
+                saving: false,
+                error: normalizeError(err),
+            }))
+            return false
+        }
+    }
+
+    async function saveLegal() {
+        if (!state.settings) return false
+
+        setState((prev) => ({ ...prev, saving: true, error: null }))
+        try {
+            const next = await profileService.updateProfileLegalSettings(
+                state.settings,
+                state.files,
+            )
             setState((prev) => ({ ...prev, settings: next, saving: false }))
             return true
         } catch (err) {
@@ -102,12 +126,10 @@ export function useProfileSettings() {
     }
 
     async function uploadAvatar(file: File) {
-        await profileService.uploadAvatar(file)
         setFile('avatar', file)
     }
 
     async function uploadDocument(file: File, kind: 'front-id' | 'back-id') {
-        await profileService.uploadDocument(file, kind)
         setFile(kind === 'front-id' ? 'frontIdCard' : 'backIdCard', file)
     }
 
@@ -120,6 +142,7 @@ export function useProfileSettings() {
         updateField,
         setFile,
         save,
+        saveLegal,
         uploadAvatar,
         uploadDocument,
         submitReport,

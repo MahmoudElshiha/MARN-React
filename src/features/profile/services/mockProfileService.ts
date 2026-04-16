@@ -77,13 +77,22 @@ const OWNER_PROFILE: PublicOwnerProfile = {
 }
 
 const PROFILE_SETTINGS: ProfileSettings = {
+    id: 'user-1',
     firstName: 'Ahmed',
     lastName: 'Hassan',
     email: 'ahmed@example.com',
     phone: '+20 10 1234 5678',
+    gender: 'Male',
+    language: 'English',
+    profileImageUrl: '',
     country: 'Egypt',
     dateOfBirth: '1995-05-15',
     bio: 'Looking for a quiet, clean roommate who respects personal space.',
+    arabicAddress: 'Cairo Arabic Address',
+    arabicFullName: 'Ahmed Hassan Arabic',
+    nationalIDNumber: '12345678901234',
+    frontIdPhotoUrl: '',
+    backIdPhotoUrl: '',
     twoFactorEnabled: false,
 }
 

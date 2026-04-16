@@ -55,13 +55,22 @@ export interface PublicOwnerProfile {
 }
 
 export interface ProfileSettings {
+    id: string
     firstName: string
     lastName: string
     email: string
     phone: string
+    gender: string
+    language: string
     country: string
     dateOfBirth: string
     bio: string
+    profileImageUrl: string
+    arabicAddress: string
+    arabicFullName: string
+    nationalIDNumber: string
+    frontIdPhotoUrl: string
+    backIdPhotoUrl: string
     twoFactorEnabled: boolean
 }
 
