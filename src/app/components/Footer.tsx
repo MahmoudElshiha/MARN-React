@@ -1,13 +1,5 @@
-import { Link } from 'react-router'
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-} from 'lucide-react'
+import { Link } from 'react-router';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -23,8 +15,7 @@ export function Footer() {
               <span className="text-2xl font-bold text-white">MARN</span>
             </div>
             <p className="text-[#99a1af] mb-4">
-              Your trusted platform for finding the perfect rental property and
-              roommates.
+              Your trusted platform for finding the perfect rental property and roommates.
             </p>
             <div className="flex gap-3">
               <a
@@ -59,35 +50,28 @@ export function Footer() {
             <h4 className="font-semibold text-white mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link
-                  to="/search"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
+                <Link to="/search" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
                   Search Properties
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/owner-dashboard"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
+                <Link to="/owner-dashboard" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
                   List Your Property
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/about"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
+                <Link to="/about" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/how-it-works"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
+                <Link to="/how-it-works" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
                   How It Works
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  Pricing
                 </Link>
               </li>
             </ul>
@@ -98,34 +82,22 @@ export function Footer() {
             <h4 className="font-semibold text-white mb-4">Support</h4>
             <ul className="space-y-2">
               <li>
-                <Link
-                  to="/faq"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
+                <Link to="/faq" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/contact"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
+                <Link to="/contact" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/terms"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
+                <Link to="/terms" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/privacy"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
+                <Link to="/privacy" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
                   Privacy Policy
                 </Link>
               </li>
@@ -146,11 +118,7 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-2 text-[#99a1af]">
                 <MapPin className="w-4 h-4 flex-shrink-0 mt-1 text-[#3A6EA5]" />
-                <span>
-                  123 Tahrir Square
-                  <br />
-                  Cairo, Egypt
-                </span>
+                <span>123 Tahrir Square<br />Cairo, Egypt</span>
               </li>
             </ul>
           </div>
@@ -163,5 +131,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

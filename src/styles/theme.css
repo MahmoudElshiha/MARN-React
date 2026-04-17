@@ -2,56 +2,56 @@
 
 :root {
   --font-size: 16px;
-
+  
   /* MARN Brand Colors - Updated Blue/Gray Palette */
-  --marn-bg-primary: #f2f4f6;
+  --marn-bg-primary: #F2F4F6;
   --marn-bg-secondary: #ffffff;
-  --marn-accent: #3a6ea5;
-  --marn-cta: #3a6ea5;
-  --marn-light-blue: #9cbbdc;
+  --marn-accent: #3A6EA5;
+  --marn-cta: #3A6EA5;
+  --marn-light-blue: #9CBBDC;
   --marn-dark: #1a1a1a;
   --marn-text-primary: #1a1a1a;
   --marn-text-secondary: #4a5565;
   --marn-text-tertiary: #6a7282;
   --marn-text-light: #99a1af;
-
-  --background: #f2f4f6;
+  
+  --background: #F2F4F6;
   --foreground: #1a1a1a;
   --card: #ffffff;
   --card-foreground: #1a1a1a;
   --popover: #ffffff;
   --popover-foreground: #1a1a1a;
-  --primary: #3a6ea5;
-  --primary-foreground: #ffffff;
-  --secondary: #9cbbdc;
+  --primary: #3A6EA5;
+  --primary-foreground: #FFFFFF;
+  --secondary: #9CBBDC;
   --secondary-foreground: #1a1a1a;
   --muted: #f8f9fb;
   --muted-foreground: #6a7282;
-  --accent: #3a6ea5;
-  --accent-foreground: #ffffff;
+  --accent: #3A6EA5;
+  --accent-foreground: #FFFFFF;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
   --border: rgba(58, 110, 165, 0.2);
   --input: transparent;
-  --input-background: #ffffff;
-  --switch-background: #3a6ea5;
+  --input-background: #FFFFFF;
+  --switch-background: #3A6EA5;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #3a6ea5;
-  --chart-1: #3a6ea5;
-  --chart-2: #9cbbdc;
+  --ring: #3A6EA5;
+  --chart-1: #3A6EA5;
+  --chart-2: #9CBBDC;
   --chart-3: #6a7282;
   --chart-4: #4a5565;
   --chart-5: #1a1a1a;
   --radius: 1.25rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #1a1a1a;
-  --sidebar-primary: #3a6ea5;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #9cbbdc;
+  --sidebar-primary: #3A6EA5;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #9CBBDC;
   --sidebar-accent-foreground: #1a1a1a;
   --sidebar-border: rgba(58, 110, 165, 0.2);
-  --sidebar-ring: #3a6ea5;
+  --sidebar-ring: #3A6EA5;
 }
 
 .dark {

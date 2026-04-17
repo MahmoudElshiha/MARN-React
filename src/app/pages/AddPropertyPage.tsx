@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,21 +21,15 @@ import {
   Users,
   X,
   Plus,
-} from 'lucide-react'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { Label } from '../components/ui/label'
-import { Textarea } from '../components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select'
-import { Checkbox } from '../components/ui/checkbox'
-import { Card, CardContent } from '../components/ui/card'
-import { toast } from 'sonner'
+} from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Checkbox } from '../components/ui/checkbox';
+import { Card, CardContent } from '../components/ui/card';
+import { toast } from 'sonner';
 
 const STEPS = [
   { id: 1, title: 'Property Details', icon: Home },
@@ -44,7 +38,7 @@ const STEPS = [
   { id: 4, title: 'Pricing', icon: DollarSign },
   { id: 5, title: 'Availability', icon: Calendar },
   { id: 6, title: 'Legal Docs', icon: FileText },
-]
+];
 
 const AMENITIES = [
   { name: 'WiFi', icon: Wifi },
@@ -55,55 +49,50 @@ const AMENITIES = [
   { name: 'Gym', icon: Dumbbell },
   { name: 'Pool', icon: Waves },
   { name: 'Pet Friendly', icon: Dog },
-]
+];
 
 export function AddPropertyPage() {
-  const navigate = useNavigate()
-  const [currentStep, setCurrentStep] = useState(1)
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
-  const [customPreferences, setCustomPreferences] = useState<string[]>([])
-  const [newPreference, setNewPreference] = useState('')
-  const mapLocation = {
-    lat: 37.7749,
-    lng: -122.4194,
-  } // Default San Francisco
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [customPreferences, setCustomPreferences] = useState<string[]>([]);
+  const [newPreference, setNewPreference] = useState('');
+  const [mapLocation, setMapLocation] = useState({ lat: 37.7749, lng: -122.4194 }); // Default San Francisco
 
   const toggleAmenity = (amenity: string) => {
     setSelectedAmenities((prev) =>
-      prev.includes(amenity)
-        ? prev.filter((a) => a !== amenity)
-        : [...prev, amenity],
-    )
-  }
+      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    );
+  };
 
   const addCustomPreference = () => {
     if (newPreference.trim()) {
-      setCustomPreferences([...customPreferences, newPreference.trim()])
-      setNewPreference('')
-      toast.success('Preference added')
+      setCustomPreferences([...customPreferences, newPreference.trim()]);
+      setNewPreference('');
+      toast.success('Preference added');
     }
-  }
+  };
 
   const removeCustomPreference = (preference: string) => {
-    setCustomPreferences(customPreferences.filter((p) => p !== preference))
-  }
+    setCustomPreferences(customPreferences.filter(p => p !== preference));
+  };
 
   const handleNext = () => {
     if (currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const handlePrev = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
   const handleSubmit = () => {
-    toast.success('Property submitted for approval')
-    navigate('/owner-dashboard')
-  }
+    toast.success('Property submitted for approval');
+    navigate('/owner-dashboard');
+  };
 
   return (
     <div className="min-h-screen pb-20">
@@ -117,12 +106,8 @@ export function AddPropertyPage() {
             <ChevronLeft className="w-5 h-5" />
             Back to Dashboard
           </button>
-          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-            Add New Property
-          </h1>
-          <p className="text-[#4a5565]">
-            Fill out the details to list your property
-          </p>
+          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Add New Property</h1>
+          <p className="text-[#4a5565]">Fill out the details to list your property</p>
         </div>
 
         {/* Progress Steps */}
@@ -132,16 +117,14 @@ export function AddPropertyPage() {
             <div className="absolute top-6 left-0 right-0 h-1 bg-[#f5f7fa] -z-10">
               <div
                 className="h-full bg-[#3A6EA5] transition-all duration-300"
-                style={{
-                  width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%`,
-                }}
+                style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
               />
             </div>
 
             {STEPS.map((step) => {
-              const Icon = step.icon
-              const isActive = step.id === currentStep
-              const isCompleted = step.id < currentStep
+              const Icon = step.icon;
+              const isActive = step.id === currentStep;
+              const isCompleted = step.id < currentStep;
 
               return (
                 <div key={step.id} className="flex flex-col items-center">
@@ -150,23 +133,21 @@ export function AddPropertyPage() {
                       isActive
                         ? 'bg-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : isCompleted
-                          ? 'bg-[#9CBBDC] text-white'
-                          : 'bg-white border-2 border-[#f5f7fa] text-[#4a5565]'
+                        ? 'bg-[#9CBBDC] text-white'
+                        : 'bg-white border-2 border-[#f5f7fa] text-[#4a5565]'
                     }`}
                   >
                     <Icon className="w-6 h-6" />
                   </div>
                   <span
                     className={`text-sm ${
-                      isActive
-                        ? 'text-[#3A6EA5] font-semibold'
-                        : 'text-[#4a5565]'
+                      isActive ? 'text-[#3A6EA5] font-semibold' : 'text-[#4a5565]'
                     }`}
                   >
                     {step.title}
                   </span>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
@@ -183,10 +164,7 @@ export function AddPropertyPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label
-                      htmlFor="title"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="title" className="text-[#1a1a1a] mb-2 block">
                       Property Title
                     </Label>
                     <Input
@@ -215,10 +193,7 @@ export function AddPropertyPage() {
                 </div>
 
                 <div>
-                  <Label
-                    htmlFor="address"
-                    className="text-[#1a1a1a] mb-2 block"
-                  >
+                  <Label htmlFor="address" className="text-[#1a1a1a] mb-2 block">
                     Street Address
                   </Label>
                   <Input
@@ -240,10 +215,7 @@ export function AddPropertyPage() {
                     />
                   </div>
                   <div>
-                    <Label
-                      htmlFor="state"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="state" className="text-[#1a1a1a] mb-2 block">
                       State
                     </Label>
                     <Input
@@ -275,28 +247,18 @@ export function AddPropertyPage() {
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gNDAgMCBMIDAgMCAwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9IiM5Q0JCREMiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC4zIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
                     <div className="relative z-10 text-center">
                       <MapPin className="w-12 h-12 mx-auto mb-3 text-[#3A6EA5]" />
-                      <p className="text-[#1a1a1a] font-semibold mb-2">
-                        Click to select exact location
-                      </p>
-                      <p className="text-sm text-[#4a5565]">
-                        Latitude: {mapLocation.lat.toFixed(4)}, Longitude:{' '}
-                        {mapLocation.lng.toFixed(4)}
-                      </p>
-                      <Button
+                      <p className="text-[#1a1a1a] font-semibold mb-2">Click to select exact location</p>
+                      <p className="text-sm text-[#4a5565]">Latitude: {mapLocation.lat.toFixed(4)}, Longitude: {mapLocation.lng.toFixed(4)}</p>
+                      <Button 
                         className="mt-4 bg-white text-[#3A6EA5] hover:bg-[#f5f7fa] rounded-xl"
-                        onClick={() =>
-                          toast.info(
-                            'Map selection feature - Integration pending',
-                          )
-                        }
+                        onClick={() => toast.info('Map selection feature - Integration pending')}
                       >
                         Select on Map
                       </Button>
                     </div>
                   </div>
                   <p className="text-xs text-[#4a5565] mt-3">
-                    Drag the marker to set the exact location of your property
-                    for better visibility
+                    Drag the marker to set the exact location of your property for better visibility
                   </p>
                 </div>
 
@@ -319,10 +281,7 @@ export function AddPropertyPage() {
                     </Select>
                   </div>
                   <div>
-                    <Label
-                      htmlFor="baths"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="baths" className="text-[#1a1a1a] mb-2 block">
                       Bathrooms
                     </Label>
                     <Select>
@@ -352,10 +311,7 @@ export function AddPropertyPage() {
                 </div>
 
                 <div>
-                  <Label
-                    htmlFor="description"
-                    className="text-[#1a1a1a] mb-2 block"
-                  >
+                  <Label htmlFor="description" className="text-[#1a1a1a] mb-2 block">
                     Description
                   </Label>
                   <Textarea
@@ -376,17 +332,11 @@ export function AddPropertyPage() {
                   </div>
 
                   <div>
-                    <Label
-                      htmlFor="num-people"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="num-people" className="text-[#1a1a1a] mb-2 block">
                       Number of People
                     </Label>
                     <Select>
-                      <SelectTrigger
-                        id="num-people"
-                        className="rounded-xl border-[#3A6EA5]/20"
-                      >
+                      <SelectTrigger id="num-people" className="rounded-xl border-[#3A6EA5]/20">
                         <SelectValue placeholder="Select number of people" />
                       </SelectTrigger>
                       <SelectContent>
@@ -400,20 +350,14 @@ export function AddPropertyPage() {
                   </div>
 
                   <div>
-                    <Label
-                      htmlFor="occupancy-preference"
-                      className="text-[#1a1a1a] mb-3 block"
-                    >
+                    <Label htmlFor="occupancy-preference" className="text-[#1a1a1a] mb-3 block">
                       Occupancy Preference
                     </Label>
                     <p className="text-sm text-[#4a5565] mb-3">
                       How would you like this property to be occupied?
                     </p>
                     <Select>
-                      <SelectTrigger
-                        id="occupancy-preference"
-                        className="rounded-xl border-[#3A6EA5]/20"
-                      >
+                      <SelectTrigger id="occupancy-preference" className="rounded-xl border-[#3A6EA5]/20">
                         <SelectValue placeholder="Select occupancy preference" />
                       </SelectTrigger>
                       <SelectContent>
@@ -426,9 +370,7 @@ export function AddPropertyPage() {
                         <SelectItem value="single">
                           <div className="flex items-center gap-2">
                             <Users className="w-4 h-4" />
-                            <span>
-                              Single User - Entire property for one user
-                            </span>
+                            <span>Single User - Entire property for one user</span>
                           </div>
                         </SelectItem>
                         <SelectItem value="either">
@@ -445,16 +387,13 @@ export function AddPropertyPage() {
                     <CheckCircle className="w-5 h-5 text-[#3A6EA5] flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm text-[#1a1a1a]">
-                        <strong>Shared:</strong> Each bed/room can be rented to
-                        different users. Ideal for roommate situations.
+                        <strong>Shared:</strong> Each bed/room can be rented to different users. Ideal for roommate situations.
                       </p>
                       <p className="text-sm text-[#1a1a1a] mt-2">
-                        <strong>Single User:</strong> The entire property will
-                        be rented to one person or family.
+                        <strong>Single User:</strong> The entire property will be rented to one person or family.
                       </p>
                       <p className="text-sm text-[#1a1a1a] mt-2">
-                        <strong>Either:</strong> You're flexible and open to
-                        both shared and single-user arrangements.
+                        <strong>Either:</strong> You're flexible and open to both shared and single-user arrangements.
                       </p>
                     </div>
                   </div>
@@ -471,8 +410,8 @@ export function AddPropertyPage() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {AMENITIES.map((amenity) => {
-                    const Icon = amenity.icon
-                    const isSelected = selectedAmenities.includes(amenity.name)
+                    const Icon = amenity.icon;
+                    const isSelected = selectedAmenities.includes(amenity.name);
 
                     return (
                       <button
@@ -487,7 +426,7 @@ export function AddPropertyPage() {
                         <Icon className="w-8 h-8 mx-auto mb-3" />
                         <p className="text-sm font-medium">{amenity.name}</p>
                       </button>
-                    )
+                    );
                   })}
                 </div>
 
@@ -559,9 +498,8 @@ export function AddPropertyPage() {
 
                 <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
                   <p className="text-sm text-[#1a1a1a]">
-                    <strong>Tip:</strong> Properties with 5+ high-quality photos
-                    get 40% more views. Include photos of living areas,
-                    bedrooms, kitchen, bathroom, and exterior.
+                    <strong>Tip:</strong> Properties with 5+ high-quality photos get 40% more views. 
+                    Include photos of living areas, bedrooms, kitchen, bathroom, and exterior.
                   </p>
                 </div>
               </div>
@@ -581,10 +519,7 @@ export function AddPropertyPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <Label
-                        htmlFor="day-rent"
-                        className="text-[#1a1a1a] mb-2 block"
-                      >
+                      <Label htmlFor="day-rent" className="text-[#1a1a1a] mb-2 block">
                         Day-based Rent
                       </Label>
                       <div className="relative">
@@ -600,10 +535,7 @@ export function AddPropertyPage() {
                     </div>
 
                     <div>
-                      <Label
-                        htmlFor="month-rent"
-                        className="text-[#1a1a1a] mb-2 block"
-                      >
+                      <Label htmlFor="month-rent" className="text-[#1a1a1a] mb-2 block">
                         Month-based Rent
                       </Label>
                       <div className="relative">
@@ -619,10 +551,7 @@ export function AddPropertyPage() {
                     </div>
 
                     <div>
-                      <Label
-                        htmlFor="year-rent"
-                        className="text-[#1a1a1a] mb-2 block"
-                      >
+                      <Label htmlFor="year-rent" className="text-[#1a1a1a] mb-2 block">
                         Year-based Rent
                       </Label>
                       <div className="relative">
@@ -641,10 +570,7 @@ export function AddPropertyPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label
-                      htmlFor="deposit"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="deposit" className="text-[#1a1a1a] mb-2 block">
                       Security Deposit
                     </Label>
                     <div className="relative">
@@ -664,27 +590,22 @@ export function AddPropertyPage() {
                     Utilities Included
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
-                    {[
-                      'Water',
-                      'Electricity',
-                      'Gas',
-                      'Internet',
-                      'Trash',
-                      'Parking',
-                    ].map((utility) => (
-                      <div key={utility} className="flex items-center">
-                        <Checkbox
-                          id={utility}
-                          className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5]"
-                        />
-                        <label
-                          htmlFor={utility}
-                          className="ml-3 text-[#1a1a1a] cursor-pointer"
-                        >
-                          {utility}
-                        </label>
-                      </div>
-                    ))}
+                    {['Water', 'Electricity', 'Gas', 'Internet', 'Trash', 'Parking'].map(
+                      (utility) => (
+                        <div key={utility} className="flex items-center">
+                          <Checkbox
+                            id={utility}
+                            className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5]"
+                          />
+                          <label
+                            htmlFor={utility}
+                            className="ml-3 text-[#1a1a1a] cursor-pointer"
+                          >
+                            {utility}
+                          </label>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               </div>
@@ -698,10 +619,7 @@ export function AddPropertyPage() {
                 </h2>
 
                 <div>
-                  <Label
-                    htmlFor="available-from"
-                    className="text-[#1a1a1a] mb-2 block"
-                  >
+                  <Label htmlFor="available-from" className="text-[#1a1a1a] mb-2 block">
                     Available From
                   </Label>
                   <Input
@@ -747,9 +665,7 @@ export function AddPropertyPage() {
                     <Input
                       value={newPreference}
                       onChange={(e) => setNewPreference(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === 'Enter' && addCustomPreference()
-                      }
+                      onKeyPress={(e) => e.key === 'Enter' && addCustomPreference()}
                       placeholder="Enter new preference and press Enter"
                       className="rounded-xl border-[#3A6EA5]/20"
                     />
@@ -788,10 +704,7 @@ export function AddPropertyPage() {
 
                     {/* Custom preferences */}
                     {customPreferences.map((preference) => (
-                      <div
-                        key={preference}
-                        className="flex items-center justify-between bg-[#9CBBDC]/20 rounded-xl p-3"
-                      >
+                      <div key={preference} className="flex items-center justify-between bg-[#9CBBDC]/20 rounded-xl p-3">
                         <div className="flex items-center">
                           <Checkbox
                             id={preference}
@@ -816,8 +729,7 @@ export function AddPropertyPage() {
                   </div>
 
                   <p className="text-xs text-[#4a5565] mt-4">
-                    Add custom preferences to attract the right tenants for your
-                    property
+                    Add custom preferences to attract the right tenants for your property
                   </p>
                 </div>
 
@@ -829,9 +741,8 @@ export function AddPropertyPage() {
                         Review Before Publishing
                       </h3>
                       <p className="text-sm text-[#4a5565]">
-                        Your listing will be reviewed by our team within 24
-                        hours. Once approved, it will be visible to potential
-                        tenants.
+                        Your listing will be reviewed by our team within 24 hours. Once approved, 
+                        it will be visible to potential tenants.
                       </p>
                     </div>
                   </div>
@@ -874,9 +785,8 @@ export function AddPropertyPage() {
 
                 <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
                   <p className="text-sm text-[#1a1a1a]">
-                    <strong>Tip:</strong> Uploading legal documents ensures
-                    compliance and trustworthiness. Include lease agreements,
-                    property deeds, and any other relevant documents.
+                    <strong>Tip:</strong> Uploading legal documents ensures compliance and trustworthiness. 
+                    Include lease agreements, property deeds, and any other relevant documents.
                   </p>
                 </div>
               </div>
@@ -916,5 +826,5 @@ export function AddPropertyPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

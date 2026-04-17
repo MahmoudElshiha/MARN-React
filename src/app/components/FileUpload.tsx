@@ -1,77 +1,71 @@
-import { useState, useRef } from 'react'
-import { Upload, X, FileText, CheckCircle } from 'lucide-react'
-import { Button } from './ui/button'
+import { useState, useRef } from 'react';
+import { Upload, X, FileText, CheckCircle } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface FileUploadProps {
-  label: string
-  required?: boolean
-  onFileChange?: (file: File | null) => void
-  accept?: string
-  maxSize?: number // in MB
+  label: string;
+  required?: boolean;
+  onFileChange?: (file: File | null) => void;
+  accept?: string;
+  maxSize?: number; // in MB
 }
 
-export function FileUpload({
-  label,
-  required = false,
-  onFileChange,
-  accept = '*',
-  maxSize = 10,
-}: FileUploadProps) {
-  const [file, setFile] = useState<File | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const [error, setError] = useState<string>('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+export function FileUpload({ label, required = false, onFileChange, accept = '*', maxSize = 10 }: FileUploadProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const validateFile = (file: File): boolean => {
     if (maxSize && file.size > maxSize * 1024 * 1024) {
-      setError(`File size must be less than ${maxSize}MB`)
-      return false
+      setError(`File size must be less than ${maxSize}MB`);
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    setError('')
+    e.preventDefault();
+    setIsDragging(false);
+    setError('');
 
-    const droppedFile = e.dataTransfer.files[0]
+    const droppedFile = e.dataTransfer.files[0];
     if (droppedFile && validateFile(droppedFile)) {
-      setFile(droppedFile)
-      onFileChange?.(droppedFile)
+      setFile(droppedFile);
+      onFileChange?.(droppedFile);
     }
-  }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError('')
-    const selectedFile = e.target.files?.[0]
+    setError('');
+    const selectedFile = e.target.files?.[0];
     if (selectedFile && validateFile(selectedFile)) {
-      setFile(selectedFile)
-      onFileChange?.(selectedFile)
+      setFile(selectedFile);
+      onFileChange?.(selectedFile);
     }
-  }
+  };
 
   const handleRemove = () => {
-    setFile(null)
-    setError('')
-    onFileChange?.(null)
+    setFile(null);
+    setError('');
+    onFileChange?.(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.value = '';
     }
-  }
+  };
 
   const handleBrowseClick = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className="space-y-2">
@@ -100,9 +94,7 @@ export function FileUpload({
           }`}
           onClick={handleBrowseClick}
         >
-          <Upload
-            className={`w-12 h-12 mx-auto mb-4 ${isDragging ? 'text-[#3A6EA5]' : 'text-[#4a5565]'}`}
-          />
+          <Upload className={`w-12 h-12 mx-auto mb-4 ${isDragging ? 'text-[#3A6EA5]' : 'text-[#4a5565]'}`} />
           <p className="text-[#1a1a1a] font-medium mb-2">
             {isDragging ? 'Drop file here' : 'Drag & drop your file here'}
           </p>
@@ -112,8 +104,8 @@ export function FileUpload({
             variant="outline"
             className="border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white rounded-xl"
             onClick={(e) => {
-              e.stopPropagation()
-              handleBrowseClick()
+              e.stopPropagation();
+              handleBrowseClick();
             }}
           >
             Browse Files
@@ -170,8 +162,10 @@ export function FileUpload({
       )}
 
       {error && (
-        <p className="text-sm text-red-500 flex items-center gap-1">{error}</p>
+        <p className="text-sm text-red-500 flex items-center gap-1">
+          {error}
+        </p>
       )}
     </div>
-  )
+  );
 }

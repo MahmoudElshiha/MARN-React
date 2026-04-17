@@ -1,18 +1,10 @@
-import {
-  Search,
-  MapPin,
-  Shield,
-  Users,
-  CheckCircle,
-  Star,
-  ArrowRight,
-} from 'lucide-react'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { PropertyCard } from '../components/PropertyCard'
-import { motion } from 'motion/react'
-import { Link } from 'react-router'
-import { ImageWithFallback } from '../components/figma/ImageWithFallback'
+import { Search, MapPin, Shield, Users, CheckCircle, Star, ArrowRight } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { PropertyCard } from '../components/PropertyCard';
+import { motion } from 'motion/react';
+import { Link } from 'react-router';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
 const FEATURED_PROPERTIES = [
   {
@@ -67,28 +59,25 @@ const FEATURED_PROPERTIES = [
     baths: 3,
     guests: 6,
   },
-]
+];
 
 const BENEFITS = [
   {
     icon: Shield,
     title: 'Secure Payments',
-    description:
-      'All transactions are encrypted and protected with industry-leading security.',
+    description: 'All transactions are encrypted and protected with industry-leading security.',
   },
   {
     icon: CheckCircle,
     title: 'Verified Listings',
-    description:
-      'Every property is verified and inspected to ensure quality and authenticity.',
+    description: 'Every property is verified and inspected to ensure quality and authenticity.',
   },
   {
     icon: Users,
     title: 'Roommate Matching',
-    description:
-      'Find compatible roommates with our AI-powered matching algorithm.',
+    description: 'Find compatible roommates with our AI-powered matching algorithm.',
   },
-]
+];
 
 const TESTIMONIALS = [
   {
@@ -112,13 +101,14 @@ const TESTIMONIALS = [
     rating: 5,
     text: 'The roommate matching feature is brilliant! I found the perfect roommate who shares my lifestyle and interests.',
   },
-]
+];
 
 export function LandingPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-[#F2F4F6]">
+        
         <div className="relative max-w-[1440px] mx-auto px-8 py-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -133,9 +123,8 @@ export function LandingPage() {
               </span>
             </h1>
             <p className="text-xl text-[#4a5565] mb-12 max-w-2xl mx-auto">
-              Discover verified rental properties and connect with compatible
-              roommates in your area. Your journey to comfortable living starts
-              here.
+              Discover verified rental properties and connect with compatible roommates in your area. 
+              Your journey to comfortable living starts here.
             </p>
 
             {/* Search Bar */}
@@ -240,7 +229,7 @@ export function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {BENEFITS.map((benefit, index) => {
-              const Icon = benefit.icon
+              const Icon = benefit.icon;
               return (
                 <motion.div
                   key={benefit.title}
@@ -258,7 +247,7 @@ export function LandingPage() {
                   </h3>
                   <p className="text-[#4a5565]">{benefit.description}</p>
                 </motion.div>
-              )
+              );
             })}
           </div>
         </div>
@@ -334,8 +323,7 @@ export function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
-                variant="outline"
-                className="border-2 border-white text-white bg-white text-[#3A6EA5] rounded-2xl px-8 py-6"
+                className="bg-white text-[#3A6EA5] hover:bg-white/90 rounded-2xl px-8 py-6 shadow-lg"
                 asChild
               >
                 <Link to="/search">Browse Properties</Link>
@@ -343,7 +331,7 @@ export function LandingPage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-white text-white bg-white text-[#3A6EA5] rounded-2xl px-8 py-6"
+                className="border-2 border-white text-white hover:bg-white hover:text-[#3A6EA5] rounded-2xl px-8 py-6"
                 asChild
               >
                 <Link to="/owner-dashboard">List Your Property</Link>
@@ -353,5 +341,5 @@ export function LandingPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

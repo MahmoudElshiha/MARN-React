@@ -1,22 +1,9 @@
-import {
-  Plus,
-  Home,
-  DollarSign,
-  Users,
-  Eye,
-  Calendar,
-  MoreVertical,
-  MessageSquare,
-  Download,
-  CheckCircle,
-  XCircle,
-  Star,
-} from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Button } from '../components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
-import { Badge } from '../components/ui/badge'
-import { Link } from 'react-router'
+import { Plus, Home, DollarSign, Users, Eye, Calendar, MoreVertical, MessageSquare, Download, CheckCircle, XCircle, Star } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { Badge } from '../components/ui/badge';
+import { Link } from 'react-router';
 import {
   LineChart,
   Line,
@@ -28,9 +15,9 @@ import {
   PieChart,
   Pie,
   Cell,
-} from 'recharts'
-import { toast } from 'sonner'
-import { useState } from 'react'
+} from 'recharts';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 const EARNINGS_DATA_MONTHLY = [
   { month: 'Jan', earnings: 8400 },
@@ -39,7 +26,7 @@ const EARNINGS_DATA_MONTHLY = [
   { month: 'Apr', earnings: 12600 },
   { month: 'May', earnings: 14000 },
   { month: 'Jun', earnings: 16800 },
-]
+];
 
 const EARNINGS_DATA_YEARLY = [
   { month: '2020', earnings: 78000 },
@@ -48,12 +35,12 @@ const EARNINGS_DATA_YEARLY = [
   { month: '2023', earnings: 145000 },
   { month: '2024', earnings: 168000 },
   { month: '2025', earnings: 195000 },
-]
+];
 
 const OCCUPANCY_DATA = [
   { name: 'Occupied', value: 8, color: '#3A6EA5' },
   { name: 'Vacant', value: 2, color: '#9CBBDC' },
-]
+];
 
 const BOOKING_REQUESTS = [
   {
@@ -86,7 +73,7 @@ const BOOKING_REQUESTS = [
     status: 'pending',
     image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
   },
-]
+];
 
 const CONTRACTS_HISTORY = [
   {
@@ -124,7 +111,7 @@ const CONTRACTS_HISTORY = [
     status: 'Active',
     expiryDate: '2027-06-30',
   },
-]
+];
 
 const MY_PROPERTIES = [
   {
@@ -160,7 +147,7 @@ const MY_PROPERTIES = [
     views: 289,
     image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400',
   },
-]
+];
 
 const NOTIFICATIONS = [
   {
@@ -191,34 +178,31 @@ const NOTIFICATIONS = [
     time: '2 days ago',
     read: true,
   },
-]
+];
 
 const getContractStatusBadge = (status: string) => {
   const styles = {
     Active: 'bg-green-100 text-green-700 hover:bg-green-100',
     Expired: 'bg-red-100 text-red-700 hover:bg-red-100',
     Pending: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
-  }
-  return (
-    styles[status as keyof typeof styles] ||
-    'bg-gray-100 text-gray-700 hover:bg-gray-100'
-  )
-}
+  };
+  return styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-700 hover:bg-gray-100';
+};
 
 export function OwnerDashboard() {
-  const handleAcceptRequest = (_id: string) => {
-    toast.success('Booking request accepted')
-  }
+  const handleAcceptRequest = (id: string) => {
+    toast.success('Booking request accepted');
+  };
 
-  const handleDeclineRequest = (_id: string) => {
-    toast.error('Booking request declined')
-  }
+  const handleDeclineRequest = (id: string) => {
+    toast.error('Booking request declined');
+  };
 
   const handleDownloadContract = (contractId: string) => {
-    toast.success(`Downloading contract ${contractId}`)
-  }
+    toast.success(`Downloading contract ${contractId}`);
+  };
 
-  const [view, setView] = useState('monthly')
+  const [view, setView] = useState('monthly');
 
   return (
     <div className="min-h-screen pb-20">
@@ -226,12 +210,8 @@ export function OwnerDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-              Owner Dashboard
-            </h1>
-            <p className="text-[#4a5565]">
-              Manage your properties and track performance
-            </p>
+            <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Owner Dashboard</h1>
+            <p className="text-[#4a5565]">Manage your properties and track performance</p>
           </div>
           <Button
             size="lg"
@@ -268,9 +248,7 @@ export function OwnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
-                16,800 EGP
-              </div>
+              <div className="text-4xl font-bold text-[#3A6EA5] mb-1">16,800 EGP</div>
               <p className="text-green-600 text-sm">+12% from last month</p>
             </CardContent>
           </Card>
@@ -284,13 +262,9 @@ export function OwnerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between mb-2">
-                <div className="text-4xl font-bold text-[#3A6EA5]">
-                  12,450 EGP
-                </div>
+                <div className="text-4xl font-bold text-[#3A6EA5]">12,450 EGP</div>
               </div>
-              <p className="text-[#4a5565] text-sm mb-3">
-                Available for transfer
-              </p>
+              <p className="text-[#4a5565] text-sm mb-3">Available for transfer</p>
               <Button
                 size="sm"
                 className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
@@ -323,24 +297,12 @@ export function OwnerDashboard() {
             {/* Earnings Chart */}
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Earnings Overview
-                </CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">Earnings Overview</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart
-                    data={
-                      view === 'monthly'
-                        ? EARNINGS_DATA_MONTHLY
-                        : EARNINGS_DATA_YEARLY
-                    }
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="#3A6EA5"
-                      opacity={0.1}
-                    />
+                  <LineChart data={view === 'monthly' ? EARNINGS_DATA_MONTHLY : EARNINGS_DATA_YEARLY}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#3A6EA5" opacity={0.1} />
                     <XAxis dataKey="month" stroke="#4a5565" />
                     <YAxis stroke="#4a5565" />
                     <Tooltip
@@ -392,9 +354,7 @@ export function OwnerDashboard() {
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Booking Requests
-                  </CardTitle>
+                  <CardTitle className="text-2xl text-[#1a1a1a]">Booking Requests</CardTitle>
                   <Badge className="bg-[#3A6EA5] text-white hover:bg-[#3A6EA5]">
                     {BOOKING_REQUESTS.length} New
                   </Badge>
@@ -410,17 +370,13 @@ export function OwnerDashboard() {
                       <div className="flex items-center gap-4">
                         <Avatar className="w-14 h-14">
                           <AvatarImage src={request.image} />
-                          <AvatarFallback>
-                            {request.tenant.charAt(0)}
-                          </AvatarFallback>
+                          <AvatarFallback>{request.tenant.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
                             {request.tenant}
                           </h3>
-                          <p className="text-sm text-[#4a5565] mb-2">
-                            {request.property}
-                          </p>
+                          <p className="text-sm text-[#4a5565] mb-2">{request.property}</p>
                           <div className="flex items-center gap-4 text-sm">
                             <div className="flex items-center gap-1 text-[#6a7282]">
                               <Calendar className="w-4 h-4" />
@@ -468,69 +424,38 @@ export function OwnerDashboard() {
             {/* Contracts History */}
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Contracts History
-                </CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">Contracts History</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-[#3A6EA5]/20">
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Contract ID
-                        </th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Property Name
-                        </th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Tenant Name
-                        </th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Status
-                        </th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Expiry Date
-                        </th>
-                        <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Actions
-                        </th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">Contract ID</th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">Property Name</th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">Tenant Name</th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">Status</th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">Expiry Date</th>
+                        <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {CONTRACTS_HISTORY.map((contract) => (
-                        <tr
-                          key={contract.id}
-                          className="border-b border-[#3A6EA5]/10 hover:bg-[#f5f7fa] transition-colors"
-                        >
-                          <td className="py-4 px-4 text-[#1a1a1a] font-medium">
-                            {contract.id}
-                          </td>
-                          <td className="py-4 px-4 text-[#4a5565]">
-                            {contract.propertyName}
-                          </td>
-                          <td className="py-4 px-4 text-[#4a5565]">
-                            {contract.tenantName}
-                          </td>
+                        <tr key={contract.id} className="border-b border-[#3A6EA5]/10 hover:bg-[#f5f7fa] transition-colors">
+                          <td className="py-4 px-4 text-[#1a1a1a] font-medium">{contract.id}</td>
+                          <td className="py-4 px-4 text-[#4a5565]">{contract.propertyName}</td>
+                          <td className="py-4 px-4 text-[#4a5565]">{contract.tenantName}</td>
                           <td className="py-4 px-4">
-                            <Badge
-                              className={getContractStatusBadge(
-                                contract.status,
-                              )}
-                            >
+                            <Badge className={getContractStatusBadge(contract.status)}>
                               {contract.status}
                             </Badge>
                           </td>
-                          <td className="py-4 px-4 text-[#4a5565]">
-                            {contract.expiryDate}
-                          </td>
+                          <td className="py-4 px-4 text-[#4a5565]">{contract.expiryDate}</td>
                           <td className="py-4 px-4 text-right">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() =>
-                                handleDownloadContract(contract.id)
-                              }
+                              onClick={() => handleDownloadContract(contract.id)}
                               className="rounded-xl border-[#3A6EA5]/20"
                             >
                               <Download className="w-4 h-4 mr-1" />
@@ -548,9 +473,7 @@ export function OwnerDashboard() {
             {/* Property Listings */}
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">
-                  My Properties
-                </CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">My Properties</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -582,32 +505,24 @@ export function OwnerDashboard() {
                                   : 'bg-orange-100 text-orange-700 hover:bg-orange-100'
                               }`}
                             >
-                              {property.status === 'occupied'
-                                ? 'Occupied'
-                                : 'Vacant'}
+                              {property.status === 'occupied' ? 'Occupied' : 'Vacant'}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-3 gap-4 mb-4">
                             <div>
-                              <p className="text-xs text-[#6a7282] mb-1">
-                                Monthly Rent
-                              </p>
+                              <p className="text-xs text-[#6a7282] mb-1">Monthly Rent</p>
                               <p className="font-semibold text-[#3A6EA5]">
                                 ${property.rent.toLocaleString()}
                               </p>
                             </div>
                             <div>
-                              <p className="text-xs text-[#6a7282] mb-1">
-                                Tenant
-                              </p>
+                              <p className="text-xs text-[#6a7282] mb-1">Tenant</p>
                               <p className="text-sm text-[#1a1a1a]">
                                 {property.tenant || 'N/A'}
                               </p>
                             </div>
                             <div>
-                              <p className="text-xs text-[#6a7282] mb-1">
-                                Views
-                              </p>
+                              <p className="text-xs text-[#6a7282] mb-1">Views</p>
                               <p className="text-sm text-[#1a1a1a] flex items-center gap-1">
                                 <Eye className="w-4 h-4" />
                                 {property.views}
@@ -651,9 +566,7 @@ export function OwnerDashboard() {
             {/* Quick Actions */}
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">
-                  Quick Actions
-                </CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button
@@ -682,26 +595,18 @@ export function OwnerDashboard() {
             {/* Notifications */}
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">
-                  Notifications
-                </CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">Notifications</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {NOTIFICATIONS.map((notification) => (
                   <div
                     key={notification.id}
                     className={`p-4 rounded-xl transition-colors ${
-                      notification.read
-                        ? 'bg-[#f5f7fa]'
-                        : 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
+                      notification.read ? 'bg-[#f5f7fa]' : 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
                     }`}
                   >
-                    <p className="text-sm text-[#1a1a1a] mb-1">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-[#6a7282]">
-                      {notification.time}
-                    </p>
+                    <p className="text-sm text-[#1a1a1a] mb-1">{notification.message}</p>
+                    <p className="text-xs text-[#6a7282]">{notification.time}</p>
                   </div>
                 ))}
               </CardContent>
@@ -710,9 +615,7 @@ export function OwnerDashboard() {
             {/* Occupancy Rate */}
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">
-                  Occupancy Rate
-                </CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">Occupancy Rate</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={200}>
@@ -735,18 +638,13 @@ export function OwnerDashboard() {
                 </ResponsiveContainer>
                 <div className="space-y-2 mt-4">
                   {OCCUPANCY_DATA.map((item) => (
-                    <div
-                      key={item.name}
-                      className="flex items-center justify-between"
-                    >
+                    <div key={item.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: item.color }}
                         />
-                        <span className="text-sm text-[#1a1a1a]">
-                          {item.name}
-                        </span>
+                        <span className="text-sm text-[#1a1a1a]">{item.name}</span>
                       </div>
                       <span className="text-sm font-semibold text-[#1a1a1a]">
                         {item.value} ({((item.value / 10) * 100).toFixed(0)}%)
@@ -760,9 +658,7 @@ export function OwnerDashboard() {
             {/* Quick Stats */}
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">
-                  Quick Stats
-                </CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">Quick Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
@@ -786,5 +682,5 @@ export function OwnerDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,21 +21,15 @@ import {
   Users,
   X,
   Plus,
-} from 'lucide-react'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { Label } from '../components/ui/label'
-import { Textarea } from '../components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select'
-import { Checkbox } from '../components/ui/checkbox'
-import { Card, CardContent } from '../components/ui/card'
-import { toast } from 'sonner'
+} from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Checkbox } from '../components/ui/checkbox';
+import { Card, CardContent } from '../components/ui/card';
+import { toast } from 'sonner';
 
 const STEPS = [
   { id: 1, title: 'Property Details', icon: Home },
@@ -44,7 +38,7 @@ const STEPS = [
   { id: 4, title: 'Pricing', icon: DollarSign },
   { id: 5, title: 'Availability', icon: Calendar },
   { id: 6, title: 'Legal Docs', icon: FileText },
-]
+];
 
 const AMENITIES = [
   { name: 'WiFi', icon: Wifi },
@@ -55,25 +49,15 @@ const AMENITIES = [
   { name: 'Gym', icon: Dumbbell },
   { name: 'Pool', icon: Waves },
   { name: 'Pet Friendly', icon: Dog },
-]
+];
 
 export function EditPropertyPage() {
-  const navigate = useNavigate()
-  const [currentStep, setCurrentStep] = useState(1)
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
-    'WiFi',
-    'Parking',
-    'Air Conditioning',
-    'Heating',
-  ])
-  const [customPreferences, setCustomPreferences] = useState<string[]>([
-    'Non-smokers only',
-  ])
-  const [newPreference, setNewPreference] = useState('')
-  const mapLocation = {
-    lat: 37.7749,
-    lng: -122.4194,
-  }
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(['WiFi', 'Parking', 'Air Conditioning', 'Heating']);
+  const [customPreferences, setCustomPreferences] = useState<string[]>(['Non-smokers only']);
+  const [newPreference, setNewPreference] = useState('');
+  const [mapLocation, setMapLocation] = useState({ lat: 37.7749, lng: -122.4194 });
 
   // Pre-filled property data
   const [propertyData, setPropertyData] = useState({
@@ -86,8 +70,7 @@ export function EditPropertyPage() {
     bedrooms: '2',
     bathrooms: '2',
     sqm: '120',
-    description:
-      'Beautiful modern apartment in the heart of downtown Alexandria. Recently renovated with high-end finishes, floor-to-ceiling windows, and stunning city views.',
+    description: 'Beautiful modern apartment in the heart of downtown Alexandria. Recently renovated with high-end finishes, floor-to-ceiling windows, and stunning city views.',
     numberOfPeople: '2',
     occupancyPreference: 'either',
     dayRent: '500',
@@ -95,44 +78,42 @@ export function EditPropertyPage() {
     yearRent: '180000',
     deposit: '15000',
     availableFrom: '2026-04-01',
-  })
+  });
 
   const toggleAmenity = (amenity: string) => {
     setSelectedAmenities((prev) =>
-      prev.includes(amenity)
-        ? prev.filter((a) => a !== amenity)
-        : [...prev, amenity],
-    )
-  }
+      prev.includes(amenity) ? prev.filter((a) => a !== amenity) : [...prev, amenity]
+    );
+  };
 
   const addCustomPreference = () => {
     if (newPreference.trim()) {
-      setCustomPreferences([...customPreferences, newPreference.trim()])
-      setNewPreference('')
-      toast.success('Preference added')
+      setCustomPreferences([...customPreferences, newPreference.trim()]);
+      setNewPreference('');
+      toast.success('Preference added');
     }
-  }
+  };
 
   const removeCustomPreference = (preference: string) => {
-    setCustomPreferences(customPreferences.filter((p) => p !== preference))
-  }
+    setCustomPreferences(customPreferences.filter(p => p !== preference));
+  };
 
   const handleNext = () => {
     if (currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const handlePrev = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
   const handleUpdate = () => {
-    toast.success('Property updated successfully')
-    navigate('/owner-dashboard')
-  }
+    toast.success('Property updated successfully');
+    navigate('/owner-dashboard');
+  };
 
   return (
     <div className="min-h-screen pb-20">
@@ -146,9 +127,7 @@ export function EditPropertyPage() {
             <ChevronLeft className="w-5 h-5" />
             Back to Dashboard
           </button>
-          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-            Edit Property
-          </h1>
+          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Edit Property</h1>
           <p className="text-[#4a5565]">Update your property details</p>
         </div>
 
@@ -159,16 +138,14 @@ export function EditPropertyPage() {
             <div className="absolute top-6 left-0 right-0 h-1 bg-[#f5f7fa] -z-10">
               <div
                 className="h-full bg-[#3A6EA5] transition-all duration-300"
-                style={{
-                  width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%`,
-                }}
+                style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
               />
             </div>
 
             {STEPS.map((step) => {
-              const Icon = step.icon
-              const isActive = step.id === currentStep
-              const isCompleted = step.id < currentStep
+              const Icon = step.icon;
+              const isActive = step.id === currentStep;
+              const isCompleted = step.id < currentStep;
 
               return (
                 <div key={step.id} className="flex flex-col items-center">
@@ -177,23 +154,21 @@ export function EditPropertyPage() {
                       isActive
                         ? 'bg-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : isCompleted
-                          ? 'bg-[#9CBBDC] text-white'
-                          : 'bg-white border-2 border-[#f5f7fa] text-[#4a5565]'
+                        ? 'bg-[#9CBBDC] text-white'
+                        : 'bg-white border-2 border-[#f5f7fa] text-[#4a5565]'
                     }`}
                   >
                     <Icon className="w-6 h-6" />
                   </div>
                   <span
                     className={`text-sm ${
-                      isActive
-                        ? 'text-[#3A6EA5] font-semibold'
-                        : 'text-[#4a5565]'
+                      isActive ? 'text-[#3A6EA5] font-semibold' : 'text-[#4a5565]'
                     }`}
                   >
                     {step.title}
                   </span>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
@@ -210,21 +185,13 @@ export function EditPropertyPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label
-                      htmlFor="title"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="title" className="text-[#1a1a1a] mb-2 block">
                       Property Title
                     </Label>
                     <Input
                       id="title"
                       value={propertyData.title}
-                      onChange={(e) =>
-                        setPropertyData({
-                          ...propertyData,
-                          title: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setPropertyData({...propertyData, title: e.target.value})}
                       className="rounded-xl bg-white border-[#3A6EA5]/20"
                     />
                   </div>
@@ -233,12 +200,7 @@ export function EditPropertyPage() {
                     <Label htmlFor="type" className="text-[#1a1a1a] mb-2 block">
                       Property Type
                     </Label>
-                    <Select
-                      value={propertyData.type}
-                      onValueChange={(value) =>
-                        setPropertyData({ ...propertyData, type: value })
-                      }
-                    >
+                    <Select value={propertyData.type} onValueChange={(value) => setPropertyData({...propertyData, type: value})}>
                       <SelectTrigger className="rounded-xl bg-white border-[#3A6EA5]/20">
                         <SelectValue />
                       </SelectTrigger>
@@ -253,21 +215,13 @@ export function EditPropertyPage() {
                 </div>
 
                 <div>
-                  <Label
-                    htmlFor="address"
-                    className="text-[#1a1a1a] mb-2 block"
-                  >
+                  <Label htmlFor="address" className="text-[#1a1a1a] mb-2 block">
                     Street Address
                   </Label>
                   <Input
                     id="address"
                     value={propertyData.address}
-                    onChange={(e) =>
-                      setPropertyData({
-                        ...propertyData,
-                        address: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setPropertyData({...propertyData, address: e.target.value})}
                     className="rounded-xl bg-white border-[#3A6EA5]/20"
                   />
                 </div>
@@ -280,31 +234,18 @@ export function EditPropertyPage() {
                     <Input
                       id="city"
                       value={propertyData.city}
-                      onChange={(e) =>
-                        setPropertyData({
-                          ...propertyData,
-                          city: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setPropertyData({...propertyData, city: e.target.value})}
                       className="rounded-xl bg-white border-[#3A6EA5]/20"
                     />
                   </div>
                   <div>
-                    <Label
-                      htmlFor="state"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="state" className="text-[#1a1a1a] mb-2 block">
                       Governorate
                     </Label>
                     <Input
                       id="state"
                       value={propertyData.state}
-                      onChange={(e) =>
-                        setPropertyData({
-                          ...propertyData,
-                          state: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setPropertyData({...propertyData, state: e.target.value})}
                       className="rounded-xl bg-white border-[#3A6EA5]/20"
                     />
                   </div>
@@ -315,12 +256,7 @@ export function EditPropertyPage() {
                     <Input
                       id="zip"
                       value={propertyData.zip}
-                      onChange={(e) =>
-                        setPropertyData({
-                          ...propertyData,
-                          zip: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setPropertyData({...propertyData, zip: e.target.value})}
                       className="rounded-xl bg-white border-[#3A6EA5]/20"
                     />
                   </div>
@@ -336,28 +272,18 @@ export function EditPropertyPage() {
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gNDAgMCBMIDAgMCAwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9IiM5Q0JCREMiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC4zIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
                     <div className="relative z-10 text-center">
                       <MapPin className="w-12 h-12 mx-auto mb-3 text-[#3A6EA5]" />
-                      <p className="text-[#1a1a1a] font-semibold mb-2">
-                        Click to select exact location
-                      </p>
-                      <p className="text-sm text-[#4a5565]">
-                        Latitude: {mapLocation.lat.toFixed(4)}, Longitude:{' '}
-                        {mapLocation.lng.toFixed(4)}
-                      </p>
-                      <Button
+                      <p className="text-[#1a1a1a] font-semibold mb-2">Click to select exact location</p>
+                      <p className="text-sm text-[#4a5565]">Latitude: {mapLocation.lat.toFixed(4)}, Longitude: {mapLocation.lng.toFixed(4)}</p>
+                      <Button 
                         className="mt-4 bg-white text-[#3A6EA5] hover:bg-[#f5f7fa] rounded-xl"
-                        onClick={() =>
-                          toast.info(
-                            'Map selection feature - Integration pending',
-                          )
-                        }
+                        onClick={() => toast.info('Map selection feature - Integration pending')}
                       >
                         Select on Map
                       </Button>
                     </div>
                   </div>
                   <p className="text-xs text-[#4a5565] mt-3">
-                    Drag the marker to set the exact location of your property
-                    for better visibility
+                    Drag the marker to set the exact location of your property for better visibility
                   </p>
                 </div>
 
@@ -366,12 +292,7 @@ export function EditPropertyPage() {
                     <Label htmlFor="beds" className="text-[#1a1a1a] mb-2 block">
                       Bedrooms
                     </Label>
-                    <Select
-                      value={propertyData.bedrooms}
-                      onValueChange={(value) =>
-                        setPropertyData({ ...propertyData, bedrooms: value })
-                      }
-                    >
+                    <Select value={propertyData.bedrooms} onValueChange={(value) => setPropertyData({...propertyData, bedrooms: value})}>
                       <SelectTrigger className="rounded-xl bg-white border-[#3A6EA5]/20">
                         <SelectValue />
                       </SelectTrigger>
@@ -385,18 +306,10 @@ export function EditPropertyPage() {
                     </Select>
                   </div>
                   <div>
-                    <Label
-                      htmlFor="baths"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="baths" className="text-[#1a1a1a] mb-2 block">
                       Bathrooms
                     </Label>
-                    <Select
-                      value={propertyData.bathrooms}
-                      onValueChange={(value) =>
-                        setPropertyData({ ...propertyData, bathrooms: value })
-                      }
-                    >
+                    <Select value={propertyData.bathrooms} onValueChange={(value) => setPropertyData({...propertyData, bathrooms: value})}>
                       <SelectTrigger className="rounded-xl bg-white border-[#3A6EA5]/20">
                         <SelectValue />
                       </SelectTrigger>
@@ -417,33 +330,20 @@ export function EditPropertyPage() {
                       id="sqm"
                       type="number"
                       value={propertyData.sqm}
-                      onChange={(e) =>
-                        setPropertyData({
-                          ...propertyData,
-                          sqm: e.target.value,
-                        })
-                      }
+                      onChange={(e) => setPropertyData({...propertyData, sqm: e.target.value})}
                       className="rounded-xl bg-white border-[#3A6EA5]/20"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label
-                    htmlFor="description"
-                    className="text-[#1a1a1a] mb-2 block"
-                  >
+                  <Label htmlFor="description" className="text-[#1a1a1a] mb-2 block">
                     Description
                   </Label>
                   <Textarea
                     id="description"
                     value={propertyData.description}
-                    onChange={(e) =>
-                      setPropertyData({
-                        ...propertyData,
-                        description: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setPropertyData({...propertyData, description: e.target.value})}
                     rows={6}
                     className="rounded-xl bg-white border-[#3A6EA5]/20"
                   />
@@ -459,25 +359,11 @@ export function EditPropertyPage() {
                   </div>
 
                   <div>
-                    <Label
-                      htmlFor="num-people"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="num-people" className="text-[#1a1a1a] mb-2 block">
                       Number of People
                     </Label>
-                    <Select
-                      value={propertyData.numberOfPeople}
-                      onValueChange={(value) =>
-                        setPropertyData({
-                          ...propertyData,
-                          numberOfPeople: value,
-                        })
-                      }
-                    >
-                      <SelectTrigger
-                        id="num-people"
-                        className="rounded-xl border-[#3A6EA5]/20"
-                      >
+                    <Select value={propertyData.numberOfPeople} onValueChange={(value) => setPropertyData({...propertyData, numberOfPeople: value})}>
+                      <SelectTrigger id="num-people" className="rounded-xl border-[#3A6EA5]/20">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -491,28 +377,14 @@ export function EditPropertyPage() {
                   </div>
 
                   <div>
-                    <Label
-                      htmlFor="occupancy-preference"
-                      className="text-[#1a1a1a] mb-3 block"
-                    >
+                    <Label htmlFor="occupancy-preference" className="text-[#1a1a1a] mb-3 block">
                       Occupancy Preference
                     </Label>
                     <p className="text-sm text-[#4a5565] mb-3">
                       How would you like this property to be occupied?
                     </p>
-                    <Select
-                      value={propertyData.occupancyPreference}
-                      onValueChange={(value) =>
-                        setPropertyData({
-                          ...propertyData,
-                          occupancyPreference: value,
-                        })
-                      }
-                    >
-                      <SelectTrigger
-                        id="occupancy-preference"
-                        className="rounded-xl border-[#3A6EA5]/20"
-                      >
+                    <Select value={propertyData.occupancyPreference} onValueChange={(value) => setPropertyData({...propertyData, occupancyPreference: value})}>
+                      <SelectTrigger id="occupancy-preference" className="rounded-xl border-[#3A6EA5]/20">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -533,16 +405,13 @@ export function EditPropertyPage() {
                     <CheckCircle className="w-5 h-5 text-[#3A6EA5] flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm text-[#1a1a1a]">
-                        <strong>Shared:</strong> Each bed/room can be rented to
-                        different users. Ideal for roommate situations.
+                        <strong>Shared:</strong> Each bed/room can be rented to different users. Ideal for roommate situations.
                       </p>
                       <p className="text-sm text-[#1a1a1a] mt-2">
-                        <strong>Single User:</strong> The entire property will
-                        be rented to one person or family.
+                        <strong>Single User:</strong> The entire property will be rented to one person or family.
                       </p>
                       <p className="text-sm text-[#1a1a1a] mt-2">
-                        <strong>Either:</strong> You're flexible and open to
-                        both shared and single-user arrangements.
+                        <strong>Either:</strong> You're flexible and open to both shared and single-user arrangements.
                       </p>
                     </div>
                   </div>
@@ -559,8 +428,8 @@ export function EditPropertyPage() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {AMENITIES.map((amenity) => {
-                    const Icon = amenity.icon
-                    const isSelected = selectedAmenities.includes(amenity.name)
+                    const Icon = amenity.icon;
+                    const isSelected = selectedAmenities.includes(amenity.name);
 
                     return (
                       <button
@@ -575,7 +444,7 @@ export function EditPropertyPage() {
                         <Icon className="w-8 h-8 mx-auto mb-3" />
                         <p className="text-sm font-medium">{amenity.name}</p>
                       </button>
-                    )
+                    );
                   })}
                 </div>
 
@@ -648,9 +517,8 @@ export function EditPropertyPage() {
 
                 <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
                   <p className="text-sm text-[#1a1a1a]">
-                    <strong>Tip:</strong> Properties with 5+ high-quality photos
-                    get 40% more views. Include photos of living areas,
-                    bedrooms, kitchen, bathroom, and exterior.
+                    <strong>Tip:</strong> Properties with 5+ high-quality photos get 40% more views. 
+                    Include photos of living areas, bedrooms, kitchen, bathroom, and exterior.
                   </p>
                 </div>
               </div>
@@ -670,10 +538,7 @@ export function EditPropertyPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <Label
-                        htmlFor="day-rent"
-                        className="text-[#1a1a1a] mb-2 block"
-                      >
+                      <Label htmlFor="day-rent" className="text-[#1a1a1a] mb-2 block">
                         Day-based Rent
                       </Label>
                       <div className="relative">
@@ -682,12 +547,7 @@ export function EditPropertyPage() {
                           id="day-rent"
                           type="number"
                           value={propertyData.dayRent}
-                          onChange={(e) =>
-                            setPropertyData({
-                              ...propertyData,
-                              dayRent: e.target.value,
-                            })
-                          }
+                          onChange={(e) => setPropertyData({...propertyData, dayRent: e.target.value})}
                           className="pl-12 rounded-xl border-[#3A6EA5]/20"
                         />
                       </div>
@@ -695,10 +555,7 @@ export function EditPropertyPage() {
                     </div>
 
                     <div>
-                      <Label
-                        htmlFor="month-rent"
-                        className="text-[#1a1a1a] mb-2 block"
-                      >
+                      <Label htmlFor="month-rent" className="text-[#1a1a1a] mb-2 block">
                         Month-based Rent
                       </Label>
                       <div className="relative">
@@ -707,12 +564,7 @@ export function EditPropertyPage() {
                           id="month-rent"
                           type="number"
                           value={propertyData.monthRent}
-                          onChange={(e) =>
-                            setPropertyData({
-                              ...propertyData,
-                              monthRent: e.target.value,
-                            })
-                          }
+                          onChange={(e) => setPropertyData({...propertyData, monthRent: e.target.value})}
                           className="pl-12 rounded-xl border-[#3A6EA5]/20"
                         />
                       </div>
@@ -720,10 +572,7 @@ export function EditPropertyPage() {
                     </div>
 
                     <div>
-                      <Label
-                        htmlFor="year-rent"
-                        className="text-[#1a1a1a] mb-2 block"
-                      >
+                      <Label htmlFor="year-rent" className="text-[#1a1a1a] mb-2 block">
                         Year-based Rent
                       </Label>
                       <div className="relative">
@@ -732,12 +581,7 @@ export function EditPropertyPage() {
                           id="year-rent"
                           type="number"
                           value={propertyData.yearRent}
-                          onChange={(e) =>
-                            setPropertyData({
-                              ...propertyData,
-                              yearRent: e.target.value,
-                            })
-                          }
+                          onChange={(e) => setPropertyData({...propertyData, yearRent: e.target.value})}
                           className="pl-12 rounded-xl border-[#3A6EA5]/20"
                         />
                       </div>
@@ -748,10 +592,7 @@ export function EditPropertyPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label
-                      htmlFor="deposit"
-                      className="text-[#1a1a1a] mb-2 block"
-                    >
+                    <Label htmlFor="deposit" className="text-[#1a1a1a] mb-2 block">
                       Security Deposit
                     </Label>
                     <div className="relative">
@@ -760,12 +601,7 @@ export function EditPropertyPage() {
                         id="deposit"
                         type="number"
                         value={propertyData.deposit}
-                        onChange={(e) =>
-                          setPropertyData({
-                            ...propertyData,
-                            deposit: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setPropertyData({...propertyData, deposit: e.target.value})}
                         className="pl-12 rounded-xl bg-white border-[#3A6EA5]/20"
                       />
                     </div>
@@ -777,28 +613,23 @@ export function EditPropertyPage() {
                     Utilities Included
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
-                    {[
-                      'Water',
-                      'Electricity',
-                      'Gas',
-                      'Internet',
-                      'Trash',
-                      'Parking',
-                    ].map((utility) => (
-                      <div key={utility} className="flex items-center">
-                        <Checkbox
-                          id={utility}
-                          defaultChecked
-                          className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5]"
-                        />
-                        <label
-                          htmlFor={utility}
-                          className="ml-3 text-[#1a1a1a] cursor-pointer"
-                        >
-                          {utility}
-                        </label>
-                      </div>
-                    ))}
+                    {['Water', 'Electricity', 'Gas', 'Internet', 'Trash', 'Parking'].map(
+                      (utility) => (
+                        <div key={utility} className="flex items-center">
+                          <Checkbox
+                            id={utility}
+                            defaultChecked
+                            className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5]"
+                          />
+                          <label
+                            htmlFor={utility}
+                            className="ml-3 text-[#1a1a1a] cursor-pointer"
+                          >
+                            {utility}
+                          </label>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               </div>
@@ -812,22 +643,14 @@ export function EditPropertyPage() {
                 </h2>
 
                 <div>
-                  <Label
-                    htmlFor="available-from"
-                    className="text-[#1a1a1a] mb-2 block"
-                  >
+                  <Label htmlFor="available-from" className="text-[#1a1a1a] mb-2 block">
                     Available From
                   </Label>
                   <Input
                     id="available-from"
                     type="date"
                     value={propertyData.availableFrom}
-                    onChange={(e) =>
-                      setPropertyData({
-                        ...propertyData,
-                        availableFrom: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setPropertyData({...propertyData, availableFrom: e.target.value})}
                     className="rounded-xl bg-white border-[#3A6EA5]/20"
                   />
                 </div>
@@ -869,9 +692,7 @@ export function EditPropertyPage() {
                     <Input
                       value={newPreference}
                       onChange={(e) => setNewPreference(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === 'Enter' && addCustomPreference()
-                      }
+                      onKeyPress={(e) => e.key === 'Enter' && addCustomPreference()}
                       placeholder="Enter new preference and press Enter"
                       className="rounded-xl border-[#3A6EA5]/20"
                     />
@@ -910,10 +731,7 @@ export function EditPropertyPage() {
 
                     {/* Custom preferences */}
                     {customPreferences.map((preference) => (
-                      <div
-                        key={preference}
-                        className="flex items-center justify-between bg-[#9CBBDC]/20 rounded-xl p-3"
-                      >
+                      <div key={preference} className="flex items-center justify-between bg-[#9CBBDC]/20 rounded-xl p-3">
                         <div className="flex items-center">
                           <Checkbox
                             id={preference}
@@ -938,8 +756,7 @@ export function EditPropertyPage() {
                   </div>
 
                   <p className="text-xs text-[#4a5565] mt-4">
-                    Add custom preferences to attract the right tenants for your
-                    property
+                    Add custom preferences to attract the right tenants for your property
                   </p>
                 </div>
               </div>
@@ -980,9 +797,8 @@ export function EditPropertyPage() {
 
                 <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
                   <p className="text-sm text-[#1a1a1a]">
-                    <strong>Tip:</strong> Uploading legal documents ensures
-                    compliance and trustworthiness. Include lease agreements,
-                    property deeds, and any other relevant documents.
+                    <strong>Tip:</strong> Uploading legal documents ensures compliance and trustworthiness. 
+                    Include lease agreements, property deeds, and any other relevant documents.
                   </p>
                 </div>
 
@@ -994,9 +810,8 @@ export function EditPropertyPage() {
                         Review Before Publishing
                       </h3>
                       <p className="text-sm text-[#4a5565]">
-                        Your updated listing will be reviewed by our team within
-                        24 hours. Once approved, the changes will be visible to
-                        potential tenants.
+                        Your updated listing will be reviewed by our team within 24 hours. Once approved, 
+                        the changes will be visible to potential tenants.
                       </p>
                     </div>
                   </div>
@@ -1038,5 +853,5 @@ export function EditPropertyPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

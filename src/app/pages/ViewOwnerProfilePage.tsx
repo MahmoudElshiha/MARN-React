@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Button } from '../components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import {
   Mail,
   Phone,
@@ -12,19 +12,19 @@ import {
   MessageCircle,
   CheckCircle,
   Building2,
-} from 'lucide-react'
-import { useNavigate } from 'react-router'
-import { useState } from 'react'
+} from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '../components/ui/dialog'
-import { Label } from '../components/ui/label'
-import { Textarea } from '../components/ui/textarea'
-import { toast } from 'sonner'
+} from '../components/ui/dialog';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
+import { toast } from 'sonner';
 
 const OWNER_PROFILE = {
   name: 'Ahmed El-Sayed',
@@ -39,7 +39,7 @@ const OWNER_PROFILE = {
   totalReviews: 45,
   properties: 8,
   responseTime: 'Within 2 hours',
-}
+};
 
 const PROPERTIES = [
   {
@@ -66,27 +66,27 @@ const PROPERTIES = [
     price: 38000,
     rating: 4.7,
   },
-]
+];
 
 export function ViewOwnerProfilePage() {
-  const navigate = useNavigate()
-  const [showReportDialog, setShowReportDialog] = useState(false)
-  const [reportReason, setReportReason] = useState('')
+  const navigate = useNavigate();
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportReason, setReportReason] = useState('');
 
   const handleReport = () => {
     if (reportReason.trim()) {
-      toast.success('Report submitted successfully. We will review it shortly.')
-      setShowReportDialog(false)
-      setReportReason('')
+      toast.success('Report submitted successfully. We will review it shortly.');
+      setShowReportDialog(false);
+      setReportReason('');
     } else {
-      toast.error('Please provide a reason for reporting')
+      toast.error('Please provide a reason for reporting');
     }
-  }
+  };
 
   const handleChatClick = () => {
-    navigate('/messages')
-    toast.success('Opening chat with owner...')
-  }
+    navigate('/messages');
+    toast.success('Opening chat with owner...');
+  };
 
   return (
     <div className="min-h-screen py-20">
@@ -108,10 +108,7 @@ export function ViewOwnerProfilePage() {
                   <Avatar className="w-full h-full">
                     <AvatarImage src={OWNER_PROFILE.avatar} />
                     <AvatarFallback className="text-4xl">
-                      {OWNER_PROFILE.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
+                      {OWNER_PROFILE.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   {OWNER_PROFILE.verified && (
@@ -120,9 +117,7 @@ export function ViewOwnerProfilePage() {
                     </div>
                   )}
                 </div>
-                <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-                  {OWNER_PROFILE.name}
-                </h2>
+                <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">{OWNER_PROFILE.name}</h2>
                 <p className="text-sm text-[#6B7280] mb-4">Property Owner</p>
 
                 {OWNER_PROFILE.verified && (
@@ -136,9 +131,7 @@ export function ViewOwnerProfilePage() {
                 <div className="flex items-center justify-center gap-2 mb-6">
                   <div className="flex items-center gap-1">
                     <Star className="w-5 h-5 fill-[#FFB800] text-[#FFB800]" />
-                    <span className="font-bold text-[#1a1a1a]">
-                      {OWNER_PROFILE.rating}
-                    </span>
+                    <span className="font-bold text-[#1a1a1a]">{OWNER_PROFILE.rating}</span>
                   </div>
                   <span className="text-sm text-[#6B7280]">
                     ({OWNER_PROFILE.totalReviews} reviews)
@@ -197,18 +190,14 @@ export function ViewOwnerProfilePage() {
                 <CardTitle className="text-2xl text-[#1a1a1a]">About</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-[#1a1a1a] leading-relaxed">
-                  {OWNER_PROFILE.bio}
-                </p>
+                <p className="text-[#1a1a1a] leading-relaxed">{OWNER_PROFILE.bio}</p>
               </CardContent>
             </Card>
 
             {/* Owner Stats */}
             <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Owner Statistics
-                </CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">Owner Statistics</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -221,9 +210,7 @@ export function ViewOwnerProfilePage() {
                   <div className="p-4 bg-white rounded-2xl text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Star className="w-5 h-5 fill-[#FFB800] text-[#FFB800]" />
-                      <p className="text-3xl font-bold text-[#3A6EA5]">
-                        {OWNER_PROFILE.rating}
-                      </p>
+                      <p className="text-3xl font-bold text-[#3A6EA5]">{OWNER_PROFILE.rating}</p>
                     </div>
                     <p className="text-sm text-[#6B7280]">Average Rating</p>
                   </div>
@@ -255,9 +242,7 @@ export function ViewOwnerProfilePage() {
                         className="w-full h-48 object-cover"
                       />
                       <div className="p-4">
-                        <h3 className="font-semibold text-[#1a1a1a] mb-1">
-                          {property.name}
-                        </h3>
+                        <h3 className="font-semibold text-[#1a1a1a] mb-1">{property.name}</h3>
                         <div className="flex items-center gap-2 text-sm text-[#6B7280] mb-2">
                           <MapPin className="w-3 h-3" />
                           {property.location}
@@ -287,20 +272,14 @@ export function ViewOwnerProfilePage() {
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
         <DialogContent className="bg-white rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#1a1a1a]">
-              Report Owner
-            </DialogTitle>
+            <DialogTitle className="text-2xl text-[#1a1a1a]">Report Owner</DialogTitle>
             <DialogDescription className="text-[#6B7280]">
-              Please provide details about why you're reporting this owner. Our
-              team will review your report.
+              Please provide details about why you're reporting this owner. Our team will review your report.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label
-                htmlFor="report-reason"
-                className="text-[#1a1a1a] mb-2 block"
-              >
+              <Label htmlFor="report-reason" className="text-[#1a1a1a] mb-2 block">
                 Reason for Reporting
               </Label>
               <Textarea
@@ -316,8 +295,8 @@ export function ViewOwnerProfilePage() {
             <Button
               variant="outline"
               onClick={() => {
-                setShowReportDialog(false)
-                setReportReason('')
+                setShowReportDialog(false);
+                setReportReason('');
               }}
               className="rounded-xl border-[#3A6EA5]/20"
             >
@@ -333,5 +312,5 @@ export function ViewOwnerProfilePage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

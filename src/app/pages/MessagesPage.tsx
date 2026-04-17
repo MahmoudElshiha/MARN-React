@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { Send, Paperclip, MoreVertical, ChevronLeft } from 'lucide-react'
-import { Input } from '../components/ui/input'
-import { Button } from '../components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
-import { Card } from '../components/ui/card'
-import { useNavigate } from 'react-router'
+import { useState } from 'react';
+import { Send, Paperclip, MoreVertical, ChevronLeft } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { Card } from '../components/ui/card';
+import { useNavigate } from 'react-router';
 
 const CONVERSATIONS = [
   {
@@ -14,12 +14,10 @@ const CONVERSATIONS = [
     lastMessage: 'The apartment is available from March 1st',
     time: '2m ago',
     unread: 2,
-    avatar:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
     property: {
       name: 'Modern Downtown Apartment',
-      image:
-        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400',
+      image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400',
     },
   },
   {
@@ -29,12 +27,10 @@ const CONVERSATIONS = [
     lastMessage: 'Can we schedule a tour this weekend?',
     time: '1h ago',
     unread: 0,
-    avatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
     property: {
       name: 'Luxury Penthouse Suite',
-      image:
-        'https://images.unsplash.com/photo-1515263487990-61b07816b324?w=400',
+      image: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?w=400',
     },
   },
   {
@@ -44,21 +40,19 @@ const CONVERSATIONS = [
     lastMessage: 'Thank you for your interest!',
     time: '3h ago',
     unread: 0,
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
     property: {
       name: 'Cozy Studio in Arts District',
-      image:
-        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400',
+      image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400',
     },
   },
-]
+];
 
 const MESSAGES = [
   {
     id: '1',
     sender: 'them',
-    text: "Hi! I'm interested in the apartment. Is it still available?",
+    text: 'Hi! I\'m interested in the apartment. Is it still available?',
     time: '10:30 AM',
   },
   {
@@ -70,7 +64,7 @@ const MESSAGES = [
   {
     id: '3',
     sender: 'them',
-    text: "That would be great! I'm available this weekend. What times work for you?",
+    text: 'That would be great! I\'m available this weekend. What times work for you?',
     time: '10:40 AM',
   },
   {
@@ -88,7 +82,7 @@ const MESSAGES = [
   {
     id: '6',
     sender: 'me',
-    text: "Great! I'll send you the address and meeting details.",
+    text: 'Great! I\'ll send you the address and meeting details.',
     time: '10:46 AM',
   },
   {
@@ -97,59 +91,49 @@ const MESSAGES = [
     text: 'The apartment is available from March 1st',
     time: '10:48 AM',
   },
-]
+];
 
 export function MessagesPage() {
-  const navigate = useNavigate()
-  const [selectedConversation, setSelectedConversation] = useState(
-    CONVERSATIONS[0],
-  )
-  const [newMessage, setNewMessage] = useState('')
-  const [isMobileView, setIsMobileView] = useState(false)
+  const navigate = useNavigate();
+  const [selectedConversation, setSelectedConversation] = useState(CONVERSATIONS[0]);
+  const [newMessage, setNewMessage] = useState('');
+  const [isMobileView, setIsMobileView] = useState(false);
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
       // Handle sending message
-      setNewMessage('')
+      setNewMessage('');
     }
-  }
+  };
 
   return (
     <div className="min-h-screen">
       <div className="max-w-[1440px] mx-auto px-8 py-8">
         <div className="mb-6">
           <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Messages</h1>
-          <p className="text-[#4a5565]">
-            Communicate with property owners and tenants
-          </p>
+          <p className="text-[#4a5565]">Communicate with property owners and tenants</p>
         </div>
 
         <Card className="bg-[#f5f7fa] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-3 h-[700px]">
             {/* Conversations Sidebar */}
-            <div
-              className={`border-r border-[#3A6EA5]/20 flex flex-col ${isMobileView && selectedConversation ? 'hidden lg:flex' : ''}`}
-            >
+            <div className={`border-r border-[#3A6EA5]/20 flex flex-col ${isMobileView && selectedConversation ? 'hidden lg:flex' : ''}`}>
               {/* Conversations List */}
               <div className="flex-1 overflow-y-auto">
                 {CONVERSATIONS.map((conversation) => (
                   <button
                     key={conversation.id}
                     onClick={() => {
-                      setSelectedConversation(conversation)
-                      setIsMobileView(true)
+                      setSelectedConversation(conversation);
+                      setIsMobileView(true);
                     }}
                     className={`w-full p-4 flex gap-3 hover:bg-[#9CBBDC]/20 transition-colors border-b border-[#3A6EA5]/10 ${
-                      selectedConversation.id === conversation.id
-                        ? 'bg-[#9CBBDC]/20'
-                        : ''
+                      selectedConversation.id === conversation.id ? 'bg-[#9CBBDC]/20' : ''
                     }`}
                   >
                     <Avatar className="w-12 h-12 flex-shrink-0">
                       <AvatarImage src={conversation.avatar} />
-                      <AvatarFallback>
-                        {conversation.name.charAt(0)}
-                      </AvatarFallback>
+                      <AvatarFallback>{conversation.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 text-left min-w-0">
                       <div className="flex items-start justify-between mb-1">
@@ -160,9 +144,7 @@ export function MessagesPage() {
                           {conversation.time}
                         </span>
                       </div>
-                      <p className="text-sm text-[#4a5565] mb-1">
-                        {conversation.role}
-                      </p>
+                      <p className="text-sm text-[#4a5565] mb-1">{conversation.role}</p>
                       <p className="text-sm text-[#1a1a1a] truncate">
                         {conversation.lastMessage}
                       </p>
@@ -178,9 +160,7 @@ export function MessagesPage() {
             </div>
 
             {/* Chat Area */}
-            <div
-              className={`lg:col-span-2 flex flex-col ${!isMobileView ? 'hidden lg:flex' : ''}`}
-            >
+            <div className={`lg:col-span-2 flex flex-col ${!isMobileView ? 'hidden lg:flex' : ''}`}>
               {/* Chat Header */}
               <div className="p-4 border-b border-[#3A6EA5]/20 bg-white">
                 <div className="flex items-center justify-between">
@@ -259,9 +239,7 @@ export function MessagesPage() {
                       <p className="text-sm mb-1">{message.text}</p>
                       <p
                         className={`text-xs ${
-                          message.sender === 'me'
-                            ? 'text-white/70'
-                            : 'text-[#4a5565]'
+                          message.sender === 'me' ? 'text-white/70' : 'text-[#4a5565]'
                         }`}
                       >
                         {message.time}
@@ -287,7 +265,7 @@ export function MessagesPage() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
-                          handleSendMessage()
+                          handleSendMessage();
                         }
                       }}
                       placeholder="Type a message..."
@@ -307,5 +285,5 @@ export function MessagesPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

@@ -1,13 +1,13 @@
-import { motion } from 'motion/react'
-import { useState } from 'react'
-import { ChevronDown, Search, MessageCircle } from 'lucide-react'
-import { Input } from '../components/ui/input'
-import { Button } from '../components/ui/button'
-import { Link } from 'react-router'
+import { motion } from 'motion/react';
+import { useState } from 'react';
+import { ChevronDown, Search, MessageCircle } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
+import { Link } from 'react-router';
 
 export function FAQPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const categories = [
     {
@@ -16,34 +16,29 @@ export function FAQPage() {
         {
           id: 1,
           question: 'How do I search for properties?',
-          answer:
-            'Use our advanced search feature to filter properties by location, price range, number of bedrooms, amenities, and more. You can also save your searches for quick access later.',
+          answer: 'Use our advanced search feature to filter properties by location, price range, number of bedrooms, amenities, and more. You can also save your searches for quick access later.'
         },
         {
           id: 2,
           question: 'Is there a fee to use MARN as a tenant?',
-          answer:
-            'No, MARN is completely free for tenants. You can search, browse, and message property owners at no cost.',
+          answer: 'No, MARN is completely free for tenants. You can search, browse, and message property owners at no cost.'
         },
         {
           id: 3,
           question: 'How do I schedule a property tour?',
-          answer:
-            'Click the "Schedule Tour" button on any property listing, select your preferred date and time, and the property owner will confirm your appointment.',
+          answer: 'Click the "Schedule Tour" button on any property listing, select your preferred date and time, and the property owner will confirm your appointment.'
         },
         {
           id: 4,
           question: 'What is the roommate matching feature?',
-          answer:
-            'Our smart algorithm matches you with potential roommates based on lifestyle preferences, work schedules, cleanliness habits, and more. You can filter and chat with matches before making a decision.',
+          answer: 'Our smart algorithm matches you with potential roommates based on lifestyle preferences, work schedules, cleanliness habits, and more. You can filter and chat with matches before making a decision.'
         },
         {
           id: 5,
           question: 'How do I apply for a property?',
-          answer:
-            'Once you find a property you like, click "Apply Now" and complete the online application form. You\'ll need to provide personal information, employment details, and references.',
-        },
-      ],
+          answer: 'Once you find a property you like, click "Apply Now" and complete the online application form. You\'ll need to provide personal information, employment details, and references.'
+        }
+      ]
     },
     {
       name: 'For Property Owners',
@@ -51,34 +46,29 @@ export function FAQPage() {
         {
           id: 6,
           question: 'How much does it cost to list a property?',
-          answer:
-            'We offer flexible pricing plans starting from $29/month for basic listings. Premium plans include featured placement, professional photography, and advanced analytics.',
+          answer: 'We offer flexible pricing plans starting from $29/month for basic listings. Premium plans include featured placement, professional photography, and advanced analytics.'
         },
         {
           id: 7,
           question: 'How do I create a property listing?',
-          answer:
-            'Click "Become a Host" in the navigation menu, fill out the property details form, upload photos, set your pricing and availability, and publish. Your listing will go live within 24 hours after verification.',
+          answer: 'Click "Become a Host" in the navigation menu, fill out the property details form, upload photos, set your pricing and availability, and publish. Your listing will go live within 24 hours after verification.'
         },
         {
           id: 8,
           question: 'How are tenants verified?',
-          answer:
-            'All tenants go through identity verification, employment verification, and background checks. You can review their full profiles before accepting applications.',
+          answer: 'All tenants go through identity verification, employment verification, and background checks. You can review their full profiles before accepting applications.'
         },
         {
           id: 9,
           question: 'Can I manage multiple properties?',
-          answer:
-            'Yes! Our owner dashboard allows you to manage unlimited properties, track all bookings, handle maintenance requests, and view analytics for each property separately.',
+          answer: 'Yes! Our owner dashboard allows you to manage unlimited properties, track all bookings, handle maintenance requests, and view analytics for each property separately.'
         },
         {
           id: 10,
           question: 'How do I receive rent payments?',
-          answer:
-            'Tenants pay through our secure platform, and funds are automatically deposited to your bank account on your chosen schedule (weekly, bi-weekly, or monthly).',
-        },
-      ],
+          answer: 'Tenants pay through our secure platform, and funds are automatically deposited to your bank account on your chosen schedule (weekly, bi-weekly, or monthly).'
+        }
+      ]
     },
     {
       name: 'Safety & Security',
@@ -86,28 +76,24 @@ export function FAQPage() {
         {
           id: 11,
           question: 'How does MARN verify property listings?',
-          answer:
-            'Our team manually reviews each listing, verifies ownership documents, and may conduct property inspections. All listings display a "Verified" badge once approved.',
+          answer: 'Our team manually reviews each listing, verifies ownership documents, and may conduct property inspections. All listings display a "Verified" badge once approved.'
         },
         {
           id: 12,
           question: 'Is my payment information secure?',
-          answer:
-            'Yes, we use bank-level 256-bit SSL encryption for all transactions. We never store your full payment details on our servers and comply with PCI DSS standards.',
+          answer: 'Yes, we use bank-level 256-bit SSL encryption for all transactions. We never store your full payment details on our servers and comply with PCI DSS standards.'
         },
         {
           id: 13,
           question: 'What if I encounter a scam or fraud?',
-          answer:
-            'Report suspicious activity immediately through our platform. We have a dedicated trust and safety team that investigates all reports within 24 hours and takes appropriate action.',
+          answer: 'Report suspicious activity immediately through our platform. We have a dedicated trust and safety team that investigates all reports within 24 hours and takes appropriate action.'
         },
         {
           id: 14,
           question: 'Are background checks mandatory?',
-          answer:
-            'For tenants, background checks are optional but highly recommended and increase your chances of approval. Property owners can require them as part of their application process.',
-        },
-      ],
+          answer: 'For tenants, background checks are optional but highly recommended and increase your chances of approval. Property owners can require them as part of their application process.'
+        }
+      ]
     },
     {
       name: 'Payments & Billing',
@@ -115,41 +101,34 @@ export function FAQPage() {
         {
           id: 15,
           question: 'What payment methods do you accept?',
-          answer:
-            'We accept credit cards, debit cards, bank transfers (ACH), and digital wallets including PayPal and Apple Pay.',
+          answer: 'We accept credit cards, debit cards, bank transfers (ACH), and digital wallets including PayPal and Apple Pay.'
         },
         {
           id: 16,
           question: 'When is rent due?',
-          answer:
-            "Rent due dates are set by individual property owners, typically on the 1st of each month. You'll receive reminders 5 days before the due date.",
+          answer: 'Rent due dates are set by individual property owners, typically on the 1st of each month. You\'ll receive reminders 5 days before the due date.'
         },
         {
           id: 17,
           question: 'Is there a security deposit?',
-          answer:
-            'Security deposit amounts vary by property and are determined by the property owner. Deposits are held securely and returned within 30 days of move-out, minus any deductions for damages.',
+          answer: 'Security deposit amounts vary by property and are determined by the property owner. Deposits are held securely and returned within 30 days of move-out, minus any deductions for damages.'
         },
         {
           id: 18,
           question: 'What are the cancellation policies?',
-          answer:
-            'Cancellation policies vary by property. Most require 30-60 days notice. Check the specific policy on each property listing before booking.',
-        },
-      ],
-    },
-  ]
+          answer: 'Cancellation policies vary by property. Most require 30-60 days notice. Check the specific policy on each property listing before booking.'
+        }
+      ]
+    }
+  ];
 
-  const filteredCategories = categories
-    .map((category) => ({
-      ...category,
-      faqs: category.faqs.filter(
-        (faq) =>
-          faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          faq.answer.toLowerCase().includes(searchQuery.toLowerCase()),
-      ),
-    }))
-    .filter((category) => category.faqs.length > 0)
+  const filteredCategories = categories.map(category => ({
+    ...category,
+    faqs: category.faqs.filter(faq =>
+      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  })).filter(category => category.faqs.length > 0);
 
   return (
     <div className="min-h-screen">
@@ -163,10 +142,7 @@ export function FAQPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-6xl font-bold text-[#1a1a1a] mb-6">
-              Frequently Asked{' '}
-              <span className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">
-                Questions
-              </span>
+              Frequently Asked <span className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">Questions</span>
             </h1>
             <p className="text-xl text-[#4a5565] mb-8">
               Find answers to common questions about using MARN
@@ -191,9 +167,7 @@ export function FAQPage() {
         <div className="max-w-[1440px] mx-auto px-8">
           {filteredCategories.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-xl text-[#4a5565] mb-6">
-                No results found for "{searchQuery}"
-              </p>
+              <p className="text-xl text-[#4a5565] mb-6">No results found for "{searchQuery}"</p>
               <Button
                 variant="outline"
                 className="rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
@@ -212,9 +186,7 @@ export function FAQPage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: catIndex * 0.1 }}
                 >
-                  <h2 className="text-3xl font-bold text-[#1a1a1a] mb-6">
-                    {category.name}
-                  </h2>
+                  <h2 className="text-3xl font-bold text-[#1a1a1a] mb-6">{category.name}</h2>
                   <div className="space-y-4">
                     {category.faqs.map((faq) => (
                       <div
@@ -222,9 +194,7 @@ export function FAQPage() {
                         className="bg-[#F2F4F6] rounded-2xl shadow-lg shadow-[#3A6EA5]/10 overflow-hidden"
                       >
                         <button
-                          onClick={() =>
-                            setExpandedId(expandedId === faq.id ? null : faq.id)
-                          }
+                          onClick={() => setExpandedId(expandedId === faq.id ? null : faq.id)}
                           className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-[#9CBBDC]/20 transition-colors"
                         >
                           <span className="font-semibold text-lg text-[#1a1a1a] pr-4">
@@ -240,15 +210,13 @@ export function FAQPage() {
                           initial={false}
                           animate={{
                             height: expandedId === faq.id ? 'auto' : 0,
-                            opacity: expandedId === faq.id ? 1 : 0,
+                            opacity: expandedId === faq.id ? 1 : 0
                           }}
                           transition={{ duration: 0.3 }}
                           className="overflow-hidden"
                         >
                           <div className="px-6 pb-5 pt-2">
-                            <p className="text-[#4a5565] leading-relaxed">
-                              {faq.answer}
-                            </p>
+                            <p className="text-[#4a5565] leading-relaxed">{faq.answer}</p>
                           </div>
                         </motion.div>
                       </div>
@@ -293,5 +261,5 @@ export function FAQPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }
