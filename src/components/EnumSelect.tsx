@@ -30,11 +30,11 @@ export function EnumSelect({
   // The profile API may return a name string (e.g. "Male") instead of an id
   // string. Resolve it to the matching id so Radix Select can highlight it.
   const resolvedValue =
-    options.find(
-      (o) => o.name.toLowerCase() === value?.toLowerCase(),
-    )?.id !== undefined
+    options.find((o) => o.name.toLowerCase() === value?.toLowerCase())?.id !==
+    undefined
       ? String(
-          options.find((o) => o.name.toLowerCase() === value?.toLowerCase())!.id,
+          options.find((o) => o.name.toLowerCase() === value?.toLowerCase())!
+            .id,
         )
       : value
 

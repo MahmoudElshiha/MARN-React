@@ -40,7 +40,11 @@ export function useEnumOptions(endpoint: EnumEndpoint): State {
       })
       .catch(() => {
         if (!cancelled) {
-          setState({ options: [], loading: false, error: `Failed to load ${endpoint}` })
+          setState({
+            options: [],
+            loading: false,
+            error: `Failed to load ${endpoint}`,
+          })
         }
       })
 

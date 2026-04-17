@@ -217,7 +217,9 @@ export function ProfileSettingsView() {
                   required
                 />
                 {fieldError('firstName') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('firstName')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('firstName')}
+                  </p>
                 )}
               </div>
               <div>
@@ -229,7 +231,9 @@ export function ProfileSettingsView() {
                   required
                 />
                 {fieldError('lastName') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('lastName')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('lastName')}
+                  </p>
                 )}
               </div>
               <div>
@@ -249,7 +253,9 @@ export function ProfileSettingsView() {
                   required
                 />
                 {fieldError('phone') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('phone')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('phone')}
+                  </p>
                 )}
               </div>
               <div>
@@ -261,7 +267,9 @@ export function ProfileSettingsView() {
                   className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('gender') ? 'border-red-400' : ''}`}
                 />
                 {fieldError('gender') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('gender')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('gender')}
+                  </p>
                 )}
               </div>
               <div>
@@ -273,7 +281,9 @@ export function ProfileSettingsView() {
                   className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('language') ? 'border-red-400' : ''}`}
                 />
                 {fieldError('language') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('language')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('language')}
+                  </p>
                 )}
               </div>
               <div>
@@ -285,7 +295,9 @@ export function ProfileSettingsView() {
                   className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldError('country') ? 'border-red-400' : ''}`}
                 />
                 {fieldError('country') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('country')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('country')}
+                  </p>
                 )}
               </div>
               <div>
@@ -298,7 +310,9 @@ export function ProfileSettingsView() {
                   required
                 />
                 {fieldError('dateOfBirth') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('dateOfBirth')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('dateOfBirth')}
+                  </p>
                 )}
               </div>
             </div>
@@ -497,7 +511,9 @@ export function ProfileSettingsView() {
                   required
                 />
                 {fieldError('arabicFullName') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('arabicFullName')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('arabicFullName')}
+                  </p>
                 )}
               </div>
               <div>
@@ -509,7 +525,9 @@ export function ProfileSettingsView() {
                   required
                 />
                 {fieldError('arabicAddress') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('arabicAddress')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('arabicAddress')}
+                  </p>
                 )}
               </div>
               <div>
@@ -523,7 +541,9 @@ export function ProfileSettingsView() {
                   required
                 />
                 {fieldError('nationalIDNumber') && (
-                  <p className="text-xs text-red-500 mt-1">{fieldError('nationalIDNumber')}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldError('nationalIDNumber')}
+                  </p>
                 )}
               </div>
             </div>
