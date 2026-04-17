@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Button } from '../components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
 import {
   Mail,
   Phone,
@@ -14,19 +14,19 @@ import {
   Flag,
   CheckCircle,
   XCircle,
-} from 'lucide-react';
-import { useNavigate } from 'react-router';
-import { useState } from 'react';
+} from 'lucide-react'
+import { useNavigate } from 'react-router'
+import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '../components/ui/dialog';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { toast } from 'sonner';
+} from '../components/ui/dialog'
+import { Label } from '../components/ui/label'
+import { Textarea } from '../components/ui/textarea'
+import { toast } from 'sonner'
 
 const USER_PROFILE = {
   name: 'Layla Hassan',
@@ -51,22 +51,22 @@ const USER_PROFILE = {
     level: "Bachelor's",
     field: 'Computer Science',
   },
-};
+}
 
 export function ViewUserProfilePage() {
-  const navigate = useNavigate();
-  const [showReportDialog, setShowReportDialog] = useState(false);
-  const [reportReason, setReportReason] = useState('');
+  const navigate = useNavigate()
+  const [showReportDialog, setShowReportDialog] = useState(false)
+  const [reportReason, setReportReason] = useState('')
 
   const handleReport = () => {
     if (reportReason.trim()) {
-      toast.success('Report submitted successfully. We will review it shortly.');
-      setShowReportDialog(false);
-      setReportReason('');
+      toast.success('Report submitted successfully. We will review it shortly.')
+      setShowReportDialog(false)
+      setReportReason('')
     } else {
-      toast.error('Please provide a reason for reporting');
+      toast.error('Please provide a reason for reporting')
     }
-  };
+  }
 
   return (
     <div className="min-h-screen py-20">
@@ -88,7 +88,10 @@ export function ViewUserProfilePage() {
                   <Avatar className="w-full h-full">
                     <AvatarImage src={USER_PROFILE.avatar} />
                     <AvatarFallback className="text-4xl">
-                      {USER_PROFILE.name.split(' ').map(n => n[0]).join('')}
+                      {USER_PROFILE.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
                     </AvatarFallback>
                   </Avatar>
                   {USER_PROFILE.verified && (
@@ -97,7 +100,9 @@ export function ViewUserProfilePage() {
                     </div>
                   )}
                 </div>
-                <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">{USER_PROFILE.name}</h2>
+                <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">
+                  {USER_PROFILE.name}
+                </h2>
                 {USER_PROFILE.verified && (
                   <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 rounded-full text-green-700 text-sm font-medium mb-4">
                     <CheckCircle className="w-4 h-4" />
@@ -146,7 +151,9 @@ export function ViewUserProfilePage() {
                 <CardTitle className="text-2xl text-[#1a1a1a]">About</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-[#1a1a1a] leading-relaxed">{USER_PROFILE.bio}</p>
+                <p className="text-[#1a1a1a] leading-relaxed">
+                  {USER_PROFILE.bio}
+                </p>
               </CardContent>
             </Card>
 
@@ -155,7 +162,9 @@ export function ViewUserProfilePage() {
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Users className="w-6 h-6 text-[#3A6EA5]" />
-                  <CardTitle className="text-2xl text-[#1a1a1a]">Roommate Status</CardTitle>
+                  <CardTitle className="text-2xl text-[#1a1a1a]">
+                    Roommate Status
+                  </CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -164,7 +173,9 @@ export function ViewUserProfilePage() {
                     <>
                       <CheckCircle className="w-6 h-6 text-green-500" />
                       <div>
-                        <p className="font-semibold text-[#1a1a1a]">Accepts Roommates</p>
+                        <p className="font-semibold text-[#1a1a1a]">
+                          Accepts Roommates
+                        </p>
                         <p className="text-sm text-[#6B7280]">
                           This user is open to sharing accommodation
                         </p>
@@ -174,7 +185,9 @@ export function ViewUserProfilePage() {
                     <>
                       <XCircle className="w-6 h-6 text-red-500" />
                       <div>
-                        <p className="font-semibold text-[#1a1a1a]">Does Not Accept Roommates</p>
+                        <p className="font-semibold text-[#1a1a1a]">
+                          Does Not Accept Roommates
+                        </p>
                         <p className="text-sm text-[#6B7280]">
                           This user prefers to live alone
                         </p>
@@ -190,7 +203,9 @@ export function ViewUserProfilePage() {
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Home className="w-6 h-6 text-[#3A6EA5]" />
-                  <CardTitle className="text-2xl text-[#1a1a1a]">Lifestyle & Preferences</CardTitle>
+                  <CardTitle className="text-2xl text-[#1a1a1a]">
+                    Lifestyle & Preferences
+                  </CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -208,7 +223,9 @@ export function ViewUserProfilePage() {
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">Sleep Schedule</p>
+                    <p className="text-sm text-[#6B7280] mb-1">
+                      Sleep Schedule
+                    </p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {USER_PROFILE.lifestyle.sleepSchedule}
                     </p>
@@ -223,7 +240,9 @@ export function ViewUserProfilePage() {
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">Guests Frequency</p>
+                    <p className="text-sm text-[#6B7280] mb-1">
+                      Guests Frequency
+                    </p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {USER_PROFILE.lifestyle.guestsFrequency}
                     </p>
@@ -252,18 +271,28 @@ export function ViewUserProfilePage() {
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <GraduationCap className="w-6 h-6 text-[#3A6EA5]" />
-                  <CardTitle className="text-2xl text-[#1a1a1a]">Education</CardTitle>
+                  <CardTitle className="text-2xl text-[#1a1a1a]">
+                    Education
+                  </CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">Education Level</p>
-                    <p className="font-semibold text-[#1a1a1a]">{USER_PROFILE.education.level}</p>
+                    <p className="text-sm text-[#6B7280] mb-1">
+                      Education Level
+                    </p>
+                    <p className="font-semibold text-[#1a1a1a]">
+                      {USER_PROFILE.education.level}
+                    </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">Field of Study</p>
-                    <p className="font-semibold text-[#1a1a1a]">{USER_PROFILE.education.field}</p>
+                    <p className="text-sm text-[#6B7280] mb-1">
+                      Field of Study
+                    </p>
+                    <p className="font-semibold text-[#1a1a1a]">
+                      {USER_PROFILE.education.field}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -276,14 +305,20 @@ export function ViewUserProfilePage() {
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
         <DialogContent className="bg-white rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#1a1a1a]">Report User</DialogTitle>
+            <DialogTitle className="text-2xl text-[#1a1a1a]">
+              Report User
+            </DialogTitle>
             <DialogDescription className="text-[#6B7280]">
-              Please provide details about why you're reporting this user. Our team will review your report.
+              Please provide details about why you're reporting this user. Our
+              team will review your report.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="report-reason" className="text-[#1a1a1a] mb-2 block">
+              <Label
+                htmlFor="report-reason"
+                className="text-[#1a1a1a] mb-2 block"
+              >
                 Reason for Reporting
               </Label>
               <Textarea
@@ -299,8 +334,8 @@ export function ViewUserProfilePage() {
             <Button
               variant="outline"
               onClick={() => {
-                setShowReportDialog(false);
-                setReportReason('');
+                setShowReportDialog(false)
+                setReportReason('')
               }}
               className="rounded-xl border-[#3A6EA5]/20"
             >
@@ -316,5 +351,5 @@ export function ViewUserProfilePage() {
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }

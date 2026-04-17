@@ -1,79 +1,79 @@
-import { motion } from 'motion/react';
-import { Mail, ArrowLeft } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Link, useNavigate } from 'react-router';
-import { useState, useRef, useEffect } from 'react';
+import { motion } from 'motion/react'
+import { Mail, ArrowLeft } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Link, useNavigate } from 'react-router'
+import { useState, useRef, useEffect } from 'react'
 
 export function OTPVerificationPage() {
-  const navigate = useNavigate();
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [countdown, setCountdown] = useState(60);
-  const [canResend, setCanResend] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const navigate = useNavigate()
+  const [otp, setOtp] = useState(['', '', '', '', '', ''])
+  const [countdown, setCountdown] = useState(60)
+  const [canResend, setCanResend] = useState(false)
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
     if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
+      return () => clearTimeout(timer)
     } else {
-      setCanResend(true);
+      setCanResend(true)
     }
-  }, [countdown]);
+  }, [countdown])
 
   const handleChange = (index: number, value: string) => {
-    if (value.length > 1) return;
-    if (!/^\d*$/.test(value)) return;
+    if (value.length > 1) return
+    if (!/^\d*$/.test(value)) return
 
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
+    const newOtp = [...otp]
+    newOtp[index] = value
+    setOtp(newOtp)
 
     // Auto-focus next input
     if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
+      inputRefs.current[index + 1]?.focus()
     }
-  };
+  }
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
+      inputRefs.current[index - 1]?.focus()
     }
-  };
+  }
 
   const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 6);
-    if (!/^\d+$/.test(pastedData)) return;
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text').slice(0, 6)
+    if (!/^\d+$/.test(pastedData)) return
 
-    const newOtp = [...otp];
+    const newOtp = [...otp]
     pastedData.split('').forEach((digit, i) => {
-      if (i < 6) newOtp[i] = digit;
-    });
-    setOtp(newOtp);
+      if (i < 6) newOtp[i] = digit
+    })
+    setOtp(newOtp)
 
     // Focus last filled input or first empty one
-    const lastIndex = Math.min(pastedData.length, 5);
-    inputRefs.current[lastIndex]?.focus();
-  };
+    const lastIndex = Math.min(pastedData.length, 5)
+    inputRefs.current[lastIndex]?.focus()
+  }
 
   const handleResend = () => {
-    setCountdown(60);
-    setCanResend(false);
+    setCountdown(60)
+    setCanResend(false)
     // Handle resend OTP logic
-    console.log('Resending OTP...');
-  };
+    console.log('Resending OTP...')
+  }
 
   const handleVerify = (e: React.FormEvent) => {
-    e.preventDefault();
-    const otpCode = otp.join('');
+    e.preventDefault()
+    const otpCode = otp.join('')
     if (otpCode.length === 6) {
-      console.log('Verifying OTP:', otpCode);
+      console.log('Verifying OTP:', otpCode)
       // Handle OTP verification logic
       // On success, redirect to dashboard
-      navigate('/tenant-dashboard');
+      navigate('/tenant-dashboard')
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F2F4F6] via-[#9CBBDC] to-[#3A6EA5] flex items-center justify-center px-4 py-20">
@@ -85,7 +85,7 @@ export function OTPVerificationPage() {
         >
           <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl shadow-[#3A6EA5]/20">
             {/* Back Button */}
-            <Link 
+            <Link
               to="/login"
               className="inline-flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] mb-6 transition-colors"
             >
@@ -116,7 +116,10 @@ export function OTPVerificationPage() {
                 <label className="text-[#1a1a1a] text-sm font-medium mb-3 block text-center">
                   Enter 6-digit code
                 </label>
-                <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+                <div
+                  className="flex gap-2 justify-center"
+                  onPaste={handlePaste}
+                >
                   {otp.map((digit, index) => (
                     <Input
                       key={index}
@@ -168,7 +171,10 @@ export function OTPVerificationPage() {
             <div className="mt-8 text-center">
               <p className="text-sm text-[#4a5565]">
                 Didn't receive the code?{' '}
-                <Link to="/contact" className="text-[#3A6EA5] hover:underline font-semibold">
+                <Link
+                  to="/contact"
+                  className="text-[#3A6EA5] hover:underline font-semibold"
+                >
                   Contact support
                 </Link>
               </p>
@@ -177,5 +183,5 @@ export function OTPVerificationPage() {
         </motion.div>
       </div>
     </div>
-  );
+  )
 }

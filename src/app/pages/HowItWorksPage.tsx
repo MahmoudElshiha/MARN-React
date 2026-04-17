@@ -1,77 +1,95 @@
-import { motion } from 'motion/react';
-import { Search, CheckCircle, MessageSquare, Home, Upload, Users, DollarSign, TrendingUp, Shield } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Link } from 'react-router';
+import { motion } from 'motion/react'
+import {
+  Search,
+  CheckCircle,
+  MessageSquare,
+  Home,
+  Upload,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Shield,
+} from 'lucide-react'
+import { Button } from '../components/ui/button'
+import { Link } from 'react-router'
 
 export function HowItWorksPage() {
   const tenantSteps = [
     {
       icon: Search,
       title: 'Search & Filter',
-      description: 'Browse thousands of verified listings with advanced filters for location, price, amenities, and roommate preferences.'
+      description:
+        'Browse thousands of verified listings with advanced filters for location, price, amenities, and roommate preferences.',
     },
     {
       icon: CheckCircle,
       title: 'Schedule Tours',
-      description: 'Book virtual or in-person property tours at your convenience. View detailed photos and 3D walkthroughs.'
+      description:
+        'Book virtual or in-person property tours at your convenience. View detailed photos and 3D walkthroughs.',
     },
     {
       icon: MessageSquare,
       title: 'Connect & Chat',
-      description: 'Message property owners and potential roommates directly. Get answers to all your questions instantly.'
+      description:
+        'Message property owners and potential roommates directly. Get answers to all your questions instantly.',
     },
     {
       icon: Home,
       title: 'Book & Move In',
-      description: 'Complete your application online, sign the lease digitally, and pay securely. Move into your new home!'
-    }
-  ];
+      description:
+        'Complete your application online, sign the lease digitally, and pay securely. Move into your new home!',
+    },
+  ]
 
   const ownerSteps = [
     {
       icon: Upload,
       title: 'List Your Property',
-      description: 'Create a detailed listing with photos, descriptions, and amenities. Set your price and availability.'
+      description:
+        'Create a detailed listing with photos, descriptions, and amenities. Set your price and availability.',
     },
     {
       icon: Users,
       title: 'Screen Tenants',
-      description: 'Review verified tenant profiles, background checks, and references. Choose the best match for your property.'
+      description:
+        'Review verified tenant profiles, background checks, and references. Choose the best match for your property.',
     },
     {
       icon: MessageSquare,
       title: 'Communicate',
-      description: 'Chat with interested tenants, schedule tours, and answer questions through our secure messaging platform.'
+      description:
+        'Chat with interested tenants, schedule tours, and answer questions through our secure messaging platform.',
     },
     {
       icon: DollarSign,
       title: 'Manage & Earn',
-      description: 'Accept payments, handle maintenance requests, and track your earnings all from one dashboard.'
-    }
-  ];
+      description:
+        'Accept payments, handle maintenance requests, and track your earnings all from one dashboard.',
+    },
+  ]
 
   const features = [
     {
       icon: CheckCircle,
       title: 'Verified Listings',
-      description: 'All properties are verified for authenticity and accuracy.'
+      description: 'All properties are verified for authenticity and accuracy.',
     },
     {
       icon: Shield,
       title: 'Secure Payments',
-      description: 'End-to-end encrypted payment processing for your safety.'
+      description: 'End-to-end encrypted payment processing for your safety.',
     },
     {
       icon: Users,
       title: 'Compatibility Matching',
-      description: 'Smart algorithm matches you with compatible roommates.'
+      description: 'Smart algorithm matches you with compatible roommates.',
     },
     {
       icon: TrendingUp,
       title: 'Market Insights',
-      description: 'Access real-time market data and pricing analytics.'
-    }
-  ];
+      description: 'Access real-time market data and pricing analytics.',
+    },
+  ]
 
   return (
     <div className="min-h-screen">
@@ -85,10 +103,15 @@ export function HowItWorksPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-6xl font-bold text-[#1a1a1a] mb-6">
-              How <span className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">MARN</span> Works
+              How{' '}
+              <span className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">
+                MARN
+              </span>{' '}
+              Works
             </h1>
             <p className="text-xl text-[#4a5565]">
-              Your complete guide to finding the perfect rental or listing your property
+              Your complete guide to finding the perfect rental or listing your
+              property
             </p>
           </motion.div>
         </div>
@@ -98,7 +121,9 @@ export function HowItWorksPage() {
       <section className="py-20">
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">For Tenants</h2>
+            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
+              For Tenants
+            </h2>
             <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
               Find your perfect home in four simple steps
             </p>
@@ -106,7 +131,7 @@ export function HowItWorksPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {tenantSteps.map((step, index) => {
-              const Icon = step.icon;
+              const Icon = step.icon
               return (
                 <motion.div
                   key={step.title}
@@ -118,7 +143,9 @@ export function HowItWorksPage() {
                 >
                   <div className="bg-[#F2F4F6] rounded-3xl p-8 shadow-lg shadow-[#3A6EA5]/10 hover:shadow-2xl hover:shadow-[#3A6EA5]/20 transition-all h-full">
                     <div className="absolute -top-4 -left-4 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-xl">{index + 1}</span>
+                      <span className="text-white font-bold text-xl">
+                        {index + 1}
+                      </span>
                     </div>
                     <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-6 mx-auto">
                       <Icon className="w-8 h-8 text-[#3A6EA5]" />
@@ -126,10 +153,12 @@ export function HowItWorksPage() {
                     <h3 className="text-xl font-semibold text-[#1a1a1a] mb-3 text-center">
                       {step.title}
                     </h3>
-                    <p className="text-[#4a5565] text-center">{step.description}</p>
+                    <p className="text-[#4a5565] text-center">
+                      {step.description}
+                    </p>
                   </div>
                 </motion.div>
-              );
+              )
             })}
           </div>
 
@@ -154,7 +183,9 @@ export function HowItWorksPage() {
       <section className="py-20">
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">For Property Owners</h2>
+            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
+              For Property Owners
+            </h2>
             <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
               List and manage your properties with ease
             </p>
@@ -162,7 +193,7 @@ export function HowItWorksPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {ownerSteps.map((step, index) => {
-              const Icon = step.icon;
+              const Icon = step.icon
               return (
                 <motion.div
                   key={step.title}
@@ -174,7 +205,9 @@ export function HowItWorksPage() {
                 >
                   <div className="bg-[#F2F4F6] rounded-3xl p-8 shadow-lg shadow-[#3A6EA5]/10 hover:shadow-2xl hover:shadow-[#3A6EA5]/20 transition-all h-full">
                     <div className="absolute -top-4 -left-4 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-xl">{index + 1}</span>
+                      <span className="text-white font-bold text-xl">
+                        {index + 1}
+                      </span>
                     </div>
                     <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-6 mx-auto">
                       <Icon className="w-8 h-8 text-[#3A6EA5]" />
@@ -182,10 +215,12 @@ export function HowItWorksPage() {
                     <h3 className="text-xl font-semibold text-[#1a1a1a] mb-3 text-center">
                       {step.title}
                     </h3>
-                    <p className="text-[#4a5565] text-center">{step.description}</p>
+                    <p className="text-[#4a5565] text-center">
+                      {step.description}
+                    </p>
                   </div>
                 </motion.div>
-              );
+              )
             })}
           </div>
 
@@ -205,7 +240,9 @@ export function HowItWorksPage() {
       <section className="py-20 bg-[#F2F4F6]">
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">Why Choose MARN?</h2>
+            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
+              Why Choose MARN?
+            </h2>
             <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
               Features that make your rental experience seamless
             </p>
@@ -213,7 +250,7 @@ export function HowItWorksPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => {
-              const Icon = feature.icon;
+              const Icon = feature.icon
               return (
                 <motion.div
                   key={feature.title}
@@ -226,10 +263,14 @@ export function HowItWorksPage() {
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center mb-4 mx-auto">
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="font-semibold text-[#1a1a1a] mb-2">{feature.title}</h3>
-                  <p className="text-sm text-[#4a5565]">{feature.description}</p>
+                  <h3 className="font-semibold text-[#1a1a1a] mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-[#4a5565]">
+                    {feature.description}
+                  </p>
                 </motion.div>
-              );
+              )
             })}
           </div>
         </div>
@@ -264,5 +305,5 @@ export function HowItWorksPage() {
         </div>
       </section>
     </div>
-  );
+  )
 }

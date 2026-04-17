@@ -1,18 +1,21 @@
-import { useState } from 'react';
-import { X, MapPin, Navigation } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+import { useState } from 'react'
+import { X, MapPin, Navigation } from 'lucide-react'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 
 interface LocationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (location: { address: string; lat: number; lng: number }) => void;
+  isOpen: boolean
+  onClose: () => void
+  onSave: (location: { address: string; lat: number; lng: number }) => void
 }
 
 export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
-  const [address, setAddress] = useState('');
-  const [coordinates, setCoordinates] = useState({ lat: 37.7749, lng: -122.4194 });
+  const [address, setAddress] = useState('')
+  const [coordinates, setCoordinates] = useState({
+    lat: 37.7749,
+    lng: -122.4194,
+  })
 
   const handleUseCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -20,24 +23,26 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
         (position) => {
           setCoordinates({
             lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
+            lng: position.coords.longitude,
+          })
           // In production, you'd reverse geocode to get the address
-          setAddress(`${position.coords.latitude}, ${position.coords.longitude}`);
+          setAddress(
+            `${position.coords.latitude}, ${position.coords.longitude}`,
+          )
         },
         (error) => {
-          console.error('Error getting location:', error);
-        }
-      );
+          console.error('Error getting location:', error)
+        },
+      )
     }
-  };
+  }
 
   const handleSave = () => {
-    onSave({ address, ...coordinates });
-    onClose();
-  };
+    onSave({ address, ...coordinates })
+    onClose()
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -48,7 +53,9 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center">
               <MapPin className="w-5 h-5 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-[#1a1a1a]">Upload Location</h2>
+            <h2 className="text-2xl font-bold text-[#1a1a1a]">
+              Upload Location
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -65,9 +72,12 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
             <div className="absolute inset-0 bg-gradient-to-br from-[#9CBBDC]/30 to-[#f5f7fa]"></div>
             <div className="relative z-10 text-center">
               <MapPin className="w-16 h-16 text-[#3A6EA5] mx-auto mb-4" />
-              <p className="text-[#4a5565]">Interactive map would display here</p>
+              <p className="text-[#4a5565]">
+                Interactive map would display here
+              </p>
               <p className="text-sm text-[#4a5565] mt-2">
-                Lat: {coordinates.lat.toFixed(4)}, Lng: {coordinates.lng.toFixed(4)}
+                Lat: {coordinates.lat.toFixed(4)}, Lng:{' '}
+                {coordinates.lng.toFixed(4)}
               </p>
             </div>
           </div>
@@ -122,5 +132,5 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }

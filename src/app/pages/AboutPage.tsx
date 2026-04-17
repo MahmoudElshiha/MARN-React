@@ -1,54 +1,62 @@
-import { motion } from 'motion/react';
-import { Users, Target, Award, Heart, Shield, TrendingUp } from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Link } from 'react-router';
+import { motion } from 'motion/react'
+import { Users, Target, Award, Heart, Shield, TrendingUp } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import { Link } from 'react-router'
 
 export function AboutPage() {
   const values = [
     {
       icon: Shield,
       title: 'Trust & Safety',
-      description: 'Every property and user is verified to ensure a secure experience for all our community members.'
+      description:
+        'Every property and user is verified to ensure a secure experience for all our community members.',
     },
     {
       icon: Heart,
       title: 'Customer First',
-      description: 'We prioritize your needs and provide 24/7 support to make your rental journey seamless.'
+      description:
+        'We prioritize your needs and provide 24/7 support to make your rental journey seamless.',
     },
     {
       icon: TrendingUp,
       title: 'Innovation',
-      description: 'Leveraging the latest technology to provide the best rental and roommate matching experience.'
+      description:
+        'Leveraging the latest technology to provide the best rental and roommate matching experience.',
     },
     {
       icon: Award,
       title: 'Excellence',
-      description: 'Committed to delivering exceptional quality in every property listing and user interaction.'
-    }
-  ];
+      description:
+        'Committed to delivering exceptional quality in every property listing and user interaction.',
+    },
+  ]
 
   const team = [
     {
       name: 'Sarah Johnson',
       role: 'CEO & Founder',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop'
+      image:
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
     },
     {
       name: 'Michael Chen',
       role: 'CTO',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop'
+      image:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
     },
     {
       name: 'Emily Rodriguez',
       role: 'Head of Operations',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop'
+      image:
+        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
     },
     {
       name: 'David Kim',
       role: 'Head of Product',
-      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop'
-    }
-  ];
+      image:
+        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
+    },
+  ]
 
   return (
     <div className="min-h-screen">
@@ -62,10 +70,14 @@ export function AboutPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-6xl font-bold text-[#1a1a1a] mb-6">
-              About <span className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">MARN</span>
+              About{' '}
+              <span className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">
+                MARN
+              </span>
             </h1>
             <p className="text-xl text-[#4a5565] mb-8">
-              We're revolutionizing the rental experience by connecting people with their perfect homes and compatible roommates.
+              We're revolutionizing the rental experience by connecting people
+              with their perfect homes and compatible roommates.
             </p>
           </motion.div>
         </div>
@@ -83,27 +95,38 @@ export function AboutPage() {
             >
               <div className="flex items-center gap-3 mb-6">
                 <Target className="w-8 h-8 text-[#3A6EA5]" />
-                <h2 className="text-4xl font-bold text-[#1a1a1a]">Our Mission</h2>
+                <h2 className="text-4xl font-bold text-[#1a1a1a]">
+                  Our Mission
+                </h2>
               </div>
               <p className="text-lg text-[#4a5565] mb-6">
-                At MARN, we believe everyone deserves a place they can call home. Our mission is to make the rental process transparent, 
+                At MARN, we believe everyone deserves a place they can call
+                home. Our mission is to make the rental process transparent,
                 efficient, and enjoyable for both tenants and property owners.
               </p>
               <p className="text-lg text-[#4a5565] mb-6">
-                Founded in 2020, we've grown from a small startup to a trusted platform serving over 50,000 happy tenants across 
-                100+ cities. We combine cutting-edge technology with a human touch to create meaningful connections.
+                Founded in 2020, we've grown from a small startup to a trusted
+                platform serving over 50,000 happy tenants across 100+ cities.
+                We combine cutting-edge technology with a human touch to create
+                meaningful connections.
               </p>
               <div className="grid grid-cols-3 gap-6 mt-8">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">50K+</div>
+                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">
+                    50K+
+                  </div>
                   <div className="text-sm text-[#4a5565]">Happy Tenants</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">10K+</div>
+                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">
+                    10K+
+                  </div>
                   <div className="text-sm text-[#4a5565]">Properties</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">100+</div>
+                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">
+                    100+
+                  </div>
                   <div className="text-sm text-[#4a5565]">Cities</div>
                 </div>
               </div>
@@ -132,7 +155,9 @@ export function AboutPage() {
       <section className="py-20 bg-[#F2F4F6]">
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">Our Values</h2>
+            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
+              Our Values
+            </h2>
             <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
               The principles that guide everything we do
             </p>
@@ -140,7 +165,7 @@ export function AboutPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => {
-              const Icon = value.icon;
+              const Icon = value.icon
               return (
                 <motion.div
                   key={value.title}
@@ -158,7 +183,7 @@ export function AboutPage() {
                   </h3>
                   <p className="text-[#4a5565]">{value.description}</p>
                 </motion.div>
-              );
+              )
             })}
           </div>
         </div>
@@ -170,7 +195,9 @@ export function AboutPage() {
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Users className="w-8 h-8 text-[#3A6EA5]" />
-              <h2 className="text-4xl font-bold text-[#1a1a1a]">Meet Our Team</h2>
+              <h2 className="text-4xl font-bold text-[#1a1a1a]">
+                Meet Our Team
+              </h2>
             </div>
             <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
               Passionate people dedicated to transforming the rental experience
@@ -213,7 +240,8 @@ export function AboutPage() {
             Join Our Growing Community
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Whether you're looking for a home or listing a property, we're here to help you succeed.
+            Whether you're looking for a home or listing a property, we're here
+            to help you succeed.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Button
@@ -235,5 +263,5 @@ export function AboutPage() {
         </div>
       </section>
     </div>
-  );
+  )
 }

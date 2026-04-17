@@ -1,10 +1,18 @@
-import { Calendar, CreditCard, Heart, Bell, Home, TrendingUp, MessageSquare } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { PropertyCard } from '../components/PropertyCard';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { Badge } from '../components/ui/badge';
-import { Link } from 'react-router';
+import {
+  Calendar,
+  CreditCard,
+  Heart,
+  Bell,
+  Home,
+  TrendingUp,
+  MessageSquare,
+} from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Button } from '../components/ui/button'
+import { PropertyCard } from '../components/PropertyCard'
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
+import { Badge } from '../components/ui/badge'
+import { Link } from 'react-router'
 
 const CURRENT_RENTAL = {
   id: '1',
@@ -15,7 +23,7 @@ const CURRENT_RENTAL = {
   rent: 50000,
   status: 'active',
   image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400',
-};
+}
 
 const SAVED_PROPERTIES = [
   {
@@ -42,7 +50,7 @@ const SAVED_PROPERTIES = [
     beds: 4,
     baths: 3,
   },
-];
+]
 
 const NOTIFICATIONS = [
   {
@@ -66,7 +74,7 @@ const NOTIFICATIONS = [
     time: '1 day ago',
     unread: false,
   },
-];
+]
 
 const RECOMMENDED_PROPERTIES = [
   {
@@ -95,7 +103,7 @@ const RECOMMENDED_PROPERTIES = [
     baths: 3,
     guests: 8,
   },
-];
+]
 
 export function TenantDashboard() {
   return (
@@ -145,7 +153,9 @@ export function TenantDashboard() {
                 <Heart className="w-5 h-5 text-[#3A6EA5]" />
                 <span className="text-base">Saved Properties</span>
               </CardTitle>
-              <p className="text-3xl font-bold text-[#3A6EA5] mt-2">{SAVED_PROPERTIES.length}</p>
+              <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
+                {SAVED_PROPERTIES.length}
+              </p>
             </CardContent>
           </Card>
 
@@ -156,7 +166,7 @@ export function TenantDashboard() {
                 <span className="text-base">Notifications</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
-                {NOTIFICATIONS.filter(n => n.unread).length}
+                {NOTIFICATIONS.filter((n) => n.unread).length}
               </p>
             </CardContent>
           </Card>
@@ -168,7 +178,9 @@ export function TenantDashboard() {
             {/* Current Rental */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">Active Bookings</CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">
+                  Active Bookings
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="bg-[#f5f7fa] rounded-2xl p-6">
@@ -184,25 +196,37 @@ export function TenantDashboard() {
                           <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
                             {CURRENT_RENTAL.property}
                           </h3>
-                          <p className="text-[#4a5565] text-sm">{CURRENT_RENTAL.location}</p>
+                          <p className="text-[#4a5565] text-sm">
+                            {CURRENT_RENTAL.location}
+                          </p>
                         </div>
-                        <Badge className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">Active</Badge>
+                        <Badge className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">
+                          Active
+                        </Badge>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
                           <p className="text-xs text-[#6a7282] mb-1">Move In</p>
-                          <p className="text-sm font-medium text-[#1a1a1a]">{CURRENT_RENTAL.moveIn}</p>
+                          <p className="text-sm font-medium text-[#1a1a1a]">
+                            {CURRENT_RENTAL.moveIn}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-xs text-[#6a7282] mb-1">Move Out</p>
-                          <p className="text-sm font-medium text-[#1a1a1a]">{CURRENT_RENTAL.moveOut}</p>
+                          <p className="text-xs text-[#6a7282] mb-1">
+                            Move Out
+                          </p>
+                          <p className="text-sm font-medium text-[#1a1a1a]">
+                            {CURRENT_RENTAL.moveOut}
+                          </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-[#6a7282] mb-1">Monthly Rent</p>
+                          <p className="text-xs text-[#6a7282] mb-1">
+                            Monthly Rent
+                          </p>
                           <p className="text-xl font-bold text-[#3A6EA5]">
                             {CURRENT_RENTAL.rent.toLocaleString()} EGP
                           </p>
@@ -233,7 +257,9 @@ export function TenantDashboard() {
             {/* Saved Properties */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-2xl text-[#1a1a1a]">Saved Properties</CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">
+                  Saved Properties
+                </CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -274,7 +300,9 @@ export function TenantDashboard() {
             {/* Recent Activity */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">Recent Activity</CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">
+                  Recent Activity
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -282,20 +310,26 @@ export function TenantDashboard() {
                     <div
                       key={notification.id}
                       className={`p-4 rounded-2xl transition-colors ${
-                        notification.unread 
-                          ? 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20' 
+                        notification.unread
+                          ? 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
                           : 'bg-[#f5f7fa]'
                       }`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className={`w-2 h-2 rounded-full mt-2 ${
-                          notification.unread ? 'bg-[#3A6EA5]' : 'bg-[#6a7282]'
-                        }`} />
+                        <div
+                          className={`w-2 h-2 rounded-full mt-2 ${
+                            notification.unread
+                              ? 'bg-[#3A6EA5]'
+                              : 'bg-[#6a7282]'
+                          }`}
+                        />
                         <div className="flex-1">
                           <p className="text-sm text-[#1a1a1a] mb-1">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-[#6a7282]">{notification.time}</p>
+                          <p className="text-xs text-[#6a7282]">
+                            {notification.time}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -307,7 +341,9 @@ export function TenantDashboard() {
             {/* Quick Actions */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">Quick Actions</CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">
+                  Quick Actions
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button
@@ -323,11 +359,7 @@ export function TenantDashboard() {
                 >
                   <Link to="/maintenance">Request Maintenance</Link>
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full rounded-xl"
-                  asChild
-                >
+                <Button variant="outline" className="w-full rounded-xl" asChild>
                   <Link to="/messages">Contact Landlord</Link>
                 </Button>
               </CardContent>
@@ -365,5 +397,5 @@ export function TenantDashboard() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,37 +1,44 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Button } from './ui/button';
-import { Calendar, Download, User } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import { Button } from './ui/button'
+import { Calendar, Download, User } from 'lucide-react'
+import { motion } from 'motion/react'
 
 interface RentalUser {
-  id: string;
-  name: string;
-  photo: string;
-  rentalEndDate: string;
-  contractId: string;
+  id: string
+  name: string
+  photo: string
+  rentalEndDate: string
+  contractId: string
 }
 
 interface RentalUsersModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  users: RentalUser[];
-  propertyName?: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  users: RentalUser[]
+  propertyName?: string
 }
 
-export function RentalUsersModal({ open, onOpenChange, users, propertyName }: RentalUsersModalProps) {
+export function RentalUsersModal({
+  open,
+  onOpenChange,
+  users,
+  propertyName,
+}: RentalUsersModalProps) {
   const handleDownloadContract = (user: RentalUser) => {
     // Simulate contract download
-    console.log(`Downloading contract for ${user.name} - Contract ID: ${user.contractId}`);
+    console.log(
+      `Downloading contract for ${user.name} - Contract ID: ${user.contractId}`,
+    )
     // In production: trigger actual file download
-  };
+  }
 
   const getDaysUntilEnd = (endDate: string) => {
-    const today = new Date();
-    const end = new Date(endDate);
-    const diffTime = end.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
+    const today = new Date()
+    const end = new Date(endDate)
+    const diffTime = end.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -47,8 +54,8 @@ export function RentalUsersModal({ open, onOpenChange, users, propertyName }: Re
 
         <div className="overflow-y-auto flex-1 pr-2 space-y-3">
           {users.map((user, index) => {
-            const daysRemaining = getDaysUntilEnd(user.rentalEndDate);
-            const isExpiringSoon = daysRemaining <= 30;
+            const daysRemaining = getDaysUntilEnd(user.rentalEndDate)
+            const isExpiringSoon = daysRemaining <= 30
 
             return (
               <motion.div
@@ -74,26 +81,30 @@ export function RentalUsersModal({ open, onOpenChange, users, propertyName }: Re
                     <h3 className="font-semibold text-[#1a1a1a] text-lg mb-1">
                       {user.name}
                     </h3>
-                    
+
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="w-4 h-4 text-[#4a5565]" />
                       <span className="text-sm text-[#4a5565]">
-                        Ends: <span className="font-medium">{user.rentalEndDate}</span>
+                        Ends:{' '}
+                        <span className="font-medium">
+                          {user.rentalEndDate}
+                        </span>
                       </span>
                     </div>
 
                     {/* Days Remaining Badge */}
-                    <div className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium ${
-                      isExpiringSoon 
-                        ? 'bg-orange-100 text-orange-700' 
-                        : 'bg-green-100 text-green-700'
-                    }`}>
-                      {daysRemaining > 0 
+                    <div
+                      className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium ${
+                        isExpiringSoon
+                          ? 'bg-orange-100 text-orange-700'
+                          : 'bg-green-100 text-green-700'
+                      }`}
+                    >
+                      {daysRemaining > 0
                         ? `${daysRemaining} days remaining`
                         : daysRemaining === 0
-                        ? 'Ends today'
-                        : `Expired ${Math.abs(daysRemaining)} days ago`
-                      }
+                          ? 'Ends today'
+                          : `Expired ${Math.abs(daysRemaining)} days ago`}
                     </div>
                   </div>
 
@@ -108,7 +119,7 @@ export function RentalUsersModal({ open, onOpenChange, users, propertyName }: Re
                   </Button>
                 </div>
               </motion.div>
-            );
+            )
           })}
 
           {users.length === 0 && (
@@ -122,5 +133,5 @@ export function RentalUsersModal({ open, onOpenChange, users, propertyName }: Re
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

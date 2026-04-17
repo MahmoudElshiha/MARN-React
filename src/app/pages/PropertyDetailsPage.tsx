@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router';
+import { useState } from 'react'
+import { useParams, Link } from 'react-router'
 import {
   Star,
   MapPin,
@@ -18,13 +18,17 @@ import {
   Calendar,
   Users,
   MessageSquare,
-} from 'lucide-react';
-import { Button } from '../components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { Calendar as CalendarComponent } from '../components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
-import { format } from 'date-fns';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+} from 'lucide-react'
+import { Button } from '../components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
+import { Calendar as CalendarComponent } from '../components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '../components/ui/popover'
+import { format } from 'date-fns'
+import { ImageWithFallback } from '../components/figma/ImageWithFallback'
 
 const PROPERTY_IMAGES = [
   'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200',
@@ -32,7 +36,7 @@ const PROPERTY_IMAGES = [
   'https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=1200',
   'https://images.unsplash.com/photo-1556912173-3bb406ef7e77?w=1200',
   'https://images.unsplash.com/photo-1567767292278-a4f21aa2d36e?w=1200',
-];
+]
 
 const AMENITIES_ICONS = {
   WiFi: Wifi,
@@ -43,24 +47,24 @@ const AMENITIES_ICONS = {
   Gym: Dumbbell,
   Pool: Waves,
   'Pet Friendly': Dog,
-};
+}
 
 export function PropertyDetailsPage() {
-  const { id } = useParams();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [checkIn, setCheckIn] = useState<Date>();
-  const [checkOut, setCheckOut] = useState<Date>();
+  const { id } = useParams()
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [checkIn, setCheckIn] = useState<Date>()
+  const [checkOut, setCheckOut] = useState<Date>()
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % PROPERTY_IMAGES.length);
-  };
+    setCurrentImageIndex((prev) => (prev + 1) % PROPERTY_IMAGES.length)
+  }
 
   const prevImage = () => {
     setCurrentImageIndex(
-      (prev) => (prev - 1 + PROPERTY_IMAGES.length) % PROPERTY_IMAGES.length
-    );
-  };
+      (prev) => (prev - 1 + PROPERTY_IMAGES.length) % PROPERTY_IMAGES.length,
+    )
+  }
 
   return (
     <div className="min-h-screen pb-20">
@@ -106,14 +110,14 @@ export function PropertyDetailsPage() {
                 alt="Property"
                 className="w-full h-full object-cover"
               />
-              
+
               <button
                 onClick={prevImage}
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all"
               >
                 <ChevronLeft className="w-6 h-6 text-[#1a1a1a]" />
               </button>
-              
+
               <button
                 onClick={nextImage}
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all"
@@ -155,7 +159,7 @@ export function PropertyDetailsPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-1">
                   <Star className="w-5 h-5 fill-[#3A6EA5] text-[#3A6EA5]" />
@@ -167,7 +171,9 @@ export function PropertyDetailsPage() {
                   Apartment
                 </span>
                 <span className="text-[#4a5565]">•</span>
-                <span className="text-[#1a1a1a]">2 beds • 2 baths • 1,200 sq ft</span>
+                <span className="text-[#1a1a1a]">
+                  2 beds • 2 baths • 1,200 sq ft
+                </span>
               </div>
             </div>
 
@@ -177,20 +183,23 @@ export function PropertyDetailsPage() {
                 About This Property
               </h2>
               <p className="text-[#1a1a1a] leading-relaxed mb-4">
-                Welcome to this stunning modern apartment in the heart of downtown San Francisco. 
-                This beautifully designed 2-bedroom, 2-bathroom unit offers the perfect blend of 
-                comfort and style, with panoramic city views and premium finishes throughout.
+                Welcome to this stunning modern apartment in the heart of
+                downtown San Francisco. This beautifully designed 2-bedroom,
+                2-bathroom unit offers the perfect blend of comfort and style,
+                with panoramic city views and premium finishes throughout.
               </p>
               <p className="text-[#1a1a1a] leading-relaxed mb-4">
-                The open-concept living area features floor-to-ceiling windows that flood the space 
-                with natural light. The gourmet kitchen is equipped with stainless steel appliances, 
-                quartz countertops, and custom cabinetry. Both bedrooms are generously sized with 
+                The open-concept living area features floor-to-ceiling windows
+                that flood the space with natural light. The gourmet kitchen is
+                equipped with stainless steel appliances, quartz countertops,
+                and custom cabinetry. Both bedrooms are generously sized with
                 ample closet space.
               </p>
               <p className="text-[#1a1a1a] leading-relaxed">
-                Located in a prime neighborhood with easy access to public transportation, restaurants, 
-                shopping, and entertainment. Building amenities include a fitness center, rooftop deck, 
-                and 24/7 concierge service.
+                Located in a prime neighborhood with easy access to public
+                transportation, restaurants, shopping, and entertainment.
+                Building amenities include a fitness center, rooftop deck, and
+                24/7 concierge service.
               </p>
             </div>
 
@@ -208,7 +217,9 @@ export function PropertyDetailsPage() {
                     <div className="w-12 h-12 rounded-xl bg-[#9CBBDC]/20 flex items-center justify-center">
                       <Icon className="w-6 h-6 text-[#3A6EA5]" />
                     </div>
-                    <span className="text-sm text-[#1a1a1a] text-center">{name}</span>
+                    <span className="text-sm text-[#1a1a1a] text-center">
+                      {name}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -225,7 +236,9 @@ export function PropertyDetailsPage() {
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg text-[#1a1a1a]">Ahmed Hassan</h3>
+                  <h3 className="font-semibold text-lg text-[#1a1a1a]">
+                    Ahmed Hassan
+                  </h3>
                   <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                     <Star className="w-4 h-4 fill-[#3A6EA5] text-[#3A6EA5]" />
                     <span>4.9 rating • 47 properties</span>
@@ -243,8 +256,9 @@ export function PropertyDetailsPage() {
                 </Button>
               </div>
               <p className="text-[#1a1a1a]">
-                Experienced property manager with over 10 years in the real estate industry. 
-                Committed to providing excellent service and ensuring tenant satisfaction.
+                Experienced property manager with over 10 years in the real
+                estate industry. Committed to providing excellent service and
+                ensuring tenant satisfaction.
               </p>
             </div>
 
@@ -270,16 +284,27 @@ export function PropertyDetailsPage() {
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-semibold text-[#1a1a1a]">Fatima Al-Sayed</h4>
-                        <span className="text-sm text-[#4a5565]">2 weeks ago</span>
+                        <h4 className="font-semibold text-[#1a1a1a]">
+                          Fatima Al-Sayed
+                        </h4>
+                        <span className="text-sm text-[#4a5565]">
+                          2 weeks ago
+                        </span>
                       </div>
                       <div className="flex items-center gap-1 mb-2">
                         {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
+                          <Star
+                            key={star}
+                            className="w-4 h-4 fill-[#FFB800] text-[#FFB800]"
+                          />
                         ))}
                       </div>
                       <p className="text-[#1a1a1a] text-sm leading-relaxed">
-                        Absolutely loved living here! The apartment is exactly as described - modern, clean, and in a perfect location. Ahmed was very responsive to any questions or concerns. The building amenities are fantastic, especially the gym and rooftop terrace. Highly recommend!
+                        Absolutely loved living here! The apartment is exactly
+                        as described - modern, clean, and in a perfect location.
+                        Ahmed was very responsive to any questions or concerns.
+                        The building amenities are fantastic, especially the gym
+                        and rooftop terrace. Highly recommend!
                       </p>
                     </div>
                   </div>
@@ -294,16 +319,27 @@ export function PropertyDetailsPage() {
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-semibold text-[#1a1a1a]">Omar Abdullah</h4>
-                        <span className="text-sm text-[#4a5565]">1 month ago</span>
+                        <h4 className="font-semibold text-[#1a1a1a]">
+                          Omar Abdullah
+                        </h4>
+                        <span className="text-sm text-[#4a5565]">
+                          1 month ago
+                        </span>
                       </div>
                       <div className="flex items-center gap-1 mb-2">
                         {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
+                          <Star
+                            key={star}
+                            className="w-4 h-4 fill-[#FFB800] text-[#FFB800]"
+                          />
                         ))}
                       </div>
                       <p className="text-[#1a1a1a] text-sm leading-relaxed">
-                        Great place for the price! The location is unbeatable - walking distance to everything. Apartment is spacious and well-maintained. The only minor issue was occasional noise from nearby construction, but nothing too disruptive. Would definitely rent again.
+                        Great place for the price! The location is unbeatable -
+                        walking distance to everything. Apartment is spacious
+                        and well-maintained. The only minor issue was occasional
+                        noise from nearby construction, but nothing too
+                        disruptive. Would definitely rent again.
                       </p>
                     </div>
                   </div>
@@ -318,17 +354,28 @@ export function PropertyDetailsPage() {
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-semibold text-[#1a1a1a]">Layla Mahmoud</h4>
-                        <span className="text-sm text-[#4a5565]">2 months ago</span>
+                        <h4 className="font-semibold text-[#1a1a1a]">
+                          Layla Mahmoud
+                        </h4>
+                        <span className="text-sm text-[#4a5565]">
+                          2 months ago
+                        </span>
                       </div>
                       <div className="flex items-center gap-1 mb-2">
                         {[1, 2, 3, 4].map((star) => (
-                          <Star key={star} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
+                          <Star
+                            key={star}
+                            className="w-4 h-4 fill-[#FFB800] text-[#FFB800]"
+                          />
                         ))}
                         <Star className="w-4 h-4 text-[#3A6EA5]/30" />
                       </div>
                       <p className="text-[#1a1a1a] text-sm leading-relaxed">
-                        Very nice apartment with beautiful views. The building is secure and well-maintained. Ahmed is a professional landlord who takes care of issues promptly. Only giving 4 stars because the parking situation can be a bit tight during peak hours.
+                        Very nice apartment with beautiful views. The building
+                        is secure and well-maintained. Ahmed is a professional
+                        landlord who takes care of issues promptly. Only giving
+                        4 stars because the parking situation can be a bit tight
+                        during peak hours.
                       </p>
                     </div>
                   </div>
@@ -343,23 +390,34 @@ export function PropertyDetailsPage() {
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-semibold text-[#1a1a1a]">Khalid Ibrahim</h4>
-                        <span className="text-sm text-[#4a5565]">3 months ago</span>
+                        <h4 className="font-semibold text-[#1a1a1a]">
+                          Khalid Ibrahim
+                        </h4>
+                        <span className="text-sm text-[#4a5565]">
+                          3 months ago
+                        </span>
                       </div>
                       <div className="flex items-center gap-1 mb-2">
                         {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
+                          <Star
+                            key={star}
+                            className="w-4 h-4 fill-[#FFB800] text-[#FFB800]"
+                          />
                         ))}
                       </div>
                       <p className="text-[#1a1a1a] text-sm leading-relaxed">
-                        Perfect for young professionals! The apartment has everything you need and more. Love the modern kitchen and the natural lighting throughout. The neighborhood is vibrant with great restaurants and cafes nearby. Couldn't ask for a better rental experience!
+                        Perfect for young professionals! The apartment has
+                        everything you need and more. Love the modern kitchen
+                        and the natural lighting throughout. The neighborhood is
+                        vibrant with great restaurants and cafes nearby.
+                        Couldn't ask for a better rental experience!
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <Button 
+              <Button
                 variant="outline"
                 className="w-full mt-4 rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
               >
@@ -374,7 +432,9 @@ export function PropertyDetailsPage() {
               <div className="bg-[#f5f7fa] rounded-3xl p-6 shadow-2xl shadow-[#3A6EA5]/20">
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-4xl font-bold text-[#3A6EA5]">50,000 EGP</span>
+                    <span className="text-4xl font-bold text-[#3A6EA5]">
+                      50,000 EGP
+                    </span>
                     <span className="text-[#4a5565]">/ month</span>
                   </div>
                   <div className="flex items-center gap-1 text-sm">
@@ -485,7 +545,8 @@ export function PropertyDetailsPage() {
                       Looking for Roommates?
                     </h4>
                     <p className="text-sm text-[#4a5565]">
-                      Use our roommate matching feature to find compatible housemates
+                      Use our roommate matching feature to find compatible
+                      housemates
                     </p>
                   </div>
                 </div>
@@ -495,5 +556,5 @@ export function PropertyDetailsPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
