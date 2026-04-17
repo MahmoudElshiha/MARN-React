@@ -3,21 +3,17 @@ import {
   User,
   Mail,
   Phone,
-  Globe,
   Lock,
   Bell,
   Shield,
   Camera,
   Users,
-  Home,
   Briefcase,
-  Moon,
   Volume2,
   Coffee,
   GraduationCap,
   UserPlus,
   Upload,
-  FileText,
   IdCard,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
@@ -43,7 +39,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '../components/ui/dialog'
 import { useState } from 'react'
 import { toast } from 'sonner'

@@ -63,7 +63,7 @@ export function AddPropertyPage() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
   const [customPreferences, setCustomPreferences] = useState<string[]>([])
   const [newPreference, setNewPreference] = useState('')
-  const [mapLocation, setMapLocation] = useState({
+  const [mapLocation] = useState({
     lat: 37.7749,
     lng: -122.4194,
   }) // Default San Francisco

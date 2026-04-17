@@ -13,7 +13,6 @@ import {
   UserCheck,
   Calendar,
   DollarSign,
-  UserMinus,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
@@ -35,13 +34,18 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
 } from 'recharts'
 import { toast } from 'sonner'
 
 export function AdminDashboardPage() {
-  const [selectedDocument, setSelectedDocument] = useState<any>(null)
+  const [setSelectedDocument] = useState<{
+    id: number
+    userName: string
+    propertyName: string
+    date: string
+    status: string
+    type: string
+  } | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [actionType, setActionType] = useState<
     'ban' | 'suspend' | 'restore' | null
@@ -86,15 +90,6 @@ export function AdminDashboardPage() {
     { month: 'Apr', revenue: 178000 },
     { month: 'May', revenue: 195000 },
     { month: 'Jun', revenue: 212000 },
-  ]
-
-  const chartData = [
-    { month: 'Jan', listings: 245, users: 856 },
-    { month: 'Feb', listings: 312, users: 923 },
-    { month: 'Mar', listings: 389, users: 1045 },
-    { month: 'Apr', listings: 445, users: 1167 },
-    { month: 'May', listings: 523, users: 1289 },
-    { month: 'Jun', listings: 612, users: 1401 },
   ]
 
   const pendingVerifications = [
@@ -194,7 +189,7 @@ export function AdminDashboardPage() {
     },
   ]
 
-  const handleDowngradeAdmin = (adminId: number) => {
+  const handleDowngradeAdmin = () => {
     toast.success('Admin downgraded successfully')
   }
 

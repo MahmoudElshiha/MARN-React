@@ -70,7 +70,7 @@ export function EditPropertyPage() {
     'Non-smokers only',
   ])
   const [newPreference, setNewPreference] = useState('')
-  const [mapLocation, setMapLocation] = useState({
+  const [mapLocation] = useState({
     lat: 37.7749,
     lng: -122.4194,
   })

@@ -6,13 +6,6 @@ import { Label } from '../components/ui/label'
 import { Checkbox } from '../components/ui/checkbox'
 import { Link } from 'react-router'
 import { useState } from 'react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select'
 
 export function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)

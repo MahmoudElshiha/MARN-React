@@ -17,7 +17,8 @@ export function OTPVerificationPage() {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
       return () => clearTimeout(timer)
     } else {
-      setCanResend(true)
+      const timer = setTimeout(() => setCanResend(true), 0)
+      return () => clearTimeout(timer)
     }
   }, [countdown])
 

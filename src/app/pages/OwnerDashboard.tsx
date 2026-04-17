@@ -206,11 +206,11 @@ const getContractStatusBadge = (status: string) => {
 }
 
 export function OwnerDashboard() {
-  const handleAcceptRequest = (id: string) => {
+  const handleAcceptRequest = () => {
     toast.success('Booking request accepted')
   }
 
-  const handleDeclineRequest = (id: string) => {
+  const handleDeclineRequest = () => {
     toast.error('Booking request declined')
   }
 

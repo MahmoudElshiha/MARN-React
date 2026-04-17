@@ -1,12 +1,4 @@
-import {
-  Calendar,
-  CreditCard,
-  Heart,
-  Bell,
-  Home,
-  TrendingUp,
-  MessageSquare,
-} from 'lucide-react'
+import { CreditCard, Heart, Bell, Home, MessageSquare } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { PropertyCard } from '../components/PropertyCard'

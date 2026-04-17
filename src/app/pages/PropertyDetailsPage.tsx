@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router'
+import { Link } from 'react-router'
 import {
   Star,
   MapPin,
@@ -50,7 +50,6 @@ const AMENITIES_ICONS = {
 }
 
 export function PropertyDetailsPage() {
-  const { id } = useParams()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [checkIn, setCheckIn] = useState<Date>()

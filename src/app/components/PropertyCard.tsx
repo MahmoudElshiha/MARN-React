@@ -1,4 +1,4 @@
-import { Heart, MapPin, Bed, Bath, Square, Star } from 'lucide-react'
+import { Heart, MapPin, Star } from 'lucide-react'
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router'
