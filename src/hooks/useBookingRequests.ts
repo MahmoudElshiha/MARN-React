@@ -1,6 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { rentalService } from '@/services/rentalService'
 
+export function useContracts() {
+  return useQuery({
+    queryKey: ['contracts'],
+    queryFn: () => rentalService.getContracts(),
+  })
+}
+
 export function useBookingRequests() {
   const queryClient = useQueryClient()
 

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router'
 import { Navigation } from './components/Navigation'
 import { Footer } from './components/Footer'
+import { ProtectedRoute } from './components/ProtectedRoute'
 import { LandingPage } from './pages/LandingPage'
 import { SearchPage } from './pages/SearchPage'
 import { PropertyDetailsPage } from './pages/PropertyDetailsPage'
@@ -37,66 +38,118 @@ export default function App() {
       <div className="min-h-screen bg-[#F2F4F6]">
         <Navigation />
         <Routes>
-          {/* Main Pages */}
+          {/* Public pages */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/property/:id" element={<PropertyDetailsPage />} />
-
-          {/* Dashboards */}
-          <Route path="/tenant-dashboard" element={<TenantDashboard />} />
-          <Route path="/owner-dashboard" element={<OwnerDashboard />} />
-          <Route path="/add-property" element={<AddPropertyPage />} />
-          <Route path="/messages" element={<MessagesPage />} />
-
-          {/* Information Pages */}
           <Route path="/about" element={<AboutPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/contact" element={<ContactPage />} />
-
-          {/* Legal Pages */}
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
 
-          {/* User Account Pages */}
+          {/* Auth pages */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/profile-settings" element={<ProfileSettingsPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/chatbot" element={<ChatbotPage />} />
-          <Route path="/admin-dashboard" element={<AdminDashboardPage />} />
           <Route path="/otp-verification" element={<OTPVerificationPage />} />
 
-          {/* Additional Pages */}
+          {/* Tenant routes */}
           <Route
-            path="/chat-with-rental-request"
-            element={<ChatWithRentalRequestPage />}
+            path="/tenant-dashboard"
+            element={
+              <ProtectedRoute roles={['tenant']}>
+                <TenantDashboard />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/view-user-profile" element={<ViewUserProfilePage />} />
+
+          {/* Owner routes */}
           <Route
-            path="/view-owner-profile"
-            element={<ViewOwnerProfilePage />}
+            path="/owner-dashboard"
+            element={
+              <ProtectedRoute roles={['owner']}>
+                <OwnerDashboard />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/contract" element={<ContractPage />} />
-          <Route path="/edit-property" element={<EditPropertyPage />} />
-          <Route path="/property-by-owner" element={<PropertyByOwnerPage />} />
+          <Route
+            path="/add-property"
+            element={
+              <ProtectedRoute roles={['owner']}>
+                <AddPropertyPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-property/:id"
+            element={
+              <ProtectedRoute roles={['owner']}>
+                <EditPropertyPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/property-by-owner/:id"
+            element={
+              <ProtectedRoute roles={['owner']}>
+                <PropertyByOwnerPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route
+            path="/admin-dashboard"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Shared authenticated routes */}
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <MessagesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages/rental-request/:id"
+            element={
+              <ProtectedRoute>
+                <ChatWithRentalRequestPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile-settings"
+            element={
+              <ProtectedRoute>
+                <ProfileSettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contract/:id"
+            element={
+              <ProtectedRoute>
+                <ContractPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/user/:id" element={<ViewUserProfilePage />} />
+          <Route path="/owner/:id" element={<ViewOwnerProfilePage />} />
+
+          {/* Misc */}
+          <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/modal-test" element={<ModalTestPage />} />
 
-          {/* Additional Pages with /1 for easy access */}
-          <Route
-            path="/messages/rental-request/1"
-            element={<ChatWithRentalRequestPage />}
-          />
-          <Route path="/user/1" element={<ViewUserProfilePage />} />
-          <Route path="/owner/1" element={<ViewOwnerProfilePage />} />
-          <Route path="/contract/1" element={<ContractPage />} />
-          <Route path="/edit-property/1" element={<EditPropertyPage />} />
-          <Route
-            path="/property-by-owner/1"
-            element={<PropertyByOwnerPage />}
-          />
-
-          {/* 404 Page */}
+          {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Footer />

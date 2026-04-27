@@ -6,20 +6,50 @@ import { Label } from '../components/ui/label'
 import { Checkbox } from '../components/ui/checkbox'
 import { Link, useNavigate } from 'react-router'
 import { useState } from 'react'
+import { useLogin } from '@/hooks/useLogin'
+import { useAuth } from '@/hooks/useAuth'
+import { toast } from 'sonner'
+import type { UserRole } from '@/types/user'
+
+function roleDestination(role: UserRole): string {
+  if (role === 'admin') return '/admin-dashboard'
+  if (role === 'owner') return '/owner-dashboard'
+  return '/tenant-dashboard'
+}
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     remember: false,
   })
 
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
+  const login = useLogin({
+    remember: formData.remember,
+    onSuccess: () => {
+      // user is now set in context after login() is called inside the hook
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Add authentication logic here
-    navigate('/tenant-dashboard')
+    login.mutate(
+      { email: formData.email, password: formData.password },
+      {
+        onSuccess: (response) => {
+          navigate(roleDestination(response.data.user.role))
+        },
+        onError: (err) => {
+          const msg =
+            err instanceof Error ? err.message : 'Login failed. Please try again.'
+          toast.error(msg)
+        },
+      },
+    )
   }
 
   return (
@@ -172,9 +202,10 @@ export function LoginPage() {
               <Button
                 type="submit"
                 size="lg"
+                disabled={login.isPending}
                 className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30"
               >
-                Sign In
+                {login.isPending ? 'Signing in…' : 'Sign In'}
               </Button>
             </form>
 
@@ -211,7 +242,7 @@ export function LoginPage() {
                 />
                 <path
                   fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 2.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
               Google

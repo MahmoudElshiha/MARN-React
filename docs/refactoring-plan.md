@@ -61,15 +61,15 @@ useAdminStats.ts      → useQuery → adminService.getStats()              ✅ 
 
 ### High priority (core user flows)
 
-| Page | Static data to replace | Hook to use |
-|------|------------------------|-------------|
-| `SearchPage` | `PROPERTIES` array | `useProperties(filters)` |
-| `PropertyDetailsPage` | `PROPERTY_IMAGES`, all property fields | `useProperty(id)` |
-| `LandingPage` | `FEATURED_PROPERTIES`, `TESTIMONIALS` | `useProperties({ featured: true })` |
-| `OwnerDashboard` | `BOOKING_REQUESTS`, `MY_PROPERTIES`, `CONTRACTS_HISTORY`, earnings/occupancy charts | `useBookingRequests()`, `useProperties()` |
-| `TenantDashboard` | Current rental, saved properties, notifications | `useProfile()`, `useProperties()` |
-| `ProfileSettingsPage` | Initial form values | `useProfile()` (already partially wired) |
-| `AdminDashboardPage` | `stats`, `revenueData`, `pendingVerifications`, `users` | `useAdminStats()` |
+| Page | Static data to replace | Hook to use | Status |
+|------|------------------------|-------------|--------|
+| `SearchPage` | `PROPERTIES` array | `useProperties(filters)` | ✅ Done |
+| `PropertyDetailsPage` | `PROPERTY_IMAGES`, all property fields | `useProperty(id)` | ✅ Done |
+| `LandingPage` | `FEATURED_PROPERTIES`, `TESTIMONIALS` | `useProperties({ featured: true })` | ⬜ |
+| `OwnerDashboard` | `BOOKING_REQUESTS`, `MY_PROPERTIES`, `CONTRACTS_HISTORY` | `useBookingRequests()`, `useContracts()`, `useProperties()` | ✅ Done (earnings chart still static) |
+| `TenantDashboard` | Current rental, saved properties, notifications | `useProfile()`, `useProperties()` | ⬜ |
+| `ProfileSettingsPage` | Initial form values | `useProfile()` | ⬜ |
+| `AdminDashboardPage` | `stats`, `revenueData`, `pendingVerifications`, `users` | `useAdminStats()` | ⬜ |
 
 ### Medium priority
 
@@ -98,16 +98,9 @@ No page currently uses `useParams()`. Routes like `/property/:id` exist in `App.
 `PropertyDetailsPage` ignores the `:id`. When replacing static data, every detail page
 needs `const { id } = useParams()` to know what to fetch.
 
-### Login always navigates to `/tenant-dashboard`
-`LoginPage`, `OTPVerificationPage` both hardcode the redirect. Once auth is real, navigate
-based on `user.role`:
-```ts
-const destination =
-  user.role === 'admin' ? '/admin-dashboard' :
-  user.role === 'owner' ? '/owner-dashboard' :
-  '/tenant-dashboard'
-navigate(destination)
-```
+### Login always navigates to `/tenant-dashboard` ✅ Done
+`LoginPage` now uses `useLogin` and navigates based on `user.role`. OTPVerificationPage
+still has a hardcoded `/tenant-dashboard` redirect — needs updating when OTP flow is wired.
 
 ### No route protection exists ✅ Done
 `ProtectedRoute` created at `src/app/components/ProtectedRoute.tsx`.
