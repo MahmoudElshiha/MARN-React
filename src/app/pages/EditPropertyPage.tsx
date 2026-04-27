@@ -3,21 +3,7 @@ import { useNavigate } from 'react-router'
 import {
   ChevronLeft,
   ChevronRight,
-  Home,
   MapPin,
-  DollarSign,
-  Calendar,
-  Upload,
-  CheckCircle,
-  Wifi,
-  Car,
-  Wind,
-  Flame,
-  Shirt,
-  Dumbbell,
-  Waves,
-  Dog,
-  FileText,
   Users,
   X,
   Plus,
@@ -36,26 +22,10 @@ import {
 import { Checkbox } from '../components/ui/checkbox'
 import { Card, CardContent } from '../components/ui/card'
 import { toast } from 'sonner'
-
-const STEPS = [
-  { id: 1, title: 'Property Details', icon: Home },
-  { id: 2, title: 'Amenities', icon: CheckCircle },
-  { id: 3, title: 'Photos', icon: Upload },
-  { id: 4, title: 'Pricing', icon: DollarSign },
-  { id: 5, title: 'Availability', icon: Calendar },
-  { id: 6, title: 'Legal Docs', icon: FileText },
-]
-
-const AMENITIES = [
-  { name: 'WiFi', icon: Wifi },
-  { name: 'Parking', icon: Car },
-  { name: 'Air Conditioning', icon: Wind },
-  { name: 'Heating', icon: Flame },
-  { name: 'Washer/Dryer', icon: Shirt },
-  { name: 'Gym', icon: Dumbbell },
-  { name: 'Pool', icon: Waves },
-  { name: 'Pet Friendly', icon: Dog },
-]
+import {
+  PROPERTY_STEPS as STEPS,
+  PROPERTY_AMENITIES as AMENITIES,
+} from '@/constants/property'
 
 export function EditPropertyPage() {
   const navigate = useNavigate()

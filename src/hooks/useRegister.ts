@@ -1,0 +1,10 @@
+import { useMutation } from '@tanstack/react-query'
+import { authService } from '@/services/authService'
+import type { RegisterPayload } from '@/services/authService'
+
+export function useRegister(options?: { onSuccess?: () => void }) {
+  return useMutation({
+    mutationFn: (payload: RegisterPayload) => authService.register(payload),
+    onSuccess: options?.onSuccess,
+  })
+}

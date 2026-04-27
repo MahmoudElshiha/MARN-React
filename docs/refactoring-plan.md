@@ -18,41 +18,41 @@
 
 ## What to Build Next
 
-### 1. Domain Types — `src/types/`
+### 1. Domain Types — `src/types/` ✅ Done
 
 ```
-property.ts     → Property, PropertyStatus, PropertyFilters, Amenity
-rental.ts       → Rental, RentalStatus, BookingRequest, Contract
-message.ts      → Conversation, Message
+property.ts     → Property, PropertyStatus, PropertyFilters, Amenity   ✅
+rental.ts       → Rental, RentalStatus, BookingRequest, Contract        ✅
+message.ts      → Conversation, Message                                 ✅
 ```
 
-### 2. Service Layer — `src/services/`
+### 2. Service Layer — `src/services/` ✅ Done
 
 Each service calls `apiClient` and returns typed data. No logic, no state.
 
 ```
-authService.ts        → login(), register(), forgotPassword(), resetPassword(), verifyOtp()
-propertyService.ts    → getProperties(filters), getPropertyById(id), createProperty(), updateProperty(), deleteProperty()
-userService.ts        → getProfile(), updateProfile(), uploadAvatar()
-rentalService.ts      → getBookingRequests(), acceptRequest(), rejectRequest(), getContracts()
-adminService.ts       → getStats(), getUsers(), getVerifications(), banUser(), suspendUser()
-messageService.ts     → getConversations(), getMessages(conversationId), sendMessage()
+authService.ts        → login(), register(), forgotPassword(), resetPassword(), verifyOtp()   ✅
+propertyService.ts    → getProperties(filters), getPropertyById(id), createProperty(), updateProperty(), deleteProperty()   ✅
+userService.ts        → getProfile(), updateProfile(), uploadAvatar()   ✅
+rentalService.ts      → getBookingRequests(), acceptRequest(), rejectRequest(), getContracts()   ✅
+adminService.ts       → getStats(), getUsers(), getVerifications(), banUser(), suspendUser()   ✅
+messageService.ts     → getConversations(), getMessages(conversationId), sendMessage()   ✅
 ```
 
-### 3. Feature Hooks — `src/hooks/`
+### 3. Feature Hooks — `src/hooks/` ✅ Done
 
 One hook file per domain. Each wraps a service call in `useQuery` or `useMutation`.
 
 ```
 useAuth.ts            → ✅ Done (context consumer)
-useLogin.ts           → useMutation → authService.login()
-useRegister.ts        → useMutation → authService.register()
-useProperties.ts      → useQuery → propertyService.getProperties(filters)
-useProperty.ts        → useQuery → propertyService.getPropertyById(id)
-useProfile.ts         → useQuery + useMutation → userService.*
-useBookingRequests.ts → useQuery → rentalService.getBookingRequests()
-useConversations.ts   → useQuery → messageService.getConversations()
-useAdminStats.ts      → useQuery → adminService.getStats()
+useLogin.ts           → useMutation → authService.login()               ✅
+useRegister.ts        → useMutation → authService.register()            ✅
+useProperties.ts      → useQuery → propertyService.getProperties(filters)   ✅
+useProperty.ts        → useQuery → propertyService.getPropertyById(id)  ✅
+useProfile.ts         → useQuery + useMutation → userService.*          ✅
+useBookingRequests.ts → useQuery → rentalService.getBookingRequests()   ✅
+useConversations.ts   → useQuery → messageService.getConversations()    ✅ (also useMessages, useSendMessage)
+useAdminStats.ts      → useQuery → adminService.getStats()              ✅ (also useAdminUsers, useAdminVerifications)
 ```
 
 ---
@@ -109,25 +109,25 @@ const destination =
 navigate(destination)
 ```
 
-### No route protection exists
-Any user can visit `/admin-dashboard` or `/owner-dashboard` without being logged in.
-Add a `ProtectedRoute` wrapper component and a `RoleRoute` variant:
+### No route protection exists ✅ Done
+`ProtectedRoute` created at `src/app/components/ProtectedRoute.tsx`.
+Supports both unauthenticated blocking and role-based blocking via `roles` prop:
 ```tsx
 // blocks unauthenticated users
 <ProtectedRoute><TenantDashboard /></ProtectedRoute>
 
 // blocks wrong roles
-<RoleRoute roles={['admin']}><AdminDashboardPage /></RoleRoute>
+<ProtectedRoute roles={['admin']}><AdminDashboardPage /></ProtectedRoute>
 ```
-Place these in `src/app/components/ProtectedRoute.tsx`.
+Still needs to be wired into `App.tsx` routes.
 
-### STEPS and AMENITIES are duplicated
-`AddPropertyPage` and `EditPropertyPage` both define identical `STEPS` and `AMENITIES`
-constants. Extract them to `src/constants/property.ts` before touching either page.
+### STEPS and AMENITIES are duplicated ✅ Done
+Extracted to `src/constants/property.ts` as `PROPERTY_STEPS` and `PROPERTY_AMENITIES`.
+Both `AddPropertyPage` and `EditPropertyPage` now import from there.
 
-### ProfileSettingsPage has a hardcoded countries list
-`countries` and `fieldOfStudyOptions` arrays are defined inline (lines 87 and 116).
-Move to `src/constants/options.ts` or replace with `useEnumOptions` if the API supports it.
+### ProfileSettingsPage has a hardcoded countries list ✅ Done
+Moved to `src/constants/options.ts` as `COUNTRIES` and `FIELD_OF_STUDY_OPTIONS`.
+`ProfileSettingsPage` now imports from there.
 
 ### setTimeout in ForgotPasswordPage and ChatbotPage
 `ForgotPasswordPage` simulates an API call with `setTimeout`. Replace with a real

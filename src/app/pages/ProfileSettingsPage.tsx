@@ -42,6 +42,7 @@ import {
 } from '../components/ui/dialog'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { COUNTRIES, FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
 
 export function ProfileSettingsPage() {
   const [profileData, setProfileData] = useState({
@@ -84,48 +85,8 @@ export function ProfileSettingsPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const bioMaxLength = 300
 
-  const countries = [
-    'United States',
-    'Canada',
-    'United Kingdom',
-    'Australia',
-    'Germany',
-    'France',
-    'Spain',
-    'Italy',
-    'Netherlands',
-    'Belgium',
-    'Sweden',
-    'Norway',
-    'Denmark',
-    'Finland',
-    'Switzerland',
-    'Austria',
-    'Ireland',
-    'New Zealand',
-    'Japan',
-    'Singapore',
-    'United Arab Emirates',
-    'Saudi Arabia',
-    'Qatar',
-    'Kuwait',
-    'Bahrain',
-    'Oman',
-  ]
-
-  const fieldOfStudyOptions = [
-    'Computer Science',
-    'Engineering',
-    'Business Administration',
-    'Medicine',
-    'Law',
-    'Arts & Humanities',
-    'Natural Sciences',
-    'Social Sciences',
-    'Education',
-    'Architecture',
-    'Other',
-  ]
+  const countries = COUNTRIES
+  const fieldOfStudyOptions = FIELD_OF_STUDY_OPTIONS
 
   const handle2FAToggle = () => {
     if (!twoFactorEnabled) {
