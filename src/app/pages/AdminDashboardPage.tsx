@@ -18,6 +18,7 @@ import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Input } from '../components/ui/input'
+import { Skeleton } from '../components/ui/skeleton'
 import {
   Select,
   SelectContent,
@@ -36,179 +37,116 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { toast } from 'sonner'
+import { useAdminStats, useAdminUsers, useAdminVerifications } from '@/hooks/useAdminStats'
+import { adminService } from '@/services/adminService'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 export function AdminDashboardPage() {
-  const [setSelectedDocument] = useState<{
-    id: number
-    userName: string
-    propertyName: string
-    date: string
-    status: string
-    type: string
-  } | null>(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [actionType, setActionType] = useState<
     'ban' | 'suspend' | 'restore' | null
   >(null)
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null)
 
-  // Mock data
+  const { data: statsData, isLoading: statsLoading } = useAdminStats()
+  const { data: verificationsData, isLoading: verificationsLoading } = useAdminVerifications()
+  const { data: usersData, isLoading: usersLoading } = useAdminUsers()
+  const queryClient = useQueryClient()
+
+  const apiStats = statsData?.data
+  const pendingVerifications = verificationsData?.data ?? []
+  const users = usersData?.data ?? []
+  const revenueData = apiStats?.revenueData ?? []
+
   const stats = [
     {
       icon: Users,
       label: 'Total Users',
-      value: '12,543',
-      change: '+12%',
+      value: statsLoading ? '…' : (apiStats?.totalUsers ?? 0).toLocaleString(),
+      change: '',
       color: 'from-blue-500 to-blue-600',
     },
     {
       icon: Building,
       label: 'Total Listings',
-      value: '3,842',
-      change: '+8%',
+      value: statsLoading ? '…' : (apiStats?.totalListings ?? 0).toLocaleString(),
+      change: '',
       color: 'from-green-500 to-green-600',
     },
     {
       icon: Clock,
       label: 'Pending Verifications',
-      value: '47',
-      change: '-5%',
+      value: statsLoading ? '…' : (apiStats?.pendingVerifications ?? 0).toLocaleString(),
+      change: '',
       color: 'from-yellow-500 to-yellow-600',
     },
     {
       icon: FileText,
       label: 'Active Contracts',
-      value: '1,234',
-      change: '+15%',
+      value: statsLoading ? '…' : (apiStats?.activeContracts ?? 0).toLocaleString(),
+      change: '',
       color: 'from-purple-500 to-purple-600',
     },
   ]
 
-  const revenueData = [
-    { month: 'Jan', revenue: 125000 },
-    { month: 'Feb', revenue: 145000 },
-    { month: 'Mar', revenue: 162000 },
-    { month: 'Apr', revenue: 178000 },
-    { month: 'May', revenue: 195000 },
-    { month: 'Jun', revenue: 212000 },
-  ]
+  const approveVerification = useMutation({
+    mutationFn: (id: number) => adminService.approveVerification(id),
+    onSuccess: () => {
+      toast.success('Verification approved')
+      queryClient.invalidateQueries({ queryKey: ['adminVerifications'] })
+      queryClient.invalidateQueries({ queryKey: ['adminStats'] })
+    },
+    onError: () => toast.error('Failed to approve'),
+  })
 
-  const pendingVerifications = [
-    {
-      id: 1,
-      userName: 'John Doe',
-      propertyName: 'Modern Downtown Apartment',
-      date: '2026-02-14',
-      status: 'pending',
-      type: 'property',
+  const rejectVerification = useMutation({
+    mutationFn: (id: number) => adminService.rejectVerification(id),
+    onSuccess: () => {
+      toast.success('Verification rejected')
+      queryClient.invalidateQueries({ queryKey: ['adminVerifications'] })
     },
-    {
-      id: 2,
-      userName: 'Sarah Smith',
-      propertyName: 'Cozy Studio in Mission',
-      date: '2026-02-15',
-      status: 'pending',
-      type: 'property',
-    },
-    {
-      id: 3,
-      userName: 'Mike Johnson',
-      propertyName: 'Luxury Penthouse',
-      date: '2026-02-15',
-      status: 'pending',
-      type: 'property',
-    },
-    {
-      id: 4,
-      userName: 'Emma Wilson',
-      propertyName: 'Family House in Sunset',
-      date: '2026-02-16',
-      status: 'pending',
-      type: 'contract',
-    },
-  ]
+    onError: () => toast.error('Failed to reject'),
+  })
 
-  const users = [
-    {
-      id: 1,
-      name: 'Alice Cooper',
-      email: 'alice@example.com',
-      role: 'Tenant',
-      status: 'Active',
-      joinDate: '2025-11-20',
+  const userAction = useMutation({
+    mutationFn: ({ userId, action }: { userId: string; action: 'ban' | 'suspend' | 'restore' }) => {
+      if (action === 'ban') return adminService.banUser(userId)
+      if (action === 'suspend') return adminService.suspendUser(userId)
+      return adminService.restoreUser(userId)
     },
-    {
-      id: 2,
-      name: 'Bob Martin',
-      email: 'bob@example.com',
-      role: 'Owner',
-      status: 'Active',
-      joinDate: '2025-12-05',
+    onSuccess: () => {
+      toast.success(`User ${actionType}ned successfully`)
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] })
+      setShowConfirmModal(false)
+      setPendingUserId(null)
     },
-    {
-      id: 3,
-      name: 'Charlie Brown',
-      email: 'charlie@example.com',
-      role: 'Tenant',
-      status: 'Suspended',
-      joinDate: '2026-01-10',
-    },
-    {
-      id: 4,
-      name: 'Diana Prince',
-      email: 'diana@example.com',
-      role: 'Owner',
-      status: 'Active',
-      joinDate: '2026-01-28',
-    },
-  ]
+    onError: () => toast.error('Action failed'),
+  })
 
   const adminUsers = [
-    {
-      id: 1,
-      username: 'admin_john',
-      email: 'john.admin@marn.com',
-      joinDate: '2024-05-12',
-    },
-    {
-      id: 2,
-      username: 'admin_sarah',
-      email: 'sarah.admin@marn.com',
-      joinDate: '2024-08-20',
-    },
-    {
-      id: 3,
-      username: 'admin_mike',
-      email: 'mike.admin@marn.com',
-      joinDate: '2025-02-14',
-    },
-    {
-      id: 4,
-      username: 'admin_emma',
-      email: 'emma.admin@marn.com',
-      joinDate: '2025-06-08',
-    },
+    { id: 1, username: 'admin_john', email: 'john.admin@marn.com', joinDate: '2024-05-12' },
+    { id: 2, username: 'admin_sarah', email: 'sarah.admin@marn.com', joinDate: '2024-08-20' },
+    { id: 3, username: 'admin_mike', email: 'mike.admin@marn.com', joinDate: '2025-02-14' },
+    { id: 4, username: 'admin_emma', email: 'emma.admin@marn.com', joinDate: '2025-06-08' },
   ]
 
   const handleDowngradeAdmin = () => {
     toast.success('Admin downgraded successfully')
   }
 
-  const handleApprove = (id: number) => {
-    console.log('Approved:', id)
-    // Handle approval logic
-  }
+  const handleApprove = (id: number) => approveVerification.mutate(id)
+  const handleReject = (id: number) => rejectVerification.mutate(id)
 
-  const handleReject = (id: number) => {
-    console.log('Rejected:', id)
-    // Handle rejection logic
-  }
-
-  const handleUserAction = (
-    userId: number,
-    action: 'ban' | 'suspend' | 'restore',
-  ) => {
+  const handleUserAction = (userId: string, action: 'ban' | 'suspend' | 'restore') => {
     setActionType(action)
+    setPendingUserId(userId)
     setShowConfirmModal(true)
+  }
+
+  const confirmUserAction = () => {
+    if (pendingUserId && actionType) {
+      userAction.mutate({ userId: pendingUserId, action: actionType })
+    }
   }
 
   const getStatusBadge = (status: string) => {
@@ -436,7 +374,23 @@ export function AdminDashboardPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {pendingVerifications.map((item) => (
+                        {verificationsLoading ? (
+                          Array.from({ length: 4 }).map((_, i) => (
+                            <tr key={i} className="border-b border-[#3A6EA5]/10">
+                              {Array.from({ length: 5 }).map((_, j) => (
+                                <td key={j} className="py-4 px-4">
+                                  <Skeleton className="h-5 w-full rounded" />
+                                </td>
+                              ))}
+                            </tr>
+                          ))
+                        ) : pendingVerifications.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="py-10 text-center text-[#4a5565]">
+                              No pending verifications.
+                            </td>
+                          </tr>
+                        ) : pendingVerifications.map((item) => (
                           <tr
                             key={item.id}
                             className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
@@ -459,7 +413,6 @@ export function AdminDashboardPage() {
                                   size="sm"
                                   variant="outline"
                                   className="rounded-xl border-[#3A6EA5]/20"
-                                  onClick={() => setSelectedDocument(item)}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
                                   View
@@ -467,6 +420,7 @@ export function AdminDashboardPage() {
                                 <Button
                                   size="sm"
                                   className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                                  disabled={approveVerification.isPending}
                                   onClick={() => handleApprove(item.id)}
                                 >
                                   <CheckCircle className="w-4 h-4 mr-1" />
@@ -476,6 +430,7 @@ export function AdminDashboardPage() {
                                   size="sm"
                                   variant="outline"
                                   className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                                  disabled={rejectVerification.isPending}
                                   onClick={() => handleReject(item.id)}
                                 >
                                   <XCircle className="w-4 h-4 mr-1" />
@@ -532,7 +487,23 @@ export function AdminDashboardPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {users.map((user) => (
+                        {usersLoading ? (
+                          Array.from({ length: 5 }).map((_, i) => (
+                            <tr key={i} className="border-b border-[#3A6EA5]/10">
+                              {Array.from({ length: 6 }).map((_, j) => (
+                                <td key={j} className="py-4 px-4">
+                                  <Skeleton className="h-5 w-full rounded" />
+                                </td>
+                              ))}
+                            </tr>
+                          ))
+                        ) : users.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-10 text-center text-[#4a5565]">
+                              No users found.
+                            </td>
+                          </tr>
+                        ) : users.map((user) => (
                           <tr
                             key={user.id}
                             className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
@@ -668,7 +639,7 @@ export function AdminDashboardPage() {
                                   size="sm"
                                   variant="outline"
                                   className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                                  onClick={() => handleDowngradeAdmin(admin.id)}
+                                  onClick={() => handleDowngradeAdmin()}
                                 >
                                   <Ban className="w-4 h-4" />
                                 </Button>
@@ -852,12 +823,10 @@ export function AdminDashboardPage() {
               </Button>
               <Button
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl"
-                onClick={() => {
-                  setShowConfirmModal(false)
-                  // Handle action
-                }}
+                disabled={userAction.isPending}
+                onClick={confirmUserAction}
               >
-                Confirm
+                {userAction.isPending ? 'Processing…' : 'Confirm'}
               </Button>
             </div>
           </motion.div>

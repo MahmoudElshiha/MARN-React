@@ -9,40 +9,29 @@ import {
   Home,
   User,
 } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Label } from '../components/ui/label'
-
-const CONTRACT_INFO = {
-  contractId: 'MARN-2026-001234',
-  property: {
-    name: 'Modern Downtown Apartment',
-    address: '123 Market Street, Cairo, Egypt',
-    price: 28000,
-  },
-  tenant: {
-    name: 'Fatima Al-Masri',
-    email: 'fatima.almasri@example.com',
-  },
-  owner: {
-    name: 'Ahmed El-Sayed',
-    email: 'ahmed.elsayed@example.com',
-  },
-  startDate: '2026-04-01',
-  endDate: '2026-10-01',
-  duration: '6 months',
-  totalAmount: 168000,
-  status: 'pending', // pending, owner-signed, completed
-}
+import { Skeleton } from '../components/ui/skeleton'
+import { useContract } from '@/hooks/useBookingRequests'
 
 export function ContractPage() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
   const [uploadedContract, setUploadedContract] = useState<File | null>(null)
 
+  const { data: contractData, isLoading } = useContract(id)
+  const contract = contractData?.data ?? null
+
+  const isCompleted = contract?.status === 'Active'
+
   const handleDownload = () => {
-    // In a real app, this would generate and download the PDF
-    toast.success('Contract downloaded successfully')
+    if (contract?.documentUrl) {
+      window.open(contract.documentUrl, '_blank')
+    } else {
+      toast.success('Contract downloaded successfully')
+    }
   }
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +55,27 @@ export function ContractPage() {
     } else {
       toast.error('Please upload the signed contract first')
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-20">
+        <div className="max-w-[900px] mx-auto px-8 space-y-6">
+          <Skeleton className="h-10 w-32 rounded" />
+          <Skeleton className="h-24 w-full rounded-3xl" />
+          <Skeleton className="h-64 w-full rounded-3xl" />
+          <Skeleton className="h-48 w-full rounded-3xl" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!contract) {
+    return (
+      <div className="min-h-screen py-20 flex items-center justify-center text-[#4a5565]">
+        Contract not found.
+      </div>
+    )
   }
 
   return (
@@ -95,12 +105,10 @@ export function ContractPage() {
               <div className="flex items-center gap-3">
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    CONTRACT_INFO.status === 'completed'
-                      ? 'bg-green-100'
-                      : 'bg-yellow-100'
+                    isCompleted ? 'bg-green-100' : 'bg-yellow-100'
                   }`}
                 >
-                  {CONTRACT_INFO.status === 'completed' ? (
+                  {isCompleted ? (
                     <CheckCircle className="w-6 h-6 text-green-600" />
                   ) : (
                     <FileText className="w-6 h-6 text-yellow-600" />
@@ -111,22 +119,21 @@ export function ContractPage() {
                     Contract Status
                   </h3>
                   <p className="text-sm text-[#6B7280]">
-                    {CONTRACT_INFO.status === 'pending' &&
-                      'Awaiting signatures'}
-                    {CONTRACT_INFO.status === 'owner-signed' &&
-                      'Awaiting tenant signature'}
-                    {CONTRACT_INFO.status === 'completed' && 'Fully executed'}
+                    {contract.status === 'Pending' && 'Awaiting signatures'}
+                    {contract.status === 'Active' && 'Fully executed'}
+                    {contract.status === 'Expired' && 'Contract expired'}
+                    {contract.status === 'Terminated' && 'Contract terminated'}
                   </p>
                 </div>
               </div>
               <div
                 className={`px-4 py-2 rounded-full text-sm font-medium ${
-                  CONTRACT_INFO.status === 'completed'
+                  isCompleted
                     ? 'bg-green-100 text-green-700'
                     : 'bg-yellow-100 text-yellow-700'
                 }`}
               >
-                {CONTRACT_INFO.status === 'completed' ? 'Completed' : 'Pending'}
+                {contract.status}
               </div>
             </div>
           </CardContent>
@@ -143,14 +150,12 @@ export function ContractPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <p className="text-sm text-[#6B7280] mb-1">Contract ID</p>
-                <p className="font-semibold text-[#1a1a1a]">
-                  {CONTRACT_INFO.contractId}
-                </p>
+                <p className="font-semibold text-[#1a1a1a]">{contract.id}</p>
               </div>
               <div>
-                <p className="text-sm text-[#6B7280] mb-1">Duration</p>
+                <p className="text-sm text-[#6B7280] mb-1">Monthly Rent</p>
                 <p className="font-semibold text-[#1a1a1a]">
-                  {CONTRACT_INFO.duration}
+                  EGP {contract.monthlyRent.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -161,14 +166,11 @@ export function ContractPage() {
                 <Home className="w-5 h-5 text-[#3A6EA5]" />
                 <h4 className="font-semibold text-[#1a1a1a]">Property</h4>
               </div>
-              <p className="font-medium text-[#1a1a1a] mb-1">
-                {CONTRACT_INFO.property.name}
-              </p>
-              <p className="text-sm text-[#6B7280] mb-2">
-                {CONTRACT_INFO.property.address}
+              <p className="font-medium text-[#1a1a1a] mb-2">
+                {contract.propertyName}
               </p>
               <p className="text-lg font-bold text-[#3A6EA5]">
-                EGP {CONTRACT_INFO.property.price.toLocaleString()}/month
+                EGP {contract.monthlyRent.toLocaleString()}/month
               </p>
             </div>
 
@@ -179,25 +181,21 @@ export function ContractPage() {
                   <User className="w-5 h-5 text-[#3A6EA5]" />
                   <h4 className="font-semibold text-[#1a1a1a]">Tenant</h4>
                 </div>
-                <p className="font-medium text-[#1a1a1a] mb-1">
-                  {CONTRACT_INFO.tenant.name}
-                </p>
-                <p className="text-sm text-[#6B7280]">
-                  {CONTRACT_INFO.tenant.email}
+                <p className="font-medium text-[#1a1a1a]">
+                  {contract.tenantName}
                 </p>
               </div>
-              <div className="p-4 bg-white rounded-2xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <User className="w-5 h-5 text-[#3A6EA5]" />
-                  <h4 className="font-semibold text-[#1a1a1a]">Owner</h4>
+              {contract.ownerName && (
+                <div className="p-4 bg-white rounded-2xl">
+                  <div className="flex items-center gap-2 mb-3">
+                    <User className="w-5 h-5 text-[#3A6EA5]" />
+                    <h4 className="font-semibold text-[#1a1a1a]">Owner</h4>
+                  </div>
+                  <p className="font-medium text-[#1a1a1a]">
+                    {contract.ownerName}
+                  </p>
                 </div>
-                <p className="font-medium text-[#1a1a1a] mb-1">
-                  {CONTRACT_INFO.owner.name}
-                </p>
-                <p className="text-sm text-[#6B7280]">
-                  {CONTRACT_INFO.owner.email}
-                </p>
-              </div>
+              )}
             </div>
 
             {/* Rental Period */}
@@ -210,37 +208,31 @@ export function ContractPage() {
                 <div>
                   <p className="text-sm text-[#6B7280] mb-1">Start Date</p>
                   <p className="font-medium text-[#1a1a1a]">
-                    {new Date(CONTRACT_INFO.startDate).toLocaleDateString(
-                      'en-US',
-                      {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      },
-                    )}
+                    {new Date(contract.startDate).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-[#6B7280] mb-1">End Date</p>
                   <p className="font-medium text-[#1a1a1a]">
-                    {new Date(CONTRACT_INFO.endDate).toLocaleDateString(
-                      'en-US',
-                      {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      },
-                    )}
+                    {new Date(contract.expiryDate).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Total Amount */}
+            {/* Monthly Rent highlight */}
             <div className="p-4 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] rounded-2xl text-white">
-              <p className="text-sm mb-1 opacity-90">Total Contract Value</p>
+              <p className="text-sm mb-1 opacity-90">Monthly Rent</p>
               <p className="text-3xl font-bold">
-                EGP {CONTRACT_INFO.totalAmount.toLocaleString()}
+                EGP {contract.monthlyRent.toLocaleString()}
               </p>
             </div>
           </CardContent>

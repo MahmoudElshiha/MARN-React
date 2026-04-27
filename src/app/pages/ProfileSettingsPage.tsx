@@ -40,20 +40,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { COUNTRIES, FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
+import { useProfile } from '@/hooks/useProfile'
 
 export function ProfileSettingsPage() {
+  const { data: profileResponse, update, uploadAvatar } = useProfile()
+  const apiProfile = profileResponse?.data
+
   const [profileData, setProfileData] = useState({
-    firstName: 'Ahmed',
-    lastName: 'Hassan',
-    email: 'ahmed@example.com',
-    phone: '+20 10 1234 5678',
-    country: 'Egypt',
-    dateOfBirth: '1995-05-15',
-    bio: 'Looking for a quiet, clean roommate who respects personal space.',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    country: '',
+    dateOfBirth: '',
+    bio: '',
   })
+
+  // Prefill once the API response arrives
+  useEffect(() => {
+    if (apiProfile) {
+      setProfileData({
+        firstName: apiProfile.firstName ?? '',
+        lastName: apiProfile.lastName ?? '',
+        email: apiProfile.email ?? '',
+        phone: '',
+        country: '',
+        dateOfBirth: '',
+        bio: '',
+      })
+    }
+  }, [apiProfile])
 
   const [identityVerification, setIdentityVerification] = useState({
     frontIdCard: null as File | null,
@@ -184,12 +203,34 @@ export function ProfileSettingsPage() {
                       {profileData.firstName} {profileData.lastName}
                     </h3>
                     <p className="text-[#4a5565] mb-6">{profileData.email}</p>
-                    <Button
-                      variant="outline"
-                      className="w-full rounded-xl border-[#3A6EA5]/20 hover:bg-white"
-                    >
-                      Upload New Photo
-                    </Button>
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            uploadAvatar.mutate(file, {
+                              onSuccess: () =>
+                                toast.success('Avatar updated!'),
+                              onError: () =>
+                                toast.error('Failed to upload avatar.'),
+                            })
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="outline"
+                        className="w-full rounded-xl border-[#3A6EA5]/20 hover:bg-white"
+                        disabled={uploadAvatar.isPending}
+                        asChild
+                      >
+                        <span>
+                          {uploadAvatar.isPending ? 'Uploading…' : 'Upload New Photo'}
+                        </span>
+                      </Button>
+                    </label>
                   </CardContent>
                 </Card>
 
@@ -379,12 +420,28 @@ export function ProfileSettingsPage() {
                         Cancel
                       </Button>
                       <Button
-                        onClick={() =>
-                          toast.success('Profile updated successfully!')
-                        }
+                        disabled={update.isPending}
+                        onClick={() => {
+                          update.mutate(
+                            {
+                              firstName: profileData.firstName,
+                              lastName: profileData.lastName,
+                              phone: profileData.phone,
+                              country: profileData.country,
+                              dateOfBirth: profileData.dateOfBirth,
+                              bio: profileData.bio,
+                            },
+                            {
+                              onSuccess: () =>
+                                toast.success('Profile updated successfully!'),
+                              onError: () =>
+                                toast.error('Failed to update profile.'),
+                            },
+                          )
+                        }}
                         className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
                       >
-                        Save Changes
+                        {update.isPending ? 'Saving…' : 'Save Changes'}
                       </Button>
                     </div>
                   </CardContent>

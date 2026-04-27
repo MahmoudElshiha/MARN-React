@@ -8,6 +8,15 @@ export function useContracts() {
   })
 }
 
+export function useContract(id: string | undefined) {
+  return useQuery({
+    queryKey: ['contract', id],
+    queryFn: () => rentalService.getContractById(id!),
+    enabled: !!id,
+    staleTime: Infinity,
+  })
+}
+
 export function useBookingRequests() {
   const queryClient = useQueryClient()
 

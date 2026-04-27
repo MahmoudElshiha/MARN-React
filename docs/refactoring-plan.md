@@ -67,18 +67,18 @@ useAdminStats.ts      → useQuery → adminService.getStats()              ✅ 
 | `PropertyDetailsPage` | `PROPERTY_IMAGES`, all property fields | `useProperty(id)` | ✅ Done |
 | `LandingPage` | `FEATURED_PROPERTIES`, `TESTIMONIALS` | `useProperties({ featured: true })` | ⬜ |
 | `OwnerDashboard` | `BOOKING_REQUESTS`, `MY_PROPERTIES`, `CONTRACTS_HISTORY` | `useBookingRequests()`, `useContracts()`, `useProperties()` | ✅ Done (earnings chart still static) |
-| `TenantDashboard` | Current rental, saved properties, notifications | `useProfile()`, `useProperties()` | ⬜ |
-| `ProfileSettingsPage` | Initial form values | `useProfile()` | ⬜ |
-| `AdminDashboardPage` | `stats`, `revenueData`, `pendingVerifications`, `users` | `useAdminStats()` | ⬜ |
+| `TenantDashboard` | Current rental, saved properties, notifications | `useContracts()`, `useProperties()` | ✅ Done |
+| `ProfileSettingsPage` | Initial form values | `useProfile()` | ✅ Done |
+| `AdminDashboardPage` | `stats`, `revenueData`, `pendingVerifications`, `users` | `useAdminStats()` | ✅ Done |
 
 ### Medium priority
 
-| Page | Static data to replace | Hook to use |
-|------|------------------------|-------------|
-| `PropertyByOwnerPage` | `RENTAL_REQUESTS` | `useBookingRequests()` |
-| `MessagesPage` | `CONVERSATIONS`, `MESSAGES` | `useConversations()` |
-| `ChatWithRentalRequestPage` | `MESSAGES` | `useMessages(conversationId)` |
-| `ContractPage` | All contract fields | `useContract(id)` |
+| Page | Static data to replace | Hook to use | Status |
+|------|------------------------|-------------|--------|
+| `PropertyByOwnerPage` | `RENTAL_REQUESTS` | `useBookingRequests()`, `useProperty(id)` | ✅ Done |
+| `MessagesPage` | `CONVERSATIONS`, `MESSAGES` | `useConversations()`, `useMessages(id)` | ✅ Done |
+| `ChatWithRentalRequestPage` | `MESSAGES` | `useMessages(id)`, `useSendMessage()` | ✅ Done |
+| `ContractPage` | All contract fields | `useContract(id)` | ✅ Done |
 
 ### Low priority (mostly UI/content — may stay static)
 
@@ -93,10 +93,9 @@ useAdminStats.ts      → useQuery → adminService.getStats()              ✅ 
 
 ## Things to Keep in Mind
 
-### Route params are not wired up
-No page currently uses `useParams()`. Routes like `/property/:id` exist in `App.tsx` but
-`PropertyDetailsPage` ignores the `:id`. When replacing static data, every detail page
-needs `const { id } = useParams()` to know what to fetch.
+### Route params are not wired up ✅ Done
+All detail pages now use `useParams()`: `PropertyDetailsPage`, `PropertyByOwnerPage`,
+`ChatWithRentalRequestPage`, `ContractPage`, `EditPropertyPage`.
 
 ### Login always navigates to `/tenant-dashboard` ✅ Done
 `LoginPage` now uses `useLogin` and navigates based on `user.role`. OTPVerificationPage
@@ -112,7 +111,7 @@ Supports both unauthenticated blocking and role-based blocking via `roles` prop:
 // blocks wrong roles
 <ProtectedRoute roles={['admin']}><AdminDashboardPage /></ProtectedRoute>
 ```
-Still needs to be wired into `App.tsx` routes.
+Wired into `App.tsx` — all dashboard, owner, admin, and shared authenticated routes are protected. ✅
 
 ### STEPS and AMENITIES are duplicated ✅ Done
 Extracted to `src/constants/property.ts` as `PROPERTY_STEPS` and `PROPERTY_AMENITIES`.
