@@ -33,22 +33,39 @@ export interface Profile {
 }
 
 export interface UpdateProfilePayload {
-  firstName?: string
-  lastName?: string
-  phone?: string
-  country?: string
-  gender?: string
-  language?: string
-  dateOfBirth?: string
+  id: string
+  firstName: string
+  lastName: string
+  phoneNumber: string
+  country: string
+  gender: string
+  language: string
+  dateOfBirth: string
   bio?: string
+  profileImage?: File
 }
 
 export const userService = {
   getProfile: () =>
     apiClient.get<ApiResponse<Profile>>('/api/Profile/edit-profile'),
 
-  updateProfile: (payload: UpdateProfilePayload) =>
-    apiClient.put<ApiResponse<Profile>>('/Users/profile', payload),
+  updateProfile: (payload: UpdateProfilePayload) => {
+    const form = new FormData()
+    form.append('Id', payload.id)
+    form.append('FirstName', payload.firstName)
+    form.append('LastName', payload.lastName)
+    form.append('PhoneNumber', payload.phoneNumber)
+    form.append('Country', payload.country)
+    form.append('Gender', payload.gender)
+    form.append('Language', payload.language)
+    form.append('DateOfBirth', payload.dateOfBirth)
+    if (payload.bio !== undefined) form.append('Bio', payload.bio)
+    if (payload.profileImage) form.append('ProfileImage', payload.profileImage)
+    return apiClient.put<ApiResponse<Profile>>(
+      '/api/Profile/edit-profile-basic',
+      form,
+    )
+  },
 
   uploadAvatar: (file: File) => {
     const form = new FormData()

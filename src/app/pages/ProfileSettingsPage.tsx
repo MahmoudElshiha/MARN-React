@@ -47,8 +47,11 @@ import { useProfile } from '@/hooks/useProfile'
 import { EnumSelect } from '../components/EnumSelect'
 
 export function ProfileSettingsPage() {
-  const { data: profileResponse, update, uploadAvatar } = useProfile()
+  const { data: profileResponse, update } = useProfile()
   const apiProfile = profileResponse?.data
+
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
 
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -199,7 +202,7 @@ export function ProfileSettingsPage() {
                   <CardContent className="pt-6 text-center">
                     <div className="relative w-40 h-40 mx-auto mb-6">
                       <img
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop"
+                        src={avatarPreview ?? apiProfile?.profileImage ?? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop'}
                         alt="Profile"
                         className="w-full h-full rounded-full object-cover shadow-lg"
                       />
@@ -219,25 +222,17 @@ export function ProfileSettingsPage() {
                         onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (file) {
-                            uploadAvatar.mutate(file, {
-                              onSuccess: () => toast.success('Avatar updated!'),
-                              onError: () =>
-                                toast.error('Failed to upload avatar.'),
-                            })
+                            setAvatarFile(file)
+                            setAvatarPreview(URL.createObjectURL(file))
                           }
                         }}
                       />
                       <Button
                         variant="outline"
                         className="w-full rounded-xl border-[#3A6EA5]/20 hover:bg-white"
-                        disabled={uploadAvatar.isPending}
                         asChild
                       >
-                        <span>
-                          {uploadAvatar.isPending
-                            ? 'Uploading…'
-                            : 'Upload New Photo'}
-                        </span>
+                        <span>{avatarFile ? avatarFile.name : 'Upload New Photo'}</span>
                       </Button>
                     </label>
                   </CardContent>
@@ -433,12 +428,16 @@ export function ProfileSettingsPage() {
                         onClick={() => {
                           update.mutate(
                             {
+                              id: apiProfile!.id,
                               firstName: profileData.firstName,
                               lastName: profileData.lastName,
-                              phone: profileData.phone,
+                              phoneNumber: profileData.phone,
                               country: profileData.country,
+                              gender: profileData.gender,
+                              language: profileData.language,
                               dateOfBirth: profileData.dateOfBirth,
                               bio: profileData.bio,
+                              profileImage: avatarFile ?? undefined,
                             },
                             {
                               onSuccess: () =>
