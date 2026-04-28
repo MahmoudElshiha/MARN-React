@@ -52,12 +52,54 @@ export default function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
 
           {/* Auth pages — redirect to dashboard if already signed in */}
-          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
-          <Route path="/signup" element={<GuestRoute><SignUpPage /></GuestRoute>} />
-          <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
-          <Route path="/otp-verification" element={<GuestRoute><OTPVerificationPage /></GuestRoute>} />
-          <Route path="/confirm-email" element={<GuestRoute><ConfirmEmailPage /></GuestRoute>} />
-          <Route path="/reset-password" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
+          <Route
+            path="/login"
+            element={
+              <GuestRoute>
+                <LoginPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <GuestRoute>
+                <SignUpPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <GuestRoute>
+                <ForgotPasswordPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/otp-verification"
+            element={
+              <GuestRoute>
+                <OTPVerificationPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/confirm-email"
+            element={
+              <GuestRoute>
+                <ConfirmEmailPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <GuestRoute>
+                <ResetPasswordPage />
+              </GuestRoute>
+            }
+          />
 
           {/* Tenant routes */}
           <Route

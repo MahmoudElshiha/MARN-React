@@ -37,7 +37,11 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { toast } from 'sonner'
-import { useAdminStats, useAdminUsers, useAdminVerifications } from '@/hooks/useAdminStats'
+import {
+  useAdminStats,
+  useAdminUsers,
+  useAdminVerifications,
+} from '@/hooks/useAdminStats'
 import { adminService } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -49,7 +53,8 @@ export function AdminDashboardPage() {
   const [pendingUserId, setPendingUserId] = useState<string | null>(null)
 
   const { data: statsData, isLoading: statsLoading } = useAdminStats()
-  const { data: verificationsData, isLoading: verificationsLoading } = useAdminVerifications()
+  const { data: verificationsData, isLoading: verificationsLoading } =
+    useAdminVerifications()
   const { data: usersData, isLoading: usersLoading } = useAdminUsers()
   const queryClient = useQueryClient()
 
@@ -69,21 +74,27 @@ export function AdminDashboardPage() {
     {
       icon: Building,
       label: 'Total Listings',
-      value: statsLoading ? '…' : (apiStats?.totalListings ?? 0).toLocaleString(),
+      value: statsLoading
+        ? '…'
+        : (apiStats?.totalListings ?? 0).toLocaleString(),
       change: '',
       color: 'from-green-500 to-green-600',
     },
     {
       icon: Clock,
       label: 'Pending Verifications',
-      value: statsLoading ? '…' : (apiStats?.pendingVerifications ?? 0).toLocaleString(),
+      value: statsLoading
+        ? '…'
+        : (apiStats?.pendingVerifications ?? 0).toLocaleString(),
       change: '',
       color: 'from-yellow-500 to-yellow-600',
     },
     {
       icon: FileText,
       label: 'Active Contracts',
-      value: statsLoading ? '…' : (apiStats?.activeContracts ?? 0).toLocaleString(),
+      value: statsLoading
+        ? '…'
+        : (apiStats?.activeContracts ?? 0).toLocaleString(),
       change: '',
       color: 'from-purple-500 to-purple-600',
     },
@@ -109,7 +120,13 @@ export function AdminDashboardPage() {
   })
 
   const userAction = useMutation({
-    mutationFn: ({ userId, action }: { userId: string; action: 'ban' | 'suspend' | 'restore' }) => {
+    mutationFn: ({
+      userId,
+      action,
+    }: {
+      userId: string
+      action: 'ban' | 'suspend' | 'restore'
+    }) => {
       if (action === 'ban') return adminService.banUser(userId)
       if (action === 'suspend') return adminService.suspendUser(userId)
       return adminService.restoreUser(userId)
@@ -124,10 +141,30 @@ export function AdminDashboardPage() {
   })
 
   const adminUsers = [
-    { id: 1, username: 'admin_john', email: 'john.admin@marn.com', joinDate: '2024-05-12' },
-    { id: 2, username: 'admin_sarah', email: 'sarah.admin@marn.com', joinDate: '2024-08-20' },
-    { id: 3, username: 'admin_mike', email: 'mike.admin@marn.com', joinDate: '2025-02-14' },
-    { id: 4, username: 'admin_emma', email: 'emma.admin@marn.com', joinDate: '2025-06-08' },
+    {
+      id: 1,
+      username: 'admin_john',
+      email: 'john.admin@marn.com',
+      joinDate: '2024-05-12',
+    },
+    {
+      id: 2,
+      username: 'admin_sarah',
+      email: 'sarah.admin@marn.com',
+      joinDate: '2024-08-20',
+    },
+    {
+      id: 3,
+      username: 'admin_mike',
+      email: 'mike.admin@marn.com',
+      joinDate: '2025-02-14',
+    },
+    {
+      id: 4,
+      username: 'admin_emma',
+      email: 'emma.admin@marn.com',
+      joinDate: '2025-06-08',
+    },
   ]
 
   const handleDowngradeAdmin = () => {
@@ -137,7 +174,10 @@ export function AdminDashboardPage() {
   const handleApprove = (id: number) => approveVerification.mutate(id)
   const handleReject = (id: number) => rejectVerification.mutate(id)
 
-  const handleUserAction = (userId: string, action: 'ban' | 'suspend' | 'restore') => {
+  const handleUserAction = (
+    userId: string,
+    action: 'ban' | 'suspend' | 'restore',
+  ) => {
     setActionType(action)
     setPendingUserId(userId)
     setShowConfirmModal(true)
@@ -376,7 +416,10 @@ export function AdminDashboardPage() {
                       <tbody>
                         {verificationsLoading ? (
                           Array.from({ length: 4 }).map((_, i) => (
-                            <tr key={i} className="border-b border-[#3A6EA5]/10">
+                            <tr
+                              key={i}
+                              className="border-b border-[#3A6EA5]/10"
+                            >
                               {Array.from({ length: 5 }).map((_, j) => (
                                 <td key={j} className="py-4 px-4">
                                   <Skeleton className="h-5 w-full rounded" />
@@ -386,60 +429,65 @@ export function AdminDashboardPage() {
                           ))
                         ) : pendingVerifications.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="py-10 text-center text-[#4a5565]">
+                            <td
+                              colSpan={5}
+                              className="py-10 text-center text-[#4a5565]"
+                            >
                               No pending verifications.
                             </td>
                           </tr>
-                        ) : pendingVerifications.map((item) => (
-                          <tr
-                            key={item.id}
-                            className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
-                          >
-                            <td className="py-4 px-4 text-[#1a1a1a]">
-                              {item.userName}
-                            </td>
-                            <td className="py-4 px-4 text-[#4a5565]">
-                              {item.propertyName}
-                            </td>
-                            <td className="py-4 px-4 text-[#4a5565]">
-                              {item.date}
-                            </td>
-                            <td className="py-4 px-4">
-                              {getStatusBadge(item.status)}
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="flex gap-2 justify-end">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="rounded-xl border-[#3A6EA5]/20"
-                                >
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  View
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                                  disabled={approveVerification.isPending}
-                                  onClick={() => handleApprove(item.id)}
-                                >
-                                  <CheckCircle className="w-4 h-4 mr-1" />
-                                  Approve
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                                  disabled={rejectVerification.isPending}
-                                  onClick={() => handleReject(item.id)}
-                                >
-                                  <XCircle className="w-4 h-4 mr-1" />
-                                  Reject
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                        ) : (
+                          pendingVerifications.map((item) => (
+                            <tr
+                              key={item.id}
+                              className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
+                            >
+                              <td className="py-4 px-4 text-[#1a1a1a]">
+                                {item.userName}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {item.propertyName}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {item.date}
+                              </td>
+                              <td className="py-4 px-4">
+                                {getStatusBadge(item.status)}
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className="flex gap-2 justify-end">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="rounded-xl border-[#3A6EA5]/20"
+                                  >
+                                    <Eye className="w-4 h-4 mr-1" />
+                                    View
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                                    disabled={approveVerification.isPending}
+                                    onClick={() => handleApprove(item.id)}
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                                    disabled={rejectVerification.isPending}
+                                    onClick={() => handleReject(item.id)}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -489,7 +537,10 @@ export function AdminDashboardPage() {
                       <tbody>
                         {usersLoading ? (
                           Array.from({ length: 5 }).map((_, i) => (
-                            <tr key={i} className="border-b border-[#3A6EA5]/10">
+                            <tr
+                              key={i}
+                              className="border-b border-[#3A6EA5]/10"
+                            >
                               {Array.from({ length: 6 }).map((_, j) => (
                                 <td key={j} className="py-4 px-4">
                                   <Skeleton className="h-5 w-full rounded" />
@@ -499,78 +550,83 @@ export function AdminDashboardPage() {
                           ))
                         ) : users.length === 0 ? (
                           <tr>
-                            <td colSpan={6} className="py-10 text-center text-[#4a5565]">
+                            <td
+                              colSpan={6}
+                              className="py-10 text-center text-[#4a5565]"
+                            >
                               No users found.
                             </td>
                           </tr>
-                        ) : users.map((user) => (
-                          <tr
-                            key={user.id}
-                            className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
-                          >
-                            <td className="py-4 px-4 text-[#1a1a1a] font-medium">
-                              {user.name}
-                            </td>
-                            <td className="py-4 px-4 text-[#4a5565]">
-                              {user.email}
-                            </td>
-                            <td className="py-4 px-4 text-[#4a5565]">
-                              {user.role}
-                            </td>
-                            <td className="py-4 px-4">
-                              {getStatusBadge(user.status)}
-                            </td>
-                            <td className="py-4 px-4 text-[#4a5565]">
-                              {user.joinDate}
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="flex gap-2 justify-end">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="rounded-xl border-[#3A6EA5]/20"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                                {user.status === 'Active' ? (
-                                  <>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white rounded-xl"
-                                      onClick={() =>
-                                        handleUserAction(user.id, 'suspend')
-                                      }
-                                    >
-                                      Suspend
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                                      onClick={() =>
-                                        handleUserAction(user.id, 'ban')
-                                      }
-                                    >
-                                      <Ban className="w-4 h-4" />
-                                    </Button>
-                                  </>
-                                ) : (
+                        ) : (
+                          users.map((user) => (
+                            <tr
+                              key={user.id}
+                              className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
+                            >
+                              <td className="py-4 px-4 text-[#1a1a1a] font-medium">
+                                {user.name}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {user.email}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {user.role}
+                              </td>
+                              <td className="py-4 px-4">
+                                {getStatusBadge(user.status)}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {user.joinDate}
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className="flex gap-2 justify-end">
                                   <Button
                                     size="sm"
-                                    className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                                    onClick={() =>
-                                      handleUserAction(user.id, 'restore')
-                                    }
+                                    variant="outline"
+                                    className="rounded-xl border-[#3A6EA5]/20"
                                   >
-                                    <UserCheck className="w-4 h-4 mr-1" />
-                                    Restore
+                                    <Eye className="w-4 h-4" />
                                   </Button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                                  {user.status === 'Active' ? (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white rounded-xl"
+                                        onClick={() =>
+                                          handleUserAction(user.id, 'suspend')
+                                        }
+                                      >
+                                        Suspend
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                                        onClick={() =>
+                                          handleUserAction(user.id, 'ban')
+                                        }
+                                      >
+                                        <Ban className="w-4 h-4" />
+                                      </Button>
+                                    </>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                                      onClick={() =>
+                                        handleUserAction(user.id, 'restore')
+                                      }
+                                    >
+                                      <UserCheck className="w-4 h-4 mr-1" />
+                                      Restore
+                                    </Button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>

@@ -9,7 +9,10 @@ interface UseLoginOptions {
   onSuccess?: () => void
 }
 
-export function useLogin({ remember = false, onSuccess }: UseLoginOptions = {}) {
+export function useLogin({
+  remember = false,
+  onSuccess,
+}: UseLoginOptions = {}) {
   const { login } = useAuth()
 
   return useMutation({

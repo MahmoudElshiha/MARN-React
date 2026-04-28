@@ -248,7 +248,9 @@ export function ChatWithRentalRequestPage() {
                     <div
                       key={message.id}
                       className={`flex ${
-                        message.sender === 'me' ? 'justify-end' : 'justify-start'
+                        message.sender === 'me'
+                          ? 'justify-end'
+                          : 'justify-start'
                       }`}
                     >
                       <div className="relative group">
@@ -283,7 +285,9 @@ export function ChatWithRentalRequestPage() {
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => handleDeleteMessage(message.id)}
+                                  onClick={() =>
+                                    handleDeleteMessage(message.id)
+                                  }
                                   className="text-red-600"
                                 >
                                   Delete
@@ -293,7 +297,9 @@ export function ChatWithRentalRequestPage() {
                           </div>
                           <p
                             className={`text-xs ${
-                              message.sender === 'me' ? 'text-white/70' : 'text-[#6B7280]'
+                              message.sender === 'me'
+                                ? 'text-white/70'
+                                : 'text-[#6B7280]'
                             }`}
                           >
                             {message.time}

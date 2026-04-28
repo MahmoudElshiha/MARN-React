@@ -68,7 +68,10 @@ export const authService = {
     apiClient.put<ResetPasswordResult>('/api/Account/reset-password', payload),
 
   verifyOtp: (payload: VerifyOtpPayload) =>
-    apiClient.post<ApiResponse<{ message: string }>>('/Auth/verify-otp', payload),
+    apiClient.post<ApiResponse<{ message: string }>>(
+      '/Auth/verify-otp',
+      payload,
+    ),
 
   confirmEmail: (userId: string, token: string) =>
     apiClient.get<{ message: string; data: boolean }>(

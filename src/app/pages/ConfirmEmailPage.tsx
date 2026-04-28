@@ -20,7 +20,9 @@ export function ConfirmEmailPage() {
 
     if (!userId || !token) {
       setStatus('error')
-      setMessage('Invalid confirmation link. Please check your email and try again.')
+      setMessage(
+        'Invalid confirmation link. Please check your email and try again.',
+      )
       return
     }
 

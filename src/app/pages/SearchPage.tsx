@@ -45,7 +45,9 @@ export function SearchPage() {
     maxPrice: priceRange[1],
     amenities: selectedAmenities.length ? selectedAmenities : undefined,
     beds:
-      selectedBeds !== 'Any' ? parseInt(selectedBeds.replace('+', '')) : undefined,
+      selectedBeds !== 'Any'
+        ? parseInt(selectedBeds.replace('+', ''))
+        : undefined,
     baths:
       selectedBaths !== 'Any'
         ? parseInt(selectedBaths.replace('+', ''))
@@ -137,7 +139,10 @@ export function SearchPage() {
                 <Label className="text-[#1a1a1a] mb-3 block">
                   Rental Duration
                 </Label>
-                <Select value={rentalDuration} onValueChange={setRentalDuration}>
+                <Select
+                  value={rentalDuration}
+                  onValueChange={setRentalDuration}
+                >
                   <SelectTrigger className="rounded-xl bg-[#f5f7fa] border-[#3A6EA5]/20">
                     <SelectValue placeholder="Select rental duration" />
                   </SelectTrigger>
@@ -169,7 +174,10 @@ export function SearchPage() {
                       max={10000}
                       step={100}
                       value={priceRange}
-                      onValueChange={(v) => { setPriceRange(v); setPage(1) }}
+                      onValueChange={(v) => {
+                        setPriceRange(v)
+                        setPage(1)
+                      }}
                       className="mb-2"
                     />
                     <div className="flex justify-between text-sm text-[#6a7282]">
@@ -210,7 +218,10 @@ export function SearchPage() {
                   {['Any', '1', '2', '3', '4+'].map((bed) => (
                     <button
                       key={bed}
-                      onClick={() => { setSelectedBeds(bed); setPage(1) }}
+                      onClick={() => {
+                        setSelectedBeds(bed)
+                        setPage(1)
+                      }}
                       className={`flex-1 py-2 rounded-xl transition-colors text-sm ${
                         selectedBeds === bed
                           ? 'bg-[#3A6EA5] text-white'
@@ -230,7 +241,10 @@ export function SearchPage() {
                   {['Any', '1', '2', '3+'].map((bath) => (
                     <button
                       key={bath}
-                      onClick={() => { setSelectedBaths(bath); setPage(1) }}
+                      onClick={() => {
+                        setSelectedBaths(bath)
+                        setPage(1)
+                      }}
                       className={`flex-1 py-2 rounded-xl transition-colors text-sm ${
                         selectedBaths === bath
                           ? 'bg-[#3A6EA5] text-white'
@@ -331,19 +345,21 @@ export function SearchPage() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-center gap-2 mt-12">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`w-12 h-12 rounded-xl transition-all ${
-                      p === page
-                        ? 'bg-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
-                        : 'bg-[#f5f7fa] text-[#1a1a1a] hover:bg-[#9CBBDC] hover:text-white'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`w-12 h-12 rounded-xl transition-all ${
+                        p === page
+                          ? 'bg-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
+                          : 'bg-[#f5f7fa] text-[#1a1a1a] hover:bg-[#9CBBDC] hover:text-white'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ),
+                )}
               </div>
             )}
           </main>

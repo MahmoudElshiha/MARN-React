@@ -53,18 +53,18 @@ export function PropertyDetailsPage() {
   const [checkOut, setCheckOut] = useState<Date>()
 
   const property = data?.data
-  const images =
-    property?.images?.length
-      ? property.images
-      : property?.image
-        ? [property.image]
-        : []
+  const images = property?.images?.length
+    ? property.images
+    : property?.image
+      ? [property.image]
+      : []
 
   const nextImage = () =>
     setCurrentImageIndex((prev) => (prev + 1) % Math.max(images.length, 1))
   const prevImage = () =>
     setCurrentImageIndex(
-      (prev) => (prev - 1 + Math.max(images.length, 1)) % Math.max(images.length, 1),
+      (prev) =>
+        (prev - 1 + Math.max(images.length, 1)) % Math.max(images.length, 1),
     )
 
   if (isError) {
@@ -405,7 +405,10 @@ export function PropertyDetailsPage() {
                       <div className="flex justify-between text-[#1a1a1a]">
                         <span>Service fee</span>
                         <span>
-                          {Math.round((property?.price ?? 0) * 0.05).toLocaleString()} EGP
+                          {Math.round(
+                            (property?.price ?? 0) * 0.05,
+                          ).toLocaleString()}{' '}
+                          EGP
                         </span>
                       </div>
                       <div className="border-t border-[#3A6EA5]/20 pt-3 flex justify-between font-semibold text-[#1a1a1a]">

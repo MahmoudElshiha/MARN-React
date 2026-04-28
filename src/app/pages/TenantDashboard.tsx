@@ -11,17 +11,33 @@ import { useContracts } from '@/hooks/useBookingRequests'
 import { useProperties } from '@/hooks/useProperties'
 
 const NOTIFICATIONS = [
-  { id: '1', message: 'Rent payment due in 5 days', time: '2 hours ago', unread: true },
-  { id: '2', message: 'New message from your landlord', time: '5 hours ago', unread: true },
-  { id: '3', message: 'Maintenance scheduled for next week', time: '1 day ago', unread: false },
+  {
+    id: '1',
+    message: 'Rent payment due in 5 days',
+    time: '2 hours ago',
+    unread: true,
+  },
+  {
+    id: '2',
+    message: 'New message from your landlord',
+    time: '5 hours ago',
+    unread: true,
+  },
+  {
+    id: '3',
+    message: 'Maintenance scheduled for next week',
+    time: '1 day ago',
+    unread: false,
+  },
 ]
 
 export function TenantDashboard() {
   const { user } = useAuth()
   const { data: contractsData, isLoading: contractsLoading } = useContracts()
-  const { data: recommendedData, isLoading: recommendedLoading } = useProperties({
-    pageSize: 2,
-  })
+  const { data: recommendedData, isLoading: recommendedLoading } =
+    useProperties({
+      pageSize: 2,
+    })
 
   const contracts = contractsData?.data ?? []
   const activeContracts = contracts.filter((c) => c.status === 'Active')
@@ -120,7 +136,10 @@ export function TenantDashboard() {
                 ) : !currentRental ? (
                   <div className="text-center py-8 text-[#4a5565]">
                     No active rentals.{' '}
-                    <Link to="/search" className="text-[#3A6EA5] hover:underline">
+                    <Link
+                      to="/search"
+                      className="text-[#3A6EA5] hover:underline"
+                    >
                       Find a property.
                     </Link>
                   </div>
@@ -258,7 +277,9 @@ export function TenantDashboard() {
                       <div className="flex items-start gap-3">
                         <div
                           className={`w-2 h-2 rounded-full mt-2 ${
-                            notification.unread ? 'bg-[#3A6EA5]' : 'bg-[#6a7282]'
+                            notification.unread
+                              ? 'bg-[#3A6EA5]'
+                              : 'bg-[#6a7282]'
                           }`}
                         />
                         <div className="flex-1">
@@ -308,7 +329,9 @@ export function TenantDashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <Avatar className="w-12 h-12 border-2 border-[#3A6EA5]">
-                    {user?.avatarUrl && <AvatarFallback>{user.firstName[0]}</AvatarFallback>}
+                    {user?.avatarUrl && (
+                      <AvatarFallback>{user.firstName[0]}</AvatarFallback>
+                    )}
                     <AvatarFallback>
                       {user?.firstName?.[0] ?? '?'}
                     </AvatarFallback>

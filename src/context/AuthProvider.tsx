@@ -11,7 +11,8 @@ function readToken(): string | null {
 
 function readUser(): User | null {
   try {
-    const raw = localStorage.getItem(USER_KEY) ?? sessionStorage.getItem(USER_KEY) ?? null
+    const raw =
+      localStorage.getItem(USER_KEY) ?? sessionStorage.getItem(USER_KEY) ?? null
     return raw ? (JSON.parse(raw) as User) : null
   } catch {
     return null

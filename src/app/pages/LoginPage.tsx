@@ -39,7 +39,9 @@ export function LoginPage() {
         },
         onError: (err) => {
           const msg =
-            err instanceof Error ? err.message : 'Login failed. Please try again.'
+            err instanceof Error
+              ? err.message
+              : 'Login failed. Please try again.'
           toast.error(msg)
         },
       },

@@ -41,7 +41,10 @@ export function SignUpPage() {
         setFieldErrors(error.validationErrors ?? {})
         const flat = error.errors?.join(' ')
         setErrorMessage(
-          flat ?? (Object.keys(error.validationErrors ?? {}).length ? '' : error.message),
+          flat ??
+            (Object.keys(error.validationErrors ?? {}).length
+              ? ''
+              : error.message),
         )
       } else {
         setErrorMessage('Something went wrong. Please try again.')
@@ -155,7 +158,9 @@ export function SignUpPage() {
                   />
                 </div>
                 {fe('FirstName').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                  <p key={msg} className="text-xs text-red-500 mt-1">
+                    {msg}
+                  </p>
                 ))}
               </div>
 
@@ -179,7 +184,9 @@ export function SignUpPage() {
                   />
                 </div>
                 {fe('LastName').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                  <p key={msg} className="text-xs text-red-500 mt-1">
+                    {msg}
+                  </p>
                 ))}
               </div>
 
@@ -203,7 +210,9 @@ export function SignUpPage() {
                   />
                 </div>
                 {fe('Email').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                  <p key={msg} className="text-xs text-red-500 mt-1">
+                    {msg}
+                  </p>
                 ))}
               </div>
 
@@ -239,11 +248,14 @@ export function SignUpPage() {
                 </div>
                 {fe('Password').length ? (
                   fe('Password').map((msg) => (
-                    <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                    <p key={msg} className="text-xs text-red-500 mt-1">
+                      {msg}
+                    </p>
                   ))
                 ) : (
                   <p className="text-xs text-[#6a7282] mt-2">
-                    Must be at least 8 characters with a mix of letters and numbers
+                    Must be at least 8 characters with a mix of letters and
+                    numbers
                   </p>
                 )}
               </div>
@@ -286,10 +298,14 @@ export function SignUpPage() {
                 </div>
                 {fe('ConfirmPassword').length ? (
                   fe('ConfirmPassword').map((msg) => (
-                    <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                    <p key={msg} className="text-xs text-red-500 mt-1">
+                      {msg}
+                    </p>
                   ))
                 ) : (
-                  <p className="text-xs text-[#6a7282] mt-2">Must match the password</p>
+                  <p className="text-xs text-[#6a7282] mt-2">
+                    Must match the password
+                  </p>
                 )}
               </div>
 
@@ -333,7 +349,9 @@ export function SignUpPage() {
                   </button>
                 </div>
                 {fe('Gender').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-2">{msg}</p>
+                  <p key={msg} className="text-xs text-red-500 mt-2">
+                    {msg}
+                  </p>
                 ))}
               </div>
 
@@ -359,7 +377,9 @@ export function SignUpPage() {
                   />
                 </div>
                 {fe('DateOfBirth').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                  <p key={msg} className="text-xs text-red-500 mt-1">
+                    {msg}
+                  </p>
                 ))}
               </div>
 

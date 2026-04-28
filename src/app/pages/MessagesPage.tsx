@@ -6,17 +6,23 @@ import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
 import { Card } from '../components/ui/card'
 import { Skeleton } from '../components/ui/skeleton'
 import { useNavigate } from 'react-router'
-import { useConversations, useMessages, useSendMessage } from '@/hooks/useConversations'
+import {
+  useConversations,
+  useMessages,
+  useSendMessage,
+} from '@/hooks/useConversations'
 import type { Conversation } from '@/types/message'
 
 export function MessagesPage() {
   const navigate = useNavigate()
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null)
   const [newMessage, setNewMessage] = useState('')
   const [isMobileView, setIsMobileView] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const { data: conversationsData, isLoading: conversationsLoading } = useConversations()
+  const { data: conversationsData, isLoading: conversationsLoading } =
+    useConversations()
   const conversations = conversationsData?.data ?? []
 
   const { data: messagesData, isLoading: messagesLoading } = useMessages(
@@ -63,7 +69,10 @@ export function MessagesPage() {
               <div className="flex-1 overflow-y-auto">
                 {conversationsLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="p-4 flex gap-3 border-b border-[#3A6EA5]/10">
+                    <div
+                      key={i}
+                      className="p-4 flex gap-3 border-b border-[#3A6EA5]/10"
+                    >
                       <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-4 w-3/4 rounded" />
@@ -72,7 +81,9 @@ export function MessagesPage() {
                     </div>
                   ))
                 ) : conversations.length === 0 ? (
-                  <div className="p-8 text-center text-[#4a5565]">No conversations yet.</div>
+                  <div className="p-8 text-center text-[#4a5565]">
+                    No conversations yet.
+                  </div>
                 ) : (
                   conversations.map((conversation) => (
                     <button
@@ -141,7 +152,9 @@ export function MessagesPage() {
                           <ChevronLeft className="w-6 h-6 text-[#1a1a1a]" />
                         </button>
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={selectedConversation.participant.avatarUrl} />
+                          <AvatarImage
+                            src={selectedConversation.participant.avatarUrl}
+                          />
                           <AvatarFallback>
                             {selectedConversation.participant.name.charAt(0)}
                           </AvatarFallback>
@@ -184,7 +197,9 @@ export function MessagesPage() {
                               size="sm"
                               className="text-[#3A6EA5] p-0 h-auto"
                               onClick={() =>
-                                navigate(`/property/${selectedConversation.property!.id}`)
+                                navigate(
+                                  `/property/${selectedConversation.property!.id}`,
+                                )
                               }
                             >
                               View Property
@@ -215,7 +230,9 @@ export function MessagesPage() {
                         <div
                           key={message.id}
                           className={`flex ${
-                            message.sender === 'me' ? 'justify-end' : 'justify-start'
+                            message.sender === 'me'
+                              ? 'justify-end'
+                              : 'justify-start'
                           }`}
                         >
                           <div
@@ -228,7 +245,9 @@ export function MessagesPage() {
                             <p className="text-sm mb-1">{message.text}</p>
                             <p
                               className={`text-xs ${
-                                message.sender === 'me' ? 'text-white/70' : 'text-[#4a5565]'
+                                message.sender === 'me'
+                                  ? 'text-white/70'
+                                  : 'text-[#4a5565]'
                               }`}
                             >
                               {message.time}

@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { motion } from 'motion/react'
-import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
+import {
+  ArrowLeft,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
@@ -39,7 +46,11 @@ export function ResetPasswordPage() {
       if (error instanceof HttpError && error.errors?.length) {
         setServerErrors(error.errors)
       } else {
-        setServerErrors([error instanceof HttpError ? error.message : 'Something went wrong. Please try again.'])
+        setServerErrors([
+          error instanceof HttpError
+            ? error.message
+            : 'Something went wrong. Please try again.',
+        ])
       }
     },
   })
@@ -171,7 +182,10 @@ export function ResetPasswordPage() {
             )}
 
             <div>
-              <Label htmlFor="newPassword" className="text-[#1a1a1a] mb-2 block">
+              <Label
+                htmlFor="newPassword"
+                className="text-[#1a1a1a] mb-2 block"
+              >
                 New Password
               </Label>
               <div className="relative">
@@ -203,7 +217,10 @@ export function ResetPasswordPage() {
             </div>
 
             <div>
-              <Label htmlFor="confirmPassword" className="text-[#1a1a1a] mb-2 block">
+              <Label
+                htmlFor="confirmPassword"
+                className="text-[#1a1a1a] mb-2 block"
+              >
                 Confirm New Password
               </Label>
               <div className="relative">
@@ -213,7 +230,10 @@ export function ResetPasswordPage() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) =>
-                    setFormData({ ...formData, confirmPassword: e.target.value })
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
                   }
                   required
                   disabled={loading}

@@ -212,8 +212,7 @@ export function ProfileSettingsPage() {
                           const file = e.target.files?.[0]
                           if (file) {
                             uploadAvatar.mutate(file, {
-                              onSuccess: () =>
-                                toast.success('Avatar updated!'),
+                              onSuccess: () => toast.success('Avatar updated!'),
                               onError: () =>
                                 toast.error('Failed to upload avatar.'),
                             })
@@ -227,7 +226,9 @@ export function ProfileSettingsPage() {
                         asChild
                       >
                         <span>
-                          {uploadAvatar.isPending ? 'Uploading…' : 'Upload New Photo'}
+                          {uploadAvatar.isPending
+                            ? 'Uploading…'
+                            : 'Upload New Photo'}
                         </span>
                       </Button>
                     </label>

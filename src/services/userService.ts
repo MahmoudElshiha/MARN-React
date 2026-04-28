@@ -12,7 +12,8 @@ export interface UpdateProfilePayload {
 }
 
 export const userService = {
-  getProfile: () => apiClient.get<ApiResponse<User>>('/api/Profile/edit-profile'),
+  getProfile: () =>
+    apiClient.get<ApiResponse<User>>('/api/Profile/edit-profile'),
 
   updateProfile: (payload: UpdateProfilePayload) =>
     apiClient.put<ApiResponse<User>>('/Users/profile', payload),

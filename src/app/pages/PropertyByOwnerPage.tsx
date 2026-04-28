@@ -25,8 +25,12 @@ export function PropertyByOwnerPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const { data: propertyData, isLoading: propertyLoading } = useProperty(id)
-  const { data: requestsData, isLoading: requestsLoading, accept, reject } =
-    useBookingRequests()
+  const {
+    data: requestsData,
+    isLoading: requestsLoading,
+    accept,
+    reject,
+  } = useBookingRequests()
 
   const property = propertyData?.data ?? null
   const allRequests = requestsData?.data ?? []
@@ -150,7 +154,9 @@ export function PropertyByOwnerPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Bath className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-[#1a1a1a]">{property.baths} Bathrooms</span>
+                <span className="text-[#1a1a1a]">
+                  {property.baths} Bathrooms
+                </span>
               </div>
               {property.area && (
                 <div className="flex items-center gap-2">
@@ -230,35 +236,48 @@ export function PropertyByOwnerPage() {
                               {request.createdAt && (
                                 <p className="text-sm text-[#6B7280]">
                                   Submitted:{' '}
-                                  {new Date(request.createdAt).toLocaleDateString()}
+                                  {new Date(
+                                    request.createdAt,
+                                  ).toLocaleDateString()}
                                 </p>
                               )}
                             </div>
                           </div>
-                          <Badge className={`${getStatusColor(request.status)} capitalize`}>
+                          <Badge
+                            className={`${getStatusColor(request.status)} capitalize`}
+                          >
                             {request.status}
                           </Badge>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                           <div className="p-3 bg-white rounded-xl">
-                            <p className="text-xs text-[#6B7280] mb-1">Move-in</p>
+                            <p className="text-xs text-[#6B7280] mb-1">
+                              Move-in
+                            </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
-                              {new Date(request.moveIn).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
+                              {new Date(request.moveIn).toLocaleDateString(
+                                'en-US',
+                                {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                },
+                              )}
                             </p>
                           </div>
                           <div className="p-3 bg-white rounded-xl">
-                            <p className="text-xs text-[#6B7280] mb-1">Duration</p>
+                            <p className="text-xs text-[#6B7280] mb-1">
+                              Duration
+                            </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {request.requestedDates}
                             </p>
                           </div>
                           <div className="p-3 bg-white rounded-xl">
-                            <p className="text-xs text-[#6B7280] mb-1">Monthly Rent</p>
+                            <p className="text-xs text-[#6B7280] mb-1">
+                              Monthly Rent
+                            </p>
                             <p className="text-sm font-bold text-[#3A6EA5]">
                               EGP {request.monthlyRent.toLocaleString()}
                             </p>
@@ -352,13 +371,19 @@ export function PropertyByOwnerPage() {
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#6B7280]">Pending</span>
                         <span className="font-semibold text-yellow-600">
-                          {requests.filter((r) => r.status === 'pending').length}
+                          {
+                            requests.filter((r) => r.status === 'pending')
+                              .length
+                          }
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#6B7280]">Accepted</span>
                         <span className="font-semibold text-green-600">
-                          {requests.filter((r) => r.status === 'accepted').length}
+                          {
+                            requests.filter((r) => r.status === 'accepted')
+                              .length
+                          }
                         </span>
                       </div>
                     </div>

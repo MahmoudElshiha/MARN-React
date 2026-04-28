@@ -17,7 +17,11 @@ export function ForgotPasswordPage() {
     mutationFn: () => authService.forgotPassword({ email }),
     onSuccess: () => setIsSubmitted(true),
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong. Please try again.',
+      )
     },
   })
 
