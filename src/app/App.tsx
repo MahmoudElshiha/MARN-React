@@ -23,6 +23,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ChatbotPage } from './pages/ChatbotPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage'
 import { OTPVerificationPage } from './pages/OTPVerificationPage'
+import { ConfirmEmailPage } from './pages/ConfirmEmailPage'
 import { ChatWithRentalRequestPage } from './pages/ChatWithRentalRequestPage'
 import { ViewUserProfilePage } from './pages/ViewUserProfilePage'
 import { ViewOwnerProfilePage } from './pages/ViewOwnerProfilePage'
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/otp-verification" element={<OTPVerificationPage />} />
+          <Route path="/confirm-email" element={<ConfirmEmailPage />} />
 
           {/* Tenant routes */}
           <Route

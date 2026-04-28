@@ -62,4 +62,9 @@ export const authService = {
 
   verifyOtp: (payload: VerifyOtpPayload) =>
     apiClient.post<ApiResponse<{ message: string }>>('/Auth/verify-otp', payload),
+
+  confirmEmail: (userId: string, token: string) =>
+    apiClient.get<{ message: string; data: boolean }>(
+      `/api/Account/confirm-email?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`,
+    ),
 }
