@@ -16,8 +16,15 @@ export interface RegisterPayload {
   firstName: string
   lastName: string
   email: string
+  dateOfBirth: string
   password: string
-  role: 'tenant' | 'owner'
+  confirmPassword: string
+  gender: 'Unknown' | 'Male' | 'Female'
+}
+
+export interface RegisterResult {
+  message: string
+  data: boolean
 }
 
 export interface ForgotPasswordPayload {
@@ -39,7 +46,7 @@ export const authService = {
     apiClient.post<ApiResponse<LoginResult>>('/Auth/login', payload),
 
   register: (payload: RegisterPayload) =>
-    apiClient.post<ApiResponse<{ message: string }>>('/Auth/register', payload),
+    apiClient.post<RegisterResult>('/api/Account/register', payload),
 
   forgotPassword: (payload: ForgotPasswordPayload) =>
     apiClient.post<ApiResponse<{ message: string }>>(

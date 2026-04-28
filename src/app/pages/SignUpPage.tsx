@@ -4,27 +4,55 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Checkbox } from '../components/ui/checkbox'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { useState } from 'react'
+import { useRegister } from '@/hooks/useRegister'
+import { HttpError } from '@/services/httpErrors'
 
 export function SignUpPage() {
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    gender: '',
+    gender: '' as 'Male' | 'Female' | '',
     birthdate: '',
     agreeToTerms: false,
   })
 
+  const { mutate: register, isPending } = useRegister({
+    onSuccess: (data) => {
+      setSuccessMessage(data.message)
+      setTimeout(() => navigate('/login'), 3000)
+    },
+    onError: (error) => {
+      if (error instanceof HttpError) {
+        setErrorMessage(error.message)
+      } else {
+        setErrorMessage('Something went wrong. Please try again.')
+      }
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Sign up:', formData)
-    // Handle signup logic
+    setErrorMessage('')
+    setSuccessMessage('')
+    register({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      dateOfBirth: formData.birthdate,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      gender: formData.gender || 'Unknown',
+    })
   }
 
   return (
@@ -243,9 +271,9 @@ export function SignUpPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, gender: 'male' })}
+                    onClick={() => setFormData({ ...formData, gender: 'Male' })}
                     className={`p-6 rounded-2xl border-2 transition-all ${
-                      formData.gender === 'male'
+                      formData.gender === 'Male'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
                     }`}
@@ -258,10 +286,10 @@ export function SignUpPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setFormData({ ...formData, gender: 'female' })
+                      setFormData({ ...formData, gender: 'Female' })
                     }
                     className={`p-6 rounded-2xl border-2 transition-all ${
-                      formData.gender === 'female'
+                      formData.gender === 'Female'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
                     }`}
@@ -329,13 +357,26 @@ export function SignUpPage() {
                 </label>
               </div>
 
+              {errorMessage && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                  {errorMessage}
+                </p>
+              )}
+
+              {successMessage && (
+                <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                  {successMessage}
+                </p>
+              )}
+
               {/* Submit Button */}
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30"
+                disabled={isPending}
+                className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30 disabled:opacity-60"
               >
-                Create Account
+                {isPending ? 'Creating Account...' : 'Create Account'}
               </Button>
             </form>
 
