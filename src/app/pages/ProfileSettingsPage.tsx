@@ -45,6 +45,7 @@ import { toast } from 'sonner'
 import { FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
 import { useProfile } from '@/hooks/useProfile'
 import { EnumSelect } from '../components/EnumSelect'
+import { HttpError } from '@/services/httpErrors'
 
 export function ProfileSettingsPage() {
   const { data: profileResponse, update } = useProfile()
@@ -52,6 +53,7 @@ export function ProfileSettingsPage() {
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -112,6 +114,13 @@ export function ProfileSettingsPage() {
     bio: '',
     profileVisible: false,
   })
+
+  const clearFieldError = (key: string) =>
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev
+      const { [key]: _, ...rest } = prev
+      return rest
+    })
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const bioMaxLength = 300
@@ -260,15 +269,14 @@ export function ProfileSettingsPage() {
                           <Input
                             id="firstName"
                             value={profileData.firstName}
-                            onChange={(e) =>
-                              setProfileData({
-                                ...profileData,
-                                firstName: e.target.value,
-                              })
-                            }
-                            className="pl-12 bg-white rounded-xl border-[#3A6EA5]/20"
+                            onChange={(e) => {
+                              setProfileData({ ...profileData, firstName: e.target.value })
+                              clearFieldError('FirstName')
+                            }}
+                            className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.FirstName ? 'border-red-400' : ''}`}
                           />
                         </div>
+                        {fieldErrors.FirstName && <p className="text-xs text-red-500 mt-1">{fieldErrors.FirstName}</p>}
                       </div>
 
                       {/* Last Name */}
@@ -284,15 +292,14 @@ export function ProfileSettingsPage() {
                           <Input
                             id="lastName"
                             value={profileData.lastName}
-                            onChange={(e) =>
-                              setProfileData({
-                                ...profileData,
-                                lastName: e.target.value,
-                              })
-                            }
-                            className="pl-12 bg-white rounded-xl border-[#3A6EA5]/20"
+                            onChange={(e) => {
+                              setProfileData({ ...profileData, lastName: e.target.value })
+                              clearFieldError('LastName')
+                            }}
+                            className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.LastName ? 'border-red-400' : ''}`}
                           />
                         </div>
+                        {fieldErrors.LastName && <p className="text-xs text-red-500 mt-1">{fieldErrors.LastName}</p>}
                       </div>
 
                       {/* Email (Non-editable) */}
@@ -331,15 +338,14 @@ export function ProfileSettingsPage() {
                           <Input
                             id="phone"
                             value={profileData.phone}
-                            onChange={(e) =>
-                              setProfileData({
-                                ...profileData,
-                                phone: e.target.value,
-                              })
-                            }
-                            className="pl-12 bg-white rounded-xl border-[#3A6EA5]/20"
+                            onChange={(e) => {
+                              setProfileData({ ...profileData, phone: e.target.value })
+                              clearFieldError('PhoneNumber')
+                            }}
+                            className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.PhoneNumber ? 'border-red-400' : ''}`}
                           />
                         </div>
+                        {fieldErrors.PhoneNumber && <p className="text-xs text-red-500 mt-1">{fieldErrors.PhoneNumber}</p>}
                       </div>
 
                       {/* Date of Birth */}
@@ -354,45 +360,56 @@ export function ProfileSettingsPage() {
                           id="dateOfBirth"
                           type="date"
                           value={profileData.dateOfBirth}
-                          onChange={(e) =>
-                            setProfileData({
-                              ...profileData,
-                              dateOfBirth: e.target.value,
-                            })
-                          }
-                          className="bg-white rounded-xl border-[#3A6EA5]/20"
+                          onChange={(e) => {
+                            setProfileData({ ...profileData, dateOfBirth: e.target.value })
+                            clearFieldError('DateOfBirth')
+                          }}
+                          className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.DateOfBirth ? 'border-red-400' : ''}`}
                         />
+                        {fieldErrors.DateOfBirth && <p className="text-xs text-red-500 mt-1">{fieldErrors.DateOfBirth}</p>}
                       </div>
 
-                      <EnumSelect
-                        id="country"
-                        label="Country"
-                        endpoint="countries"
-                        value={profileData.country}
-                        onChange={(value) =>
-                          setProfileData({ ...profileData, country: value })
-                        }
-                      />
+                      <div>
+                        <EnumSelect
+                          id="country"
+                          label="Country"
+                          endpoint="countries"
+                          value={profileData.country}
+                          onChange={(value) => {
+                            setProfileData({ ...profileData, country: value })
+                            clearFieldError('Country')
+                          }}
+                        />
+                        {fieldErrors.Country && <p className="text-xs text-red-500 mt-1">{fieldErrors.Country}</p>}
+                      </div>
 
-                      <EnumSelect
-                        id="gender"
-                        label="Gender"
-                        endpoint="genders"
-                        value={profileData.gender}
-                        onChange={(value) =>
-                          setProfileData({ ...profileData, gender: value })
-                        }
-                      />
+                      <div>
+                        <EnumSelect
+                          id="gender"
+                          label="Gender"
+                          endpoint="genders"
+                          value={profileData.gender}
+                          onChange={(value) => {
+                            setProfileData({ ...profileData, gender: value })
+                            clearFieldError('Gender')
+                          }}
+                        />
+                        {fieldErrors.Gender && <p className="text-xs text-red-500 mt-1">{fieldErrors.Gender}</p>}
+                      </div>
 
-                      <EnumSelect
-                        id="language"
-                        label="Language"
-                        endpoint="languages"
-                        value={profileData.language}
-                        onChange={(value) =>
-                          setProfileData({ ...profileData, language: value })
-                        }
-                      />
+                      <div>
+                        <EnumSelect
+                          id="language"
+                          label="Language"
+                          endpoint="languages"
+                          value={profileData.language}
+                          onChange={(value) => {
+                            setProfileData({ ...profileData, language: value })
+                            clearFieldError('Language')
+                          }}
+                        />
+                        {fieldErrors.Language && <p className="text-xs text-red-500 mt-1">{fieldErrors.Language}</p>}
+                      </div>
                     </div>
 
                     <div>
@@ -405,15 +422,14 @@ export function ProfileSettingsPage() {
                       <Textarea
                         id="bio"
                         value={profileData.bio}
-                        onChange={(e) =>
-                          setProfileData({
-                            ...profileData,
-                            bio: e.target.value,
-                          })
-                        }
-                        className="bg-white rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, bio: e.target.value })
+                          clearFieldError('Bio')
+                        }}
+                        className={`bg-white rounded-xl border-[#3A6EA5]/20 min-h-[120px] ${fieldErrors.Bio ? 'border-red-400' : ''}`}
                         placeholder="Tell us about yourself..."
                       />
+                      {fieldErrors.Bio && <p className="text-xs text-red-500 mt-1">{fieldErrors.Bio}</p>}
                     </div>
 
                     <div className="flex gap-4 justify-end">
@@ -440,10 +456,21 @@ export function ProfileSettingsPage() {
                               profileImage: avatarFile ?? undefined,
                             },
                             {
-                              onSuccess: () =>
-                                toast.success('Profile updated successfully!'),
-                              onError: () =>
-                                toast.error('Failed to update profile.'),
+                              onSuccess: () => {
+                                setFieldErrors({})
+                                toast.success('Profile updated successfully!')
+                              },
+                              onError: (err) => {
+                                if (err instanceof HttpError && err.validationErrors) {
+                                  const flat: Record<string, string> = {}
+                                  for (const [key, msgs] of Object.entries(err.validationErrors)) {
+                                    flat[key] = msgs[0]
+                                  }
+                                  setFieldErrors(flat)
+                                } else {
+                                  toast.error('Failed to update profile.')
+                                }
+                              },
                             },
                           )
                         }}
