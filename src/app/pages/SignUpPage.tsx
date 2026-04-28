@@ -15,6 +15,7 @@ export function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -26,14 +27,22 @@ export function SignUpPage() {
     agreeToTerms: false,
   })
 
+  const fe = (key: string) => fieldErrors[key] ?? []
+
   const { mutate: register, isPending } = useRegister({
     onSuccess: (data) => {
       setSuccessMessage(data.message)
+      setErrorMessage('')
+      setFieldErrors({})
       setTimeout(() => navigate('/login'), 3000)
     },
     onError: (error) => {
       if (error instanceof HttpError) {
-        setErrorMessage(error.message)
+        setFieldErrors(error.validationErrors ?? {})
+        const flat = error.errors?.join(' ')
+        setErrorMessage(
+          flat ?? (Object.keys(error.validationErrors ?? {}).length ? '' : error.message),
+        )
       } else {
         setErrorMessage('Something went wrong. Please try again.')
       }
@@ -44,6 +53,7 @@ export function SignUpPage() {
     e.preventDefault()
     setErrorMessage('')
     setSuccessMessage('')
+    setFieldErrors({})
     register({
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -140,10 +150,13 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, firstName: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('FirstName').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="John"
                   />
                 </div>
+                {fe('FirstName').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                ))}
               </div>
 
               {/* Last Name */}
@@ -161,10 +174,13 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, lastName: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('LastName').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="Doe"
                   />
                 </div>
+                {fe('LastName').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                ))}
               </div>
 
               {/* Email */}
@@ -182,10 +198,13 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('Email').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="you@example.com"
                   />
                 </div>
+                {fe('Email').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                ))}
               </div>
 
               {/* Password */}
@@ -203,7 +222,7 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    className="pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('Password').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="Create a strong password"
                   />
                   <button
@@ -218,10 +237,15 @@ export function SignUpPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-[#6a7282] mt-2">
-                  Must be at least 8 characters with a mix of letters and
-                  numbers
-                </p>
+                {fe('Password').length ? (
+                  fe('Password').map((msg) => (
+                    <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                  ))
+                ) : (
+                  <p className="text-xs text-[#6a7282] mt-2">
+                    Must be at least 8 characters with a mix of letters and numbers
+                  </p>
+                )}
               </div>
 
               {/* Confirm Password */}
@@ -245,7 +269,7 @@ export function SignUpPage() {
                         confirmPassword: e.target.value,
                       })
                     }
-                    className="pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('ConfirmPassword').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="Confirm your password"
                   />
                   <button
@@ -260,9 +284,13 @@ export function SignUpPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-[#6a7282] mt-2">
-                  Must match the password
-                </p>
+                {fe('ConfirmPassword').length ? (
+                  fe('ConfirmPassword').map((msg) => (
+                    <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                  ))
+                ) : (
+                  <p className="text-xs text-[#6a7282] mt-2">Must match the password</p>
+                )}
               </div>
 
               {/* Gender */}
@@ -275,7 +303,9 @@ export function SignUpPage() {
                     className={`p-6 rounded-2xl border-2 transition-all ${
                       formData.gender === 'Male'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
-                        : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
+                        : fe('Gender').length
+                          ? 'bg-[#f5f7fa] border-red-300 text-[#1a1a1a] hover:border-red-400'
+                          : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
                     }`}
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -291,7 +321,9 @@ export function SignUpPage() {
                     className={`p-6 rounded-2xl border-2 transition-all ${
                       formData.gender === 'Female'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
-                        : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
+                        : fe('Gender').length
+                          ? 'bg-[#f5f7fa] border-red-300 text-[#1a1a1a] hover:border-red-400'
+                          : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
                     }`}
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -300,6 +332,9 @@ export function SignUpPage() {
                     </div>
                   </button>
                 </div>
+                {fe('Gender').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-2">{msg}</p>
+                ))}
               </div>
 
               {/* Birthdate */}
@@ -320,9 +355,12 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, birthdate: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('DateOfBirth').length ? 'border-red-400 focus:border-red-400' : ''}`}
                   />
                 </div>
+                {fe('DateOfBirth').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
+                ))}
               </div>
 
               {/* Terms Checkbox */}
