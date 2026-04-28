@@ -39,3 +39,23 @@ export function ProtectedRoute({
 
   return <>{children}</>
 }
+
+/**
+ * Blocks authenticated users from accessing guest-only pages (login, signup, etc.).
+ * Redirects them to their role-specific dashboard.
+ */
+export function GuestRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuth()
+
+  if (isAuthenticated) {
+    const dashboard =
+      user?.role === 'admin'
+        ? '/admin-dashboard'
+        : user?.role === 'owner'
+          ? '/owner-dashboard'
+          : '/tenant-dashboard'
+    return <Navigate to={dashboard} replace />
+  }
+
+  return <>{children}</>
+}

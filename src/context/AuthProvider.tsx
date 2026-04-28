@@ -5,18 +5,23 @@ import type { User } from '@/types/user'
 const TOKEN_KEY = 'token'
 const USER_KEY = 'user'
 
-function readStorage<T>(key: string): T | null {
+function readToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY)
+}
+
+function readUser(): User | null {
   try {
-    const raw = localStorage.getItem(key) ?? sessionStorage.getItem(key) ?? null
-    return raw ? (JSON.parse(raw) as T) : null
+    const raw = localStorage.getItem(USER_KEY) ?? sessionStorage.getItem(USER_KEY) ?? null
+    return raw ? (JSON.parse(raw) as User) : null
   } catch {
     return null
   }
 }
 
-function writeStorage(key: string, value: unknown, persist: boolean): void {
+function writeStorage(token: string, user: User, persist: boolean): void {
   const storage = persist ? localStorage : sessionStorage
-  storage.setItem(key, JSON.stringify(value))
+  storage.setItem(TOKEN_KEY, token)
+  storage.setItem(USER_KEY, JSON.stringify(user))
 }
 
 function clearStorage(): void {
@@ -27,17 +32,12 @@ function clearStorage(): void {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(() =>
-    readStorage<string>(TOKEN_KEY),
-  )
-  const [user, setUser] = useState<User | null>(() =>
-    readStorage<User>(USER_KEY),
-  )
+  const [token, setToken] = useState<string | null>(readToken)
+  const [user, setUser] = useState<User | null>(readUser)
 
   const login = useCallback(
     (newToken: string, newUser: User, remember: boolean) => {
-      writeStorage(TOKEN_KEY, newToken, remember)
-      writeStorage(USER_KEY, newUser, remember)
+      writeStorage(newToken, newUser, remember)
       setToken(newToken)
       setUser(newUser)
     },

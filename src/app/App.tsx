@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router'
 import { Navigation } from './components/Navigation'
 import { Footer } from './components/Footer'
-import { ProtectedRoute } from './components/ProtectedRoute'
+import { ProtectedRoute, GuestRoute } from './components/ProtectedRoute'
 import { LandingPage } from './pages/LandingPage'
 import { SearchPage } from './pages/SearchPage'
 import { PropertyDetailsPage } from './pages/PropertyDetailsPage'
@@ -24,6 +24,7 @@ import { ChatbotPage } from './pages/ChatbotPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage'
 import { OTPVerificationPage } from './pages/OTPVerificationPage'
 import { ConfirmEmailPage } from './pages/ConfirmEmailPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { ChatWithRentalRequestPage } from './pages/ChatWithRentalRequestPage'
 import { ViewUserProfilePage } from './pages/ViewUserProfilePage'
 import { ViewOwnerProfilePage } from './pages/ViewOwnerProfilePage'
@@ -50,12 +51,13 @@ export default function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
 
-          {/* Auth pages */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/otp-verification" element={<OTPVerificationPage />} />
-          <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+          {/* Auth pages — redirect to dashboard if already signed in */}
+          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+          <Route path="/signup" element={<GuestRoute><SignUpPage /></GuestRoute>} />
+          <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+          <Route path="/otp-verification" element={<GuestRoute><OTPVerificationPage /></GuestRoute>} />
+          <Route path="/confirm-email" element={<GuestRoute><ConfirmEmailPage /></GuestRoute>} />
+          <Route path="/reset-password" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
 
           {/* Tenant routes */}
           <Route

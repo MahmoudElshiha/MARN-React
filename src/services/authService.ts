@@ -1,6 +1,5 @@
 import { apiClient } from './apiClient'
 import type { ApiResponse } from '@/types/common'
-import type { User } from '@/types/user'
 
 export interface LoginPayload {
   email: string
@@ -9,7 +8,11 @@ export interface LoginPayload {
 
 export interface LoginResult {
   token: string
-  user: User
+  expiration: string
+  requiresTwoFactor: boolean
+  twoFactorProvider: string | null
+  isExternalLogin: boolean
+  externalProvider: string | null
 }
 
 export interface RegisterPayload {
@@ -32,8 +35,15 @@ export interface ForgotPasswordPayload {
 }
 
 export interface ResetPasswordPayload {
+  email: string
   token: string
   newPassword: string
+  confirmPassword: string
+}
+
+export interface ResetPasswordResult {
+  message: string
+  data: boolean
 }
 
 export interface VerifyOtpPayload {
@@ -43,22 +53,19 @@ export interface VerifyOtpPayload {
 
 export const authService = {
   login: (payload: LoginPayload) =>
-    apiClient.post<ApiResponse<LoginResult>>('/Auth/login', payload),
+    apiClient.post<ApiResponse<LoginResult>>('/api/Account/login', payload),
 
   register: (payload: RegisterPayload) =>
     apiClient.post<RegisterResult>('/api/Account/register', payload),
 
   forgotPassword: (payload: ForgotPasswordPayload) =>
     apiClient.post<ApiResponse<{ message: string }>>(
-      '/Auth/forgot-password',
+      '/api/Account/forgot-password',
       payload,
     ),
 
   resetPassword: (payload: ResetPasswordPayload) =>
-    apiClient.post<ApiResponse<{ message: string }>>(
-      '/Auth/reset-password',
-      payload,
-    ),
+    apiClient.put<ResetPasswordResult>('/api/Account/reset-password', payload),
 
   verifyOtp: (payload: VerifyOtpPayload) =>
     apiClient.post<ApiResponse<{ message: string }>>('/Auth/verify-otp', payload),

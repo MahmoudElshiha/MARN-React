@@ -15,12 +15,7 @@ axiosInstance.interceptors.request.use((config) => {
     typeof FormData !== 'undefined' && config.data instanceof FormData
 
   if (isFormData) {
-    // Let the browser set multipart boundary automatically.
-    if (config.headers && typeof config.headers.setContentType === 'function') {
-      config.headers.setContentType(undefined)
-    } else if (config.headers) {
-      delete (config.headers as Record<string, string>)['Content-Type']
-    }
+    delete (config.headers as Record<string, string>)['Content-Type']
   }
 
   const token = localStorage.getItem('token') ?? sessionStorage.getItem('token')

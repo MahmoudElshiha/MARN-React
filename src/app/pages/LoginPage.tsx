@@ -7,11 +7,11 @@ import { Checkbox } from '../components/ui/checkbox'
 import { Link, useNavigate } from 'react-router'
 import { useState } from 'react'
 import { useLogin } from '@/hooks/useLogin'
-import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 import type { UserRole } from '@/types/user'
 
 function roleDestination(role: UserRole): string {
+  //TODO: review business logic for role-based redirection after login
   if (role === 'admin') return '/admin-dashboard'
   if (role === 'owner') return '/owner-dashboard'
   return '/tenant-dashboard'
@@ -26,22 +26,16 @@ export function LoginPage() {
   })
 
   const navigate = useNavigate()
-  const { user } = useAuth()
 
-  const login = useLogin({
-    remember: formData.remember,
-    onSuccess: () => {
-      // user is now set in context after login() is called inside the hook
-    },
-  })
+  const login = useLogin({ remember: formData.remember })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     login.mutate(
       { email: formData.email, password: formData.password },
       {
-        onSuccess: (response) => {
-          navigate(roleDestination(response.data.user.role))
+        onSuccess: (result) => {
+          navigate(roleDestination(result.user.role))
         },
         onError: (err) => {
           const msg =
