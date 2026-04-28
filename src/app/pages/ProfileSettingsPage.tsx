@@ -40,7 +40,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, startTransition } from 'react'
 import { toast } from 'sonner'
 import { COUNTRIES, FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
 import { useProfile } from '@/hooks/useProfile'
@@ -62,14 +62,16 @@ export function ProfileSettingsPage() {
   // Prefill once the API response arrives
   useEffect(() => {
     if (apiProfile) {
-      setProfileData({
-        firstName: apiProfile.firstName ?? '',
-        lastName: apiProfile.lastName ?? '',
-        email: apiProfile.email ?? '',
-        phone: '',
-        country: '',
-        dateOfBirth: '',
-        bio: '',
+      startTransition(() => {
+        setProfileData({
+          firstName: apiProfile.firstName ?? '',
+          lastName: apiProfile.lastName ?? '',
+          email: apiProfile.email ?? '',
+          phone: '',
+          country: '',
+          dateOfBirth: '',
+          bio: '',
+        })
       })
     }
   }, [apiProfile])

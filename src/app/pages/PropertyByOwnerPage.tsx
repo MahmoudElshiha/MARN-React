@@ -8,7 +8,6 @@ import {
   Star,
   Heart,
   Share2,
-  Users,
   CheckCircle,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'

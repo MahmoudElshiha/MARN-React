@@ -11,23 +11,24 @@ type Status = 'loading' | 'success' | 'error'
 export function ConfirmEmailPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const [status, setStatus] = useState<Status>('loading')
-  const [message, setMessage] = useState('')
+
+  const userId = searchParams.get('userId') ?? ''
+  const tokenParam = searchParams.get('token') ?? ''
+
+  const [status, setStatus] = useState<Status>(
+    !userId || !tokenParam ? 'error' : 'loading',
+  )
+  const [message, setMessage] = useState(
+    !userId || !tokenParam
+      ? 'Invalid confirmation link. Please check your email and try again.'
+      : '',
+  )
 
   useEffect(() => {
-    const userId = searchParams.get('userId') ?? ''
-    const token = searchParams.get('token') ?? ''
-
-    if (!userId || !token) {
-      setStatus('error')
-      setMessage(
-        'Invalid confirmation link. Please check your email and try again.',
-      )
-      return
-    }
+    if (!userId || !tokenParam) return
 
     authService
-      .confirmEmail(userId, token)
+      .confirmEmail(userId, tokenParam)
       .then((data) => {
         setMessage(data.message)
         setStatus('success')

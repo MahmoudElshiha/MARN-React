@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import {
   Send,
   Paperclip,
@@ -49,7 +49,7 @@ export function ChatWithRentalRequestPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const { data: messagesData, isLoading: messagesLoading } = useMessages(id)
-  const messages = messagesData?.data ?? []
+  const messages = useMemo(() => messagesData?.data ?? [], [messagesData])
   const sendMessage = useSendMessage()
 
   useEffect(() => {

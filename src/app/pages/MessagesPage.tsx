@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Send, Paperclip, MoreVertical, ChevronLeft } from 'lucide-react'
 import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
@@ -23,20 +23,19 @@ export function MessagesPage() {
 
   const { data: conversationsData, isLoading: conversationsLoading } =
     useConversations()
-  const conversations = conversationsData?.data ?? []
+  const conversations = useMemo(
+    () => conversationsData?.data ?? [],
+    [conversationsData],
+  )
+
+  const effectiveConversation = selectedConversation ?? conversations[0] ?? null
 
   const { data: messagesData, isLoading: messagesLoading } = useMessages(
-    selectedConversation?.id,
+    effectiveConversation?.id,
   )
-  const messages = messagesData?.data ?? []
+  const messages = useMemo(() => messagesData?.data ?? [], [messagesData])
 
   const sendMessage = useSendMessage()
-
-  useEffect(() => {
-    if (!selectedConversation && conversations.length > 0) {
-      setSelectedConversation(conversations[0])
-    }
-  }, [conversations, selectedConversation])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -93,7 +92,7 @@ export function MessagesPage() {
                         setIsMobileView(true)
                       }}
                       className={`w-full p-4 flex gap-3 hover:bg-[#9CBBDC]/20 transition-colors border-b border-[#3A6EA5]/10 ${
-                        selectedConversation?.id === conversation.id
+                        effectiveConversation?.id === conversation.id
                           ? 'bg-[#9CBBDC]/20'
                           : ''
                       }`}
@@ -135,7 +134,7 @@ export function MessagesPage() {
             <div
               className={`lg:col-span-2 flex flex-col ${!isMobileView ? 'hidden lg:flex' : ''}`}
             >
-              {!selectedConversation ? (
+              {!effectiveConversation ? (
                 <div className="flex-1 flex items-center justify-center text-[#4a5565]">
                   Select a conversation to start chatting.
                 </div>
@@ -153,18 +152,18 @@ export function MessagesPage() {
                         </button>
                         <Avatar className="w-10 h-10">
                           <AvatarImage
-                            src={selectedConversation.participant.avatarUrl}
+                            src={effectiveConversation.participant.avatarUrl}
                           />
                           <AvatarFallback>
-                            {selectedConversation.participant.name.charAt(0)}
+                            {effectiveConversation.participant.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <h3 className="font-semibold text-[#1a1a1a]">
-                            {selectedConversation.participant.name}
+                            {effectiveConversation.participant.name}
                           </h3>
                           <p className="text-sm text-[#4a5565]">
-                            {selectedConversation.participant.role}
+                            {effectiveConversation.participant.role}
                           </p>
                         </div>
                       </div>
@@ -178,27 +177,27 @@ export function MessagesPage() {
                     </div>
 
                     {/* Property Context */}
-                    {selectedConversation.property && (
+                    {effectiveConversation.property && (
                       <div className="mt-4 p-3 bg-[#f5f7fa] rounded-2xl flex items-center gap-3">
-                        {selectedConversation.property.image && (
+                        {effectiveConversation.property.image && (
                           <img
-                            src={selectedConversation.property.image}
-                            alt={selectedConversation.property.name}
+                            src={effectiveConversation.property.image}
+                            alt={effectiveConversation.property.name}
                             className="w-16 h-16 rounded-xl object-cover"
                           />
                         )}
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-[#1a1a1a]">
-                            {selectedConversation.property.name}
+                            {effectiveConversation.property.name}
                           </p>
-                          {selectedConversation.property.id && (
+                          {effectiveConversation.property.id && (
                             <Button
                               variant="link"
                               size="sm"
                               className="text-[#3A6EA5] p-0 h-auto"
                               onClick={() =>
                                 navigate(
-                                  `/property/${selectedConversation.property!.id}`,
+                                  `/property/${effectiveConversation.property!.id}`,
                                 )
                               }
                             >
