@@ -42,8 +42,9 @@ import {
 } from '../components/ui/dialog'
 import { useState, useEffect, startTransition } from 'react'
 import { toast } from 'sonner'
-import { COUNTRIES, FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
+import { FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
 import { useProfile } from '@/hooks/useProfile'
+import { EnumSelect } from '../components/EnumSelect'
 
 export function ProfileSettingsPage() {
   const { data: profileResponse, update, uploadAvatar } = useProfile()
@@ -55,6 +56,8 @@ export function ProfileSettingsPage() {
     email: '',
     phone: '',
     country: '',
+    gender: '',
+    language: '',
     dateOfBirth: '',
     bio: '',
   })
@@ -67,10 +70,14 @@ export function ProfileSettingsPage() {
           firstName: apiProfile.firstName ?? '',
           lastName: apiProfile.lastName ?? '',
           email: apiProfile.email ?? '',
-          phone: '',
-          country: '',
-          dateOfBirth: '',
-          bio: '',
+          phone: apiProfile.phoneNumber ?? '',
+          country: apiProfile.country ?? '',
+          gender: apiProfile.gender ?? '',
+          language: apiProfile.language ?? '',
+          dateOfBirth: apiProfile.dateOfBirth
+            ? apiProfile.dateOfBirth.split('T')[0]
+            : '',
+          bio: apiProfile.bio ?? '',
         })
       })
     }
@@ -106,7 +113,6 @@ export function ProfileSettingsPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const bioMaxLength = 300
 
-  const countries = COUNTRIES
   const fieldOfStudyOptions = FIELD_OF_STUDY_OPTIONS
 
   const handle2FAToggle = () => {
@@ -363,35 +369,35 @@ export function ProfileSettingsPage() {
                         />
                       </div>
 
-                      {/* Country Dropdown */}
-                      <div>
-                        <Label
-                          htmlFor="country"
-                          className="text-[#1a1a1a] mb-2 block"
-                        >
-                          Country
-                        </Label>
-                        <Select
-                          value={profileData.country}
-                          onValueChange={(value) =>
-                            setProfileData({ ...profileData, country: value })
-                          }
-                        >
-                          <SelectTrigger
-                            id="country"
-                            className="bg-white rounded-xl border-[#3A6EA5]/20"
-                          >
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px]">
-                            {countries.map((country) => (
-                              <SelectItem key={country} value={country}>
-                                {country}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <EnumSelect
+                        id="country"
+                        label="Country"
+                        endpoint="countries"
+                        value={profileData.country}
+                        onChange={(value) =>
+                          setProfileData({ ...profileData, country: value })
+                        }
+                      />
+
+                      <EnumSelect
+                        id="gender"
+                        label="Gender"
+                        endpoint="genders"
+                        value={profileData.gender}
+                        onChange={(value) =>
+                          setProfileData({ ...profileData, gender: value })
+                        }
+                      />
+
+                      <EnumSelect
+                        id="language"
+                        label="Language"
+                        endpoint="languages"
+                        value={profileData.language}
+                        onChange={(value) =>
+                          setProfileData({ ...profileData, language: value })
+                        }
+                      />
                     </div>
 
                     <div>

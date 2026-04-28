@@ -31,7 +31,7 @@ export function useEnumOptions(endpoint: EnumEndpoint): State {
     let cancelled = false
 
     apiClient
-      .get<ApiResponse<EnumOption[]>>(`/Enum/${endpoint}`)
+      .get<ApiResponse<EnumOption[]>>(`/api/Enum/${endpoint}`)
       .then((res) => {
         if (cancelled) return
         const options = res.data ?? []
