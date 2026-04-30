@@ -5,23 +5,30 @@ import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Link } from 'react-router'
 import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { authService } from '@/services/authService'
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const { mutate: sendReset, isPending: isLoading } = useMutation({
+    mutationFn: () => authService.forgotPassword({ email }),
+    onSuccess: () => setIsSubmitted(true),
+    onError: (err) => {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong. Please try again.',
+      )
+    },
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      setIsSubmitted(true)
-    }, 1500)
+    sendReset()
   }
 
   const validateEmail = (email: string) => {

@@ -40,19 +40,53 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog'
-import { useState } from 'react'
+import { useState, useEffect, startTransition } from 'react'
 import { toast } from 'sonner'
+import { FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
+import { useProfile } from '@/hooks/useProfile'
+import { EnumSelect } from '../components/EnumSelect'
+import { HttpError } from '@/services/httpErrors'
 
 export function ProfileSettingsPage() {
+  const { data: profileResponse, update } = useProfile()
+  const apiProfile = profileResponse?.data
+
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
   const [profileData, setProfileData] = useState({
-    firstName: 'Ahmed',
-    lastName: 'Hassan',
-    email: 'ahmed@example.com',
-    phone: '+20 10 1234 5678',
-    country: 'Egypt',
-    dateOfBirth: '1995-05-15',
-    bio: 'Looking for a quiet, clean roommate who respects personal space.',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    country: '',
+    gender: '',
+    language: '',
+    dateOfBirth: '',
+    bio: '',
   })
+
+  // Prefill once the API response arrives
+  useEffect(() => {
+    if (apiProfile) {
+      startTransition(() => {
+        setProfileData({
+          firstName: apiProfile.firstName ?? '',
+          lastName: apiProfile.lastName ?? '',
+          email: apiProfile.email ?? '',
+          phone: apiProfile.phoneNumber ?? '',
+          country: apiProfile.country ?? '',
+          gender: apiProfile.gender ?? '',
+          language: apiProfile.language ?? '',
+          dateOfBirth: apiProfile.dateOfBirth
+            ? apiProfile.dateOfBirth.split('T')[0]
+            : '',
+          bio: apiProfile.bio ?? '',
+        })
+      })
+    }
+  }, [apiProfile])
 
   const [identityVerification, setIdentityVerification] = useState({
     frontIdCard: null as File | null,
@@ -81,51 +115,17 @@ export function ProfileSettingsPage() {
     profileVisible: false,
   })
 
+  const clearFieldError = (key: string) =>
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev
+      const { [key]: _, ...rest } = prev
+      return rest
+    })
+
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const bioMaxLength = 300
 
-  const countries = [
-    'United States',
-    'Canada',
-    'United Kingdom',
-    'Australia',
-    'Germany',
-    'France',
-    'Spain',
-    'Italy',
-    'Netherlands',
-    'Belgium',
-    'Sweden',
-    'Norway',
-    'Denmark',
-    'Finland',
-    'Switzerland',
-    'Austria',
-    'Ireland',
-    'New Zealand',
-    'Japan',
-    'Singapore',
-    'United Arab Emirates',
-    'Saudi Arabia',
-    'Qatar',
-    'Kuwait',
-    'Bahrain',
-    'Oman',
-  ]
-
-  const fieldOfStudyOptions = [
-    'Computer Science',
-    'Engineering',
-    'Business Administration',
-    'Medicine',
-    'Law',
-    'Arts & Humanities',
-    'Natural Sciences',
-    'Social Sciences',
-    'Education',
-    'Architecture',
-    'Other',
-  ]
+  const fieldOfStudyOptions = FIELD_OF_STUDY_OPTIONS
 
   const handle2FAToggle = () => {
     if (!twoFactorEnabled) {
@@ -211,7 +211,7 @@ export function ProfileSettingsPage() {
                   <CardContent className="pt-6 text-center">
                     <div className="relative w-40 h-40 mx-auto mb-6">
                       <img
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop"
+                        src={avatarPreview ?? apiProfile?.profileImage ?? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop'}
                         alt="Profile"
                         className="w-full h-full rounded-full object-cover shadow-lg"
                       />
@@ -223,12 +223,27 @@ export function ProfileSettingsPage() {
                       {profileData.firstName} {profileData.lastName}
                     </h3>
                     <p className="text-[#4a5565] mb-6">{profileData.email}</p>
-                    <Button
-                      variant="outline"
-                      className="w-full rounded-xl border-[#3A6EA5]/20 hover:bg-white"
-                    >
-                      Upload New Photo
-                    </Button>
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            setAvatarFile(file)
+                            setAvatarPreview(URL.createObjectURL(file))
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="outline"
+                        className="w-full rounded-xl border-[#3A6EA5]/20 hover:bg-white"
+                        asChild
+                      >
+                        <span>{avatarFile ? avatarFile.name : 'Upload New Photo'}</span>
+                      </Button>
+                    </label>
                   </CardContent>
                 </Card>
 
@@ -254,15 +269,14 @@ export function ProfileSettingsPage() {
                           <Input
                             id="firstName"
                             value={profileData.firstName}
-                            onChange={(e) =>
-                              setProfileData({
-                                ...profileData,
-                                firstName: e.target.value,
-                              })
-                            }
-                            className="pl-12 bg-white rounded-xl border-[#3A6EA5]/20"
+                            onChange={(e) => {
+                              setProfileData({ ...profileData, firstName: e.target.value })
+                              clearFieldError('FirstName')
+                            }}
+                            className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.FirstName ? 'border-red-400' : ''}`}
                           />
                         </div>
+                        {fieldErrors.FirstName && <p className="text-xs text-red-500 mt-1">{fieldErrors.FirstName}</p>}
                       </div>
 
                       {/* Last Name */}
@@ -278,15 +292,14 @@ export function ProfileSettingsPage() {
                           <Input
                             id="lastName"
                             value={profileData.lastName}
-                            onChange={(e) =>
-                              setProfileData({
-                                ...profileData,
-                                lastName: e.target.value,
-                              })
-                            }
-                            className="pl-12 bg-white rounded-xl border-[#3A6EA5]/20"
+                            onChange={(e) => {
+                              setProfileData({ ...profileData, lastName: e.target.value })
+                              clearFieldError('LastName')
+                            }}
+                            className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.LastName ? 'border-red-400' : ''}`}
                           />
                         </div>
+                        {fieldErrors.LastName && <p className="text-xs text-red-500 mt-1">{fieldErrors.LastName}</p>}
                       </div>
 
                       {/* Email (Non-editable) */}
@@ -325,15 +338,14 @@ export function ProfileSettingsPage() {
                           <Input
                             id="phone"
                             value={profileData.phone}
-                            onChange={(e) =>
-                              setProfileData({
-                                ...profileData,
-                                phone: e.target.value,
-                              })
-                            }
-                            className="pl-12 bg-white rounded-xl border-[#3A6EA5]/20"
+                            onChange={(e) => {
+                              setProfileData({ ...profileData, phone: e.target.value })
+                              clearFieldError('PhoneNumber')
+                            }}
+                            className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.PhoneNumber ? 'border-red-400' : ''}`}
                           />
                         </div>
+                        {fieldErrors.PhoneNumber && <p className="text-xs text-red-500 mt-1">{fieldErrors.PhoneNumber}</p>}
                       </div>
 
                       {/* Date of Birth */}
@@ -348,44 +360,55 @@ export function ProfileSettingsPage() {
                           id="dateOfBirth"
                           type="date"
                           value={profileData.dateOfBirth}
-                          onChange={(e) =>
-                            setProfileData({
-                              ...profileData,
-                              dateOfBirth: e.target.value,
-                            })
-                          }
-                          className="bg-white rounded-xl border-[#3A6EA5]/20"
+                          onChange={(e) => {
+                            setProfileData({ ...profileData, dateOfBirth: e.target.value })
+                            clearFieldError('DateOfBirth')
+                          }}
+                          className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.DateOfBirth ? 'border-red-400' : ''}`}
                         />
+                        {fieldErrors.DateOfBirth && <p className="text-xs text-red-500 mt-1">{fieldErrors.DateOfBirth}</p>}
                       </div>
 
-                      {/* Country Dropdown */}
                       <div>
-                        <Label
-                          htmlFor="country"
-                          className="text-[#1a1a1a] mb-2 block"
-                        >
-                          Country
-                        </Label>
-                        <Select
+                        <EnumSelect
+                          id="country"
+                          label="Country"
+                          endpoint="countries"
                           value={profileData.country}
-                          onValueChange={(value) =>
+                          onChange={(value) => {
                             setProfileData({ ...profileData, country: value })
-                          }
-                        >
-                          <SelectTrigger
-                            id="country"
-                            className="bg-white rounded-xl border-[#3A6EA5]/20"
-                          >
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px]">
-                            {countries.map((country) => (
-                              <SelectItem key={country} value={country}>
-                                {country}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                            clearFieldError('Country')
+                          }}
+                        />
+                        {fieldErrors.Country && <p className="text-xs text-red-500 mt-1">{fieldErrors.Country}</p>}
+                      </div>
+
+                      <div>
+                        <EnumSelect
+                          id="gender"
+                          label="Gender"
+                          endpoint="genders"
+                          value={profileData.gender}
+                          onChange={(value) => {
+                            setProfileData({ ...profileData, gender: value })
+                            clearFieldError('Gender')
+                          }}
+                        />
+                        {fieldErrors.Gender && <p className="text-xs text-red-500 mt-1">{fieldErrors.Gender}</p>}
+                      </div>
+
+                      <div>
+                        <EnumSelect
+                          id="language"
+                          label="Language"
+                          endpoint="languages"
+                          value={profileData.language}
+                          onChange={(value) => {
+                            setProfileData({ ...profileData, language: value })
+                            clearFieldError('Language')
+                          }}
+                        />
+                        {fieldErrors.Language && <p className="text-xs text-red-500 mt-1">{fieldErrors.Language}</p>}
                       </div>
                     </div>
 
@@ -399,15 +422,14 @@ export function ProfileSettingsPage() {
                       <Textarea
                         id="bio"
                         value={profileData.bio}
-                        onChange={(e) =>
-                          setProfileData({
-                            ...profileData,
-                            bio: e.target.value,
-                          })
-                        }
-                        className="bg-white rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
+                        onChange={(e) => {
+                          setProfileData({ ...profileData, bio: e.target.value })
+                          clearFieldError('Bio')
+                        }}
+                        className={`bg-white rounded-xl border-[#3A6EA5]/20 min-h-[120px] ${fieldErrors.Bio ? 'border-red-400' : ''}`}
                         placeholder="Tell us about yourself..."
                       />
+                      {fieldErrors.Bio && <p className="text-xs text-red-500 mt-1">{fieldErrors.Bio}</p>}
                     </div>
 
                     <div className="flex gap-4 justify-end">
@@ -418,12 +440,43 @@ export function ProfileSettingsPage() {
                         Cancel
                       </Button>
                       <Button
-                        onClick={() =>
-                          toast.success('Profile updated successfully!')
-                        }
+                        disabled={update.isPending}
+                        onClick={() => {
+                          update.mutate(
+                            {
+                              id: apiProfile!.id,
+                              firstName: profileData.firstName,
+                              lastName: profileData.lastName,
+                              phoneNumber: profileData.phone,
+                              country: profileData.country,
+                              gender: profileData.gender,
+                              language: profileData.language,
+                              dateOfBirth: profileData.dateOfBirth,
+                              bio: profileData.bio,
+                              profileImage: avatarFile ?? undefined,
+                            },
+                            {
+                              onSuccess: () => {
+                                setFieldErrors({})
+                                toast.success('Profile updated successfully!')
+                              },
+                              onError: (err) => {
+                                if (err instanceof HttpError && err.validationErrors) {
+                                  const flat: Record<string, string> = {}
+                                  for (const [key, msgs] of Object.entries(err.validationErrors)) {
+                                    flat[key] = msgs[0]
+                                  }
+                                  setFieldErrors(flat)
+                                } else {
+                                  toast.error('Failed to update profile.')
+                                }
+                              },
+                            },
+                          )
+                        }}
                         className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
                       >
-                        Save Changes
+                        {update.isPending ? 'Saving…' : 'Save Changes'}
                       </Button>
                     </div>
                   </CardContent>

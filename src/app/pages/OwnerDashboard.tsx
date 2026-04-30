@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
 import { Badge } from '../components/ui/badge'
+import { Skeleton } from '../components/ui/skeleton'
 import { Link } from 'react-router'
 import {
   LineChart,
@@ -31,7 +32,10 @@ import {
 } from 'recharts'
 import { toast } from 'sonner'
 import { useState } from 'react'
+import { useBookingRequests, useContracts } from '@/hooks/useBookingRequests'
+import { useProperties } from '@/hooks/useProperties'
 
+// Static chart data — will be replaced once the owner stats endpoint exists
 const EARNINGS_DATA_MONTHLY = [
   { month: 'Jan', earnings: 8400 },
   { month: 'Feb', earnings: 11200 },
@@ -50,143 +54,27 @@ const EARNINGS_DATA_YEARLY = [
   { month: '2025', earnings: 195000 },
 ]
 
-const OCCUPANCY_DATA = [
-  { name: 'Occupied', value: 8, color: '#3A6EA5' },
-  { name: 'Vacant', value: 2, color: '#9CBBDC' },
-]
-
-const BOOKING_REQUESTS = [
-  {
-    id: '1',
-    tenant: 'Alice Johnson',
-    property: 'Modern Downtown Apartment',
-    requestedDates: 'March 15 - September 15, 2026',
-    moveIn: 'March 15, 2026',
-    monthlyRent: 2800,
-    status: 'pending',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-  },
-  {
-    id: '2',
-    tenant: 'Robert Chen',
-    property: 'Luxury Penthouse Suite',
-    requestedDates: 'March 20 - December 20, 2026',
-    moveIn: 'March 20, 2026',
-    monthlyRent: 4500,
-    status: 'pending',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-  },
-  {
-    id: '3',
-    tenant: 'Maria Garcia',
-    property: 'Cozy Studio in Arts District',
-    requestedDates: 'April 1 - October 1, 2026',
-    moveIn: 'April 1, 2026',
-    monthlyRent: 1900,
-    status: 'pending',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-  },
-]
-
-const CONTRACTS_HISTORY = [
-  {
-    id: 'CNT-001',
-    propertyName: 'Modern Downtown Apartment',
-    tenantName: 'John Smith',
-    status: 'Active',
-    expiryDate: '2026-12-31',
-  },
-  {
-    id: 'CNT-002',
-    propertyName: 'Cozy Studio in Arts District',
-    tenantName: 'Emily Davis',
-    status: 'Active',
-    expiryDate: '2027-03-15',
-  },
-  {
-    id: 'CNT-003',
-    propertyName: 'Beachfront Villa',
-    tenantName: 'Michael Brown',
-    status: 'Expired',
-    expiryDate: '2026-01-20',
-  },
-  {
-    id: 'CNT-004',
-    propertyName: 'Loft in Financial District',
-    tenantName: 'Sarah Wilson',
-    status: 'Pending',
-    expiryDate: '2026-04-01',
-  },
-  {
-    id: 'CNT-005',
-    propertyName: 'Garden House Suburb',
-    tenantName: 'David Lee',
-    status: 'Active',
-    expiryDate: '2027-06-30',
-  },
-]
-
-const MY_PROPERTIES = [
-  {
-    id: '1',
-    name: 'Modern Downtown Apartment',
-    location: 'San Francisco, CA',
-    type: 'Apartment',
-    rent: 2800,
-    status: 'occupied',
-    tenant: 'John Smith',
-    views: 342,
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400',
-  },
-  {
-    id: '2',
-    name: 'Luxury Penthouse Suite',
-    location: 'Miami, FL',
-    type: 'Penthouse',
-    rent: 4500,
-    status: 'vacant',
-    tenant: null,
-    views: 567,
-    image: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?w=400',
-  },
-  {
-    id: '3',
-    name: 'Cozy Studio in Arts District',
-    location: 'Los Angeles, CA',
-    type: 'Studio',
-    rent: 1900,
-    status: 'occupied',
-    tenant: 'Emily Davis',
-    views: 289,
-    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400',
-  },
-]
-
 const NOTIFICATIONS = [
   {
     id: '1',
-    type: 'payment',
     message: 'Payment received from John Smith',
     time: '2 hours ago',
     read: false,
   },
   {
     id: '2',
-    type: 'request',
     message: 'New booking request for Downtown Apartment',
     time: '5 hours ago',
     read: false,
   },
   {
     id: '3',
-    type: 'maintenance',
     message: 'Maintenance request from Emily Davis',
     time: '1 day ago',
     read: true,
   },
   {
     id: '4',
-    type: 'review',
     message: 'New review received (4.5 stars)',
     time: '2 days ago',
     read: true,
@@ -194,31 +82,57 @@ const NOTIFICATIONS = [
 ]
 
 const getContractStatusBadge = (status: string) => {
-  const styles = {
+  const styles: Record<string, string> = {
     Active: 'bg-green-100 text-green-700 hover:bg-green-100',
     Expired: 'bg-red-100 text-red-700 hover:bg-red-100',
     Pending: 'bg-yellow-100 text-yellow-700 hover:bg-yellow-100',
   }
-  return (
-    styles[status as keyof typeof styles] ||
-    'bg-gray-100 text-gray-700 hover:bg-gray-100'
-  )
+  return styles[status] ?? 'bg-gray-100 text-gray-700 hover:bg-gray-100'
 }
 
 export function OwnerDashboard() {
-  const handleAcceptRequest = (_id: string) => {
-    toast.success('Booking request accepted')
+  const [view, setView] = useState('monthly')
+
+  const {
+    data: requestsData,
+    isLoading: requestsLoading,
+    accept,
+    reject,
+  } = useBookingRequests()
+
+  const { data: contractsData, isLoading: contractsLoading } = useContracts()
+  const { data: propertiesData, isLoading: propertiesLoading } = useProperties()
+
+  const bookingRequests = requestsData?.data ?? []
+  const contracts = contractsData?.data ?? []
+  const myProperties = propertiesData?.data ?? []
+
+  const totalProperties = propertiesData?.total ?? 0
+  const occupiedCount = myProperties.filter((p) => p.status === 'rented').length
+  const vacantCount = totalProperties - occupiedCount
+
+  const occupancyData = [
+    { name: 'Occupied', value: occupiedCount, color: '#3A6EA5' },
+    { name: 'Vacant', value: vacantCount, color: '#9CBBDC' },
+  ]
+
+  const handleAcceptRequest = (id: string) => {
+    accept.mutate(id, {
+      onSuccess: () => toast.success('Booking request accepted'),
+      onError: () => toast.error('Failed to accept request'),
+    })
   }
 
-  const handleDeclineRequest = (_id: string) => {
-    toast.error('Booking request declined')
+  const handleDeclineRequest = (id: string) => {
+    reject.mutate(id, {
+      onSuccess: () => toast.error('Booking request declined'),
+      onError: () => toast.error('Failed to decline request'),
+    })
   }
 
   const handleDownloadContract = (contractId: string) => {
     toast.success(`Downloading contract ${contractId}`)
   }
-
-  const [view, setView] = useState('monthly')
 
   return (
     <div className="min-h-screen pb-20">
@@ -255,8 +169,18 @@ export function OwnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold mb-1">10</div>
-              <p className="text-white/80 text-sm">8 occupied • 2 vacant</p>
+              {propertiesLoading ? (
+                <Skeleton className="h-10 w-16 bg-white/30" />
+              ) : (
+                <>
+                  <div className="text-4xl font-bold mb-1">
+                    {totalProperties}
+                  </div>
+                  <p className="text-white/80 text-sm">
+                    {occupiedCount} occupied • {vacantCount} vacant
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -283,10 +207,8 @@ export function OwnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-4xl font-bold text-[#3A6EA5]">
-                  12,450 EGP
-                </div>
+              <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
+                12,450 EGP
               </div>
               <p className="text-[#4a5565] text-sm mb-3">
                 Available for transfer
@@ -309,10 +231,21 @@ export function OwnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
-                {BOOKING_REQUESTS.length}
-              </div>
-              <p className="text-[#4a5565] text-sm">Awaiting your response</p>
+              {requestsLoading ? (
+                <Skeleton className="h-10 w-12" />
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
+                    {
+                      bookingRequests.filter((r) => r.status === 'pending')
+                        .length
+                    }
+                  </div>
+                  <p className="text-[#4a5565] text-sm">
+                    Awaiting your response
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -360,30 +293,21 @@ export function OwnerDashboard() {
                   </LineChart>
                 </ResponsiveContainer>
                 <div className="flex justify-center gap-3 mt-4">
-                  <Button
-                    size="sm"
-                    className={`${
-                      view === 'monthly'
-                        ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white'
-                        : 'bg-[#f5f7fa] hover:bg-[#3A6EA5]/10 text-[#1a1a1a] border border-[#3A6EA5]/20'
-                    } rounded-xl`}
-                    variant={view === 'monthly' ? 'default' : 'outline'}
-                    onClick={() => setView('monthly')}
-                  >
-                    Monthly
-                  </Button>
-                  <Button
-                    size="sm"
-                    className={`${
-                      view === 'yearly'
-                        ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white'
-                        : 'bg-[#f5f7fa] hover:bg-[#3A6EA5]/10 text-[#1a1a1a] border border-[#3A6EA5]/20'
-                    } rounded-xl`}
-                    variant={view === 'yearly' ? 'default' : 'outline'}
-                    onClick={() => setView('yearly')}
-                  >
-                    Yearly
-                  </Button>
+                  {(['monthly', 'yearly'] as const).map((v) => (
+                    <Button
+                      key={v}
+                      size="sm"
+                      variant={view === v ? 'default' : 'outline'}
+                      className={`rounded-xl ${
+                        view === v
+                          ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white'
+                          : 'bg-[#f5f7fa] hover:bg-[#3A6EA5]/10 text-[#1a1a1a] border border-[#3A6EA5]/20'
+                      }`}
+                      onClick={() => setView(v)}
+                    >
+                      {v.charAt(0).toUpperCase() + v.slice(1)}
+                    </Button>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -396,72 +320,94 @@ export function OwnerDashboard() {
                     Booking Requests
                   </CardTitle>
                   <Badge className="bg-[#3A6EA5] text-white hover:bg-[#3A6EA5]">
-                    {BOOKING_REQUESTS.length} New
+                    {
+                      bookingRequests.filter((r) => r.status === 'pending')
+                        .length
+                    }{' '}
+                    New
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {BOOKING_REQUESTS.map((request) => (
-                  <div
-                    key={request.id}
-                    className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow border border-[#3A6EA5]/10"
-                  >
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="w-14 h-14">
-                          <AvatarImage src={request.image} />
-                          <AvatarFallback>
-                            {request.tenant.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
-                            {request.tenant}
-                          </h3>
-                          <p className="text-sm text-[#4a5565] mb-2">
-                            {request.property}
-                          </p>
-                          <div className="flex items-center gap-4 text-sm">
-                            <div className="flex items-center gap-1 text-[#6a7282]">
-                              <Calendar className="w-4 h-4" />
-                              {request.requestedDates}
+                {requestsLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-32 w-full rounded-2xl" />
+                  ))
+                ) : bookingRequests.length === 0 ? (
+                  <p className="text-[#4a5565] text-center py-8">
+                    No pending booking requests.
+                  </p>
+                ) : (
+                  bookingRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow border border-[#3A6EA5]/10"
+                    >
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="w-14 h-14">
+                            {request.tenantAvatarUrl && (
+                              <AvatarImage src={request.tenantAvatarUrl} />
+                            )}
+                            <AvatarFallback>
+                              {request.tenant.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
+                              {request.tenant}
+                            </h3>
+                            <p className="text-sm text-[#4a5565] mb-2">
+                              {request.property}
+                            </p>
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center gap-1 text-[#6a7282]">
+                                <Calendar className="w-4 h-4" />
+                                {request.requestedDates}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleAcceptRequest(request.id)}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Accept
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeclineRequest(request.id)}
-                          className="flex-1 rounded-xl border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-                        >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Decline
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className="rounded-xl border-[#3A6EA5]/20"
-                        >
-                          <Link to="/messages">
-                            <MessageSquare className="w-4 h-4 mr-1" />
-                            Message
-                          </Link>
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            disabled={
+                              accept.isPending || request.status !== 'pending'
+                            }
+                            onClick={() => handleAcceptRequest(request.id)}
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Accept
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={
+                              reject.isPending || request.status !== 'pending'
+                            }
+                            onClick={() => handleDeclineRequest(request.id)}
+                            className="flex-1 rounded-xl border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Decline
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="rounded-xl border-[#3A6EA5]/20"
+                          >
+                            <Link to="/messages">
+                              <MessageSquare className="w-4 h-4 mr-1" />
+                              Message
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </CardContent>
             </Card>
 
@@ -473,75 +419,90 @@ export function OwnerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-[#3A6EA5]/20">
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Contract ID
-                        </th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Property Name
-                        </th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Tenant Name
-                        </th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Status
-                        </th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Expiry Date
-                        </th>
-                        <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {CONTRACTS_HISTORY.map((contract) => (
-                        <tr
-                          key={contract.id}
-                          className="border-b border-[#3A6EA5]/10 hover:bg-[#f5f7fa] transition-colors"
-                        >
-                          <td className="py-4 px-4 text-[#1a1a1a] font-medium">
-                            {contract.id}
-                          </td>
-                          <td className="py-4 px-4 text-[#4a5565]">
-                            {contract.propertyName}
-                          </td>
-                          <td className="py-4 px-4 text-[#4a5565]">
-                            {contract.tenantName}
-                          </td>
-                          <td className="py-4 px-4">
-                            <Badge
-                              className={getContractStatusBadge(
-                                contract.status,
-                              )}
-                            >
-                              {contract.status}
-                            </Badge>
-                          </td>
-                          <td className="py-4 px-4 text-[#4a5565]">
-                            {contract.expiryDate}
-                          </td>
-                          <td className="py-4 px-4 text-right">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleDownloadContract(contract.id)
-                              }
-                              className="rounded-xl border-[#3A6EA5]/20"
-                            >
-                              <Download className="w-4 h-4 mr-1" />
-                              Download
-                            </Button>
-                          </td>
+                {contractsLoading ? (
+                  <Skeleton className="h-48 w-full rounded-2xl" />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-[#3A6EA5]/20">
+                          <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                            Contract ID
+                          </th>
+                          <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                            Property
+                          </th>
+                          <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                            Tenant
+                          </th>
+                          <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                            Status
+                          </th>
+                          <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                            Expiry
+                          </th>
+                          <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
+                            Actions
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {contracts.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="text-center py-8 text-[#4a5565]"
+                            >
+                              No contracts found.
+                            </td>
+                          </tr>
+                        ) : (
+                          contracts.map((contract) => (
+                            <tr
+                              key={contract.id}
+                              className="border-b border-[#3A6EA5]/10 hover:bg-[#f5f7fa] transition-colors"
+                            >
+                              <td className="py-4 px-4 text-[#1a1a1a] font-medium">
+                                {contract.id}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {contract.propertyName}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {contract.tenantName}
+                              </td>
+                              <td className="py-4 px-4">
+                                <Badge
+                                  className={getContractStatusBadge(
+                                    contract.status,
+                                  )}
+                                >
+                                  {contract.status}
+                                </Badge>
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {contract.expiryDate}
+                              </td>
+                              <td className="py-4 px-4 text-right">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    handleDownloadContract(contract.id)
+                                  }
+                                  className="rounded-xl border-[#3A6EA5]/20"
+                                >
+                                  <Download className="w-4 h-4 mr-1" />
+                                  Download
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -553,95 +514,111 @@ export function OwnerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {MY_PROPERTIES.map((property) => (
-                    <div
-                      key={property.id}
-                      className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow"
+                {propertiesLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-36 w-full rounded-2xl" />
+                    ))}
+                  </div>
+                ) : myProperties.length === 0 ? (
+                  <p className="text-[#4a5565] text-center py-8">
+                    No properties yet.{' '}
+                    <Link
+                      to="/add-property"
+                      className="text-[#3A6EA5] hover:underline"
                     >
-                      <div className="flex gap-4">
-                        <img
-                          src={property.image}
-                          alt={property.name}
-                          className="w-32 h-32 rounded-xl object-cover"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
-                                {property.name}
-                              </h3>
-                              <p className="text-sm text-[#4a5565] mb-2">
-                                {property.location} • {property.type}
-                              </p>
+                      Add your first one.
+                    </Link>
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {myProperties.map((property) => (
+                      <div
+                        key={property.id}
+                        className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow"
+                      >
+                        <div className="flex gap-4">
+                          <img
+                            src={property.image ?? property.images?.[0] ?? ''}
+                            alt={property.title}
+                            className="w-32 h-32 rounded-xl object-cover"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
+                                  {property.title}
+                                </h3>
+                                <p className="text-sm text-[#4a5565] mb-2">
+                                  {property.location} • {property.type}
+                                </p>
+                              </div>
+                              <Badge
+                                className={
+                                  property.status === 'rented'
+                                    ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                                    : 'bg-orange-100 text-orange-700 hover:bg-orange-100'
+                                }
+                              >
+                                {property.status === 'rented'
+                                  ? 'Occupied'
+                                  : 'Vacant'}
+                              </Badge>
                             </div>
-                            <Badge
-                              className={`${
-                                property.status === 'occupied'
-                                  ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                                  : 'bg-orange-100 text-orange-700 hover:bg-orange-100'
-                              }`}
-                            >
-                              {property.status === 'occupied'
-                                ? 'Occupied'
-                                : 'Vacant'}
-                            </Badge>
-                          </div>
-                          <div className="grid grid-cols-3 gap-4 mb-4">
-                            <div>
-                              <p className="text-xs text-[#6a7282] mb-1">
-                                Monthly Rent
-                              </p>
-                              <p className="font-semibold text-[#3A6EA5]">
-                                ${property.rent.toLocaleString()}
-                              </p>
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              <div>
+                                <p className="text-xs text-[#6a7282] mb-1">
+                                  Monthly Rent
+                                </p>
+                                <p className="font-semibold text-[#3A6EA5]">
+                                  {property.price.toLocaleString()} EGP
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-[#6a7282] mb-1">
+                                  Rating
+                                </p>
+                                <p className="text-sm text-[#1a1a1a] flex items-center gap-1">
+                                  <Star className="w-4 h-4 fill-[#3A6EA5] text-[#3A6EA5]" />
+                                  {property.rating ?? 'N/A'}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-xs text-[#6a7282] mb-1">
-                                Tenant
-                              </p>
-                              <p className="text-sm text-[#1a1a1a]">
-                                {property.tenant || 'N/A'}
-                              </p>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="rounded-xl border-[#3A6EA5]/20"
+                                asChild
+                              >
+                                <Link to={`/edit-property/${property.id}`}>
+                                  Edit
+                                </Link>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="rounded-xl border-[#3A6EA5]/20"
+                                asChild
+                              >
+                                <Link to={`/property/${property.id}`}>
+                                  View Details
+                                </Link>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-xl"
+                              >
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
                             </div>
-                            <div>
-                              <p className="text-xs text-[#6a7282] mb-1">
-                                Views
-                              </p>
-                              <p className="text-sm text-[#1a1a1a] flex items-center gap-1">
-                                <Eye className="w-4 h-4" />
-                                {property.views}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="rounded-xl border-[#3A6EA5]/20"
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="rounded-xl border-[#3A6EA5]/20"
-                            >
-                              View Details
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="rounded-xl"
-                            >
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -715,45 +692,53 @@ export function OwnerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={OCCUPANCY_DATA}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {OCCUPANCY_DATA.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="space-y-2 mt-4">
-                  {OCCUPANCY_DATA.map((item) => (
-                    <div
-                      key={item.name}
-                      className="flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
+                {propertiesLoading ? (
+                  <Skeleton className="h-48 w-full rounded-2xl" />
+                ) : (
+                  <>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie
+                          data={occupancyData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {occupancyData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="space-y-2 mt-4">
+                      {occupancyData.map((item) => (
                         <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <span className="text-sm text-[#1a1a1a]">
-                          {item.name}
-                        </span>
-                      </div>
-                      <span className="text-sm font-semibold text-[#1a1a1a]">
-                        {item.value} ({((item.value / 10) * 100).toFixed(0)}%)
-                      </span>
+                          key={item.name}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <span className="text-sm text-[#1a1a1a]">
+                              {item.name}
+                            </span>
+                          </div>
+                          <span className="text-sm font-semibold text-[#1a1a1a]">
+                            {item.value}
+                            {totalProperties > 0 &&
+                              ` (${((item.value / totalProperties) * 100).toFixed(0)}%)`}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -766,18 +751,31 @@ export function OwnerDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">Average Rent</p>
-                  <p className="text-2xl font-bold text-[#3A6EA5]">$2,350</p>
+                  <p className="text-sm text-[#6a7282] mb-1">
+                    Total Properties
+                  </p>
+                  <p className="text-2xl font-bold text-[#3A6EA5]">
+                    {totalProperties}
+                  </p>
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">Total Tenants</p>
-                  <p className="text-2xl font-bold text-[#3A6EA5]">8</p>
+                  <p className="text-sm text-[#6a7282] mb-1">
+                    Pending Requests
+                  </p>
+                  <p className="text-2xl font-bold text-[#3A6EA5]">
+                    {
+                      bookingRequests.filter((r) => r.status === 'pending')
+                        .length
+                    }
+                  </p>
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">Average Rating</p>
+                  <p className="text-sm text-[#6a7282] mb-1">
+                    Active Contracts
+                  </p>
                   <p className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
-                    4.7
-                    <Star className="w-5 h-5 fill-[#3A6EA5]" />
+                    {contracts.filter((c) => c.status === 'Active').length}
+                    <Eye className="w-5 h-5" />
                   </p>
                 </div>
               </CardContent>

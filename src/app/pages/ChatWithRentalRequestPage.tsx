@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import {
   Send,
   Paperclip,
@@ -12,13 +12,15 @@ import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
 import { Card } from '../components/ui/card'
-import { useNavigate } from 'react-router'
+import { Skeleton } from '../components/ui/skeleton'
+import { useNavigate, useParams } from 'react-router'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
+import { useMessages, useSendMessage } from '@/hooks/useConversations'
 
 const RENTAL_REQUEST = {
   apartment: {
@@ -40,74 +42,34 @@ const RENTAL_REQUEST = {
   totalPrice: 168000,
 }
 
-const MESSAGES = [
-  {
-    id: '1',
-    sender: 'them',
-    text: "Hi! I'm very interested in renting your apartment. Is it still available?",
-    time: '10:30 AM',
-    status: 'read',
-  },
-  {
-    id: '2',
-    sender: 'me',
-    text: 'Hello! Yes, the apartment is available. Would you like to know more details?',
-    time: '10:35 AM',
-    status: 'read',
-  },
-  {
-    id: '3',
-    sender: 'them',
-    text: "I'd like to rent it from April to October. Can we discuss the terms?",
-    time: '10:40 AM',
-    status: 'read',
-  },
-  {
-    id: '4',
-    sender: 'me',
-    text: "Of course! I've reviewed your rental request. Everything looks good. We can proceed with the contract.",
-    time: '10:45 AM',
-    status: 'sent',
-  },
-  {
-    id: '5',
-    sender: 'them',
-    text: 'Great! Looking forward to it.',
-    time: '10:48 AM',
-    status: 'pending',
-  },
-]
-
 export function ChatWithRentalRequestPage() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
   const [newMessage, setNewMessage] = useState('')
-  const [messages, setMessages] = useState(MESSAGES)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const { data: messagesData, isLoading: messagesLoading } = useMessages(id)
+  const messages = useMemo(() => messagesData?.data ?? [], [messagesData])
+  const sendMessage = useSendMessage()
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      setMessages([
-        ...messages,
-        {
-          id: String(messages.length + 1),
-          sender: 'me',
-          text: newMessage,
-          time: new Date().toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          status: 'sent',
-        },
-      ])
-      setNewMessage('')
-    }
+    if (!newMessage.trim() || !id) return
+    sendMessage.mutate(
+      { conversationId: id, text: newMessage },
+      { onSuccess: () => setNewMessage('') },
+    )
   }
 
-  const handleEditMessage = (id: string) => {
-    console.log('Edit message:', id)
+  const handleEditMessage = (_id: string) => {
+    // Edit not yet supported by API
   }
 
-  const handleDeleteMessage = (id: string) => {
-    setMessages(messages.filter((msg) => msg.id !== id))
+  const handleDeleteMessage = (_id: string) => {
+    // Delete not yet supported by API
   }
 
   return (
@@ -268,54 +230,71 @@ export function ChatWithRentalRequestPage() {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender === 'me' ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
-                    <div className="relative group">
-                      <div
-                        className={`max-w-[70%] ${
-                          message.sender === 'me'
-                            ? 'bg-[#3A6EA5] text-white'
-                            : 'bg-white text-[#1a1a1a]'
-                        } rounded-2xl px-4 py-3`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm mb-1">{message.text}</p>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button
-                                className={`opacity-0 group-hover:opacity-100 transition-opacity ${
-                                  message.sender === 'me'
-                                    ? 'text-white/70 hover:text-white'
-                                    : 'text-[#6B7280] hover:text-[#1a1a1a]'
-                                }`}
+                {messagesLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}
+                    >
+                      <Skeleton className="h-14 w-48 rounded-2xl" />
+                    </div>
+                  ))
+                ) : messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-[#6B7280]">
+                    No messages yet. Start the conversation!
+                  </div>
+                ) : (
+                  messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${
+                        message.sender === 'me'
+                          ? 'justify-end'
+                          : 'justify-start'
+                      }`}
+                    >
+                      <div className="relative group">
+                        <div
+                          className={`max-w-[70%] ${
+                            message.sender === 'me'
+                              ? 'bg-[#3A6EA5] text-white'
+                              : 'bg-white text-[#1a1a1a]'
+                          } rounded-2xl px-4 py-3`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm mb-1">{message.text}</p>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  className={`opacity-0 group-hover:opacity-100 transition-opacity ${
+                                    message.sender === 'me'
+                                      ? 'text-white/70 hover:text-white'
+                                      : 'text-[#6B7280] hover:text-[#1a1a1a]'
+                                  }`}
+                                >
+                                  <MoreVertical className="w-4 h-4" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="bg-white rounded-xl"
                               >
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="bg-white rounded-xl"
-                            >
-                              <DropdownMenuItem
-                                onClick={() => handleEditMessage(message.id)}
-                              >
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleDeleteMessage(message.id)}
-                                className="text-red-600"
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        <div className="flex items-center justify-between">
+                                <DropdownMenuItem
+                                  onClick={() => handleEditMessage(message.id)}
+                                >
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleDeleteMessage(message.id)
+                                  }
+                                  className="text-red-600"
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                           <p
                             className={`text-xs ${
                               message.sender === 'me'
@@ -325,22 +304,12 @@ export function ChatWithRentalRequestPage() {
                           >
                             {message.time}
                           </p>
-                          <p
-                            className={`text-xs ml-3 ${
-                              message.sender === 'me'
-                                ? 'text-white/70'
-                                : 'text-[#6B7280]'
-                            }`}
-                          >
-                            {message.status === 'pending' && 'Pending'}
-                            {message.status === 'sent' && 'Sent'}
-                            {message.status === 'read' && 'Read'}
-                          </p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Message Input */}
@@ -357,17 +326,20 @@ export function ChatWithRentalRequestPage() {
                     <Input
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
                           handleSendMessage()
                         }
                       }}
                       placeholder="Type a message..."
                       className="rounded-2xl bg-[#E5EBF0] border-[#3A6EA5]/20 pr-12"
+                      disabled={sendMessage.isPending}
                     />
                   </div>
                   <Button
                     onClick={handleSendMessage}
+                    disabled={!newMessage.trim() || sendMessage.isPending}
                     className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30 flex-shrink-0"
                   >
                     <Send className="w-5 h-5" />

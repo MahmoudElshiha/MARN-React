@@ -1,9 +1,8 @@
-import { Link, useLocation, useNavigate } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import {
   Search,
   Menu,
   User,
-  LogOut,
   X,
   Home,
   Building,
@@ -19,19 +18,8 @@ import { motion, AnimatePresence } from 'motion/react'
 
 export function Navigation() {
   const location = useLocation()
-  const navigate = useNavigate()
   const isHome = location.pathname === '/'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const isLoggedIn = Boolean(
-    localStorage.getItem('token') ?? sessionStorage.getItem('token'),
-  )
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    sessionStorage.removeItem('token')
-    setIsMenuOpen(false)
-    navigate('/login')
-  }
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/' },
@@ -39,9 +27,7 @@ export function Navigation() {
     { icon: MessageCircle, label: 'Chat Support', path: '/chatbot' },
     { icon: HelpCircle, label: 'FAQ', path: '/faq' },
     { icon: Phone, label: 'Contact', path: '/contact' },
-    ...(isLoggedIn
-      ? [{ icon: Settings, label: 'Settings', path: '/profile-settings' }]
-      : []),
+    { icon: Settings, label: 'Settings', path: '/profile-settings' },
   ]
 
   return (
@@ -165,7 +151,7 @@ export function Navigation() {
                     return (
                       <motion.div
                         key={item.path}
-                        initial={{ opacity: 0, x: -20 }}
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
                       >
@@ -175,7 +161,7 @@ export function Navigation() {
                           className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
                             isActive
                               ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white shadow-lg shadow-[#3A6EA5]/30'
-                              : 'text-[#1a1a1a] hover:bg-[#f5f7fa] hover:translate-x-1'
+                              : 'text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1'
                           }`}
                         >
                           <Icon className="w-5 h-5" />
@@ -192,29 +178,18 @@ export function Navigation() {
                 {/* Account Section */}
                 <div className="space-y-2">
                   <motion.div
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    {!isLoggedIn ? (
-                      <Link
-                        to="/login"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:translate-x-1 transition-all"
-                      >
-                        <User className="w-5 h-5" />
-                        <span className="font-medium">Login / Sign Up</span>
-                      </Link>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:translate-x-1 transition-all text-left"
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span className="font-medium">Logout</span>
-                      </button>
-                    )}
+                    <Link
+                      to="/login"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">Login / Sign Up</span>
+                    </Link>
                   </motion.div>
                 </div>
 

@@ -4,27 +4,68 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Checkbox } from '../components/ui/checkbox'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { useState } from 'react'
+import { useRegister } from '@/hooks/useRegister'
+import { HttpError } from '@/services/httpErrors'
 
 export function SignUpPage() {
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    gender: '',
+    gender: '' as 'Male' | 'Female' | '',
     birthdate: '',
     agreeToTerms: false,
   })
 
+  const fe = (key: string) => fieldErrors[key] ?? []
+
+  const { mutate: register, isPending } = useRegister({
+    onSuccess: (data) => {
+      setSuccessMessage(data.message)
+      setErrorMessage('')
+      setFieldErrors({})
+      setTimeout(() => navigate('/login'), 3000)
+    },
+    onError: (error) => {
+      if (error instanceof HttpError) {
+        setFieldErrors(error.validationErrors ?? {})
+        const flat = error.errors?.join(' ')
+        setErrorMessage(
+          flat ??
+            (Object.keys(error.validationErrors ?? {}).length
+              ? ''
+              : error.message),
+        )
+      } else {
+        setErrorMessage('Something went wrong. Please try again.')
+      }
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Sign up:', formData)
-    // Handle signup logic
+    setErrorMessage('')
+    setSuccessMessage('')
+    setFieldErrors({})
+    register({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      dateOfBirth: formData.birthdate,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      gender: formData.gender || 'Unknown',
+    })
   }
 
   return (
@@ -112,10 +153,15 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, firstName: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('FirstName').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="John"
                   />
                 </div>
+                {fe('FirstName').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-1">
+                    {msg}
+                  </p>
+                ))}
               </div>
 
               {/* Last Name */}
@@ -133,10 +179,15 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, lastName: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('LastName').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="Doe"
                   />
                 </div>
+                {fe('LastName').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-1">
+                    {msg}
+                  </p>
+                ))}
               </div>
 
               {/* Email */}
@@ -154,10 +205,15 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('Email').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="you@example.com"
                   />
                 </div>
+                {fe('Email').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-1">
+                    {msg}
+                  </p>
+                ))}
               </div>
 
               {/* Password */}
@@ -175,7 +231,7 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    className="pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('Password').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="Create a strong password"
                   />
                   <button
@@ -190,10 +246,18 @@ export function SignUpPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-[#6a7282] mt-2">
-                  Must be at least 8 characters with a mix of letters and
-                  numbers
-                </p>
+                {fe('Password').length ? (
+                  fe('Password').map((msg) => (
+                    <p key={msg} className="text-xs text-red-500 mt-1">
+                      {msg}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-xs text-[#6a7282] mt-2">
+                    Must be at least 8 characters with a mix of letters and
+                    numbers
+                  </p>
+                )}
               </div>
 
               {/* Confirm Password */}
@@ -217,7 +281,7 @@ export function SignUpPage() {
                         confirmPassword: e.target.value,
                       })
                     }
-                    className="pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('ConfirmPassword').length ? 'border-red-400 focus:border-red-400' : ''}`}
                     placeholder="Confirm your password"
                   />
                   <button
@@ -232,9 +296,17 @@ export function SignUpPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-[#6a7282] mt-2">
-                  Must match the password
-                </p>
+                {fe('ConfirmPassword').length ? (
+                  fe('ConfirmPassword').map((msg) => (
+                    <p key={msg} className="text-xs text-red-500 mt-1">
+                      {msg}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-xs text-[#6a7282] mt-2">
+                    Must match the password
+                  </p>
+                )}
               </div>
 
               {/* Gender */}
@@ -243,11 +315,13 @@ export function SignUpPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, gender: 'male' })}
+                    onClick={() => setFormData({ ...formData, gender: 'Male' })}
                     className={`p-6 rounded-2xl border-2 transition-all ${
-                      formData.gender === 'male'
+                      formData.gender === 'Male'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
-                        : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
+                        : fe('Gender').length
+                          ? 'bg-[#f5f7fa] border-red-300 text-[#1a1a1a] hover:border-red-400'
+                          : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
                     }`}
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -258,12 +332,14 @@ export function SignUpPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setFormData({ ...formData, gender: 'female' })
+                      setFormData({ ...formData, gender: 'Female' })
                     }
                     className={`p-6 rounded-2xl border-2 transition-all ${
-                      formData.gender === 'female'
+                      formData.gender === 'Female'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
-                        : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
+                        : fe('Gender').length
+                          ? 'bg-[#f5f7fa] border-red-300 text-[#1a1a1a] hover:border-red-400'
+                          : 'bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#1a1a1a] hover:border-[#3A6EA5]/40'
                     }`}
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -272,6 +348,11 @@ export function SignUpPage() {
                     </div>
                   </button>
                 </div>
+                {fe('Gender').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-2">
+                    {msg}
+                  </p>
+                ))}
               </div>
 
               {/* Birthdate */}
@@ -292,9 +373,14 @@ export function SignUpPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, birthdate: e.target.value })
                     }
-                    className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
+                    className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('DateOfBirth').length ? 'border-red-400 focus:border-red-400' : ''}`}
                   />
                 </div>
+                {fe('DateOfBirth').map((msg) => (
+                  <p key={msg} className="text-xs text-red-500 mt-1">
+                    {msg}
+                  </p>
+                ))}
               </div>
 
               {/* Terms Checkbox */}
@@ -329,13 +415,26 @@ export function SignUpPage() {
                 </label>
               </div>
 
+              {errorMessage && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                  {errorMessage}
+                </p>
+              )}
+
+              {successMessage && (
+                <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                  {successMessage}
+                </p>
+              )}
+
               {/* Submit Button */}
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30"
+                disabled={isPending}
+                className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30 disabled:opacity-60"
               >
-                Create Account
+                {isPending ? 'Creating Account...' : 'Create Account'}
               </Button>
             </form>
 
