@@ -22,6 +22,7 @@ import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
 import { Switch } from '../components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Skeleton } from '../components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import {
   Select,
@@ -43,12 +44,13 @@ import {
 import { useState, useEffect, startTransition } from 'react'
 import { toast } from 'sonner'
 import { FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
+import { getImageUrl } from '@/constants/assets'
 import { useProfile } from '@/hooks/useProfile'
 import { EnumSelect } from '../components/EnumSelect'
 import { HttpError } from '@/services/httpErrors'
 
 export function ProfileSettingsPage() {
-  const { data: profileResponse, update } = useProfile()
+  const { data: profileResponse, isLoading, update } = useProfile()
   const apiProfile = profileResponse?.data
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
@@ -176,28 +178,28 @@ export function ProfileSettingsPage() {
           </p>
 
           <Tabs defaultValue="profile" className="space-y-8">
-            <TabsList className="bg-[#F2F4F6] p-2 rounded-2xl">
+            <TabsList className="w-full h-auto bg-[#F2F4F6] p-1.5 rounded-2xl gap-1">
               <TabsTrigger
                 value="profile"
-                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5]"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
                 Profile
               </TabsTrigger>
               <TabsTrigger
                 value="security"
-                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5]"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
                 Security
               </TabsTrigger>
               <TabsTrigger
                 value="documents"
-                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5]"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
                 Documents
               </TabsTrigger>
               <TabsTrigger
                 value="roommate"
-                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5]"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
                 Roommate Settings
               </TabsTrigger>
@@ -210,11 +212,15 @@ export function ProfileSettingsPage() {
                 <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 lg:col-span-1">
                   <CardContent className="pt-6 text-center">
                     <div className="relative w-40 h-40 mx-auto mb-6">
-                      <img
-                        src={avatarPreview ?? apiProfile?.profileImage ?? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop'}
-                        alt="Profile"
-                        className="w-full h-full rounded-full object-cover shadow-lg"
-                      />
+                      {isLoading ? (
+                        <Skeleton className="w-full h-full rounded-full" />
+                      ) : (
+                        <img
+                          src={avatarPreview ?? getImageUrl(apiProfile?.profileImage)}
+                          alt="Profile"
+                          className="w-full h-full rounded-full object-cover shadow-lg"
+                        />
+                      )}
                       <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
                         <Camera className="w-5 h-5 text-white" />
                       </button>

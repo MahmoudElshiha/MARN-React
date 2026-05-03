@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import {
   Search,
   Menu,
@@ -10,16 +10,26 @@ import {
   HelpCircle,
   Phone,
   Settings,
+  LogOut,
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useAuth } from '@/hooks/useAuth'
 
 export function Navigation() {
   const location = useLocation()
+  const navigate = useNavigate()
   const isHome = location.pathname === '/'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isAuthenticated, logout } = useAuth()
+
+  function handleLogout() {
+    logout()
+    setIsMenuOpen(false)
+    navigate('/')
+  }
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/' },
@@ -58,13 +68,12 @@ export function Navigation() {
 
             {/* Navigation Links */}
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                className="text-[#1a1a1a] hover:bg-[#9CBBDC]/20 rounded-xl"
-                asChild
+              <Link
+                to="/search"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] rounded-xl transition-colors"
               >
-                <Link to="/search">Explore</Link>
-              </Button>
+                Explore
+              </Link>
 
               <Button
                 className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
@@ -182,14 +191,24 @@ export function Navigation() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
-                    >
-                      <User className="w-5 h-5" />
-                      <span className="font-medium">Login / Sign Up</span>
-                    </Link>
+                    {isAuthenticated ? (
+                      <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-medium">Logout</span>
+                      </button>
+                    ) : (
+                      <Link
+                        to="/login"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
+                      >
+                        <User className="w-5 h-5" />
+                        <span className="font-medium">Login / Sign Up</span>
+                      </Link>
+                    )}
                   </motion.div>
                 </div>
 
