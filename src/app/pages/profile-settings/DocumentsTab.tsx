@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { IdCard, Upload } from 'lucide-react'
+import { IdCard } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { FileUpload } from '../../components/ui/file-upload'
 import { toast } from 'sonner'
 
 export function DocumentsTab() {
@@ -14,17 +15,6 @@ export function DocumentsTab() {
     addressArabic: '',
     nationalIdNumber: '',
   })
-
-  const handleFileUpload = (
-    field: 'frontIdCard' | 'backIdCard',
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setIdentityVerification({ ...identityVerification, [field]: file })
-      toast.success(`${field === 'frontIdCard' ? 'Front' : 'Back'} side of ID uploaded`)
-    }
-  }
 
   return (
     <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
@@ -43,50 +33,32 @@ export function DocumentsTab() {
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <Label className="text-[#1a1a1a] mb-2 block">Front Side of ID Card</Label>
-            <div className="relative">
-              <input
-                type="file"
-                id="frontIdCard"
-                accept="image/*"
-                onChange={(e) => handleFileUpload('frontIdCard', e)}
-                className="hidden"
-              />
-              <label
-                htmlFor="frontIdCard"
-                className="flex flex-col items-center justify-center w-full h-40 bg-white rounded-xl border-2 border-dashed border-[#3A6EA5]/20 hover:border-[#3A6EA5]/40 cursor-pointer transition-colors"
-              >
-                <Upload className="w-8 h-8 text-[#4a5565] mb-2" />
-                <span className="text-sm text-[#4a5565]">
-                  {identityVerification.frontIdCard
-                    ? identityVerification.frontIdCard.name
-                    : 'Click to upload'}
-                </span>
-              </label>
-            </div>
+            <FileUpload
+              id="frontIdCard"
+              value={identityVerification.frontIdCard}
+              onChange={(file) => {
+                setIdentityVerification({ ...identityVerification, frontIdCard: file })
+                toast.success('Front side of ID uploaded')
+              }}
+              onClear={() =>
+                setIdentityVerification({ ...identityVerification, frontIdCard: null })
+              }
+            />
           </div>
 
           <div>
             <Label className="text-[#1a1a1a] mb-2 block">Back Side of ID Card</Label>
-            <div className="relative">
-              <input
-                type="file"
-                id="backIdCard"
-                accept="image/*"
-                onChange={(e) => handleFileUpload('backIdCard', e)}
-                className="hidden"
-              />
-              <label
-                htmlFor="backIdCard"
-                className="flex flex-col items-center justify-center w-full h-40 bg-white rounded-xl border-2 border-dashed border-[#3A6EA5]/20 hover:border-[#3A6EA5]/40 cursor-pointer transition-colors"
-              >
-                <Upload className="w-8 h-8 text-[#4a5565] mb-2" />
-                <span className="text-sm text-[#4a5565]">
-                  {identityVerification.backIdCard
-                    ? identityVerification.backIdCard.name
-                    : 'Click to upload'}
-                </span>
-              </label>
-            </div>
+            <FileUpload
+              id="backIdCard"
+              value={identityVerification.backIdCard}
+              onChange={(file) => {
+                setIdentityVerification({ ...identityVerification, backIdCard: file })
+                toast.success('Back side of ID uploaded')
+              }}
+              onClear={() =>
+                setIdentityVerification({ ...identityVerification, backIdCard: null })
+              }
+            />
           </div>
 
           <div>
