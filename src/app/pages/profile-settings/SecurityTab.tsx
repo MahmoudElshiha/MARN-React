@@ -14,14 +14,59 @@ import {
 } from '../../components/ui/dialog'
 import { toast } from 'sonner'
 import { useProfile } from '@/hooks/useProfile'
+import { HttpError } from '@/services/httpErrors'
 
 export function SecurityTab() {
-  const { data: profileResponse } = useProfile()
-  const email = profileResponse?.data?.email ?? ''
+  const { data: profileResponse, changePassword } = useProfile()
+  const apiProfile = profileResponse?.data
+
+  const [passwords, setPasswords] = useState({
+    current: '',
+    new: '',
+    confirm: '',
+  })
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
   const [show2FAModal, setShow2FAModal] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
+
+  const clearFieldError = (key: string) =>
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev
+      const { [key]: _, ...rest } = prev
+      return rest
+    })
+
+  const handleChangePassword = () => {
+    if (!apiProfile?.id) return
+    changePassword.mutate(
+      {
+        id: apiProfile.id,
+        currentPassword: passwords.current,
+        newPassword: passwords.new,
+        confirmNewPassword: passwords.confirm,
+      },
+      {
+        onSuccess: () => {
+          setPasswords({ current: '', new: '', confirm: '' })
+          setFieldErrors({})
+          toast.success('Password updated successfully!')
+        },
+        onError: (err) => {
+          if (err instanceof HttpError && err.validationErrors) {
+            const flat: Record<string, string> = {}
+            for (const [key, msgs] of Object.entries(err.validationErrors)) {
+              flat[key] = msgs[0]
+            }
+            setFieldErrors(flat)
+          } else {
+            toast.error(err instanceof HttpError ? err.message : 'Failed to update password.')
+          }
+        },
+      },
+    )
+  }
 
   const handle2FAToggle = () => {
     if (!twoFactorEnabled) {
@@ -65,10 +110,19 @@ export function SecurityTab() {
                   <Input
                     id="current-password"
                     type="password"
-                    className="pl-12 bg-white rounded-xl border-[#3A6EA5]/20"
+                    value={passwords.current}
+                    onChange={(e) => {
+                      setPasswords({ ...passwords, current: e.target.value })
+                      clearFieldError('CurrentPassword')
+                    }}
+                    className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.CurrentPassword ? 'border-red-400' : ''}`}
                   />
                 </div>
+                {fieldErrors.CurrentPassword && (
+                  <p className="text-xs text-red-500 mt-1">{fieldErrors.CurrentPassword}</p>
+                )}
               </div>
+
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="new-password" className="text-[#1a1a1a] mb-2 block">
@@ -77,8 +131,16 @@ export function SecurityTab() {
                   <Input
                     id="new-password"
                     type="password"
-                    className="bg-white rounded-xl border-[#3A6EA5]/20"
+                    value={passwords.new}
+                    onChange={(e) => {
+                      setPasswords({ ...passwords, new: e.target.value })
+                      clearFieldError('NewPassword')
+                    }}
+                    className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.NewPassword ? 'border-red-400' : ''}`}
                   />
+                  {fieldErrors.NewPassword && (
+                    <p className="text-xs text-red-500 mt-1">{fieldErrors.NewPassword}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="confirm-password" className="text-[#1a1a1a] mb-2 block">
@@ -87,15 +149,25 @@ export function SecurityTab() {
                   <Input
                     id="confirm-password"
                     type="password"
-                    className="bg-white rounded-xl border-[#3A6EA5]/20"
+                    value={passwords.confirm}
+                    onChange={(e) => {
+                      setPasswords({ ...passwords, confirm: e.target.value })
+                      clearFieldError('ConfirmNewPassword')
+                    }}
+                    className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ConfirmNewPassword ? 'border-red-400' : ''}`}
                   />
+                  {fieldErrors.ConfirmNewPassword && (
+                    <p className="text-xs text-red-500 mt-1">{fieldErrors.ConfirmNewPassword}</p>
+                  )}
                 </div>
               </div>
+
               <Button
-                onClick={() => toast.success('Password updated successfully!')}
+                disabled={changePassword.isPending}
+                onClick={handleChangePassword}
                 className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
               >
-                Update Password
+                {changePassword.isPending ? 'Updating…' : 'Update Password'}
               </Button>
             </div>
           </div>
@@ -146,7 +218,7 @@ export function SecurityTab() {
               />
             </div>
             <p className="text-sm text-[#4a5565]">
-              A verification code has been sent to <strong>{email}</strong>
+              A verification code has been sent to <strong>{apiProfile?.email}</strong>
             </p>
           </div>
           <div className="flex gap-3 justify-end">

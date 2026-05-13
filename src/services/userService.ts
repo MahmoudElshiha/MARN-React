@@ -32,6 +32,13 @@ export interface Profile {
   budgetRangeMax: number | null
 }
 
+export interface ChangePasswordPayload {
+  id: string
+  currentPassword: string
+  newPassword: string
+  confirmNewPassword: string
+}
+
 export interface UpdateProfilePayload {
   id: string
   firstName: string
@@ -66,6 +73,9 @@ export const userService = {
       form,
     )
   },
+
+  changePassword: (payload: ChangePasswordPayload) =>
+    apiClient.put<void>('/api/Profile/change-password', payload),
 
   uploadAvatar: (file: File) => {
     const form = new FormData()
