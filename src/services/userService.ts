@@ -32,6 +32,15 @@ export interface Profile {
   budgetRangeMax: number | null
 }
 
+export interface UpdateLegalProfilePayload {
+  id: string
+  frontIdPhoto?: File
+  backIdPhoto?: File
+  arabicAddress: string
+  arabicFullName: string
+  nationalIDNumber: string
+}
+
 export interface ChangePasswordPayload {
   id: string
   currentPassword: string
@@ -72,6 +81,17 @@ export const userService = {
       '/api/Profile/edit-profile-basic',
       form,
     )
+  },
+
+  updateLegalProfile: (payload: UpdateLegalProfilePayload) => {
+    const form = new FormData()
+    form.append('Id', payload.id)
+    form.append('ArabicFullName', payload.arabicFullName)
+    form.append('ArabicAddress', payload.arabicAddress)
+    form.append('NationalIDNumber', payload.nationalIDNumber)
+    if (payload.frontIdPhoto) form.append('FrontIdPhoto', payload.frontIdPhoto)
+    if (payload.backIdPhoto) form.append('BackIdPhoto', payload.backIdPhoto)
+    return apiClient.put<ApiResponse<Profile>>('/api/Profile/edit-profile-legal', form)
   },
 
   changePassword: (payload: ChangePasswordPayload) =>

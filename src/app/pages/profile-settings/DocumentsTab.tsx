@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, startTransition } from 'react'
 import { IdCard } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -6,8 +6,15 @@ import { Label } from '../../components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { FileUpload } from '../../components/ui/file-upload'
 import { toast } from 'sonner'
+import { useProfile } from '@/hooks/useProfile'
+import { HttpError } from '@/services/httpErrors'
+import { getImageUrl } from '@/constants/assets'
 
 export function DocumentsTab() {
+  const { data: profileResponse, updateLegal } = useProfile()
+  const apiProfile = profileResponse?.data
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [identityVerification, setIdentityVerification] = useState({
     frontIdCard: null as File | null,
     backIdCard: null as File | null,
@@ -15,6 +22,79 @@ export function DocumentsTab() {
     addressArabic: '',
     nationalIdNumber: '',
   })
+
+  useEffect(() => {
+    if (!apiProfile) return
+
+    startTransition(() => {
+      setIdentityVerification((prev) => ({
+        ...prev,
+        nameArabic: apiProfile.arabicFullName ?? '',
+        addressArabic: apiProfile.arabicAddress ?? '',
+        nationalIdNumber: apiProfile.nationalIDNumber ?? '',
+      }))
+    })
+
+    const fetchAsFile = async (path: string): Promise<File | null> => {
+      try {
+        const res = await fetch(getImageUrl(path))
+        const blob = await res.blob()
+        const filename = path.split('/').pop() ?? 'image.jpg'
+        return new File([blob], filename, { type: blob.type })
+      } catch {
+        return null
+      }
+    }
+
+    if (apiProfile.frontIdPhoto) {
+      fetchAsFile(apiProfile.frontIdPhoto).then(
+        (file) => file && setIdentityVerification((prev) => ({ ...prev, frontIdCard: file })),
+      )
+    }
+    if (apiProfile.backIdPhoto) {
+      fetchAsFile(apiProfile.backIdPhoto).then(
+        (file) => file && setIdentityVerification((prev) => ({ ...prev, backIdCard: file })),
+      )
+    }
+  }, [apiProfile])
+
+  const clearFieldError = (key: string) =>
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev
+      const { [key]: _, ...rest } = prev
+      return rest
+    })
+
+  const handleSubmit = () => {
+    if (!apiProfile?.id) return
+    updateLegal.mutate(
+      {
+        id: apiProfile.id,
+        arabicFullName: identityVerification.nameArabic,
+        arabicAddress: identityVerification.addressArabic,
+        nationalIDNumber: identityVerification.nationalIdNumber,
+        frontIdPhoto: identityVerification.frontIdCard ?? undefined,
+        backIdPhoto: identityVerification.backIdCard ?? undefined,
+      },
+      {
+        onSuccess: () => {
+          setFieldErrors({})
+          toast.success('Identity documents submitted for review')
+        },
+        onError: (err) => {
+          if (err instanceof HttpError && err.validationErrors) {
+            const flat: Record<string, string> = {}
+            for (const [key, msgs] of Object.entries(err.validationErrors)) {
+              flat[key] = msgs[0]
+            }
+            setFieldErrors(flat)
+          } else {
+            toast.error(err instanceof HttpError ? err.message : 'Failed to submit documents.')
+          }
+        },
+      },
+    )
+  }
 
   return (
     <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
@@ -36,10 +116,10 @@ export function DocumentsTab() {
             <FileUpload
               id="frontIdCard"
               value={identityVerification.frontIdCard}
-              onChange={(file) => {
+              initialUrl={apiProfile?.frontIdPhoto ? getImageUrl(apiProfile.frontIdPhoto) : null}
+              onChange={(file) =>
                 setIdentityVerification({ ...identityVerification, frontIdCard: file })
-                toast.success('Front side of ID uploaded')
-              }}
+              }
               onClear={() =>
                 setIdentityVerification({ ...identityVerification, frontIdCard: null })
               }
@@ -51,10 +131,10 @@ export function DocumentsTab() {
             <FileUpload
               id="backIdCard"
               value={identityVerification.backIdCard}
-              onChange={(file) => {
+              initialUrl={apiProfile?.backIdPhoto ? getImageUrl(apiProfile.backIdPhoto) : null}
+              onChange={(file) =>
                 setIdentityVerification({ ...identityVerification, backIdCard: file })
-                toast.success('Back side of ID uploaded')
-              }}
+              }
               onClear={() =>
                 setIdentityVerification({ ...identityVerification, backIdCard: null })
               }
@@ -66,13 +146,17 @@ export function DocumentsTab() {
             <Input
               id="nameArabic"
               value={identityVerification.nameArabic}
-              onChange={(e) =>
+              onChange={(e) => {
                 setIdentityVerification({ ...identityVerification, nameArabic: e.target.value })
-              }
-              className="bg-white rounded-xl border-[#3A6EA5]/20"
+                clearFieldError('ArabicFullName')
+              }}
+              className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ArabicFullName ? 'border-red-400' : ''}`}
               placeholder="أدخل اسمك بالعربية"
               dir="rtl"
             />
+            {fieldErrors.ArabicFullName && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.ArabicFullName}</p>
+            )}
           </div>
 
           <div>
@@ -82,16 +166,17 @@ export function DocumentsTab() {
             <Input
               id="addressArabic"
               value={identityVerification.addressArabic}
-              onChange={(e) =>
-                setIdentityVerification({
-                  ...identityVerification,
-                  addressArabic: e.target.value,
-                })
-              }
-              className="bg-white rounded-xl border-[#3A6EA5]/20"
+              onChange={(e) => {
+                setIdentityVerification({ ...identityVerification, addressArabic: e.target.value })
+                clearFieldError('ArabicAddress')
+              }}
+              className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ArabicAddress ? 'border-red-400' : ''}`}
               placeholder="أدخل عنوانك بالعربية"
               dir="rtl"
             />
+            {fieldErrors.ArabicAddress && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.ArabicAddress}</p>
+            )}
           </div>
 
           <div className="md:col-span-2">
@@ -101,15 +186,19 @@ export function DocumentsTab() {
             <Input
               id="nationalIdNumber"
               value={identityVerification.nationalIdNumber}
-              onChange={(e) =>
+              onChange={(e) => {
                 setIdentityVerification({
                   ...identityVerification,
                   nationalIdNumber: e.target.value,
                 })
-              }
-              className="bg-white rounded-xl border-[#3A6EA5]/20"
+                clearFieldError('NationalIDNumber')
+              }}
+              className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.NationalIDNumber ? 'border-red-400' : ''}`}
               placeholder="Enter your national ID number"
             />
+            {fieldErrors.NationalIDNumber && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.NationalIDNumber}</p>
+            )}
           </div>
         </div>
 
@@ -118,10 +207,11 @@ export function DocumentsTab() {
             Cancel
           </Button>
           <Button
-            onClick={() => toast.success('Identity documents submitted for review')}
+            disabled={updateLegal.isPending}
+            onClick={handleSubmit}
             className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
           >
-            Submit for Verification
+            {updateLegal.isPending ? 'Submitting…' : 'Submit for Verification'}
           </Button>
         </div>
       </CardContent>
