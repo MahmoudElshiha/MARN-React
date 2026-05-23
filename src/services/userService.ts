@@ -1,6 +1,72 @@
 import { apiClient } from './apiClient'
 import type { ApiResponse } from '@/types/common'
 
+// ─── Renter Dashboard ───────────────────────────────────────────────────────
+
+export interface DashboardNotification {
+  id: number
+  type: string
+  title: string
+  isRead: boolean
+  createdAt: string
+}
+
+export interface DashboardActiveRental {
+  id: string
+  propertyId: string
+  propertyName: string
+  monthlyRent: number
+  startDate: string
+  expiryDate: string
+  status: string
+}
+
+export interface DashboardPendingBooking {
+  id: string
+  propertyId: string
+  propertyName: string
+  requestedDate: string
+  status: string
+}
+
+export interface DashboardSavedProperty {
+  id: string
+  title: string
+  price: number
+  location: string
+  imageUrl?: string
+}
+
+export interface DashboardContract {
+  id: string
+  propertyName: string
+  startDate: string
+  expiryDate: string
+  status: string
+  documentUrl?: string
+}
+
+export interface DashboardPaidPayment {
+  id: string
+  amount: number
+  paidAt: string
+  propertyName: string
+}
+
+export interface RenterDashboard {
+  activeRentalsCount: number
+  nextPayment: string | null
+  savedPropertiesCount: number
+  unreadNotificationsCount: number
+  accountStatus: string
+  activeRentals: DashboardActiveRental[]
+  pendingBookingRequests: DashboardPendingBooking[]
+  savedProperties: DashboardSavedProperty[]
+  notifications: DashboardNotification[]
+  allContracts: DashboardContract[]
+  paidPayments: DashboardPaidPayment[]
+}
+
 export interface Profile {
   id: string
   email: string
@@ -64,6 +130,9 @@ export interface UpdateProfilePayload {
 export const userService = {
   getProfile: () =>
     apiClient.get<ApiResponse<Profile>>('/api/Profile/edit-profile'),
+
+  getRenterDashboard: () =>
+    apiClient.get<ApiResponse<RenterDashboard>>('/api/Profile/renter-dashboard'),
 
   updateProfile: (payload: UpdateProfilePayload) => {
     const form = new FormData()

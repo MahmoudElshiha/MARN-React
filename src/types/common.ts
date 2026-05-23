@@ -13,6 +13,17 @@ export interface PaginatedResponse<T> {
   pageSize: number
 }
 
+/** Paginated variant used by the Property search endpoint.
+ *  Shape: { items: T[], totalCount, page, pageSize, totalPages }
+ */
+export interface SearchPaginatedResponse<T> {
+  items: T[]
+  totalCount: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 /** Normalized error shape used throughout the app. */
 export interface ApiError {
   message: string

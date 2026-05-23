@@ -7,7 +7,14 @@ export interface EnumOption {
   name: string
 }
 
-export type EnumEndpoint = 'genders' | 'languages' | 'countries'
+export type EnumEndpoint =
+  | 'genders'
+  | 'languages'
+  | 'countries'
+  | 'property-types'
+  | 'cities'
+  | 'governorates'
+  | 'rental-units'
 
 interface State {
   options: EnumOption[]
