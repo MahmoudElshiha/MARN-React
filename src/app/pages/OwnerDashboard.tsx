@@ -105,9 +105,11 @@ export function OwnerDashboard() {
 
   const bookingRequests = requestsData?.data ?? []
   const contracts = contractsData?.data ?? []
-  const myProperties = propertiesData?.data ?? []
+  // propertyService returns ApiResponse<SearchPaginatedResponse<…>>
+  // so the array lives at .data.items, not .data
+  const myProperties = propertiesData?.data?.items ?? []
 
-  const totalProperties = propertiesData?.total ?? 0
+  const totalProperties = propertiesData?.data?.totalCount ?? 0
   const occupiedCount = myProperties.filter((p) => p.status === 'rented').length
   const vacantCount = totalProperties - occupiedCount
 

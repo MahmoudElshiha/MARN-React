@@ -17,13 +17,36 @@ import { Input } from './ui/input'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/useAuth'
+import { propertyService } from '@/services/propertyService'
+import { decodeUserFromToken } from '@/utils/tokenUtils'
 
 export function Navigation() {
   const location = useLocation()
   const navigate = useNavigate()
   const isHome = location.pathname === '/'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, login, logout, user } = useAuth()
+  const [isBecomeHostLoading, setIsBecomeHostLoading] = useState(false)
+
+  async function handleBecomeHost() {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    try {
+      setIsBecomeHostLoading(true)
+      const res = await propertyService.becomeOwner()
+      const newToken = res.data
+      const remember = !!localStorage.getItem('token')
+      const updatedUser = decodeUserFromToken(newToken)
+      login(newToken, updatedUser, remember)
+      navigate('/owner-dashboard')
+    } catch (err) {
+      console.error('Become owner failed:', err)
+    } finally {
+      setIsBecomeHostLoading(false)
+    }
+  }
 
   function handleLogout() {
     logout()
@@ -75,12 +98,15 @@ export function Navigation() {
                 Explore
               </Link>
 
-              <Button
-                className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
-                asChild
-              >
-                <Link to="/owner-dashboard">Become a Host</Link>
-              </Button>
+              {user?.role !== 'owner' && (
+                <Button
+                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
+                  disabled={isBecomeHostLoading}
+                  onClick={handleBecomeHost}
+                >
+                  {isBecomeHostLoading ? 'Please wait…' : 'Become a Host'}
+                </Button>
+              )}
 
               <div className="flex items-center gap-2">
                 <Button

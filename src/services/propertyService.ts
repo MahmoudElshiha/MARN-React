@@ -75,4 +75,7 @@ export const propertyService = {
 
   deleteProperty: (id: string) =>
     apiClient.delete<ApiResponse<void>>(`/api/Property/${id}`),
+
+  becomeOwner: () =>
+    apiClient.post<ApiResponse<string>>('/api/Property/become-owner'),
 }
