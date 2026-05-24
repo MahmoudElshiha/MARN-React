@@ -57,11 +57,11 @@ function DashboardButton() {
       <Button
         variant="ghost"
         size="icon"
-        className="rounded-xl hover:bg-[#9CBBDC]/20"
+        className="group rounded-xl hover:bg-[#3A6EA5]/10"
         asChild
       >
         <Link to={dashboards[0].path}>
-          <User className="w-5 h-5" />
+          <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
         </Link>
       </Button>
     )
@@ -71,12 +71,12 @@ function DashboardButton() {
     <div ref={ref} className="relative">
       <Button
         variant="ghost"
-        className="rounded-xl hover:bg-[#9CBBDC]/20 px-2 gap-1"
+        className="group rounded-xl hover:bg-[#3A6EA5]/10 px-2 gap-1"
         onClick={() => setOpen((prev) => !prev)}
       >
-        <User className="w-5 h-5" />
+        <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
         <ChevronDown
-          className={`w-3 h-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`w-3 h-3 transition-[transform,color] duration-200 group-hover:text-[#3A6EA5] ${open ? 'rotate-180' : ''}`}
         />
       </Button>
 
@@ -96,9 +96,9 @@ function DashboardButton() {
                   navigate(d.path)
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] transition-colors"
+                className="group flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-[#1a1a1a] transition-colors hover:bg-[#3A6EA5] hover:text-white"
               >
-                <LayoutDashboard className="w-4 h-4 shrink-0" />
+                <LayoutDashboard className="w-4 h-4 shrink-0 text-[#3A6EA5] transition-colors group-hover:text-white" />
                 {d.label}
               </button>
             ))}
@@ -202,10 +202,10 @@ export function Navigation() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-xl hover:bg-[#9CBBDC]/20 transition-all"
+                  className="group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
                   onClick={() => setIsMenuOpen(true)}
                 >
-                  <Menu className="w-5 h-5 text-[#1a1a1a]" />
+                  <Menu className="w-5 h-5 text-[#1a1a1a] transition-colors group-hover:text-[#3A6EA5]" />
                 </Button>
               </div>
             </div>
