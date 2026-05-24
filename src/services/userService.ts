@@ -85,6 +85,40 @@ export interface Profile {
   arabicFullName: string | null
   nationalIDNumber: string | null
   twoFactorEnabled: boolean
+  governorate: string | null
+  searchStatus: string | null
+  roommatePreferencesEnabled: boolean
+  smoking: boolean | null
+  smokingImportance: number | null
+  pets: boolean | null
+  petsImportance: number | null
+  sleepSchedule: string | null
+  sleepImportance: number | null
+  educationLevel: string | null
+  educationImportance: number | null
+  fieldOfStudy: string | null
+  fieldOfStudyImportance: number | null
+  noiseTolerance: number | null
+  noiseToleranceImportance: number | null
+  guestsFrequency: string | null
+  guestsFrequencyImportance: number | null
+  workSchedule: string | null
+  workScheduleImportance: number | null
+  sharingLevel: string | null
+  sharingLevelImportance: number | null
+  budgetRangeMin: number | null
+  budgetRangeMax: number | null
+  budgetImportance: number | null
+}
+
+export interface PublicProfile {
+  id: string
+  fullName: string
+  email: string
+  profileImage: string | null
+  accountStatus: string
+  bio: string | null
+  isOwner: boolean
   roommatePreferencesEnabled: boolean
   smoking: boolean | null
   pets: boolean | null
@@ -163,6 +197,9 @@ export interface UpdateProfilePayload {
 export const userService = {
   getProfile: () =>
     apiClient.get<ApiResponse<Profile>>('/api/Profile/edit-profile'),
+
+  getPublicProfile: () =>
+    apiClient.get<ApiResponse<PublicProfile>>('/api/Profile/profile'),
 
   getRenterDashboard: () =>
     apiClient.get<ApiResponse<RenterDashboard>>('/api/Profile/renter-dashboard'),

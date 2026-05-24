@@ -24,7 +24,7 @@ import { toast } from 'sonner'
 import { useProfile } from '@/hooks/useProfile'
 import { HttpError } from '@/services/httpErrors'
 
-// ─── Importance Rating ─────────────────────────────────────────────────────────
+// ─── Importance Rating (1–5) ───────────────────────────────────────────────────
 function ImportanceRating({
   value,
   onChange,
@@ -33,14 +33,14 @@ function ImportanceRating({
   onChange: (v: number) => void
 }) {
   return (
-    <div className="flex items-center gap-1 mt-2.5">
+    <div className="flex items-center gap-1.5 mt-2.5">
       <span className="text-xs text-[#4a5565] shrink-0 mr-1">Importance:</span>
-      {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+      {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
           type="button"
           onClick={() => onChange(n)}
-          className={`w-6 h-6 rounded-full text-xs font-medium transition-colors focus:outline-none ${
+          className={`w-7 h-7 rounded-full text-xs font-medium transition-colors focus:outline-none ${
             n <= value
               ? 'bg-[#3A6EA5] text-white'
               : 'bg-white border border-[#3A6EA5]/20 text-[#4a5565] hover:bg-[#3A6EA5]/10'
@@ -58,27 +58,27 @@ const DEFAULT_SETTINGS = {
   governorate: '',
   searchStatus: '',
   smoking: false,
-  smokingImportance: 5,
+  smokingImportance: 3,
   pets: false,
-  petsImportance: 5,
+  petsImportance: 3,
   petType: '',
   sleepSchedule: '',
-  sleepImportance: 5,
+  sleepImportance: 3,
   educationLevel: '',
-  educationImportance: 5,
+  educationImportance: 3,
   fieldOfStudy: '',
-  fieldOfStudyImportance: 5,
-  noiseTolerance: [5] as number[],
-  noiseToleranceImportance: 5,
+  fieldOfStudyImportance: 3,
+  noiseTolerance: [3] as number[],
+  noiseToleranceImportance: 3,
   guestsFrequency: '',
-  guestsFrequencyImportance: 5,
+  guestsFrequencyImportance: 3,
   workSchedule: '',
-  workScheduleImportance: 5,
+  workScheduleImportance: 3,
   sharingLevel: '',
-  sharingLevelImportance: 5,
+  sharingLevelImportance: 3,
   budgetRangeMin: '',
   budgetRangeMax: '',
-  budgetImportance: 5,
+  budgetImportance: 3,
   profileVisible: false,
 }
 
@@ -98,17 +98,29 @@ export function RoommateTab() {
       startTransition(() => {
         setSettings({
           ...DEFAULT_SETTINGS,
+          governorate: apiProfile.governorate ?? '',
+          searchStatus: apiProfile.searchStatus ?? '',
           smoking: apiProfile.smoking ?? false,
+          smokingImportance: apiProfile.smokingImportance ?? 3,
           pets: apiProfile.pets ?? false,
+          petsImportance: apiProfile.petsImportance ?? 3,
           sleepSchedule: apiProfile.sleepSchedule ?? '',
+          sleepImportance: apiProfile.sleepImportance ?? 3,
           educationLevel: apiProfile.educationLevel ?? '',
+          educationImportance: apiProfile.educationImportance ?? 3,
           fieldOfStudy: apiProfile.fieldOfStudy ?? '',
-          noiseTolerance: [apiProfile.noiseTolerance ?? 5],
+          fieldOfStudyImportance: apiProfile.fieldOfStudyImportance ?? 3,
+          noiseTolerance: [apiProfile.noiseTolerance ?? 3],
+          noiseToleranceImportance: apiProfile.noiseToleranceImportance ?? 3,
           guestsFrequency: apiProfile.guestsFrequency ?? '',
+          guestsFrequencyImportance: apiProfile.guestsFrequencyImportance ?? 3,
           workSchedule: apiProfile.workSchedule ?? '',
+          workScheduleImportance: apiProfile.workScheduleImportance ?? 3,
           sharingLevel: apiProfile.sharingLevel ?? '',
+          sharingLevelImportance: apiProfile.sharingLevelImportance ?? 3,
           budgetRangeMin: apiProfile.budgetRangeMin?.toString() ?? '',
           budgetRangeMax: apiProfile.budgetRangeMax?.toString() ?? '',
+          budgetImportance: apiProfile.budgetImportance ?? 3,
           profileVisible: apiProfile.roommatePreferencesEnabled ?? false,
         })
       })
@@ -125,17 +137,29 @@ export function RoommateTab() {
       startTransition(() => {
         setSettings({
           ...DEFAULT_SETTINGS,
+          governorate: apiProfile.governorate ?? '',
+          searchStatus: apiProfile.searchStatus ?? '',
           smoking: apiProfile.smoking ?? false,
+          smokingImportance: apiProfile.smokingImportance ?? 3,
           pets: apiProfile.pets ?? false,
+          petsImportance: apiProfile.petsImportance ?? 3,
           sleepSchedule: apiProfile.sleepSchedule ?? '',
+          sleepImportance: apiProfile.sleepImportance ?? 3,
           educationLevel: apiProfile.educationLevel ?? '',
+          educationImportance: apiProfile.educationImportance ?? 3,
           fieldOfStudy: apiProfile.fieldOfStudy ?? '',
-          noiseTolerance: [apiProfile.noiseTolerance ?? 5],
+          fieldOfStudyImportance: apiProfile.fieldOfStudyImportance ?? 3,
+          noiseTolerance: [apiProfile.noiseTolerance ?? 3],
+          noiseToleranceImportance: apiProfile.noiseToleranceImportance ?? 3,
           guestsFrequency: apiProfile.guestsFrequency ?? '',
+          guestsFrequencyImportance: apiProfile.guestsFrequencyImportance ?? 3,
           workSchedule: apiProfile.workSchedule ?? '',
+          workScheduleImportance: apiProfile.workScheduleImportance ?? 3,
           sharingLevel: apiProfile.sharingLevel ?? '',
+          sharingLevelImportance: apiProfile.sharingLevelImportance ?? 3,
           budgetRangeMin: apiProfile.budgetRangeMin?.toString() ?? '',
           budgetRangeMax: apiProfile.budgetRangeMax?.toString() ?? '',
+          budgetImportance: apiProfile.budgetImportance ?? 3,
           profileVisible: apiProfile.roommatePreferencesEnabled ?? false,
         })
       })
@@ -387,10 +411,10 @@ export function RoommateTab() {
                 <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                   <Volume2 className="w-4 h-4" />
                   <span>
-                    {settings.noiseTolerance[0] <= 3 && 'Low'}
-                    {settings.noiseTolerance[0] > 3 && settings.noiseTolerance[0] <= 7 && 'Medium'}
-                    {settings.noiseTolerance[0] > 7 && 'High'}
-                    {' '}({settings.noiseTolerance[0]}/10)
+                    {settings.noiseTolerance[0] <= 2 && 'Low'}
+                    {settings.noiseTolerance[0] === 3 && 'Medium'}
+                    {settings.noiseTolerance[0] >= 4 && 'High'}
+                    {' '}({settings.noiseTolerance[0]}/5)
                   </span>
                 </div>
               </div>
@@ -398,7 +422,7 @@ export function RoommateTab() {
                 value={settings.noiseTolerance}
                 onValueChange={(v) => patch({ noiseTolerance: v })}
                 min={1}
-                max={10}
+                max={5}
                 step={1}
                 className="w-full"
               />

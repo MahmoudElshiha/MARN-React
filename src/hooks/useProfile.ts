@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/userService'
-import type { UpdateProfilePayload, ChangePasswordPayload, UpdateLegalProfilePayload, Toggle2FAPayload, UpdateRoommatePreferencesPayload } from '@/services/userService'
+import type {
+  UpdateProfilePayload,
+  ChangePasswordPayload,
+  UpdateLegalProfilePayload,
+  Toggle2FAPayload,
+  UpdateRoommatePreferencesPayload,
+} from '@/services/userService'
 
 export function useProfile() {
   const queryClient = useQueryClient()
