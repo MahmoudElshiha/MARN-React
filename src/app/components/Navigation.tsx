@@ -11,14 +11,103 @@ import {
   Phone,
   Settings,
   LogOut,
+  LayoutDashboard,
+  ChevronDown,
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/useAuth'
 import { propertyService } from '@/services/propertyService'
 import { decodeUserFromToken } from '@/utils/tokenUtils'
+
+const ROLE_DASHBOARDS: Record<string, { label: string; path: string }[]> = {
+  owner: [
+    { label: 'Owner Dashboard', path: '/owner-dashboard' },
+    { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
+  ],
+  admin: [{ label: 'Admin Dashboard', path: '/admin-dashboard' }],
+  tenant: [{ label: 'Tenant Dashboard', path: '/tenant-dashboard' }],
+}
+
+function DashboardButton() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const dashboards = (user?.role && ROLE_DASHBOARDS[user.role]) ?? [
+    { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
+  ]
+
+  // Close when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  if (dashboards.length === 1) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-xl hover:bg-[#9CBBDC]/20"
+        asChild
+      >
+        <Link to={dashboards[0].path}>
+          <User className="w-5 h-5" />
+        </Link>
+      </Button>
+    )
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <Button
+        variant="ghost"
+        className="rounded-xl hover:bg-[#9CBBDC]/20 px-2 gap-1"
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <User className="w-5 h-5" />
+        <ChevronDown
+          className={`w-3 h-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
+      </Button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-[#3A6EA5]/20 bg-white shadow-lg shadow-[#3A6EA5]/10 overflow-hidden z-[200]"
+          >
+            {dashboards.map((d) => (
+              <button
+                key={d.path}
+                onClick={() => {
+                  navigate(d.path)
+                  setOpen(false)
+                }}
+                className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] transition-colors"
+              >
+                <LayoutDashboard className="w-4 h-4 shrink-0" />
+                {d.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 export function Navigation() {
   const location = useLocation()
@@ -109,6 +198,7 @@ export function Navigation() {
               )}
 
               <div className="flex items-center gap-2">
+                <DashboardButton />
                 <Button
                   variant="ghost"
                   size="icon"
@@ -116,16 +206,6 @@ export function Navigation() {
                   onClick={() => setIsMenuOpen(true)}
                 >
                   <Menu className="w-5 h-5 text-[#1a1a1a]" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-xl hover:bg-[#9CBBDC]/20"
-                  asChild
-                >
-                  <Link to="/tenant-dashboard">
-                    <User className="w-5 h-5" />
-                  </Link>
                 </Button>
               </div>
             </div>

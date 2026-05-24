@@ -109,7 +109,7 @@ export default function App() {
           <Route
             path="/tenant-dashboard"
             element={
-              <ProtectedRoute roles={['tenant']}>
+              <ProtectedRoute roles={['tenant', 'owner']}>
                 <TenantDashboard />
               </ProtectedRoute>
             }

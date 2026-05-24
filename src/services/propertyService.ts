@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient'
+import { getImageUrl } from '@/constants/assets'
 import type { ApiResponse, SearchPaginatedResponse } from '@/types/common'
 import type { Property, SearchProperty, PropertyFilters } from '@/types/property'
 
@@ -60,9 +61,19 @@ function buildSearchQuery(filters: PropertyFilters): string {
 
 export const propertyService = {
   getProperties: (filters: PropertyFilters = {}) =>
-    apiClient.get<ApiResponse<SearchPaginatedResponse<SearchProperty>>>(
-      `/api/Property/search${buildSearchQuery(filters)}`,
-    ),
+    apiClient
+      .get<ApiResponse<SearchPaginatedResponse<SearchProperty>>>(
+        `/api/Property/search${buildSearchQuery(filters)}`,
+      )
+      .then((res) => {
+        if (res.data?.data?.items) {
+          res.data.data.items = res.data.data.items.map((p) => ({
+            ...p,
+            imagePath: getImageUrl(p.imagePath),
+          }))
+        }
+        return res
+      }),
 
   getPropertyById: (id: string) =>
     apiClient.get<ApiResponse<Property>>(`/api/Property/${id}`),
