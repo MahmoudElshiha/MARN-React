@@ -17,6 +17,12 @@ export type EnumEndpoint =
   | 'governorates'
   | 'rental-units'
   | 'roommate-search-statuses'
+  | 'sleep-schedules'
+  | 'fields-of-study'
+  | 'guests-frequencies'
+  | 'work-schedules'
+  | 'sharing-levels'
+  | 'education-levels'
 
 interface State {
   options: EnumOption[]

@@ -18,18 +18,9 @@ import { EnumSelect } from '../../components/EnumSelect'
 import { Switch } from '../../components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Skeleton } from '../../components/ui/skeleton'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../components/ui/select'
 import { Slider } from '../../components/ui/slider'
-import { ToggleGroup, ToggleGroupItem } from '../../components/ui/toggle-group'
 import { Separator } from '../../components/ui/separator'
 import { toast } from 'sonner'
-import { FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
 import { useProfile } from '@/hooks/useProfile'
 import { HttpError } from '@/services/httpErrors'
 
@@ -326,25 +317,13 @@ export function RoommateTab() {
 
             {/* Sleep Schedule */}
             <div>
-              <Label htmlFor="sleep-schedule" className="text-[#1a1a1a] mb-2 block">
-                Sleep Schedule
-              </Label>
-              <Select
+              <EnumSelect
+                id="sleep-schedule"
+                label="Sleep Schedule"
+                endpoint="sleep-schedules"
                 value={settings.sleepSchedule}
-                onValueChange={(v) => patch({ sleepSchedule: v })}
-              >
-                <SelectTrigger
-                  id="sleep-schedule"
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
-                >
-                  <SelectValue placeholder="Select sleep schedule" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="EarlySleeper">Early sleeper</SelectItem>
-                  <SelectItem value="NightOwl">Night owl</SelectItem>
-                  <SelectItem value="Flexible">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(v) => patch({ sleepSchedule: v })}
+              />
               <ImportanceRating
                 value={settings.sleepImportance}
                 onChange={(v) => patch({ sleepImportance: v })}
@@ -363,27 +342,13 @@ export function RoommateTab() {
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="education-level" className="text-[#1a1a1a] mb-2 block">
-                Education Level
-              </Label>
-              <Select
+              <EnumSelect
+                id="education-level"
+                label="Education Level"
+                endpoint="education-levels"
                 value={settings.educationLevel}
-                onValueChange={(v) => patch({ educationLevel: v })}
-              >
-                <SelectTrigger
-                  id="education-level"
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
-                >
-                  <SelectValue placeholder="Select education level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="HighSchool">High School</SelectItem>
-                  <SelectItem value="Bachelor">Bachelor's</SelectItem>
-                  <SelectItem value="Master">Master's</SelectItem>
-                  <SelectItem value="PhD">PhD</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(v) => patch({ educationLevel: v })}
+              />
               <ImportanceRating
                 value={settings.educationImportance}
                 onChange={(v) => patch({ educationImportance: v })}
@@ -391,28 +356,13 @@ export function RoommateTab() {
             </div>
 
             <div>
-              <Label htmlFor="field-of-study" className="text-[#1a1a1a] mb-2 block">
-                Field of Study{' '}
-                <span className="text-[#4a5565] text-sm font-normal">(Optional)</span>
-              </Label>
-              <Select
+              <EnumSelect
+                id="field-of-study"
+                label="Field of Study (Optional)"
+                endpoint="fields-of-study"
                 value={settings.fieldOfStudy}
-                onValueChange={(v) => patch({ fieldOfStudy: v })}
-              >
-                <SelectTrigger
-                  id="field-of-study"
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
-                >
-                  <SelectValue placeholder="Select field of study" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FIELD_OF_STUDY_OPTIONS.map((field) => (
-                    <SelectItem key={field} value={field}>
-                      {field}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(v) => patch({ fieldOfStudy: v })}
+              />
               <ImportanceRating
                 value={settings.fieldOfStudyImportance}
                 onChange={(v) => patch({ fieldOfStudyImportance: v })}
@@ -466,25 +416,14 @@ export function RoommateTab() {
             <div className="grid md:grid-cols-2 gap-6">
               {/* Guests Frequency */}
               <div>
-                <Label htmlFor="guests-frequency" className="text-[#1a1a1a] mb-2 block">
-                  Guests Frequency
-                </Label>
-                <Select
+                <EnumSelect
+                  id="guests-frequency"
+                  label="Guests Frequency"
+                  endpoint="guests-frequencies"
                   value={settings.guestsFrequency}
-                  onValueChange={(v) => patch({ guestsFrequency: v })}
-                >
-                  <SelectTrigger
-                    id="guests-frequency"
-                    className="bg-white rounded-xl border-[#3A6EA5]/20"
-                  >
-                    <SelectValue placeholder="How often do you have guests?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Rarely">Rarely</SelectItem>
-                    <SelectItem value="Occasionally">Occasionally</SelectItem>
-                    <SelectItem value="Frequently">Frequently</SelectItem>
-                  </SelectContent>
-                </Select>
+                  onChange={(v) => patch({ guestsFrequency: v })}
+                  placeholder="How often do you have guests?"
+                />
                 <ImportanceRating
                   value={settings.guestsFrequencyImportance}
                   onChange={(v) => patch({ guestsFrequencyImportance: v })}
@@ -493,27 +432,13 @@ export function RoommateTab() {
 
               {/* Work Schedule */}
               <div>
-                <Label htmlFor="work-schedule" className="text-[#1a1a1a] mb-2 block">
-                  Work Schedule
-                </Label>
-                <Select
+                <EnumSelect
+                  id="work-schedule"
+                  label="Work Schedule"
+                  endpoint="work-schedules"
                   value={settings.workSchedule}
-                  onValueChange={(v) => patch({ workSchedule: v })}
-                >
-                  <SelectTrigger
-                    id="work-schedule"
-                    className="bg-white rounded-xl border-[#3A6EA5]/20"
-                  >
-                    <SelectValue placeholder="Select work schedule" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Remote">Remote</SelectItem>
-                    <SelectItem value="OnSite">On-site</SelectItem>
-                    <SelectItem value="Hybrid">Hybrid</SelectItem>
-                    <SelectItem value="Student">Student</SelectItem>
-                    <SelectItem value="ShiftBased">Shift-based</SelectItem>
-                  </SelectContent>
-                </Select>
+                  onChange={(v) => patch({ workSchedule: v })}
+                />
                 <ImportanceRating
                   value={settings.workScheduleImportance}
                   onChange={(v) => patch({ workScheduleImportance: v })}
@@ -523,29 +448,13 @@ export function RoommateTab() {
 
             {/* Sharing Level */}
             <div>
-              <Label className="text-[#1a1a1a] mb-3 block">Sharing Level</Label>
-              <ToggleGroup
-                type="single"
+              <EnumSelect
+                id="sharing-level"
+                label="Sharing Level"
+                endpoint="sharing-levels"
                 value={settings.sharingLevel}
-                onValueChange={(v) => {
-                  if (v) patch({ sharingLevel: v })
-                }}
-                className="grid grid-cols-3 gap-3"
-              >
-                {[
-                  { value: 'PreferPrivacy', label: 'Prefer Privacy' },
-                  { value: 'OkayWithSharing', label: 'Okay with Sharing' },
-                  { value: 'VerySocial', label: 'Very Social' },
-                ].map(({ value, label }) => (
-                  <ToggleGroupItem
-                    key={value}
-                    value={value}
-                    className="rounded-xl bg-white border border-[#3A6EA5]/20 data-[state=on]:bg-gradient-to-r data-[state=on]:from-[#3A6EA5] data-[state=on]:to-[#9CBBDC] data-[state=on]:text-white data-[state=on]:border-transparent"
-                  >
-                    {label}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                onChange={(v) => patch({ sharingLevel: v })}
+              />
               <ImportanceRating
                 value={settings.sharingLevelImportance}
                 onChange={(v) => patch({ sharingLevelImportance: v })}
