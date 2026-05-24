@@ -35,7 +35,18 @@ export function LoginPage() {
       { email: formData.email, password: formData.password },
       {
         onSuccess: (result) => {
-          navigate(roleDestination(result.user.role))
+          if (result.requiresTwoFactor) {
+            // Redirect to 2FA verification; pass context via router state
+            navigate('/2fa-verification', {
+              state: {
+                email: formData.email,
+                tempToken: result.tempToken,
+                remember: formData.remember,
+              },
+            })
+          } else {
+            navigate(roleDestination(result.user.role))
+          }
         },
         onError: (err) => {
           const msg =
