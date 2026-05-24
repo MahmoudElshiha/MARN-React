@@ -44,7 +44,7 @@ export function TenantDashboard() {
   const { data: recommendedData, isLoading: recommendedLoading } = useProperties({ pageSize: 2 })
 
   const dashboard = dashboardRes?.data
-  const recommendedProperties = recommendedData?.data ?? []
+  const recommendedProperties = recommendedData?.data?.items ?? []
 
   const activeRental = dashboard?.activeRentals?.[0] ?? null
 
@@ -280,17 +280,17 @@ export function TenantDashboard() {
                     {recommendedProperties.map((property) => (
                       <PropertyCard
                         key={property.id}
-                        id={property.id}
-                        image={property.image ?? property.images?.[0] ?? ''}
+                        id={property.id.toString()}
+                        image={property.imagePath ?? ''}
                         title={property.title}
-                        location={property.location}
+                        location={property.address}
                         price={property.price}
-                        rating={property.rating ?? 0}
-                        reviews={property.reviews ?? 0}
+                        rating={property.averageRating ?? 0}
+                        reviews={property.ratings ?? 0}
                         type={property.type}
-                        beds={property.beds}
-                        baths={property.baths}
-                        guests={property.guests}
+                        beds={property.bedrooms}
+                        baths={property.bathrooms}
+                        guests={property.maxOccupants}
                       />
                     ))}
                   </div>

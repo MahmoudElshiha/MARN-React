@@ -5,6 +5,7 @@ import type { ApiResponse } from '@/types/common'
 export interface EnumOption {
   id: number
   name: string
+  displayName?: string
 }
 
 export type EnumEndpoint =
@@ -15,6 +16,7 @@ export type EnumEndpoint =
   | 'cities'
   | 'governorates'
   | 'rental-units'
+  | 'roommate-search-statuses'
 
 interface State {
   options: EnumOption[]

@@ -44,7 +44,7 @@ export function EnumSelect({
         <SelectContent className="max-h-[300px]">
           {options.map((option) => (
             <SelectItem key={option.id} value={option.name}>
-              {option.name}
+              {option.displayName ?? option.name}
             </SelectItem>
           ))}
         </SelectContent>

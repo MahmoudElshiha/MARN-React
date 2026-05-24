@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, startTransition } from 'react'
 import { motion } from 'motion/react'
 import {
   Users,
@@ -7,15 +7,17 @@ import {
   Volume2,
   Coffee,
   GraduationCap,
-  UserPlus,
+  MapPin,
   Shield,
+  Wallet,
 } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { Textarea } from '../../components/ui/textarea'
+import { EnumSelect } from '../../components/EnumSelect'
 import { Switch } from '../../components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { Skeleton } from '../../components/ui/skeleton'
 import {
   Select,
   SelectContent,
@@ -28,31 +30,194 @@ import { ToggleGroup, ToggleGroupItem } from '../../components/ui/toggle-group'
 import { Separator } from '../../components/ui/separator'
 import { toast } from 'sonner'
 import { FIELD_OF_STUDY_OPTIONS } from '@/constants/options'
+import { useProfile } from '@/hooks/useProfile'
+import { HttpError } from '@/services/httpErrors'
 
-const BIO_MAX_LENGTH = 300
+// ─── Importance Rating ─────────────────────────────────────────────────────────
+function ImportanceRating({
+  value,
+  onChange,
+}: {
+  value: number
+  onChange: (v: number) => void
+}) {
+  return (
+    <div className="flex items-center gap-1 mt-2.5">
+      <span className="text-xs text-[#4a5565] shrink-0 mr-1">Importance:</span>
+      {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onChange(n)}
+          className={`w-6 h-6 rounded-full text-xs font-medium transition-colors focus:outline-none ${
+            n <= value
+              ? 'bg-[#3A6EA5] text-white'
+              : 'bg-white border border-[#3A6EA5]/20 text-[#4a5565] hover:bg-[#3A6EA5]/10'
+          }`}
+        >
+          {n}
+        </button>
+      ))}
+    </div>
+  )
+}
 
+// ─── Default state ─────────────────────────────────────────────────────────────
+const DEFAULT_SETTINGS = {
+  governorate: '',
+  searchStatus: '',
+  smoking: false,
+  smokingImportance: 5,
+  pets: false,
+  petsImportance: 5,
+  petType: '',
+  sleepSchedule: '',
+  sleepImportance: 5,
+  educationLevel: '',
+  educationImportance: 5,
+  fieldOfStudy: '',
+  fieldOfStudyImportance: 5,
+  noiseTolerance: [5] as number[],
+  noiseToleranceImportance: 5,
+  guestsFrequency: '',
+  guestsFrequencyImportance: 5,
+  workSchedule: '',
+  workScheduleImportance: 5,
+  sharingLevel: '',
+  sharingLevelImportance: 5,
+  budgetRangeMin: '',
+  budgetRangeMax: '',
+  budgetImportance: 5,
+  profileVisible: false,
+}
+
+type RoommateSettings = typeof DEFAULT_SETTINGS
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export function RoommateTab() {
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [roommateSettings, setRoommateSettings] = useState({
-    smoking: false,
-    pets: false,
-    petType: '',
-    sleepSchedule: '',
-    educationLevel: '',
-    fieldOfStudy: '',
-    noiseTolerance: [50],
-    guestsFrequency: '',
-    workSchedule: '',
-    sharingLevel: '',
-    bio: '',
-    profileVisible: false,
-  })
+  const { data: profileResponse, isLoading, updateRoommate } = useProfile()
+  const apiProfile = profileResponse?.data
 
-  const update = (patch: Partial<typeof roommateSettings>) => {
-    setRoommateSettings((prev) => ({ ...prev, ...patch }))
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [settings, setSettings] = useState<RoommateSettings>(DEFAULT_SETTINGS)
+
+  // Populate from API
+  useEffect(() => {
+    if (apiProfile) {
+      startTransition(() => {
+        setSettings({
+          ...DEFAULT_SETTINGS,
+          smoking: apiProfile.smoking ?? false,
+          pets: apiProfile.pets ?? false,
+          sleepSchedule: apiProfile.sleepSchedule ?? '',
+          educationLevel: apiProfile.educationLevel ?? '',
+          fieldOfStudy: apiProfile.fieldOfStudy ?? '',
+          noiseTolerance: [apiProfile.noiseTolerance ?? 5],
+          guestsFrequency: apiProfile.guestsFrequency ?? '',
+          workSchedule: apiProfile.workSchedule ?? '',
+          sharingLevel: apiProfile.sharingLevel ?? '',
+          budgetRangeMin: apiProfile.budgetRangeMin?.toString() ?? '',
+          budgetRangeMax: apiProfile.budgetRangeMax?.toString() ?? '',
+          profileVisible: apiProfile.roommatePreferencesEnabled ?? false,
+        })
+      })
+    }
+  }, [apiProfile])
+
+  const patch = (p: Partial<RoommateSettings>) => {
+    setSettings((prev) => ({ ...prev, ...p }))
     setHasUnsavedChanges(true)
   }
 
+  const handleCancel = () => {
+    if (apiProfile) {
+      startTransition(() => {
+        setSettings({
+          ...DEFAULT_SETTINGS,
+          smoking: apiProfile.smoking ?? false,
+          pets: apiProfile.pets ?? false,
+          sleepSchedule: apiProfile.sleepSchedule ?? '',
+          educationLevel: apiProfile.educationLevel ?? '',
+          fieldOfStudy: apiProfile.fieldOfStudy ?? '',
+          noiseTolerance: [apiProfile.noiseTolerance ?? 5],
+          guestsFrequency: apiProfile.guestsFrequency ?? '',
+          workSchedule: apiProfile.workSchedule ?? '',
+          sharingLevel: apiProfile.sharingLevel ?? '',
+          budgetRangeMin: apiProfile.budgetRangeMin?.toString() ?? '',
+          budgetRangeMax: apiProfile.budgetRangeMax?.toString() ?? '',
+          profileVisible: apiProfile.roommatePreferencesEnabled ?? false,
+        })
+      })
+    }
+    setHasUnsavedChanges(false)
+  }
+
+  const handleSave = () => {
+    if (!apiProfile) return
+    updateRoommate.mutate(
+      {
+        userId: apiProfile.id,
+        roommatePreferencesEnabled: settings.profileVisible,
+        governorate: settings.governorate || null,
+        searchStatus: settings.searchStatus || null,
+        smoking: settings.smoking,
+        smokingImportance: settings.smokingImportance,
+        pets: settings.pets,
+        petsImportance: settings.petsImportance,
+        sleepSchedule: settings.sleepSchedule || null,
+        sleepImportance: settings.sleepImportance,
+        educationLevel: settings.educationLevel || null,
+        educationImportance: settings.educationImportance,
+        fieldOfStudy: settings.fieldOfStudy || null,
+        fieldOfStudyImportance: settings.fieldOfStudyImportance,
+        noiseTolerance: settings.noiseTolerance[0],
+        noiseToleranceImportance: settings.noiseToleranceImportance,
+        guestsFrequency: settings.guestsFrequency || null,
+        guestsFrequencyImportance: settings.guestsFrequencyImportance,
+        workSchedule: settings.workSchedule || null,
+        workScheduleImportance: settings.workScheduleImportance,
+        sharingLevel: settings.sharingLevel || null,
+        sharingLevelImportance: settings.sharingLevelImportance,
+        budgetRangeMin: settings.budgetRangeMin ? Number(settings.budgetRangeMin) : null,
+        budgetRangeMax: settings.budgetRangeMax ? Number(settings.budgetRangeMax) : null,
+        budgetImportance: settings.budgetImportance,
+      },
+      {
+        onSuccess: () => {
+          setHasUnsavedChanges(false)
+          toast.success('Preferences saved successfully!')
+        },
+        onError: (err) => {
+          if (err instanceof HttpError) {
+            toast.error(err.message ?? 'Failed to save preferences.')
+          } else {
+            toast.error('Failed to save preferences.')
+          }
+        },
+      },
+    )
+  }
+
+  // ─── Loading ──────────────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
+        <CardContent className="pt-8 space-y-8">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-5 w-36" />
+              <div className="grid md:grid-cols-2 gap-4">
+                <Skeleton className="h-14 rounded-2xl" />
+                <Skeleton className="h-14 rounded-2xl" />
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
       <CardHeader>
@@ -68,75 +233,129 @@ export function RoommateTab() {
           </div>
         </div>
       </CardHeader>
+
       <CardContent className="space-y-8">
-        {/* Lifestyle & Preferences */}
+        {/* ── Location & Search ───────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
-            <Coffee className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">Lifestyle & Preferences</h3>
+            <MapPin className="w-5 h-5 text-[#3A6EA5]" />
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">Location & Search</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label className="text-[#1a1a1a] mb-3 block">Smoking</Label>
-              <div className="flex items-center justify-between p-6 bg-white rounded-2xl">
-                <span className="text-[#1a1a1a]">{roommateSettings.smoking ? 'Yes' : 'No'}</span>
-                <Switch
-                  checked={roommateSettings.smoking}
-                  onCheckedChange={(checked) => update({ smoking: checked })}
-                  className="data-[state=checked]:bg-[#3A6EA5]"
-                />
-              </div>
+              <EnumSelect
+                id="governorate"
+                label="Governorate"
+                endpoint="governorates"
+                value={settings.governorate}
+                onChange={(v) => patch({ governorate: v })}
+              />
             </div>
 
             <div>
-              <Label className="text-[#1a1a1a] mb-3 block">Pets</Label>
-              <div className="flex items-center justify-between p-6 bg-white rounded-2xl">
-                <span className="text-[#1a1a1a]">{roommateSettings.pets ? 'Yes' : 'No'}</span>
-                <Switch
-                  checked={roommateSettings.pets}
-                  onCheckedChange={(checked) => update({ pets: checked })}
-                  className="data-[state=checked]:bg-[#3A6EA5]"
-                />
-              </div>
-            </div>
-
-            {roommateSettings.pets && (
-              <div>
-                <Label htmlFor="pet-type" className="text-[#1a1a1a] mb-2 block">Type of Pet</Label>
-                <Input
-                  id="pet-type"
-                  value={roommateSettings.petType}
-                  onChange={(e) => update({ petType: e.target.value })}
-                  placeholder="e.g., Dog, Cat, Bird"
-                  className="bg-white rounded-xl border-[#3A6EA5]/20"
-                />
-              </div>
-            )}
-
-            <div>
-              <Label htmlFor="sleep-schedule" className="text-[#1a1a1a] mb-2 block">
-                Sleep Schedule
-              </Label>
-              <Select
-                value={roommateSettings.sleepSchedule}
-                onValueChange={(value) => update({ sleepSchedule: value })}
-              >
-                <SelectTrigger id="sleep-schedule" className="bg-white rounded-xl border-[#3A6EA5]/20">
-                  <SelectValue placeholder="Select sleep schedule" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="early-sleeper">Early sleeper</SelectItem>
-                  <SelectItem value="night-owl">Night owl</SelectItem>
-                  <SelectItem value="flexible">Flexible</SelectItem>
-                </SelectContent>
-              </Select>
+              <EnumSelect
+                id="search-status"
+                label="Search Status"
+                endpoint="roommate-search-statuses"
+                value={settings.searchStatus}
+                onChange={(v) => patch({ searchStatus: v })}
+                placeholder="Are you actively searching?"
+              />
             </div>
           </div>
         </div>
 
         <Separator className="bg-[#3A6EA5]/20" />
 
-        {/* Education */}
+        {/* ── Lifestyle & Preferences ──────────────────────────────────────── */}
+        <div>
+          <div className="flex items-center gap-2 mb-6">
+            <Coffee className="w-5 h-5 text-[#3A6EA5]" />
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">Lifestyle & Preferences</h3>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Smoking */}
+            <div>
+              <Label className="text-[#1a1a1a] mb-3 block">Smoking</Label>
+              <div className="flex items-center justify-between p-4 bg-white rounded-2xl">
+                <span className="text-[#1a1a1a]">{settings.smoking ? 'Yes' : 'No'}</span>
+                <Switch
+                  checked={settings.smoking}
+                  onCheckedChange={(v) => patch({ smoking: v })}
+                  className="data-[state=checked]:bg-[#3A6EA5]"
+                />
+              </div>
+              <ImportanceRating
+                value={settings.smokingImportance}
+                onChange={(v) => patch({ smokingImportance: v })}
+              />
+            </div>
+
+            {/* Pets */}
+            <div>
+              <Label className="text-[#1a1a1a] mb-3 block">Pets</Label>
+              <div className="flex items-center justify-between p-4 bg-white rounded-2xl">
+                <span className="text-[#1a1a1a]">{settings.pets ? 'Yes' : 'No'}</span>
+                <Switch
+                  checked={settings.pets}
+                  onCheckedChange={(v) => patch({ pets: v })}
+                  className="data-[state=checked]:bg-[#3A6EA5]"
+                />
+              </div>
+              <ImportanceRating
+                value={settings.petsImportance}
+                onChange={(v) => patch({ petsImportance: v })}
+              />
+            </div>
+
+            {/* Pet type — conditional */}
+            {settings.pets && (
+              <div>
+                <Label htmlFor="pet-type" className="text-[#1a1a1a] mb-2 block">
+                  Type of Pet
+                </Label>
+                <Input
+                  id="pet-type"
+                  value={settings.petType}
+                  onChange={(e) => patch({ petType: e.target.value })}
+                  placeholder="e.g., Dog, Cat, Bird"
+                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                />
+              </div>
+            )}
+
+            {/* Sleep Schedule */}
+            <div>
+              <Label htmlFor="sleep-schedule" className="text-[#1a1a1a] mb-2 block">
+                Sleep Schedule
+              </Label>
+              <Select
+                value={settings.sleepSchedule}
+                onValueChange={(v) => patch({ sleepSchedule: v })}
+              >
+                <SelectTrigger
+                  id="sleep-schedule"
+                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                >
+                  <SelectValue placeholder="Select sleep schedule" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EarlySleeper">Early sleeper</SelectItem>
+                  <SelectItem value="NightOwl">Night owl</SelectItem>
+                  <SelectItem value="Flexible">Flexible</SelectItem>
+                </SelectContent>
+              </Select>
+              <ImportanceRating
+                value={settings.sleepImportance}
+                onChange={(v) => patch({ sleepImportance: v })}
+              />
+            </div>
+          </div>
+        </div>
+
+        <Separator className="bg-[#3A6EA5]/20" />
+
+        {/* ── Education ────────────────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <GraduationCap className="w-5 h-5 text-[#3A6EA5]" />
@@ -148,20 +367,27 @@ export function RoommateTab() {
                 Education Level
               </Label>
               <Select
-                value={roommateSettings.educationLevel}
-                onValueChange={(value) => update({ educationLevel: value })}
+                value={settings.educationLevel}
+                onValueChange={(v) => patch({ educationLevel: v })}
               >
-                <SelectTrigger id="education-level" className="bg-white rounded-xl border-[#3A6EA5]/20">
+                <SelectTrigger
+                  id="education-level"
+                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                >
                   <SelectValue placeholder="Select education level" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="high-school">High School</SelectItem>
-                  <SelectItem value="bachelor">Bachelor's</SelectItem>
-                  <SelectItem value="master">Master's</SelectItem>
-                  <SelectItem value="phd">PhD</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="HighSchool">High School</SelectItem>
+                  <SelectItem value="Bachelor">Bachelor's</SelectItem>
+                  <SelectItem value="Master">Master's</SelectItem>
+                  <SelectItem value="PhD">PhD</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              <ImportanceRating
+                value={settings.educationImportance}
+                onChange={(v) => patch({ educationImportance: v })}
+              />
             </div>
 
             <div>
@@ -170,10 +396,13 @@ export function RoommateTab() {
                 <span className="text-[#4a5565] text-sm font-normal">(Optional)</span>
               </Label>
               <Select
-                value={roommateSettings.fieldOfStudy}
-                onValueChange={(value) => update({ fieldOfStudy: value })}
+                value={settings.fieldOfStudy}
+                onValueChange={(v) => patch({ fieldOfStudy: v })}
               >
-                <SelectTrigger id="field-of-study" className="bg-white rounded-xl border-[#3A6EA5]/20">
+                <SelectTrigger
+                  id="field-of-study"
+                  className="bg-white rounded-xl border-[#3A6EA5]/20"
+                >
                   <SelectValue placeholder="Select field of study" />
                 </SelectTrigger>
                 <SelectContent>
@@ -184,37 +413,42 @@ export function RoommateTab() {
                   ))}
                 </SelectContent>
               </Select>
+              <ImportanceRating
+                value={settings.fieldOfStudyImportance}
+                onChange={(v) => patch({ fieldOfStudyImportance: v })}
+              />
             </div>
           </div>
         </div>
 
         <Separator className="bg-[#3A6EA5]/20" />
 
-        {/* Social & Work */}
+        {/* ── Social & Work ────────────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Briefcase className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">Social & Work</h3>
           </div>
           <div className="space-y-6">
+            {/* Noise Tolerance */}
             <div>
               <div className="flex items-center justify-between mb-3">
                 <Label className="text-[#1a1a1a]">Noise Tolerance</Label>
                 <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                   <Volume2 className="w-4 h-4" />
                   <span>
-                    {roommateSettings.noiseTolerance[0] <= 33 && 'Low'}
-                    {roommateSettings.noiseTolerance[0] > 33 &&
-                      roommateSettings.noiseTolerance[0] <= 66 &&
-                      'Medium'}
-                    {roommateSettings.noiseTolerance[0] > 66 && 'High'}
+                    {settings.noiseTolerance[0] <= 3 && 'Low'}
+                    {settings.noiseTolerance[0] > 3 && settings.noiseTolerance[0] <= 7 && 'Medium'}
+                    {settings.noiseTolerance[0] > 7 && 'High'}
+                    {' '}({settings.noiseTolerance[0]}/10)
                   </span>
                 </div>
               </div>
               <Slider
-                value={roommateSettings.noiseTolerance}
-                onValueChange={(value) => update({ noiseTolerance: value })}
-                max={100}
+                value={settings.noiseTolerance}
+                onValueChange={(v) => patch({ noiseTolerance: v })}
+                min={1}
+                max={10}
                 step={1}
                 className="w-full"
               />
@@ -223,16 +457,21 @@ export function RoommateTab() {
                 <span>Medium</span>
                 <span>High</span>
               </div>
+              <ImportanceRating
+                value={settings.noiseToleranceImportance}
+                onChange={(v) => patch({ noiseToleranceImportance: v })}
+              />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
+              {/* Guests Frequency */}
               <div>
                 <Label htmlFor="guests-frequency" className="text-[#1a1a1a] mb-2 block">
                   Guests Frequency
                 </Label>
                 <Select
-                  value={roommateSettings.guestsFrequency}
-                  onValueChange={(value) => update({ guestsFrequency: value })}
+                  value={settings.guestsFrequency}
+                  onValueChange={(v) => patch({ guestsFrequency: v })}
                 >
                   <SelectTrigger
                     id="guests-frequency"
@@ -241,20 +480,25 @@ export function RoommateTab() {
                     <SelectValue placeholder="How often do you have guests?" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="rarely">Rarely</SelectItem>
-                    <SelectItem value="occasionally">Occasionally</SelectItem>
-                    <SelectItem value="frequently">Frequently</SelectItem>
+                    <SelectItem value="Rarely">Rarely</SelectItem>
+                    <SelectItem value="Occasionally">Occasionally</SelectItem>
+                    <SelectItem value="Frequently">Frequently</SelectItem>
                   </SelectContent>
                 </Select>
+                <ImportanceRating
+                  value={settings.guestsFrequencyImportance}
+                  onChange={(v) => patch({ guestsFrequencyImportance: v })}
+                />
               </div>
 
+              {/* Work Schedule */}
               <div>
                 <Label htmlFor="work-schedule" className="text-[#1a1a1a] mb-2 block">
                   Work Schedule
                 </Label>
                 <Select
-                  value={roommateSettings.workSchedule}
-                  onValueChange={(value) => update({ workSchedule: value })}
+                  value={settings.workSchedule}
+                  onValueChange={(v) => patch({ workSchedule: v })}
                 >
                   <SelectTrigger
                     id="work-schedule"
@@ -263,88 +507,113 @@ export function RoommateTab() {
                     <SelectValue placeholder="Select work schedule" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="remote">Remote</SelectItem>
-                    <SelectItem value="on-site">On-site</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="shift-based">Shift-based</SelectItem>
+                    <SelectItem value="Remote">Remote</SelectItem>
+                    <SelectItem value="OnSite">On-site</SelectItem>
+                    <SelectItem value="Hybrid">Hybrid</SelectItem>
+                    <SelectItem value="Student">Student</SelectItem>
+                    <SelectItem value="ShiftBased">Shift-based</SelectItem>
                   </SelectContent>
                 </Select>
+                <ImportanceRating
+                  value={settings.workScheduleImportance}
+                  onChange={(v) => patch({ workScheduleImportance: v })}
+                />
               </div>
             </div>
 
+            {/* Sharing Level */}
             <div>
               <Label className="text-[#1a1a1a] mb-3 block">Sharing Level</Label>
               <ToggleGroup
                 type="single"
-                value={roommateSettings.sharingLevel}
-                onValueChange={(value) => {
-                  if (value) update({ sharingLevel: value })
+                value={settings.sharingLevel}
+                onValueChange={(v) => {
+                  if (v) patch({ sharingLevel: v })
                 }}
                 className="grid grid-cols-3 gap-3"
               >
-                <ToggleGroupItem
-                  value="privacy"
-                  className="rounded-xl bg-white border border-[#3A6EA5]/20 data-[state=on]:bg-gradient-to-r data-[state=on]:from-[#3A6EA5] data-[state=on]:to-[#9CBBDC] data-[state=on]:text-white data-[state=on]:border-transparent"
-                >
-                  Prefer Privacy
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="okay-sharing"
-                  className="rounded-xl bg-white border border-[#3A6EA5]/20 data-[state=on]:bg-gradient-to-r data-[state=on]:from-[#3A6EA5] data-[state=on]:to-[#9CBBDC] data-[state=on]:text-white data-[state=on]:border-transparent"
-                >
-                  Okay with Sharing
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="very-social"
-                  className="rounded-xl bg-white border border-[#3A6EA5]/20 data-[state=on]:bg-gradient-to-r data-[state=on]:from-[#3A6EA5] data-[state=on]:to-[#9CBBDC] data-[state=on]:text-white data-[state=on]:border-transparent"
-                >
-                  Very Social
-                </ToggleGroupItem>
+                {[
+                  { value: 'PreferPrivacy', label: 'Prefer Privacy' },
+                  { value: 'OkayWithSharing', label: 'Okay with Sharing' },
+                  { value: 'VerySocial', label: 'Very Social' },
+                ].map(({ value, label }) => (
+                  <ToggleGroupItem
+                    key={value}
+                    value={value}
+                    className="rounded-xl bg-white border border-[#3A6EA5]/20 data-[state=on]:bg-gradient-to-r data-[state=on]:from-[#3A6EA5] data-[state=on]:to-[#9CBBDC] data-[state=on]:text-white data-[state=on]:border-transparent"
+                  >
+                    {label}
+                  </ToggleGroupItem>
+                ))}
               </ToggleGroup>
+              <ImportanceRating
+                value={settings.sharingLevelImportance}
+                onChange={(v) => patch({ sharingLevelImportance: v })}
+              />
             </div>
           </div>
         </div>
 
         <Separator className="bg-[#3A6EA5]/20" />
 
-        {/* About You */}
+        {/* ── Budget Range ─────────────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
-            <UserPlus className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">About You</h3>
+            <Wallet className="w-5 h-5 text-[#3A6EA5]" />
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">Budget Range</h3>
           </div>
-          <div>
-            <Label htmlFor="roommate-bio" className="text-[#1a1a1a] mb-2 block">Bio</Label>
-            <Textarea
-              id="roommate-bio"
-              value={roommateSettings.bio}
-              onChange={(e) => {
-                if (e.target.value.length <= BIO_MAX_LENGTH) {
-                  update({ bio: e.target.value })
-                }
-              }}
-              className="bg-white rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
-              placeholder="Tell potential roommates about yourself, habits, and expectations."
-              maxLength={BIO_MAX_LENGTH}
-            />
-            <div className="flex justify-end mt-2">
-              <span
-                className={`text-sm ${
-                  roommateSettings.bio.length >= BIO_MAX_LENGTH
-                    ? 'text-[#3A6EA5] font-semibold'
-                    : 'text-[#4a5565]'
-                }`}
-              >
-                {roommateSettings.bio.length}/{BIO_MAX_LENGTH}
-              </span>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="budget-min" className="text-[#1a1a1a] mb-2 block">
+                Minimum{' '}
+                <span className="text-[#4a5565] text-sm font-normal">(per month)</span>
+              </Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a5565] text-sm font-medium">
+                  $
+                </span>
+                <Input
+                  id="budget-min"
+                  type="number"
+                  min={0}
+                  value={settings.budgetRangeMin}
+                  onChange={(e) => patch({ budgetRangeMin: e.target.value })}
+                  placeholder="500"
+                  className="pl-8 bg-white rounded-xl border-[#3A6EA5]/20"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="budget-max" className="text-[#1a1a1a] mb-2 block">
+                Maximum{' '}
+                <span className="text-[#4a5565] text-sm font-normal">(per month)</span>
+              </Label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a5565] text-sm font-medium">
+                  $
+                </span>
+                <Input
+                  id="budget-max"
+                  type="number"
+                  min={0}
+                  value={settings.budgetRangeMax}
+                  onChange={(e) => patch({ budgetRangeMax: e.target.value })}
+                  placeholder="1500"
+                  className="pl-8 bg-white rounded-xl border-[#3A6EA5]/20"
+                />
+              </div>
             </div>
           </div>
+          <ImportanceRating
+            value={settings.budgetImportance}
+            onChange={(v) => patch({ budgetImportance: v })}
+          />
         </div>
 
         <Separator className="bg-[#3A6EA5]/20" />
 
-        {/* Visibility Settings */}
+        {/* ── Visibility ───────────────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Shield className="w-5 h-5 text-[#3A6EA5]" />
@@ -357,20 +626,20 @@ export function RoommateTab() {
                   Profile Visibility for Roommates
                 </p>
                 <p className="text-sm text-[#4a5565]">
-                  {roommateSettings.profileVisible
+                  {settings.profileVisible
                     ? 'Visible to users browsing for roommates.'
                     : 'Only you can see this information.'}
                 </p>
               </div>
               <Switch
-                checked={roommateSettings.profileVisible}
-                onCheckedChange={(checked) => update({ profileVisible: checked })}
+                checked={settings.profileVisible}
+                onCheckedChange={(v) => patch({ profileVisible: v })}
                 className="data-[state=checked]:bg-[#3A6EA5]"
               />
             </div>
-            {!roommateSettings.profileVisible && (
+            {!settings.profileVisible && (
               <div className="mt-4 p-4 bg-[#F2F4F6] rounded-xl flex items-start gap-3">
-                <Shield className="w-5 h-5 text-[#3A6EA5] mt-0.5 flex-shrink-0" />
+                <Shield className="w-5 h-5 text-[#3A6EA5] mt-0.5 shrink-0" />
                 <p className="text-sm text-[#1a1a1a]">
                   Your roommate preferences are stored but hidden from other users. Enable
                   visibility to help potential roommates find you.
@@ -380,6 +649,7 @@ export function RoommateTab() {
           </div>
         </div>
 
+        {/* ── Unsaved banner ────────────────────────────────────────────────── */}
         {hasUnsavedChanges && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -393,22 +663,22 @@ export function RoommateTab() {
           </motion.div>
         )}
 
+        {/* ── Actions ──────────────────────────────────────────────────────── */}
         <div className="flex gap-4 justify-end pt-4">
           <Button
             variant="outline"
             className="rounded-xl border-[#3A6EA5]/20"
-            onClick={() => setHasUnsavedChanges(false)}
+            onClick={handleCancel}
+            disabled={updateRoommate.isPending}
           >
             Cancel
           </Button>
           <Button
+            disabled={updateRoommate.isPending}
             className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
-            onClick={() => {
-              setHasUnsavedChanges(false)
-              toast.success('Preferences saved successfully!')
-            }}
+            onClick={handleSave}
           >
-            Save Preferences
+            {updateRoommate.isPending ? 'Saving…' : 'Save Preferences'}
           </Button>
         </div>
       </CardContent>

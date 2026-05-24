@@ -17,7 +17,7 @@ import { useProfile } from '@/hooks/useProfile'
 import { HttpError } from '@/services/httpErrors'
 
 export function SecurityTab() {
-  const { data: profileResponse, changePassword } = useProfile()
+  const { data: profileResponse, changePassword, toggle2FA } = useProfile()
   const apiProfile = profileResponse?.data
 
   const [passwords, setPasswords] = useState({
@@ -27,9 +27,10 @@ export function SecurityTab() {
   })
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const twoFactorEnabled = apiProfile?.twoFactorEnabled ?? false
   const [show2FAModal, setShow2FAModal] = useState(false)
-  const [verificationCode, setVerificationCode] = useState('')
+  const [twoFaPassword, setTwoFaPassword] = useState('')
+  const [twoFaPasswordError, setTwoFaPasswordError] = useState('')
 
   const clearFieldError = (key: string) =>
     setFieldErrors((prev) => {
@@ -69,23 +70,37 @@ export function SecurityTab() {
   }
 
   const handle2FAToggle = () => {
-    if (!twoFactorEnabled) {
-      setShow2FAModal(true)
-    } else {
-      setTwoFactorEnabled(false)
-      toast.success('Two-factor authentication disabled')
-    }
+    setTwoFaPassword('')
+    setTwoFaPasswordError('')
+    setShow2FAModal(true)
   }
 
-  const handleVerify2FA = () => {
-    if (verificationCode.length === 6) {
-      setTwoFactorEnabled(true)
-      setShow2FAModal(false)
-      setVerificationCode('')
-      toast.success('Two-factor authentication enabled successfully!')
-    } else {
-      toast.error('Please enter a valid 6-digit code')
+  const handleConfirm2FA = () => {
+    if (!twoFaPassword.trim()) {
+      setTwoFaPasswordError('Password is required.')
+      return
     }
+    toggle2FA.mutate(
+      { password: twoFaPassword },
+      {
+        onSuccess: (res) => {
+          const enabled = res.data
+          setShow2FAModal(false)
+          setTwoFaPassword('')
+          setTwoFaPasswordError('')
+          toast.success(
+            enabled
+              ? 'Two-factor authentication enabled successfully.'
+              : 'Two-factor authentication disabled successfully.',
+          )
+        },
+        onError: (err) => {
+          setTwoFaPasswordError(
+            err instanceof HttpError ? err.message : 'Incorrect password. Please try again.',
+          )
+        },
+      },
+    )
   }
 
   return (
@@ -197,46 +212,51 @@ export function SecurityTab() {
         <DialogContent className="bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#1a1a1a]">
-              Enable Two-Factor Authentication
+              {twoFactorEnabled ? 'Disable Two-Factor Authentication' : 'Enable Two-Factor Authentication'}
             </DialogTitle>
             <DialogDescription className="text-[#4a5565]">
-              We'll send a verification code to your email to confirm
+              Enter your account password to confirm
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="verification-code" className="text-[#1a1a1a] mb-2 block">
-                Verification Code
+              <Label htmlFor="twofa-password" className="text-[#1a1a1a] mb-2 block">
+                Password
               </Label>
-              <Input
-                id="verification-code"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                placeholder="Enter 6-digit code"
-                maxLength={6}
-                className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20"
-              />
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <Input
+                  id="twofa-password"
+                  type="password"
+                  value={twoFaPassword}
+                  onChange={(e) => {
+                    setTwoFaPassword(e.target.value)
+                    setTwoFaPasswordError('')
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleConfirm2FA()}
+                  placeholder="Enter your password"
+                  className={`pl-12 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 ${twoFaPasswordError ? 'border-red-400' : ''}`}
+                />
+              </div>
+              {twoFaPasswordError && (
+                <p className="text-xs text-red-500 mt-1">{twoFaPasswordError}</p>
+              )}
             </div>
-            <p className="text-sm text-[#4a5565]">
-              A verification code has been sent to <strong>{apiProfile?.email}</strong>
-            </p>
           </div>
           <div className="flex gap-3 justify-end">
             <Button
               variant="outline"
-              onClick={() => {
-                setShow2FAModal(false)
-                setVerificationCode('')
-              }}
+              onClick={() => setShow2FAModal(false)}
               className="rounded-xl border-[#3A6EA5]/20"
             >
               Cancel
             </Button>
             <Button
-              onClick={handleVerify2FA}
+              disabled={toggle2FA.isPending}
+              onClick={handleConfirm2FA}
               className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             >
-              Verify & Enable
+              {toggle2FA.isPending ? 'Confirming…' : 'Confirm'}
             </Button>
           </div>
         </DialogContent>

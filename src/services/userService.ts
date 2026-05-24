@@ -84,6 +84,7 @@ export interface Profile {
   arabicAddress: string | null
   arabicFullName: string | null
   nationalIDNumber: string | null
+  twoFactorEnabled: boolean
   roommatePreferencesEnabled: boolean
   smoking: boolean | null
   pets: boolean | null
@@ -98,6 +99,10 @@ export interface Profile {
   budgetRangeMax: number | null
 }
 
+export interface Toggle2FAPayload {
+  password: string
+}
+
 export interface UpdateLegalProfilePayload {
   id: string
   frontIdPhoto?: File
@@ -105,6 +110,34 @@ export interface UpdateLegalProfilePayload {
   arabicAddress: string
   arabicFullName: string
   nationalIDNumber: string
+}
+
+export interface UpdateRoommatePreferencesPayload {
+  userId: string
+  roommatePreferencesEnabled: boolean
+  governorate: string | null
+  searchStatus: string | null
+  smoking: boolean | null
+  smokingImportance: number
+  pets: boolean | null
+  petsImportance: number
+  sleepSchedule: string | null
+  sleepImportance: number
+  educationLevel: string | null
+  educationImportance: number
+  fieldOfStudy: string | null
+  fieldOfStudyImportance: number
+  noiseTolerance: number | null
+  noiseToleranceImportance: number
+  guestsFrequency: string | null
+  guestsFrequencyImportance: number
+  workSchedule: string | null
+  workScheduleImportance: number
+  sharingLevel: string | null
+  sharingLevelImportance: number
+  budgetRangeMin: number | null
+  budgetRangeMax: number | null
+  budgetImportance: number
 }
 
 export interface ChangePasswordPayload {
@@ -165,6 +198,12 @@ export const userService = {
 
   changePassword: (payload: ChangePasswordPayload) =>
     apiClient.put<void>('/api/Profile/change-password', payload),
+
+  updateRoommatePreferences: (payload: UpdateRoommatePreferencesPayload) =>
+    apiClient.put<ApiResponse<Profile>>('/api/Profile/edit-profile-roommate-preferences', payload),
+
+  toggle2FA: (payload: Toggle2FAPayload) =>
+    apiClient.put<ApiResponse<boolean>>('/api/Profile/toggle-2fa', payload),
 
   uploadAvatar: (file: File) => {
     const form = new FormData()

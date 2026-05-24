@@ -71,9 +71,6 @@ export function ProfileTab() {
                 className="w-full h-full rounded-full object-cover shadow-lg"
               />
             )}
-            <button className="absolute bottom-2 right-2 w-12 h-12 rounded-full bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-              <Camera className="w-5 h-5 text-white" />
-            </button>
           </div>
           <h3 className="text-xl font-semibold text-[#1a1a1a] mb-2">
             {profileData.firstName} {profileData.lastName}
@@ -94,7 +91,7 @@ export function ProfileTab() {
             />
             <Button
               variant="outline"
-              className="w-full rounded-xl border-[#3A6EA5]/20 hover:bg-white"
+              className="w-full rounded-xl border-[#3A6EA5]/20 hover:bg-[#3A6EA5]/8 hover:border-[#3A6EA5]/40 hover:text-[#3A6EA5] transition-colors"
               asChild
             >
               <span>{avatarFile ? avatarFile.name : 'Upload New Photo'}</span>
