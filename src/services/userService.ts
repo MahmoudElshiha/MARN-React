@@ -6,6 +6,7 @@ import type { ApiResponse } from '@/types/common'
 export interface DashboardNotification {
   id: number
   type: string
+  typeDisplayName: string
   title: string
   isRead: boolean
   createdAt: string
@@ -59,6 +60,7 @@ export interface RenterDashboard {
   savedPropertiesCount: number
   unreadNotificationsCount: number
   accountStatus: string
+  accountStatusDisplayName: string
   activeRentals: DashboardActiveRental[]
   pendingBookingRequests: DashboardPendingBooking[]
   savedProperties: DashboardSavedProperty[]

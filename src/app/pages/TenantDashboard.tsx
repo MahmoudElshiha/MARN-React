@@ -13,7 +13,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { PropertyCard } from '../components/PropertyCard'
-import { Avatar, AvatarFallback } from '../components/ui/avatar'
 import { Badge } from '../components/ui/badge'
 import { Skeleton } from '../components/ui/skeleton'
 import { Link } from 'react-router'
@@ -37,6 +36,7 @@ function timeAgo(iso: string) {
   if (hrs < 24) return `${hrs}h ago`
   return `${Math.floor(hrs / 24)}d ago`
 }
+
 
 export function TenantDashboard() {
   const { user } = useAuth()
@@ -72,7 +72,7 @@ export function TenantDashboard() {
                 ) : (
                   <AlertCircle className="w-3 h-3 mr-1" />
                 )}
-                {dashboard.accountStatus}
+                {dashboard.accountStatusDisplayName ?? dashboard.accountStatus}
               </Badge>
             )}
           </div>
@@ -92,18 +92,25 @@ export function TenantDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/80 mb-1">
-                    {dashboard?.nextPayment ? 'Next Payment' : 'Current Rent'}
+                    {dashboard?.nextPayment ? 'Next Payment Due' : 'Current Rent'}
                   </p>
                   {dashboardLoading ? (
                     <Skeleton className="h-8 w-28 bg-white/30" />
                   ) : (
-                    <p className="text-3xl font-bold">
-                      {dashboard?.nextPayment
-                        ? formatDate(dashboard.nextPayment)
-                        : activeRental
-                          ? `${activeRental.monthlyRent.toLocaleString()} EGP`
-                          : 'No active rental'}
-                    </p>
+                    <>
+                      <p className="text-3xl font-bold">
+                        {dashboard?.nextPayment
+                          ? formatDate(dashboard.nextPayment)
+                          : activeRental
+                            ? `${activeRental.monthlyRent.toLocaleString()} EGP`
+                            : 'No active rental'}
+                      </p>
+                      {dashboard?.nextPayment && activeRental && (
+                        <p className="text-sm text-white/70 mt-1">
+                          {activeRental.monthlyRent.toLocaleString()} EGP / mo
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
                 <CreditCard className="w-12 h-12 opacity-80" />
@@ -394,6 +401,91 @@ export function TenantDashboard() {
               </Card>
             )}
 
+            {/* Saved Properties */}
+            {(dashboardLoading || (dashboard?.savedProperties?.length ?? 0) > 0) && (
+              <Card className="rounded-3xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-xl text-[#1a1a1a] flex items-center justify-between">
+                    <span>Saved Properties</span>
+                    <Link
+                      to="/saved"
+                      className="text-sm font-normal text-[#3A6EA5] hover:underline"
+                    >
+                      View all
+                    </Link>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dashboardLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 w-full rounded-2xl" />
+                      <Skeleton className="h-16 w-full rounded-2xl" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {dashboard!.savedProperties.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center gap-3 bg-[#f5f7fa] rounded-2xl p-3"
+                        >
+                          {p.imageUrl && (
+                            <img
+                              src={p.imageUrl}
+                              alt={p.title}
+                              className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-[#1a1a1a] truncate">{p.title}</p>
+                            <p className="text-xs text-[#6a7282] truncate">{p.location}</p>
+                            <p className="text-sm font-bold text-[#3A6EA5]">
+                              {p.price.toLocaleString()} EGP
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Payment History */}
+            {(dashboardLoading || (dashboard?.paidPayments?.length ?? 0) > 0) && (
+              <Card className="rounded-3xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-xl text-[#1a1a1a]">Payment History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dashboardLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 w-full rounded-2xl" />
+                      <Skeleton className="h-16 w-full rounded-2xl" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {dashboard!.paidPayments.map((p) => (
+                        <div key={p.id} className="bg-[#f5f7fa] rounded-2xl p-4">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm font-medium text-[#1a1a1a] truncate flex-1 mr-2">
+                              {p.propertyName}
+                            </p>
+                            <p className="text-sm font-bold text-green-600 flex-shrink-0">
+                              {p.amount.toLocaleString()} EGP
+                            </p>
+                          </div>
+                          <p className="text-xs text-[#6a7282] flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {formatDate(p.paidAt)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Quick Actions */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
@@ -415,32 +507,6 @@ export function TenantDashboard() {
                 </Button>
                 <Button variant="outline" className="w-full rounded-xl" asChild>
                   <Link to="/messages">Contact Landlord</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Profile Completion */}
-            <Card className="rounded-3xl shadow-lg bg-gradient-to-br from-[#f5f7fa] to-white">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar className="w-12 h-12 border-2 border-[#3A6EA5]">
-                    <AvatarFallback>{user?.firstName?.[0] ?? '?'}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-[#1a1a1a] mb-2">Complete Your Profile</h3>
-                    <div className="w-full bg-[#f5f7fa] rounded-full h-2 overflow-hidden">
-                      <div className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] h-full w-[75%]" />
-                    </div>
-                    <p className="text-xs text-[#6a7282] mt-2">75% Complete</p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
-                  asChild
-                >
-                  <Link to="/profile-settings">Complete Profile</Link>
                 </Button>
               </CardContent>
             </Card>
