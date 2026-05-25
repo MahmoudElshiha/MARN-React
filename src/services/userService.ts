@@ -204,6 +204,11 @@ export interface OwnerDashboardProperty {
   status: string
   price: number
   rating: number | null
+  /** Lightweight search shape uses `imagePath` (SearchProperty) */
+  imagePath?: string | null
+  /** Full property shape uses `image` (Property) */
+  image?: string | null
+  /** Invented field — kept for compat but server may not send this */
   imageUrl?: string | null
   images?: string[]
 }
@@ -211,7 +216,15 @@ export interface OwnerDashboardProperty {
 export interface OwnerDashboardEarningEntry {
   /** Label: month name (e.g. "Jan") for monthly, year string for yearly */
   month: string
-  amount: number
+  /**
+   * The numeric earnings value. The actual server field name is unknown because
+   * the sample response had empty arrays — common alternatives are also typed
+   * as optional so the component can fall back gracefully.
+   */
+  amount?: number
+  earning?: number
+  value?: number
+  total?: number
 }
 
 export interface OwnerDashboardContract {
@@ -226,10 +239,14 @@ export interface OwnerDashboardContract {
 
 export interface OwnerDashboardBookingRequest {
   id: string
-  tenantName: string
+  /** Server field: "tenant" (matches BookingRequest.tenant) */
+  tenant: string
   tenantAvatarUrl?: string | null
-  propertyName: string
-  requestedDate: string
+  /** Server field: "property" (matches BookingRequest.property) */
+  property: string
+  /** Server field: "requestedDates" — a pre-formatted string, not an ISO date */
+  requestedDates: string
+  /** Values: 'pending' | 'accepted' | 'rejected' | 'cancelled' (all lowercase) */
   status: string
 }
 

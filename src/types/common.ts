@@ -1,8 +1,16 @@
-/** Standard envelope returned by every API endpoint. */
+/** Standard envelope returned by every API endpoint.
+ *
+ * The server sends `code: "SUCCESS"` (string), not a boolean `success` field.
+ * `success` is kept as an optional alias for backwards compatibility with any
+ * callers that may still reference it, but should not be relied upon.
+ */
 export interface ApiResponse<T> {
   data: T
   message?: string
-  success: boolean
+  /** e.g. "SUCCESS" — the actual server discriminator field */
+  code?: string
+  /** @deprecated The server does not send this; use `code === "SUCCESS"` instead */
+  success?: boolean
 }
 
 /** Paginated variant of the standard envelope. */

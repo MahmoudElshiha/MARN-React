@@ -71,15 +71,20 @@ export function OwnerDashboard() {
     { name: 'Vacant', value: vacantCount, color: '#9CBBDC' },
   ]
 
-  // Map API earning entries → chart-friendly shape
+  // Map API earning entries → chart-friendly shape.
+  // The actual server field name for the value is unknown (empty arrays in sample);
+  // fall back through common alternatives until one is defined.
+  const pickEarning = (e: { amount?: number; earning?: number; value?: number; total?: number }) =>
+    e.amount ?? e.earning ?? e.value ?? e.total ?? 0
+
   const monthlyChartData = (dashboard?.monthlyEarning ?? []).map((e) => ({
     month: e.month,
-    earnings: e.amount,
+    earnings: pickEarning(e),
   }))
 
   const yearlyChartData = (dashboard?.yearlyEarning ?? []).map((e) => ({
     month: e.month,
-    earnings: e.amount,
+    earnings: pickEarning(e),
   }))
 
   const chartData = view === 'monthly' ? monthlyChartData : yearlyChartData
@@ -346,20 +351,21 @@ export function OwnerDashboard() {
                               <AvatarImage src={request.tenantAvatarUrl} />
                             )}
                             <AvatarFallback>
-                              {request.tenantName.charAt(0)}
+                              {request.tenant.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
-                              {request.tenantName}
+                              {request.tenant}
                             </h3>
                             <p className="text-sm text-[#4a5565] mb-2">
-                              {request.propertyName}
+                              {request.property}
                             </p>
                             <div className="flex items-center gap-4 text-sm">
                               <div className="flex items-center gap-1 text-[#6a7282]">
                                 <Calendar className="w-4 h-4" />
-                                {formatDate(request.requestedDate)}
+                                {/* requestedDates is pre-formatted by the server */}
+                                {request.requestedDates}
                               </div>
                             </div>
                           </div>
@@ -368,7 +374,7 @@ export function OwnerDashboard() {
                           <Button
                             size="sm"
                             disabled={
-                              accept.isPending || request.status !== 'Pending'
+                              accept.isPending || request.status !== 'pending'
                             }
                             onClick={() => handleAcceptRequest(request.id)}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
@@ -380,7 +386,7 @@ export function OwnerDashboard() {
                             variant="outline"
                             size="sm"
                             disabled={
-                              reject.isPending || request.status !== 'Pending'
+                              reject.isPending || request.status !== 'pending'
                             }
                             onClick={() => handleDeclineRequest(request.id)}
                             className="flex-1 rounded-xl border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
@@ -536,6 +542,8 @@ export function OwnerDashboard() {
                         <div className="flex gap-4">
                           <img
                             src={
+                              property.imagePath ??
+                              property.image ??
                               property.imageUrl ??
                               property.images?.[0] ??
                               ''

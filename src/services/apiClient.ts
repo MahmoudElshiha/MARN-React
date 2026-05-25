@@ -6,7 +6,10 @@ const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15_000,
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept-Language': 'en',
+  },
 })
 
 // Attach auth token to every request
