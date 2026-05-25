@@ -194,6 +194,84 @@ export interface UpdateProfilePayload {
   profileImage?: File
 }
 
+// ─── Owner Dashboard ─────────────────────────────────────────────────────────
+
+export interface OwnerDashboardProperty {
+  id: string
+  title: string
+  location: string
+  type: string
+  status: string
+  price: number
+  rating: number | null
+  imageUrl?: string | null
+  images?: string[]
+}
+
+export interface OwnerDashboardEarningEntry {
+  /** Label: month name (e.g. "Jan") for monthly, year string for yearly */
+  month: string
+  amount: number
+}
+
+export interface OwnerDashboardContract {
+  id: string
+  propertyName: string
+  tenantName: string
+  status: string
+  startDate: string
+  expiryDate: string
+  documentUrl?: string | null
+}
+
+export interface OwnerDashboardBookingRequest {
+  id: string
+  tenantName: string
+  tenantAvatarUrl?: string | null
+  propertyName: string
+  requestedDate: string
+  status: string
+}
+
+export interface OwnerDashboardNotification {
+  id: number
+  type: string
+  typeDisplayName: string
+  title: string
+  isRead: boolean
+  createdAt: string
+}
+
+export interface OwnerDashboardPayment {
+  id: string
+  amount: number
+  paidAt: string
+  propertyName: string
+}
+
+export interface OwnerDashboardData {
+  propertiesCount: number
+  properties: OwnerDashboardProperty[]
+  occupiedPlaces: number
+  vacantPlaces: number
+  totalViews: number
+  monthlyEarning: OwnerDashboardEarningEntry[]
+  yearlyEarning: OwnerDashboardEarningEntry[]
+  withdrawableEarnings: number
+  onHoldEarnings: number
+  averageRating: number
+  ratingsCount: number
+  allContracts: OwnerDashboardContract[]
+  unreadNotificationsCount: number
+  notifications: OwnerDashboardNotification[]
+  pendingBookingRequestsCount: number
+  pendingBookingRequests: OwnerDashboardBookingRequest[]
+  accountStatus: string
+  accountStatusDisplayName: string
+  receivedPayments: OwnerDashboardPayment[]
+  stripeAccountEnabled: boolean
+}
+
 export const userService = {
   getProfile: () =>
     apiClient.get<ApiResponse<Profile>>('/api/Profile/edit-profile'),
@@ -203,6 +281,9 @@ export const userService = {
 
   getRenterDashboard: () =>
     apiClient.get<ApiResponse<RenterDashboard>>('/api/Profile/renter-dashboard'),
+
+  getOwnerDashboard: () =>
+    apiClient.get<ApiResponse<OwnerDashboardData>>('/api/Profile/owner-dashboard'),
 
   updateProfile: (payload: UpdateProfilePayload) => {
     const form = new FormData()

@@ -32,54 +32,8 @@ import {
 } from 'recharts'
 import { toast } from 'sonner'
 import { useState } from 'react'
-import { useBookingRequests, useContracts } from '@/hooks/useBookingRequests'
-import { useProperties } from '@/hooks/useProperties'
-
-// Static chart data — will be replaced once the owner stats endpoint exists
-const EARNINGS_DATA_MONTHLY = [
-  { month: 'Jan', earnings: 8400 },
-  { month: 'Feb', earnings: 11200 },
-  { month: 'Mar', earnings: 9800 },
-  { month: 'Apr', earnings: 12600 },
-  { month: 'May', earnings: 14000 },
-  { month: 'Jun', earnings: 16800 },
-]
-
-const EARNINGS_DATA_YEARLY = [
-  { month: '2020', earnings: 78000 },
-  { month: '2021', earnings: 95000 },
-  { month: '2022', earnings: 112000 },
-  { month: '2023', earnings: 145000 },
-  { month: '2024', earnings: 168000 },
-  { month: '2025', earnings: 195000 },
-]
-
-const NOTIFICATIONS = [
-  {
-    id: '1',
-    message: 'Payment received from John Smith',
-    time: '2 hours ago',
-    read: false,
-  },
-  {
-    id: '2',
-    message: 'New booking request for Downtown Apartment',
-    time: '5 hours ago',
-    read: false,
-  },
-  {
-    id: '3',
-    message: 'Maintenance request from Emily Davis',
-    time: '1 day ago',
-    read: true,
-  },
-  {
-    id: '4',
-    message: 'New review received (4.5 stars)',
-    time: '2 days ago',
-    read: true,
-  },
-]
+import { useOwnerDashboard } from '@/hooks/useOwnerDashboard'
+import { useBookingRequests } from '@/hooks/useBookingRequests'
 
 const getContractStatusBadge = (status: string) => {
   const styles: Record<string, string> = {
@@ -90,34 +44,52 @@ const getContractStatusBadge = (status: string) => {
   return styles[status] ?? 'bg-gray-100 text-gray-700 hover:bg-gray-100'
 }
 
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+
 export function OwnerDashboard() {
-  const [view, setView] = useState('monthly')
+  const [view, setView] = useState<'monthly' | 'yearly'>('monthly')
 
-  const {
-    data: requestsData,
-    isLoading: requestsLoading,
-    accept,
-    reject,
-  } = useBookingRequests()
+  const { data: dashboardResponse, isLoading } = useOwnerDashboard()
 
-  const { data: contractsData, isLoading: contractsLoading } = useContracts()
-  const { data: propertiesData, isLoading: propertiesLoading } = useProperties()
+  // Keep booking-request mutations (accept / reject) from the dedicated hook
+  const { accept, reject } = useBookingRequests()
 
-  const bookingRequests = requestsData?.data ?? []
-  const contracts = contractsData?.data ?? []
-  // propertyService returns ApiResponse<SearchPaginatedResponse<…>>
-  // so the array lives at .data.items, not .data
-  const myProperties = propertiesData?.data?.items ?? []
+  const dashboard = dashboardResponse?.data
 
-  const totalProperties = propertiesData?.data?.totalCount ?? 0
-  const occupiedCount = myProperties.filter((p) => p.status === 'rented').length
-  const vacantCount = totalProperties - occupiedCount
+  // ── Derived values ────────────────────────────────────────────────────────
+  const totalProperties = dashboard?.propertiesCount ?? 0
+  const occupiedCount = dashboard?.occupiedPlaces ?? 0
+  const vacantCount = dashboard?.vacantPlaces ?? 0
 
   const occupancyData = [
     { name: 'Occupied', value: occupiedCount, color: '#3A6EA5' },
     { name: 'Vacant', value: vacantCount, color: '#9CBBDC' },
   ]
 
+  // Map API earning entries → chart-friendly shape
+  const monthlyChartData = (dashboard?.monthlyEarning ?? []).map((e) => ({
+    month: e.month,
+    earnings: e.amount,
+  }))
+
+  const yearlyChartData = (dashboard?.yearlyEarning ?? []).map((e) => ({
+    month: e.month,
+    earnings: e.amount,
+  }))
+
+  const chartData = view === 'monthly' ? monthlyChartData : yearlyChartData
+
+  const pendingRequests = dashboard?.pendingBookingRequests ?? []
+  const contracts = dashboard?.allContracts ?? []
+  const notifications = dashboard?.notifications ?? []
+  const myProperties = dashboard?.properties ?? []
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAcceptRequest = (id: string) => {
     accept.mutate(id, {
       onSuccess: () => toast.success('Booking request accepted'),
@@ -163,6 +135,7 @@ export function OwnerDashboard() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Total Properties */}
           <Card className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] border-none text-white rounded-3xl shadow-lg shadow-[#3A6EA5]/20">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-white/90">
@@ -171,7 +144,7 @@ export function OwnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {propertiesLoading ? (
+              {isLoading ? (
                 <Skeleton className="h-10 w-16 bg-white/30" />
               ) : (
                 <>
@@ -186,6 +159,7 @@ export function OwnerDashboard() {
             </CardContent>
           </Card>
 
+          {/* Withdrawable Earnings */}
           <Card className="bg-[#f5f7fa] border-none rounded-3xl shadow-lg shadow-black/5">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
@@ -194,37 +168,60 @@ export function OwnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
-                16,800 EGP
-              </div>
-              <p className="text-green-600 text-sm">+12% from last month</p>
+              {isLoading ? (
+                <Skeleton className="h-10 w-32" />
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
+                    {(
+                      monthlyChartData[monthlyChartData.length - 1]?.earnings ??
+                      0
+                    ).toLocaleString()}{' '}
+                    EGP
+                  </div>
+                  <p className="text-[#4a5565] text-sm">
+                    {dashboard?.totalViews ?? 0} total views
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
+          {/* Withdrawable Earnings */}
           <Card className="bg-[#f5f7fa] border-none rounded-3xl shadow-lg shadow-black/5">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <DollarSign className="w-5 h-5 text-[#3A6EA5]" />
-                Money Saved
+                Withdrawable Earnings
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
-                12,450 EGP
-              </div>
-              <p className="text-[#4a5565] text-sm mb-3">
-                Available for transfer
-              </p>
-              <Button
-                size="sm"
-                className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
-                onClick={() => toast.success('Transfer initiated')}
-              >
-                Transfer Money
-              </Button>
+              {isLoading ? (
+                <Skeleton className="h-10 w-32" />
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
+                    {(dashboard?.withdrawableEarnings ?? 0).toLocaleString()} EGP
+                  </div>
+                  <p className="text-[#4a5565] text-sm mb-1">
+                    On hold:{' '}
+                    <span className="font-medium text-[#1a1a1a]">
+                      {(dashboard?.onHoldEarnings ?? 0).toLocaleString()} EGP
+                    </span>
+                  </p>
+                  <Button
+                    size="sm"
+                    className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
+                    onClick={() => toast.success('Transfer initiated')}
+                  >
+                    Transfer Money
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
 
+          {/* Pending Requests */}
           <Card className="bg-[#f5f7fa] border-none rounded-3xl shadow-lg shadow-black/5">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
@@ -233,15 +230,12 @@ export function OwnerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {requestsLoading ? (
+              {isLoading ? (
                 <Skeleton className="h-10 w-12" />
               ) : (
                 <>
                   <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
-                    {
-                      bookingRequests.filter((r) => r.status === 'pending')
-                        .length
-                    }
+                    {dashboard?.pendingBookingRequestsCount ?? 0}
                   </div>
                   <p className="text-[#4a5565] text-sm">
                     Awaiting your response
@@ -263,37 +257,39 @@ export function OwnerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart
-                    data={
-                      view === 'monthly'
-                        ? EARNINGS_DATA_MONTHLY
-                        : EARNINGS_DATA_YEARLY
-                    }
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="#3A6EA5"
-                      opacity={0.1}
-                    />
-                    <XAxis dataKey="month" stroke="#4a5565" />
-                    <YAxis stroke="#4a5565" />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#FFFFFF',
-                        border: '1px solid #3A6EA5',
-                        borderRadius: '12px',
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="earnings"
-                      stroke="#3A6EA5"
-                      strokeWidth={3}
-                      dot={{ fill: '#3A6EA5', r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {isLoading ? (
+                  <Skeleton className="h-[300px] w-full rounded-2xl" />
+                ) : chartData.length === 0 ? (
+                  <p className="text-[#4a5565] text-center py-16">
+                    No earning data available yet.
+                  </p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={chartData}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#3A6EA5"
+                        opacity={0.1}
+                      />
+                      <XAxis dataKey="month" stroke="#4a5565" />
+                      <YAxis stroke="#4a5565" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#FFFFFF',
+                          border: '1px solid #3A6EA5',
+                          borderRadius: '12px',
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="earnings"
+                        stroke="#3A6EA5"
+                        strokeWidth={3}
+                        dot={{ fill: '#3A6EA5', r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
                 <div className="flex justify-center gap-3 mt-4">
                   {(['monthly', 'yearly'] as const).map((v) => (
                     <Button
@@ -321,26 +317,24 @@ export function OwnerDashboard() {
                   <CardTitle className="text-2xl text-[#1a1a1a]">
                     Booking Requests
                   </CardTitle>
-                  <Badge className="bg-[#3A6EA5] text-white hover:bg-[#3A6EA5]">
-                    {
-                      bookingRequests.filter((r) => r.status === 'pending')
-                        .length
-                    }{' '}
-                    New
-                  </Badge>
+                  {(dashboard?.pendingBookingRequestsCount ?? 0) > 0 && (
+                    <Badge className="bg-[#3A6EA5] text-white hover:bg-[#3A6EA5]">
+                      {dashboard?.pendingBookingRequestsCount} New
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {requestsLoading ? (
+                {isLoading ? (
                   Array.from({ length: 3 }).map((_, i) => (
                     <Skeleton key={i} className="h-32 w-full rounded-2xl" />
                   ))
-                ) : bookingRequests.length === 0 ? (
+                ) : pendingRequests.length === 0 ? (
                   <p className="text-[#4a5565] text-center py-8">
                     No pending booking requests.
                   </p>
                 ) : (
-                  bookingRequests.map((request) => (
+                  pendingRequests.map((request) => (
                     <div
                       key={request.id}
                       className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow border border-[#3A6EA5]/10"
@@ -352,20 +346,20 @@ export function OwnerDashboard() {
                               <AvatarImage src={request.tenantAvatarUrl} />
                             )}
                             <AvatarFallback>
-                              {request.tenant.charAt(0)}
+                              {request.tenantName.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
-                              {request.tenant}
+                              {request.tenantName}
                             </h3>
                             <p className="text-sm text-[#4a5565] mb-2">
-                              {request.property}
+                              {request.propertyName}
                             </p>
                             <div className="flex items-center gap-4 text-sm">
                               <div className="flex items-center gap-1 text-[#6a7282]">
                                 <Calendar className="w-4 h-4" />
-                                {request.requestedDates}
+                                {formatDate(request.requestedDate)}
                               </div>
                             </div>
                           </div>
@@ -374,7 +368,7 @@ export function OwnerDashboard() {
                           <Button
                             size="sm"
                             disabled={
-                              accept.isPending || request.status !== 'pending'
+                              accept.isPending || request.status !== 'Pending'
                             }
                             onClick={() => handleAcceptRequest(request.id)}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
@@ -386,7 +380,7 @@ export function OwnerDashboard() {
                             variant="outline"
                             size="sm"
                             disabled={
-                              reject.isPending || request.status !== 'pending'
+                              reject.isPending || request.status !== 'Pending'
                             }
                             onClick={() => handleDeclineRequest(request.id)}
                             className="flex-1 rounded-xl border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
@@ -421,7 +415,7 @@ export function OwnerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {contractsLoading ? (
+                {isLoading ? (
                   <Skeleton className="h-48 w-full rounded-2xl" />
                 ) : (
                   <div className="overflow-x-auto">
@@ -483,7 +477,7 @@ export function OwnerDashboard() {
                                 </Badge>
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
-                                {contract.expiryDate}
+                                {formatDate(contract.expiryDate)}
                               </td>
                               <td className="py-4 px-4 text-right">
                                 <Button
@@ -516,7 +510,7 @@ export function OwnerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {propertiesLoading ? (
+                {isLoading ? (
                   <div className="space-y-4">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <Skeleton key={i} className="h-36 w-full rounded-2xl" />
@@ -541,7 +535,11 @@ export function OwnerDashboard() {
                       >
                         <div className="flex gap-4">
                           <img
-                            src={property.image ?? property.images?.[0] ?? ''}
+                            src={
+                              property.imageUrl ??
+                              property.images?.[0] ??
+                              ''
+                            }
                             alt={property.title}
                             className="w-32 h-32 rounded-xl object-cover"
                           />
@@ -661,28 +659,45 @@ export function OwnerDashboard() {
             {/* Notifications */}
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">
-                  Notifications
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl text-[#1a1a1a]">
+                    Notifications
+                  </CardTitle>
+                  {(dashboard?.unreadNotificationsCount ?? 0) > 0 && (
+                    <Badge className="bg-[#3A6EA5] text-white hover:bg-[#3A6EA5]">
+                      {dashboard?.unreadNotificationsCount} unread
+                    </Badge>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                {NOTIFICATIONS.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-4 rounded-xl transition-colors ${
-                      notification.read
-                        ? 'bg-[#f5f7fa]'
-                        : 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
-                    }`}
-                  >
-                    <p className="text-sm text-[#1a1a1a] mb-1">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-[#6a7282]">
-                      {notification.time}
-                    </p>
-                  </div>
-                ))}
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                  ))
+                ) : notifications.length === 0 ? (
+                  <p className="text-[#4a5565] text-center py-4 text-sm">
+                    No notifications.
+                  </p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-4 rounded-xl transition-colors ${
+                        notification.isRead
+                          ? 'bg-[#f5f7fa]'
+                          : 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
+                      }`}
+                    >
+                      <p className="text-sm text-[#1a1a1a] mb-1">
+                        {notification.title}
+                      </p>
+                      <p className="text-xs text-[#6a7282]">
+                        {formatDate(notification.createdAt)}
+                      </p>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
 
@@ -694,7 +709,7 @@ export function OwnerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {propertiesLoading ? (
+                {isLoading ? (
                   <Skeleton className="h-48 w-full rounded-2xl" />
                 ) : (
                   <>
@@ -753,31 +768,52 @@ export function OwnerDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">
-                    Total Properties
-                  </p>
+                  <p className="text-sm text-[#6a7282] mb-1">Total Properties</p>
                   <p className="text-2xl font-bold text-[#3A6EA5]">
-                    {totalProperties}
+                    {isLoading ? (
+                      <Skeleton className="h-8 w-12 inline-block" />
+                    ) : (
+                      totalProperties
+                    )}
                   </p>
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">
-                    Pending Requests
-                  </p>
+                  <p className="text-sm text-[#6a7282] mb-1">Pending Requests</p>
                   <p className="text-2xl font-bold text-[#3A6EA5]">
-                    {
-                      bookingRequests.filter((r) => r.status === 'pending')
-                        .length
-                    }
+                    {isLoading ? (
+                      <Skeleton className="h-8 w-12 inline-block" />
+                    ) : (
+                      dashboard?.pendingBookingRequestsCount ?? 0
+                    )}
                   </p>
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">
-                    Active Contracts
-                  </p>
+                  <p className="text-sm text-[#6a7282] mb-1">Active Contracts</p>
                   <p className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
-                    {contracts.filter((c) => c.status === 'Active').length}
-                    <Eye className="w-5 h-5" />
+                    {isLoading ? (
+                      <Skeleton className="h-8 w-12 inline-block" />
+                    ) : (
+                      <>
+                        {contracts.filter((c) => c.status === 'Active').length}
+                        <Eye className="w-5 h-5" />
+                      </>
+                    )}
+                  </p>
+                </div>
+                <div className="bg-[#f5f7fa] rounded-2xl p-4">
+                  <p className="text-sm text-[#6a7282] mb-1">Average Rating</p>
+                  <p className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
+                    {isLoading ? (
+                      <Skeleton className="h-8 w-12 inline-block" />
+                    ) : (
+                      <>
+                        {(dashboard?.averageRating ?? 0).toFixed(1)}
+                        <Star className="w-5 h-5 fill-[#3A6EA5]" />
+                      </>
+                    )}
+                  </p>
+                  <p className="text-xs text-[#6a7282] mt-1">
+                    {dashboard?.ratingsCount ?? 0} reviews
                   </p>
                 </div>
               </CardContent>
