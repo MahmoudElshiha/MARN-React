@@ -26,11 +26,11 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 
 4. **Pagination not threaded through UI** — most paged endpoints (users, properties, contracts, reports) accept `pageNumber`/`pageSize` but the UI doesn't expose controls. Wire `useInfiniteQuery` or a simple page-state hook so large datasets are navigable.
 
-5. **Mutation query-key gaps** — after ban/suspend/restore, only `adminUserStats` is invalidated. Related queries (`adminStats`, `adminVerifications`) should also be invalidated. Define a shared invalidation helper per domain.
+5. ~~**Mutation query-key gaps**~~ — Fixed: `ban`/`unban`/`restore` now invalidate both `adminUserStats` and `adminStats`.
 
 6. **Admin property verifications tab missing** — the UI has no tab for `GET /api/Admin/verifications/properties/pending`; the flow is symmetric to user verifications and should be added.
 
-7. **Admin roles management not surfaced** — `PATCH /api/Admin/roles/users/{userId}` lets you promote/demote users without hard-coding the `adminUsers` mock array. Replace the mock with this endpoint.
+7. ~~**Admin roles management not surfaced**~~ — Fixed: `GET /api/Admin/roles/users` + `PATCH /api/Admin/roles/users/{userId}` are wired; hardcoded mock replaced. "Downgrade" button replaced with "Update Roles" modal (Admin/Moderator checkboxes, pre-populated from current roles). Admin Management tab merged into User Management tab as a second section.
 
 8. **Real-time channels** — Notifications and Chat are polling/request-based. Evaluate adding a SignalR/WebSocket layer so unread counts and messages update without refresh.
 
@@ -145,22 +145,22 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ---
 
 ### POST `/api/Admin/analytics-reports/generate`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
-- **Options:** `{ scope, period, format }` (see Enum endpoints for valid values)
-- **Response:** Generated report metadata
-- **Notes:** Should replace the mock "Generate Monthly Report" button in the Reports tab.
+- **Status:** ✅ Wired
+- **Service:** `adminService.generateReport(payload)` → `src/services/adminService.ts`
+- **Hook:** `useGenerateReport` → `src/hooks/useAdminStats.ts`
+- **Options:** `{ scope, format, period }` — uses `GenerateReportPayload` type from `components['schemas']['AdminAnalyticsReportGenerateRequestDto']`
+- **Response:** 200 no body (`content?: never`)
+- **Notes:** Wired to the Generate Report button in the Reports tab. Invalidates `adminAnalyticsReports` on success.
 
 ---
 
 ### GET `/api/Admin/analytics-reports`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
-- **Options:** Pagination params
-- **Response:** Paged list of previously generated report records
-- **Notes:** Should replace the hardcoded recent-reports list in the Reports tab.
+- **Status:** ✅ Wired
+- **Service:** `adminService.getAnalyticsReports(page, pageSize)` → `src/services/adminService.ts`
+- **Hook:** `useAdminAnalyticsReports` → `src/hooks/useAdminStats.ts`
+- **Options:** `PageNumber`, `PageSize`
+- **Response:** `AdminAnalyticsReportsResult` (manual interface — swagger has `content?: never`)
+- **Notes:** Powers the Generated Reports list in the Reports tab.
 
 ---
 
@@ -175,12 +175,12 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ---
 
 ### GET `/api/Admin/analytics-reports/{reportId}/download`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
+- **Status:** ✅ Wired
+- **Service:** `adminService.downloadAnalyticsReport(reportId)` → `src/services/adminService.ts`
+- **Hook:** Called directly via `handleDownloadReport` in `AdminDashboardPage`
 - **Options:** `reportId` path param
-- **Response:** File download (stream)
-- **Notes:** Wire to the Download button next to each report row.
+- **Response:** File blob — `responseType: 'blob'`
+- **Notes:** Triggers browser download with filename from `AdminAnalyticsReport.fileName`.
 
 ---
 
@@ -315,29 +315,29 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ---
 
 ### GET `/api/Admin/verifications/properties/pending`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
+- **Status:** ✅ Wired
+- **Service:** `adminService.getPendingPropertyVerifications(page, pageSize)`
+- **Hook:** `useAdminPropertyVerifications` in `src/hooks/useAdminStats.ts`
 - **Options:** `pageNumber`, `pageSize`
 - **Response:** Paged list of properties awaiting ownership-document review
-- **Notes:** Add a "Property Verifications" sub-tab inside Review Submissions.
+- **Notes:** 4th tab "Property Verifications" in `AdminDashboardPage`. Interfaces defined manually (swagger has `content?: never`).
 
 ---
 
 ### GET `/api/Admin/verifications/properties/{propertyId}`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
+- **Status:** ✅ Wired
+- **Service:** `adminService.getPropertyVerification(propertyId)`
+- **Hook:** `useAdminPropertyVerification` in `src/hooks/useAdminStats.ts`
 - **Options:** `propertyId` path param
 - **Response:** Full property verification payload (ownership docs, images)
-- **Notes:** —
+- **Notes:** Powers the detail modal in the Property Verifications tab.
 
 ---
 
 ### PATCH `/api/Admin/verifications/properties/{propertyId}/approve`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
+- **Status:** ✅ Wired
+- **Service:** `adminService.approvePropertyVerification(propertyId)`
+- **Hook:** Inline `useMutation` (`approvePropertyVerification`) in `AdminDashboardPage`
 - **Options:** `propertyId` path param
 - **Response:** `ApiResponse<boolean>`
 - **Notes:** —
@@ -345,9 +345,9 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ---
 
 ### PATCH `/api/Admin/verifications/properties/{propertyId}/decline`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
+- **Status:** ✅ Wired
+- **Service:** `adminService.declinePropertyVerification(propertyId, reason)`
+- **Hook:** Inline `useMutation` (`declinePropertyVerification`) in `AdminDashboardPage`
 - **Options:** `propertyId` path param + `{ reason }` body
 - **Response:** `ApiResponse<boolean>`
 - **Notes:** —
@@ -389,18 +389,18 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 - **Service:** `adminService.banUser(userId)` → `src/services/adminService.ts`
 - **Hook:** Inline `useMutation` in `AdminDashboardPage`
 - **Options:** `userId` path param
-- **Response:** `ApiResponse<void>`
-- **Notes:** —
+- **Response:** 200 no body (`content?: never`)
+- **Notes:** Fixed from POST → PATCH. Ban button shown for non-banned, non-deleted users.
 
 ---
 
 ### PATCH `/api/Admin/users/{userId}/unban`
-- **Status:** ❌ Missing
-- **Service:** `adminService.suspendUser()` currently calls `/suspend` which is **not in swagger** — likely should be `/unban`
-- **Hook:** —
+- **Status:** ✅ Wired
+- **Service:** `adminService.unbanUser(userId)` → `src/services/adminService.ts`
+- **Hook:** Inline `useMutation` in `AdminDashboardPage`
 - **Options:** `userId` path param
-- **Response:** `ApiResponse<void>`
-- **Notes:** ⚠️ Verify with backend whether `/suspend` exists or if `suspendUser` should be renamed to `unbanUser` calling `/unban`.
+- **Response:** 200 no body (`content?: never`)
+- **Notes:** Renamed from the broken `suspendUser` (which called non-existent `/suspend`). "Unban" button shown for `accountStatus === 'Banned'` users. Reverts to `StatusBeforeBan` per swagger.
 
 ---
 
@@ -409,8 +409,8 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 - **Service:** `adminService.restoreUser(userId)` → `src/services/adminService.ts`
 - **Hook:** Inline `useMutation` in `AdminDashboardPage`
 - **Options:** `userId` path param
-- **Response:** `ApiResponse<void>`
-- **Notes:** Restores soft-deleted users.
+- **Response:** 200 no body (`content?: never`)
+- **Notes:** Fixed from POST → PATCH. "Restore" button shown only for `user.isDeleted === true`.
 
 ---
 
@@ -425,12 +425,12 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ---
 
 ### GET `/api/Admin/roles/users`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
-- **Options:** Pagination params
-- **Response:** Paged role-management user table
-- **Notes:** Replace the hardcoded `adminUsers` mock array with this endpoint.
+- **Status:** ✅ Wired
+- **Service:** `adminService.getRoleUsers(page, pageSize, search?)` → `src/services/adminService.ts`
+- **Hook:** `useAdminRoleUsers` → `src/hooks/useAdminStats.ts`
+- **Options:** `pageNumber`, `pageSize`, `Search`, `Role`, `AccountStatus`, `IncludeDeleted`
+- **Response:** `AdminRoleUsersResult` (manual interface — swagger has `content?: never`)
+- **Notes:** Replaced the hardcoded `adminUsers` mock array. Powers the Admins tab table.
 
 ---
 
@@ -445,12 +445,12 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ---
 
 ### PATCH `/api/Admin/roles/users/{userId}`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
-- **Options:** `userId` path param + `{ roles: string[] }` body
-- **Response:** Updated role set
-- **Notes:** Replaces all assignable roles while preserving protected base roles. Wire to a role-editor modal in the Admins tab.
+- **Status:** ✅ Wired
+- **Service:** `adminService.updateUserRoles(userId, roles)` → `src/services/adminService.ts`
+- **Hook:** `useUpdateUserRoles` → `src/hooks/useAdminStats.ts`
+- **Options:** `userId` path param + `AdminUpdateUserRolesDto { roles: string[] }` body
+- **Response:** 200 no body
+- **Notes:** Wired to the "Update Roles" button in the Admins & Role Management section (inside User Management tab). Opens a modal pre-populated with the user's current Admin/Moderator roles; submits the checked selection. Protected roles (Owner, Renter) are preserved by the server automatically.
 
 ---
 
@@ -1064,4 +1064,4 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 
 ---
 
-*Last updated: 2026-05-28*
+*Last updated: 2026-05-28 — wired: analytics-reports/generate, analytics-reports (list + download), Admin/roles/users (GET + PATCH), fixed ban/unban/restore HTTP methods. PATCH roles/users/{userId}: replaced "Downgrade" with "Update Roles" modal; merged Admin Management tab into User Management tab.*

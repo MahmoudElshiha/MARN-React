@@ -1,5 +1,6 @@
-import { apiClient } from './apiClient'
+import { apiClient, axiosInstance } from './apiClient'
 import type { ApiResponse, SearchPaginatedResponse } from '@/types/common'
+import type { components } from '@/types/api.generated'
 
 export interface AdminStatMetric {
   value: number
@@ -129,6 +130,75 @@ export interface PendingUserVerification {
   nationalIDNumber: string | null
 }
 
+export interface AdminRoleUser {
+  userId: string
+  fullName: string
+  email: string
+  profileImage: string | null
+  accountStatus: string
+  accountStatusDisplayName: string
+  isDeleted: boolean
+  createdAt: string
+  roles: string[]
+  rolesDisplayNames: string[]
+}
+
+export interface AdminRoleUsersResult {
+  items: AdminRoleUser[]
+  pageNumber: number
+  pageSize: number
+  totalCount: number
+  totalPages: number
+}
+
+export interface AdminAnalyticsReport {
+  reportId: number
+  scope: string
+  scopeDisplayName: string
+  format: string
+  formatDisplayName: string
+  period: string
+  periodDisplayName: string
+  fileName: string
+  fileSizeBytes: number | null
+  generatedAt: string
+  fromUtc: string | null
+  toUtc: string | null
+}
+
+export interface AdminAnalyticsReportsResult {
+  items: AdminAnalyticsReport[]
+  pageNumber: number
+  pageSize: number
+  totalCount: number
+  totalPages: number
+}
+
+export type GenerateReportPayload = components['schemas']['AdminAnalyticsReportGenerateRequestDto']
+
+// No schema in swagger — defined manually from API docs
+export interface PendingPropertyVerification {
+  propertyId: number
+  title: string
+  address: string
+  governorate: string
+  type: string
+  typeDisplayName: string
+  status: string
+  statusDisplayName: string
+  ownerFullName: string
+  ownerEmail: string
+  ownerUserId: string
+  submittedAt: string
+  mainImage: string | null
+}
+
+export interface PendingPropertyVerificationDetail extends PendingPropertyVerification {
+  description: string | null
+  ownershipDocumentUrl: string | null
+  images: string[]
+}
+
 export const adminService = {
   getStats: () =>
     apiClient.get<ApiResponse<AdminStats>>('/api/Admin/dashboard/overview'),
@@ -160,11 +230,49 @@ export const adminService = {
     apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/users/${userId}/decline`, { reason }),
 
   banUser: (userId: string) =>
-    apiClient.post<ApiResponse<void>>(`/api/Admin/users/${userId}/ban`),
+    apiClient.patch<ApiResponse<void>>(`/api/Admin/users/${userId}/ban`),
 
-  suspendUser: (userId: string) =>
-    apiClient.post<ApiResponse<void>>(`/api/Admin/users/${userId}/suspend`),
+  unbanUser: (userId: string) =>
+    apiClient.patch<ApiResponse<void>>(`/api/Admin/users/${userId}/unban`),
 
   restoreUser: (userId: string) =>
-    apiClient.post<ApiResponse<void>>(`/api/Admin/users/${userId}/restore`),
+    apiClient.patch<ApiResponse<void>>(`/api/Admin/users/${userId}/restore`),
+
+  getRoleUsers: (page = 1, pageSize = 20, search?: string) => {
+    const params = new URLSearchParams({ pageNumber: String(page), pageSize: String(pageSize) })
+    if (search) params.append('Search', search)
+    return apiClient.get<ApiResponse<AdminRoleUsersResult>>(`/api/Admin/roles/users?${params}`)
+  },
+
+  updateUserRoles: (userId: string, roles: string[]) =>
+    apiClient.patch<ApiResponse<void>>(`/api/Admin/roles/users/${userId}`, { roles }),
+
+  generateReport: (payload: GenerateReportPayload) =>
+    apiClient.post<void>('/api/Admin/analytics-reports/generate', payload),
+
+  getAnalyticsReports: (page = 1, pageSize = 20) =>
+    apiClient.get<ApiResponse<AdminAnalyticsReportsResult>>(
+      `/api/Admin/analytics-reports?PageNumber=${page}&PageSize=${pageSize}`,
+    ),
+
+  downloadAnalyticsReport: (reportId: number) =>
+    axiosInstance.get<Blob>(`/api/Admin/analytics-reports/${reportId}/download`, {
+      responseType: 'blob',
+    }),
+
+  getPendingPropertyVerifications: (page = 1, pageSize = 20) =>
+    apiClient.get<ApiResponse<SearchPaginatedResponse<PendingPropertyVerification>>>(
+      `/api/Admin/verifications/properties/pending?PageNumber=${page}&PageSize=${pageSize}`,
+    ),
+
+  getPropertyVerification: (propertyId: number) =>
+    apiClient.get<ApiResponse<PendingPropertyVerificationDetail>>(
+      `/api/Admin/verifications/properties/${propertyId}`,
+    ),
+
+  approvePropertyVerification: (propertyId: number) =>
+    apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/properties/${propertyId}/approve`),
+
+  declinePropertyVerification: (propertyId: number, reason: string) =>
+    apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/properties/${propertyId}/decline`, { reason }),
 }
