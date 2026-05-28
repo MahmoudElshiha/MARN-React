@@ -41,7 +41,7 @@ import {
 import { toast } from 'sonner'
 import {
   useAdminStats,
-  useAdminUserStats,
+  useAdminRoleUsers,
   useAdminVerifications,
   useAdminUserVerification,
   useAdminAnalyticsReports,
@@ -50,7 +50,7 @@ import {
   useAdminPropertyVerifications,
   useAdminPropertyVerification,
 } from '@/hooks/useAdminStats'
-import { adminService, type AdminUserStatsItem } from '@/services/adminService'
+import { adminService, type AdminRoleUser } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
@@ -71,7 +71,8 @@ export function AdminDashboardPage() {
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [pendingRejectUserId, setPendingRejectUserId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
-  const [selectedUser, setSelectedUser] = useState<AdminUserStatsItem | null>(null)
+  const [selectedUser, setSelectedUser] = useState<AdminRoleUser | null>(null)
+  const [userSearch, setUserSearch] = useState('')
 
   const [showRolesModal, setShowRolesModal] = useState(false)
   const [pendingRoleUserId, setPendingRoleUserId] = useState<string | null>(null)
@@ -89,7 +90,7 @@ export function AdminDashboardPage() {
   const { data: statsData, isLoading: statsLoading } = useAdminStats()
   const { data: verificationsData, isLoading: verificationsLoading } =
     useAdminVerifications()
-  const { data: usersData, isLoading: usersLoading } = useAdminUserStats()
+  const { data: usersData, isLoading: usersLoading } = useAdminRoleUsers(1, 20, userSearch || undefined)
   const { data: verificationDetailData, isLoading: verificationDetailLoading } =
     useAdminUserVerification(selectedVerificationId)
   const { data: analyticsReportsData, isLoading: analyticsReportsLoading } = useAdminAnalyticsReports()
@@ -106,7 +107,7 @@ export function AdminDashboardPage() {
 
   const apiStats = statsData?.data
   const pendingVerifications = verificationsData?.data?.items ?? []
-  const users = usersData?.data?.users?.items ?? []
+  const users = usersData?.data?.items ?? []
   const revenueData = apiStats?.monthlyRevenue ?? []
   const analyticsReports = analyticsReportsData?.data?.items ?? []
   const pendingPropertyVerifications = propertyVerificationsData?.data?.items ?? []
@@ -220,7 +221,7 @@ export function AdminDashboardPage() {
     onSuccess: () => {
       const labels: Record<string, string> = { ban: 'banned', unban: 'unbanned', restore: 'restored' }
       toast.success(`User ${labels[actionType!] ?? actionType} successfully`)
-      queryClient.invalidateQueries({ queryKey: ['adminUserStats'] })
+      queryClient.invalidateQueries({ queryKey: ['adminRoleUsers'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
       setShowConfirmModal(false)
       setPendingUserId(null)
@@ -651,6 +652,8 @@ export function AdminDashboardPage() {
                     <Input
                       placeholder="Search users..."
                       className="w-64 bg-white rounded-xl border-[#3A6EA5]/20"
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
                     />
                   </div>
                 </CardHeader>
@@ -742,7 +745,7 @@ export function AdminDashboardPage() {
                                       <UserCheck className="w-4 h-4 mr-1" />
                                       Unban
                                     </Button>
-                                  ) : (
+                                  ) : !user.roles.includes('Admin') ? (
                                     <Button
                                       size="sm"
                                       variant="outline"
@@ -751,7 +754,7 @@ export function AdminDashboardPage() {
                                     >
                                       <Ban className="w-4 h-4" />
                                     </Button>
-                                  )}
+                                  ) : null}
                                 </div>
                               </td>
                             </tr>
@@ -1366,91 +1369,6 @@ export function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              {/* Properties */}
-              <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-xs font-semibold text-[#4a5565] uppercase tracking-wide mb-3">Properties</p>
-                <div className="space-y-1.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Owned</span>
-                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.ownedPropertiesCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Active</span>
-                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.activePropertiesCount}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contracts */}
-              <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-xs font-semibold text-[#4a5565] uppercase tracking-wide mb-3">Contracts</p>
-                <div className="space-y-1.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">As Renter</span>
-                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.renterContractsCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">As Owner</span>
-                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.ownerContractsCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Active</span>
-                    <span className="font-semibold text-green-600">{selectedUser.activeContractsCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Cancelled</span>
-                    <span className="font-semibold text-red-500">{selectedUser.cancelledContractsCount}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payments */}
-              <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-xs font-semibold text-[#4a5565] uppercase tracking-wide mb-3">Payments</p>
-                <div className="space-y-1.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Made</span>
-                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.paymentsMadeCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Received</span>
-                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.paymentsReceivedCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Total Paid</span>
-                    <span className="font-semibold text-red-500">
-                      EGP {selectedUser.totalPaidAmount.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Total Received</span>
-                    <span className="font-semibold text-green-600">
-                      EGP {selectedUser.totalReceivedAmount.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Reports */}
-              <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-xs font-semibold text-[#4a5565] uppercase tracking-wide mb-3">Reports</p>
-                <div className="space-y-1.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Submitted</span>
-                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.reportsSubmittedCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4a5565]">Against User</span>
-                    <span className={`font-semibold ${selectedUser.reportsAgainstUserCount > 0 ? 'text-red-500' : 'text-[#1a1a1a]'}`}>
-                      {selectedUser.reportsAgainstUserCount}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Actions */}
             <div className="flex gap-3">
               {selectedUser.isDeleted ? (
@@ -1471,7 +1389,7 @@ export function AdminDashboardPage() {
                   <UserCheck className="w-4 h-4 mr-2" />
                   Unban
                 </Button>
-              ) : (
+              ) : !selectedUser.roles.includes('Admin') ? (
                 <Button
                   variant="outline"
                   className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
@@ -1481,7 +1399,7 @@ export function AdminDashboardPage() {
                   <Ban className="w-4 h-4 mr-2" />
                   Ban
                 </Button>
-              )}
+              ) : null}
               <Button
                 variant="outline"
                 className="rounded-xl border-[#3A6EA5]/20"
