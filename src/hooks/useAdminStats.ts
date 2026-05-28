@@ -16,9 +16,25 @@ export function useAdminUsers(page = 1, pageSize = 20) {
   })
 }
 
-export function useAdminVerifications() {
+export function useAdminVerifications(page = 1, pageSize = 20) {
   return useQuery({
-    queryKey: ['adminVerifications'],
-    queryFn: () => adminService.getVerifications(),
+    queryKey: ['adminVerifications', page, pageSize],
+    queryFn: () => adminService.getVerifications(page, pageSize),
+  })
+}
+
+export function useAdminUserStats(page = 1, pageSize = 20) {
+  return useQuery({
+    queryKey: ['adminUserStats', page, pageSize],
+    queryFn: () => adminService.getUserStats(page, pageSize),
+  })
+}
+
+export function useAdminUserVerification(userId: string | null) {
+  return useQuery({
+    queryKey: ['adminUserVerification', userId],
+    queryFn: () => adminService.getUserVerification(userId!),
+    enabled: !!userId,
+    staleTime: 60 * 1000,
   })
 }

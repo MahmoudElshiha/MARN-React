@@ -39,11 +39,20 @@ import {
 import { toast } from 'sonner'
 import {
   useAdminStats,
-  useAdminUsers,
+  useAdminUserStats,
   useAdminVerifications,
+  useAdminUserVerification,
 } from '@/hooks/useAdminStats'
-import { adminService } from '@/services/adminService'
+import { adminService, type AdminUserStatsItem } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
+
+function buildImageUrl(path: string | null) {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${BASE_URL}${path}`
+}
 
 export function AdminDashboardPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
@@ -51,24 +60,40 @@ export function AdminDashboardPage() {
     'ban' | 'suspend' | 'restore' | null
   >(null)
   const [pendingUserId, setPendingUserId] = useState<string | null>(null)
+  const [selectedVerificationId, setSelectedVerificationId] = useState<string | null>(null)
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [pendingRejectUserId, setPendingRejectUserId] = useState<string | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
+  const [selectedUser, setSelectedUser] = useState<AdminUserStatsItem | null>(null)
 
   const { data: statsData, isLoading: statsLoading } = useAdminStats()
   const { data: verificationsData, isLoading: verificationsLoading } =
     useAdminVerifications()
-  const { data: usersData, isLoading: usersLoading } = useAdminUsers()
+  const { data: usersData, isLoading: usersLoading } = useAdminUserStats()
+  const { data: verificationDetailData, isLoading: verificationDetailLoading } =
+    useAdminUserVerification(selectedVerificationId)
+
+  const verificationDetail = verificationDetailData?.data
   const queryClient = useQueryClient()
 
   const apiStats = statsData?.data
-  const pendingVerifications = verificationsData?.data ?? []
-  const users = usersData?.data ?? []
-  const revenueData = apiStats?.revenueData ?? []
+  const pendingVerifications = verificationsData?.data?.items ?? []
+  const users = usersData?.data?.users?.items ?? []
+  const revenueData = apiStats?.monthlyRevenue ?? []
+
+  const formatTrend = (pct?: number) => {
+    if (pct == null) return ''
+    return pct >= 0 ? `+${pct}%` : `${pct}%`
+  }
 
   const stats = [
     {
       icon: Users,
       label: 'Total Users',
-      value: statsLoading ? '…' : (apiStats?.totalUsers ?? 0).toLocaleString(),
-      change: '',
+      value: statsLoading
+        ? '…'
+        : (apiStats?.totalUsers?.value ?? 0).toLocaleString(),
+      change: statsLoading ? '' : formatTrend(apiStats?.totalUsers?.trendPercentage),
       color: 'from-blue-500 to-blue-600',
     },
     {
@@ -76,8 +101,8 @@ export function AdminDashboardPage() {
       label: 'Total Listings',
       value: statsLoading
         ? '…'
-        : (apiStats?.totalListings ?? 0).toLocaleString(),
-      change: '',
+        : (apiStats?.totalProperties?.value ?? 0).toLocaleString(),
+      change: statsLoading ? '' : formatTrend(apiStats?.totalProperties?.trendPercentage),
       color: 'from-green-500 to-green-600',
     },
     {
@@ -85,8 +110,8 @@ export function AdminDashboardPage() {
       label: 'Pending Verifications',
       value: statsLoading
         ? '…'
-        : (apiStats?.pendingVerifications ?? 0).toLocaleString(),
-      change: '',
+        : (apiStats?.pendingVerifications?.value ?? 0).toLocaleString(),
+      change: statsLoading ? '' : formatTrend(apiStats?.pendingVerifications?.trendPercentage),
       color: 'from-yellow-500 to-yellow-600',
     },
     {
@@ -94,14 +119,14 @@ export function AdminDashboardPage() {
       label: 'Active Contracts',
       value: statsLoading
         ? '…'
-        : (apiStats?.activeContracts ?? 0).toLocaleString(),
-      change: '',
+        : (apiStats?.revenueSummary?.activeContracts ?? 0).toLocaleString(),
+      change: statsLoading ? '' : formatTrend(apiStats?.totalContracts?.trendPercentage),
       color: 'from-purple-500 to-purple-600',
     },
   ]
 
   const approveVerification = useMutation({
-    mutationFn: (id: number) => adminService.approveVerification(id),
+    mutationFn: (userId: string) => adminService.approveVerification(userId),
     onSuccess: () => {
       toast.success('Verification approved')
       queryClient.invalidateQueries({ queryKey: ['adminVerifications'] })
@@ -111,10 +136,15 @@ export function AdminDashboardPage() {
   })
 
   const rejectVerification = useMutation({
-    mutationFn: (id: number) => adminService.rejectVerification(id),
+    mutationFn: ({ userId, reason }: { userId: string; reason: string }) =>
+      adminService.rejectVerification(userId, reason),
     onSuccess: () => {
       toast.success('Verification rejected')
       queryClient.invalidateQueries({ queryKey: ['adminVerifications'] })
+      queryClient.invalidateQueries({ queryKey: ['adminStats'] })
+      setShowRejectModal(false)
+      setPendingRejectUserId(null)
+      setRejectReason('')
     },
     onError: () => toast.error('Failed to reject'),
   })
@@ -132,10 +162,12 @@ export function AdminDashboardPage() {
       return adminService.restoreUser(userId)
     },
     onSuccess: () => {
-      toast.success(`User ${actionType}ned successfully`)
-      queryClient.invalidateQueries({ queryKey: ['adminUsers'] })
+      const labels: Record<string, string> = { ban: 'banned', suspend: 'suspended', restore: 'restored' }
+      toast.success(`User ${labels[actionType!] ?? actionType} successfully`)
+      queryClient.invalidateQueries({ queryKey: ['adminUserStats'] })
       setShowConfirmModal(false)
       setPendingUserId(null)
+      setSelectedUser(null)
     },
     onError: () => toast.error('Action failed'),
   })
@@ -171,8 +203,18 @@ export function AdminDashboardPage() {
     toast.success('Admin downgraded successfully')
   }
 
-  const handleApprove = (id: number) => approveVerification.mutate(id)
-  const handleReject = (id: number) => rejectVerification.mutate(id)
+  const handleApprove = (userId: string) => approveVerification.mutate(userId)
+  const handleReject = (userId: string) => {
+    setPendingRejectUserId(userId)
+    setRejectReason('')
+    setSelectedVerificationId(null)
+    setShowRejectModal(true)
+  }
+  const confirmReject = () => {
+    if (pendingRejectUserId && rejectReason.trim()) {
+      rejectVerification.mutate({ userId: pendingRejectUserId, reason: rejectReason.trim() })
+    }
+  }
 
   const handleUserAction = (
     userId: string,
@@ -192,8 +234,16 @@ export function AdminDashboardPage() {
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: 'bg-yellow-100 text-yellow-700',
+      Pending: 'bg-yellow-100 text-yellow-700',
+      active: 'bg-green-100 text-green-700',
       Active: 'bg-green-100 text-green-700',
+      Verified: 'bg-green-100 text-green-700',
+      verified: 'bg-green-100 text-green-700',
+      Unverified: 'bg-yellow-100 text-yellow-700',
+      unverified: 'bg-yellow-100 text-yellow-700',
+      suspended: 'bg-red-100 text-red-700',
       Suspended: 'bg-red-100 text-red-700',
+      banned: 'bg-gray-100 text-gray-700',
       Banned: 'bg-gray-100 text-gray-700',
     }
     return (
@@ -276,23 +326,41 @@ export function AdminDashboardPage() {
                 <div className="bg-white rounded-2xl p-4">
                   <p className="text-sm text-[#4a5565] mb-1">Total Revenue</p>
                   <p className="text-3xl font-bold text-[#3A6EA5]">
-                    EGP 1,017,000
+                    {statsLoading
+                      ? '…'
+                      : `EGP ${(apiStats?.revenueSummary?.totalRevenue ?? 0).toLocaleString()}`}
                   </p>
-                  <p className="text-sm text-green-600 mt-1">
-                    +18% from last period
-                  </p>
+                  {!statsLoading && apiStats?.revenueSummary?.revenueTrendPercentage != null && (
+                    <p
+                      className={`text-sm mt-1 ${
+                        apiStats.revenueSummary.revenueTrendPercentage >= 0
+                          ? 'text-green-600'
+                          : 'text-red-600'
+                      }`}
+                    >
+                      {formatTrend(apiStats.revenueSummary.revenueTrendPercentage)} from last period
+                    </p>
+                  )}
                 </div>
                 <div className="bg-white rounded-2xl p-4">
                   <p className="text-sm text-[#4a5565] mb-1">
                     Active Contracts
                   </p>
-                  <p className="text-2xl font-bold text-[#1a1a1a]">1,234</p>
+                  <p className="text-2xl font-bold text-[#1a1a1a]">
+                    {statsLoading
+                      ? '…'
+                      : (apiStats?.revenueSummary?.activeContracts ?? 0).toLocaleString()}
+                  </p>
                 </div>
                 <div className="bg-white rounded-2xl p-4">
                   <p className="text-sm text-[#4a5565] mb-1">
                     New Users (This Month)
                   </p>
-                  <p className="text-2xl font-bold text-[#1a1a1a]">1,401</p>
+                  <p className="text-2xl font-bold text-[#1a1a1a]">
+                    {statsLoading
+                      ? '…'
+                      : (apiStats?.revenueSummary?.newUsersThisMonth ?? 0).toLocaleString()}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -312,7 +380,7 @@ export function AdminDashboardPage() {
                         stroke="#3A6EA5"
                         opacity={0.2}
                       />
-                      <XAxis dataKey="month" stroke="#4a5565" />
+                      <XAxis dataKey="label" stroke="#4a5565" />
                       <YAxis stroke="#4a5565" />
                       <Tooltip
                         contentStyle={{
@@ -340,28 +408,28 @@ export function AdminDashboardPage() {
 
           {/* Main Content Tabs */}
           <Tabs defaultValue="verifications" className="space-y-8">
-            <TabsList className="bg-[#F2F4F6] p-2 rounded-2xl">
+            <TabsList className="w-full h-auto bg-[#F2F4F6] p-1.5 rounded-2xl gap-1">
               <TabsTrigger
                 value="verifications"
-                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5]"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
                 Review Submissions
               </TabsTrigger>
               <TabsTrigger
                 value="users"
-                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5]"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
                 User Management
               </TabsTrigger>
               <TabsTrigger
                 value="admins"
-                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5]"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
                 Admin Management
               </TabsTrigger>
               <TabsTrigger
                 value="reports"
-                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5]"
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
                 Reports
               </TabsTrigger>
@@ -375,20 +443,9 @@ export function AdminDashboardPage() {
                     <CardTitle className="text-2xl text-[#1a1a1a]">
                       Pending Verifications
                     </CardTitle>
-                    <div className="flex gap-3">
-                      <Select defaultValue="all">
-                        <SelectTrigger className="w-40 bg-white rounded-xl border-[#3A6EA5]/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Types</SelectItem>
-                          <SelectItem value="property">
-                            Property Listings
-                          </SelectItem>
-                          <SelectItem value="contract">Contracts</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <span className="text-sm text-[#4a5565]">
+                      {pendingVerifications.length} pending
+                    </span>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -397,13 +454,16 @@ export function AdminDashboardPage() {
                       <thead>
                         <tr className="border-b border-[#3A6EA5]/20">
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            User Name
+                            Full Name
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Property/Type
+                            Email
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Submission Date
+                            National ID
+                          </th>
+                          <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                            Submitted
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
                             Status
@@ -420,7 +480,7 @@ export function AdminDashboardPage() {
                               key={i}
                               className="border-b border-[#3A6EA5]/10"
                             >
-                              {Array.from({ length: 5 }).map((_, j) => (
+                              {Array.from({ length: 6 }).map((_, j) => (
                                 <td key={j} className="py-4 px-4">
                                   <Skeleton className="h-5 w-full rounded" />
                                 </td>
@@ -430,7 +490,7 @@ export function AdminDashboardPage() {
                         ) : pendingVerifications.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={5}
+                              colSpan={6}
                               className="py-10 text-center text-[#4a5565]"
                             >
                               No pending verifications.
@@ -439,20 +499,28 @@ export function AdminDashboardPage() {
                         ) : (
                           pendingVerifications.map((item) => (
                             <tr
-                              key={item.id}
+                              key={item.userId}
                               className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
                             >
-                              <td className="py-4 px-4 text-[#1a1a1a]">
-                                {item.userName}
+                              <td className="py-4 px-4 text-[#1a1a1a] font-medium">
+                                <div>{item.fullName}</div>
+                                {item.arabicFullName && (
+                                  <div className="text-xs text-[#4a5565] mt-0.5" dir="rtl">
+                                    {item.arabicFullName}
+                                  </div>
+                                )}
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
-                                {item.propertyName}
+                                {item.email}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565] font-mono text-sm">
+                                {item.nationalIDNumber ?? '—'}
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
-                                {item.date}
+                                {new Date(item.createdAt).toLocaleDateString('en-GB')}
                               </td>
                               <td className="py-4 px-4">
-                                {getStatusBadge(item.status)}
+                                {getStatusBadge(item.accountStatusDisplayName)}
                               </td>
                               <td className="py-4 px-4">
                                 <div className="flex gap-2 justify-end">
@@ -460,6 +528,7 @@ export function AdminDashboardPage() {
                                     size="sm"
                                     variant="outline"
                                     className="rounded-xl border-[#3A6EA5]/20"
+                                    onClick={() => setSelectedVerificationId(item.userId)}
                                   >
                                     <Eye className="w-4 h-4 mr-1" />
                                     View
@@ -468,7 +537,7 @@ export function AdminDashboardPage() {
                                     size="sm"
                                     className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
                                     disabled={approveVerification.isPending}
-                                    onClick={() => handleApprove(item.id)}
+                                    onClick={() => handleApprove(item.userId)}
                                   >
                                     <CheckCircle className="w-4 h-4 mr-1" />
                                     Approve
@@ -478,7 +547,7 @@ export function AdminDashboardPage() {
                                     variant="outline"
                                     className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
                                     disabled={rejectVerification.isPending}
-                                    onClick={() => handleReject(item.id)}
+                                    onClick={() => handleReject(item.userId)}
                                   >
                                     <XCircle className="w-4 h-4 mr-1" />
                                     Reject
@@ -560,23 +629,23 @@ export function AdminDashboardPage() {
                         ) : (
                           users.map((user) => (
                             <tr
-                              key={user.id}
+                              key={user.userId}
                               className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
                             >
                               <td className="py-4 px-4 text-[#1a1a1a] font-medium">
-                                {user.name}
+                                {user.fullName}
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
                                 {user.email}
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
-                                {user.role}
+                                {user.rolesDisplayNames.join(', ') || '—'}
                               </td>
                               <td className="py-4 px-4">
-                                {getStatusBadge(user.status)}
+                                {getStatusBadge(user.accountStatusDisplayName)}
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
-                                {user.joinDate}
+                                {new Date(user.createdAt).toLocaleDateString('en-GB')}
                               </td>
                               <td className="py-4 px-4">
                                 <div className="flex gap-2 justify-end">
@@ -584,18 +653,17 @@ export function AdminDashboardPage() {
                                     size="sm"
                                     variant="outline"
                                     className="rounded-xl border-[#3A6EA5]/20"
+                                    onClick={() => setSelectedUser(user)}
                                   >
                                     <Eye className="w-4 h-4" />
                                   </Button>
-                                  {user.status === 'Active' ? (
+                                  {user.accountStatus === 'Verified' ? (
                                     <>
                                       <Button
                                         size="sm"
                                         variant="outline"
                                         className="border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white rounded-xl"
-                                        onClick={() =>
-                                          handleUserAction(user.id, 'suspend')
-                                        }
+                                        onClick={() => handleUserAction(user.userId, 'suspend')}
                                       >
                                         Suspend
                                       </Button>
@@ -603,23 +671,28 @@ export function AdminDashboardPage() {
                                         size="sm"
                                         variant="outline"
                                         className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                                        onClick={() =>
-                                          handleUserAction(user.id, 'ban')
-                                        }
+                                        onClick={() => handleUserAction(user.userId, 'ban')}
                                       >
                                         <Ban className="w-4 h-4" />
                                       </Button>
                                     </>
-                                  ) : (
+                                  ) : user.accountStatus === 'Banned' || user.accountStatus === 'Suspended' ? (
                                     <Button
                                       size="sm"
                                       className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                                      onClick={() =>
-                                        handleUserAction(user.id, 'restore')
-                                      }
+                                      onClick={() => handleUserAction(user.userId, 'restore')}
                                     >
                                       <UserCheck className="w-4 h-4 mr-1" />
                                       Restore
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                                      onClick={() => handleUserAction(user.userId, 'ban')}
+                                    >
+                                      <Ban className="w-4 h-4" />
                                     </Button>
                                   )}
                                 </div>
@@ -853,6 +926,402 @@ export function AdminDashboardPage() {
           </Tabs>
         </motion.div>
       </div>
+
+      {/* ID-Card View Modal */}
+      {selectedVerificationId && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedVerificationId(null)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                {verificationDetailLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-7 w-48 rounded" />
+                    <Skeleton className="h-4 w-36 rounded" />
+                    <Skeleton className="h-4 w-40 rounded" />
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="text-2xl font-bold text-[#1a1a1a]">
+                      {verificationDetail?.fullName}
+                    </h3>
+                    {verificationDetail?.arabicFullName && (
+                      <p className="text-[#4a5565] mt-0.5" dir="rtl">
+                        {verificationDetail.arabicFullName}
+                      </p>
+                    )}
+                    <p className="text-sm text-[#4a5565] mt-1">
+                      {verificationDetail?.email}
+                    </p>
+                  </>
+                )}
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl border-[#3A6EA5]/20"
+                onClick={() => setSelectedVerificationId(null)}
+              >
+                <XCircle className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Detail fields */}
+            <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+              {verificationDetailLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bg-[#F2F4F6] rounded-2xl p-4 space-y-2">
+                    <Skeleton className="h-3 w-20 rounded" />
+                    <Skeleton className="h-5 w-32 rounded" />
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                    <p className="text-[#4a5565] mb-1">National ID</p>
+                    <p className="font-mono font-semibold text-[#1a1a1a]">
+                      {verificationDetail?.nationalIDNumber ?? '—'}
+                    </p>
+                  </div>
+                  <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                    <p className="text-[#4a5565] mb-1">Arabic Address</p>
+                    <p className="font-semibold text-[#1a1a1a]" dir="rtl">
+                      {verificationDetail?.arabicAddress ?? '—'}
+                    </p>
+                  </div>
+                  <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                    <p className="text-[#4a5565] mb-1">Phone</p>
+                    <p className="font-semibold text-[#1a1a1a]">
+                      {verificationDetail?.phoneNumber ?? '—'}
+                    </p>
+                  </div>
+                  <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                    <p className="text-[#4a5565] mb-1">Submitted</p>
+                    <p className="font-semibold text-[#1a1a1a]">
+                      {verificationDetail?.createdAt
+                        ? new Date(verificationDetail.createdAt).toLocaleDateString('en-GB')
+                        : '—'}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* ID card photos */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {verificationDetailLoading ? (
+                Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i}>
+                    <Skeleton className="h-4 w-16 rounded mb-2" />
+                    <Skeleton className="h-32 w-full rounded-2xl" />
+                  </div>
+                ))
+              ) : (
+                [
+                  { label: 'Front ID', src: buildImageUrl(verificationDetail?.frontIdPhoto ?? null) },
+                  { label: 'Back ID',  src: buildImageUrl(verificationDetail?.backIdPhoto  ?? null) },
+                ].map(({ label, src }) => (
+                  <div key={label}>
+                    <p className="text-sm text-[#4a5565] mb-2 font-medium">{label}</p>
+                    {src ? (
+                      <img
+                        src={src}
+                        alt={label}
+                        className="w-full rounded-2xl border border-[#3A6EA5]/20 object-cover max-h-48"
+                      />
+                    ) : (
+                      <div className="w-full rounded-2xl border border-dashed border-[#3A6EA5]/30 bg-[#F2F4F6] flex items-center justify-center h-32 text-[#4a5565] text-sm">
+                        No image
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                disabled={approveVerification.isPending || verificationDetailLoading}
+                onClick={() => {
+                  handleApprove(selectedVerificationId)
+                  setSelectedVerificationId(null)
+                }}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Approve
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                disabled={rejectVerification.isPending || verificationDetailLoading}
+                onClick={() => {
+                  handleReject(selectedVerificationId)
+                  setSelectedVerificationId(null)
+                }}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Reject
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* User Detail Modal */}
+      {selectedUser && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedUser(null)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center text-white text-xl font-bold shrink-0">
+                  {selectedUser.fullName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#1a1a1a]">{selectedUser.fullName}</h3>
+                  <p className="text-sm text-[#4a5565] mt-0.5">{selectedUser.email}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {getStatusBadge(selectedUser.accountStatusDisplayName)}
+                    {selectedUser.rolesDisplayNames.length > 0 && (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                        {selectedUser.rolesDisplayNames.join(', ')}
+                      </span>
+                    )}
+                    {selectedUser.isDeleted && (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-600">
+                        Deleted
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl border-[#3A6EA5]/20 shrink-0"
+                onClick={() => setSelectedUser(null)}
+              >
+                <XCircle className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Info row */}
+            <div className="grid grid-cols-2 gap-3 mb-6 text-sm">
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">Joined</p>
+                <p className="font-semibold text-[#1a1a1a]">
+                  {new Date(selectedUser.createdAt).toLocaleDateString('en-GB')}
+                </p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">User ID</p>
+                <p className="font-mono text-xs font-semibold text-[#1a1a1a] break-all">
+                  {selectedUser.userId}
+                </p>
+              </div>
+            </div>
+
+            {/* Stats grid */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {/* Properties */}
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-xs font-semibold text-[#4a5565] uppercase tracking-wide mb-3">Properties</p>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Owned</span>
+                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.ownedPropertiesCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Active</span>
+                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.activePropertiesCount}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contracts */}
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-xs font-semibold text-[#4a5565] uppercase tracking-wide mb-3">Contracts</p>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">As Renter</span>
+                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.renterContractsCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">As Owner</span>
+                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.ownerContractsCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Active</span>
+                    <span className="font-semibold text-green-600">{selectedUser.activeContractsCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Cancelled</span>
+                    <span className="font-semibold text-red-500">{selectedUser.cancelledContractsCount}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payments */}
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-xs font-semibold text-[#4a5565] uppercase tracking-wide mb-3">Payments</p>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Made</span>
+                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.paymentsMadeCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Received</span>
+                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.paymentsReceivedCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Total Paid</span>
+                    <span className="font-semibold text-red-500">
+                      EGP {selectedUser.totalPaidAmount.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Total Received</span>
+                    <span className="font-semibold text-green-600">
+                      EGP {selectedUser.totalReceivedAmount.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reports */}
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-xs font-semibold text-[#4a5565] uppercase tracking-wide mb-3">Reports</p>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Submitted</span>
+                    <span className="font-semibold text-[#1a1a1a]">{selectedUser.reportsSubmittedCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4a5565]">Against User</span>
+                    <span className={`font-semibold ${selectedUser.reportsAgainstUserCount > 0 ? 'text-red-500' : 'text-[#1a1a1a]'}`}>
+                      {selectedUser.reportsAgainstUserCount}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              {selectedUser.accountStatus === 'Verified' ? (
+                <>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white rounded-xl"
+                    disabled={userAction.isPending}
+                    onClick={() => handleUserAction(selectedUser.userId, 'suspend')}
+                  >
+                    Suspend
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                    disabled={userAction.isPending}
+                    onClick={() => handleUserAction(selectedUser.userId, 'ban')}
+                  >
+                    <Ban className="w-4 h-4 mr-2" />
+                    Ban
+                  </Button>
+                </>
+              ) : selectedUser.accountStatus === 'Banned' || selectedUser.accountStatus === 'Suspended' ? (
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                  disabled={userAction.isPending}
+                  onClick={() => handleUserAction(selectedUser.userId, 'restore')}
+                >
+                  <UserCheck className="w-4 h-4 mr-2" />
+                  Restore
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                  disabled={userAction.isPending}
+                  onClick={() => handleUserAction(selectedUser.userId, 'ban')}
+                >
+                  <Ban className="w-4 h-4 mr-2" />
+                  Ban
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                className="rounded-xl border-[#3A6EA5]/20"
+                onClick={() => setSelectedUser(null)}
+              >
+                Close
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Reject Reason Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+          >
+            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">
+              Reject Verification
+            </h3>
+            <p className="text-[#4a5565] mb-5">
+              Please provide a reason for rejecting this verification request.
+            </p>
+            <textarea
+              className="w-full rounded-xl border border-[#3A6EA5]/30 bg-[#F2F4F6] p-3 text-sm text-[#1a1a1a] resize-none focus:outline-none focus:ring-2 focus:ring-[#3A6EA5]/40"
+              rows={4}
+              placeholder="Enter rejection reason…"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+            <div className="flex gap-4 mt-5">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl border-[#3A6EA5]/20"
+                onClick={() => {
+                  setShowRejectModal(false)
+                  setPendingRejectUserId(null)
+                  setRejectReason('')
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                disabled={rejectVerification.isPending || !rejectReason.trim()}
+                onClick={confirmReject}
+              >
+                {rejectVerification.isPending ? 'Rejecting…' : 'Confirm Reject'}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
