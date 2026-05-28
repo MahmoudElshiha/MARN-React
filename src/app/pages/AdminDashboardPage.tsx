@@ -86,6 +86,8 @@ export function AdminDashboardPage() {
   const [reportScope, setReportScope] = useState<string>('Overview')
   const [reportFormat, setReportFormat] = useState<string>('Pdf')
   const [reportPeriod, setReportPeriod] = useState<string>('ThisMonth')
+  const [reportFromUtc, setReportFromUtc] = useState<string>('')
+  const [reportToUtc, setReportToUtc] = useState<string>('')
 
   const { data: statsData, isLoading: statsLoading } = useAdminStats()
   const { data: verificationsData, isLoading: verificationsLoading } =
@@ -309,23 +311,17 @@ export function AdminDashboardPage() {
   }
 
   const getStatusBadge = (status: string) => {
-    const styles = {
+    const styles: Record<string, string> = {
       pending: 'bg-yellow-100 text-yellow-700',
-      Pending: 'bg-yellow-100 text-yellow-700',
       active: 'bg-green-100 text-green-700',
-      Active: 'bg-green-100 text-green-700',
-      Verified: 'bg-green-100 text-green-700',
       verified: 'bg-green-100 text-green-700',
-      Unverified: 'bg-yellow-100 text-yellow-700',
       unverified: 'bg-yellow-100 text-yellow-700',
       suspended: 'bg-red-100 text-red-700',
-      Suspended: 'bg-red-100 text-red-700',
       banned: 'bg-gray-100 text-gray-700',
-      Banned: 'bg-gray-100 text-gray-700',
     }
     return (
       <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-700'}`}
+        className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status.toLowerCase()] ?? 'bg-gray-100 text-gray-700'}`}
       >
         {status}
       </span>
@@ -718,15 +714,17 @@ export function AdminDashboardPage() {
                                   >
                                     <Eye className="w-4 h-4" />
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white rounded-xl"
-                                    disabled={updateUserRoles.isPending}
-                                    onClick={() => handleOpenRolesModal(user.userId, user.roles)}
-                                  >
-                                    <ShieldCheck className="w-4 h-4" />
-                                  </Button>
+                                  {user.accountStatus !== 'Banned' && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white rounded-xl"
+                                      disabled={updateUserRoles.isPending}
+                                      onClick={() => handleOpenRolesModal(user.userId, user.roles)}
+                                    >
+                                      <ShieldCheck className="w-4 h-4" />
+                                    </Button>
+                                  )}
                                   {user.isDeleted ? (
                                     <Button
                                       size="sm"
@@ -778,21 +776,96 @@ export function AdminDashboardPage() {
                 <CardContent className="space-y-6">
 
                   {/* Generate Action */}
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl shadow-lg shadow-[#3A6EA5]/30"
-                    disabled={generateReport.isPending}
-                    onClick={() =>
-                      generateReport.mutate({
-                        scope: reportScope as 'Overview' | 'Users' | 'Properties' | 'Contracts' | 'Revenue' | 'Full',
-                        format: reportFormat as 'Pdf' | 'Csv',
-                        period: reportPeriod as 'AllTime' | 'ThisMonth' | 'ThisYear',
-                      })
-                    }
-                  >
-                    <TrendingUp className="w-5 h-5 mr-2" />
-                    {generateReport.isPending ? 'Generating…' : 'Generate Report'}
-                  </Button>
+                  <div className="bg-white rounded-2xl p-6 space-y-4">
+                    <h3 className="font-semibold text-[#1a1a1a]">Generate New Report</h3>
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <p className="text-xs text-[#4a5565] font-medium">Scope</p>
+                        <Select value={reportScope} onValueChange={setReportScope}>
+                          <SelectTrigger className="bg-[#F2F4F6] border-none rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Overview">Overview</SelectItem>
+                            <SelectItem value="Users">Users</SelectItem>
+                            <SelectItem value="Properties">Properties</SelectItem>
+                            <SelectItem value="Contracts">Contracts</SelectItem>
+                            <SelectItem value="Revenue">Revenue</SelectItem>
+                            <SelectItem value="Full">Full</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-[#4a5565] font-medium">Format</p>
+                        <Select value={reportFormat} onValueChange={setReportFormat}>
+                          <SelectTrigger className="bg-[#F2F4F6] border-none rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Pdf">PDF</SelectItem>
+                            <SelectItem value="Csv">CSV</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-[#4a5565] font-medium">Period</p>
+                        <Select value={reportPeriod} onValueChange={setReportPeriod}>
+                          <SelectTrigger className="bg-[#F2F4F6] border-none rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ThisMonth">This Month</SelectItem>
+                            <SelectItem value="ThisYear">This Year</SelectItem>
+                            <SelectItem value="AllTime">All Time</SelectItem>
+                            <SelectItem value="Custom">Custom Range</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    {reportPeriod === 'Custom' && (
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <p className="text-xs text-[#4a5565] font-medium">From</p>
+                          <Input
+                            type="date"
+                            className="bg-[#F2F4F6] border-none rounded-xl"
+                            value={reportFromUtc}
+                            onChange={(e) => setReportFromUtc(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs text-[#4a5565] font-medium">To</p>
+                          <Input
+                            type="date"
+                            className="bg-[#F2F4F6] border-none rounded-xl"
+                            value={reportToUtc}
+                            onChange={(e) => setReportToUtc(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl shadow-lg shadow-[#3A6EA5]/30"
+                      disabled={
+                        generateReport.isPending ||
+                        (reportPeriod === 'Custom' && (!reportFromUtc || !reportToUtc))
+                      }
+                      onClick={() =>
+                        generateReport.mutate({
+                          scope: reportScope as 'Overview' | 'Users' | 'Properties' | 'Contracts' | 'Revenue' | 'Full',
+                          format: reportFormat as 'Pdf' | 'Csv',
+                          period: reportPeriod as 'AllTime' | 'ThisMonth' | 'ThisYear' | 'Custom',
+                          ...(reportPeriod === 'Custom' && reportFromUtc && reportToUtc
+                            ? { fromUtc: new Date(reportFromUtc).toISOString(), toUtc: new Date(reportToUtc).toISOString() }
+                            : {}),
+                        })
+                      }
+                    >
+                      <TrendingUp className="w-5 h-5 mr-2" />
+                      {generateReport.isPending ? 'Generating…' : 'Generate Report'}
+                    </Button>
+                  </div>
 
                   {/* Generated Reports List */}
                   <div className="bg-white rounded-2xl p-6">
@@ -1472,7 +1545,7 @@ export function AdminDashboardPage() {
               Select the assignable roles for this user. Protected roles (Owner, Renter) are preserved automatically.
             </p>
             <div className="space-y-3 mb-6">
-              {['Admin', 'Moderator'].map((role) => (
+              {ASSIGNABLE_ROLES.map((role) => (
                 <label key={role} className="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-[#F2F4F6] transition-colors">
                   <Checkbox
                     checked={selectedRoles.includes(role)}
