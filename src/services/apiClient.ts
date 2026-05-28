@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { HttpError, TimeoutError } from './httpErrors'
 
+// In dev with no VITE_API_BASE_URL set, use '' so requests go to localhost
+// and are forwarded by the Vite proxy — this avoids CORS preflight issues.
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
 
 export const axiosInstance = axios.create({

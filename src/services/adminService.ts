@@ -176,6 +176,17 @@ export interface AdminAnalyticsReportsResult {
 
 export type GenerateReportPayload = components['schemas']['AdminAnalyticsReportGenerateRequestDto']
 
+// PATCH with no request body — removes Content-Type so ASP.NET doesn't attempt to read an absent body
+const patchNoBody = (url: string) =>
+  axiosInstance
+    .patch(url, undefined, {
+      transformRequest: (_, headers) => {
+        delete headers['Content-Type']
+        return undefined
+      },
+    })
+    .then((r) => r.data)
+
 // No schema in swagger — defined manually from API docs
 export interface PendingPropertyVerification {
   propertyId: number
@@ -224,19 +235,19 @@ export const adminService = {
     ),
 
   approveVerification: (userId: string) =>
-    apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/users/${userId}/approve`),
+    patchNoBody(`/api/Admin/verifications/users/${userId}/approve`),
 
   rejectVerification: (userId: string, reason: string) =>
     apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/users/${userId}/decline`, { reason }),
 
   banUser: (userId: string) =>
-    apiClient.patch<ApiResponse<void>>(`/api/Admin/users/${userId}/ban`),
+    patchNoBody(`/api/Admin/users/${userId}/ban`),
 
   unbanUser: (userId: string) =>
-    apiClient.patch<ApiResponse<void>>(`/api/Admin/users/${userId}/unban`),
+    patchNoBody(`/api/Admin/users/${userId}/unban`),
 
   restoreUser: (userId: string) =>
-    apiClient.patch<ApiResponse<void>>(`/api/Admin/users/${userId}/restore`),
+    patchNoBody(`/api/Admin/users/${userId}/restore`),
 
   getRoleUsers: (page = 1, pageSize = 20, search?: string) => {
     const params = new URLSearchParams({ pageNumber: String(page), pageSize: String(pageSize) })
@@ -271,7 +282,7 @@ export const adminService = {
     ),
 
   approvePropertyVerification: (propertyId: number) =>
-    apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/properties/${propertyId}/approve`),
+    patchNoBody(`/api/Admin/verifications/properties/${propertyId}/approve`),
 
   declinePropertyVerification: (propertyId: number, reason: string) =>
     apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/properties/${propertyId}/decline`, { reason }),

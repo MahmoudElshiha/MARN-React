@@ -773,56 +773,6 @@ export function AdminDashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Generate Controls */}
-                  <div className="grid md:grid-cols-3 gap-4 p-6 bg-white rounded-2xl">
-                    <div>
-                      <label className="text-sm text-[#4a5565] mb-2 block">
-                        Scope
-                      </label>
-                      <Select value={reportScope} onValueChange={setReportScope}>
-                        <SelectTrigger className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Overview">Overview</SelectItem>
-                          <SelectItem value="Users">Users</SelectItem>
-                          <SelectItem value="Properties">Properties</SelectItem>
-                          <SelectItem value="Contracts">Contracts</SelectItem>
-                          <SelectItem value="Revenue">Revenue</SelectItem>
-                          <SelectItem value="Full">Full (PDF only)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-sm text-[#4a5565] mb-2 block">
-                        Format
-                      </label>
-                      <Select value={reportFormat} onValueChange={setReportFormat}>
-                        <SelectTrigger className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Pdf">PDF</SelectItem>
-                          <SelectItem value="Csv" disabled={reportScope === 'Full'}>CSV</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-sm text-[#4a5565] mb-2 block">
-                        Period
-                      </label>
-                      <Select value={reportPeriod} onValueChange={setReportPeriod}>
-                        <SelectTrigger className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ThisMonth">This Month</SelectItem>
-                          <SelectItem value="ThisYear">This Year</SelectItem>
-                          <SelectItem value="AllTime">All Time</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
 
                   {/* Generate Action */}
                   <Button
