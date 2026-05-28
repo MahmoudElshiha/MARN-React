@@ -187,7 +187,7 @@ export function Navigation() {
                 Explore
               </Link>
 
-              {user?.role !== 'owner' && (
+              {user?.role === 'tenant' && (
                 <Button
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
                   disabled={isBecomeHostLoading}
