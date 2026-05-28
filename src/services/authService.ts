@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient'
+import { apiClient, axiosInstance } from './apiClient'
 import type { ApiResponse } from '@/types/common'
 
 export interface LoginPayload {
@@ -13,6 +13,12 @@ export interface LoginResult {
   twoFactorProvider: string | null
   isExternalLogin: boolean
   externalProvider: string | null
+}
+
+export interface TwoFactorPayload {
+  email: string
+  code: string
+  rememberMe: boolean
 }
 
 export interface RegisterPayload {
@@ -77,4 +83,12 @@ export const authService = {
     apiClient.get<{ message: string; data: boolean }>(
       `/api/Account/confirm-email?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`,
     ),
+
+  /** Verify a 2FA OTP code. Requires the temporary token from the login response. */
+  verify2fa: (payload: TwoFactorPayload, tempToken: string) =>
+    axiosInstance
+      .post<ApiResponse<LoginResult>>('/api/Account/verify-2fa', payload, {
+        headers: { Authorization: `Bearer ${tempToken}` },
+      })
+      .then((r) => r.data),
 }

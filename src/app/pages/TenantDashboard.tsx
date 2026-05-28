@@ -1,48 +1,52 @@
-import { CreditCard, Heart, Bell, Home, MessageSquare } from 'lucide-react'
+import {
+  CreditCard,
+  Heart,
+  Bell,
+  Home,
+  MessageSquare,
+  Clock,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Calendar,
+} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { PropertyCard } from '../components/PropertyCard'
-import { Avatar, AvatarFallback } from '../components/ui/avatar'
 import { Badge } from '../components/ui/badge'
 import { Skeleton } from '../components/ui/skeleton'
 import { Link } from 'react-router'
 import { useAuth } from '@/hooks/useAuth'
-import { useContracts } from '@/hooks/useBookingRequests'
+import { useRenterDashboard } from '@/hooks/useRenterDashboard'
 import { useProperties } from '@/hooks/useProperties'
 
-const NOTIFICATIONS = [
-  {
-    id: '1',
-    message: 'Rent payment due in 5 days',
-    time: '2 hours ago',
-    unread: true,
-  },
-  {
-    id: '2',
-    message: 'New message from your landlord',
-    time: '5 hours ago',
-    unread: true,
-  },
-  {
-    id: '3',
-    message: 'Maintenance scheduled for next week',
-    time: '1 day ago',
-    unread: false,
-  },
-]
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-EG', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function timeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60_000)
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return `${Math.floor(hrs / 24)}d ago`
+}
+
 
 export function TenantDashboard() {
   const { user } = useAuth()
-  const { data: contractsData, isLoading: contractsLoading } = useContracts()
-  const { data: recommendedData, isLoading: recommendedLoading } =
-    useProperties({
-      pageSize: 2,
-    })
+  const { data: dashboardRes, isLoading: dashboardLoading } = useRenterDashboard()
+  const { data: recommendedData, isLoading: recommendedLoading } = useProperties({ pageSize: 2 })
 
-  const contracts = contractsData?.data ?? []
-  const activeContracts = contracts.filter((c) => c.status === 'Active')
-  const currentRental = activeContracts[0] ?? null
-  const recommendedProperties = recommendedData?.data ?? []
+  const dashboard = dashboardRes?.data
+  const recommendedProperties = recommendedData?.data?.items ?? []
+
+  const activeRental = dashboard?.activeRentals?.[0] ?? null
 
   return (
     <div className="min-h-screen pb-20">
@@ -54,6 +58,23 @@ export function TenantDashboard() {
             <p className="text-[#4a5565] mt-2">
               Welcome back, {user?.firstName ?? 'there'}!
             </p>
+            {dashboard?.accountStatus && (
+              <Badge
+                className={`mt-2 ${
+                  dashboard.accountStatus === 'Verified'
+                    ? 'bg-green-100 text-green-700 border-green-200'
+                    : 'bg-amber-100 text-amber-700 border-amber-200'
+                }`}
+                variant="outline"
+              >
+                {dashboard.accountStatus === 'Verified' ? (
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                ) : (
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                )}
+                {dashboard.accountStatusDisplayName ?? dashboard.accountStatus}
+              </Badge>
+            )}
           </div>
           <Button
             className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
@@ -65,19 +86,31 @@ export function TenantDashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          {/* Current Rent / Next Payment */}
           <Card className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] border-none text-white rounded-3xl shadow-lg shadow-[#3A6EA5]/20">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/80 mb-1">Current Rent</p>
-                  {contractsLoading ? (
+                  <p className="text-white/80 mb-1">
+                    {dashboard?.nextPayment ? 'Next Payment Due' : 'Current Rent'}
+                  </p>
+                  {dashboardLoading ? (
                     <Skeleton className="h-8 w-28 bg-white/30" />
                   ) : (
-                    <p className="text-3xl font-bold">
-                      {currentRental
-                        ? `${currentRental.monthlyRent.toLocaleString()} EGP`
-                        : 'No active rental'}
-                    </p>
+                    <>
+                      <p className="text-3xl font-bold">
+                        {dashboard?.nextPayment
+                          ? formatDate(dashboard.nextPayment)
+                          : activeRental
+                            ? `${activeRental.monthlyRent.toLocaleString()} EGP`
+                            : 'No active rental'}
+                      </p>
+                      {dashboard?.nextPayment && activeRental && (
+                        <p className="text-sm text-white/70 mt-1">
+                          {activeRental.monthlyRent.toLocaleString()} EGP / mo
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
                 <CreditCard className="w-12 h-12 opacity-80" />
@@ -85,28 +118,33 @@ export function TenantDashboard() {
             </CardContent>
           </Card>
 
+          {/* Active Rentals */}
           <Card className="rounded-3xl shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-6">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <Home className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-base">Active Bookings</span>
+                <span className="text-base">Active Rentals</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
-                {contractsLoading ? '…' : activeContracts.length}
+                {dashboardLoading ? '…' : (dashboard?.activeRentalsCount ?? 0)}
               </p>
             </CardContent>
           </Card>
 
+          {/* Saved Properties */}
           <Card className="rounded-3xl shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-6">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <Heart className="w-5 h-5 text-[#3A6EA5]" />
                 <span className="text-base">Saved Properties</span>
               </CardTitle>
-              <p className="text-3xl font-bold text-[#3A6EA5] mt-2">0</p>
+              <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
+                {dashboardLoading ? '…' : (dashboard?.savedPropertiesCount ?? 0)}
+              </p>
             </CardContent>
           </Card>
 
+          {/* Unread Notifications */}
           <Card className="rounded-3xl shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-6">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
@@ -114,7 +152,7 @@ export function TenantDashboard() {
                 <span className="text-base">Notifications</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
-                {NOTIFICATIONS.filter((n) => n.unread).length}
+                {dashboardLoading ? '…' : (dashboard?.unreadNotificationsCount ?? 0)}
               </p>
             </CardContent>
           </Card>
@@ -123,67 +161,54 @@ export function TenantDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Current Rental */}
+            {/* Active Rentals */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Active Bookings
-                </CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">Active Rentals</CardTitle>
               </CardHeader>
               <CardContent>
-                {contractsLoading ? (
+                {dashboardLoading ? (
                   <Skeleton className="h-36 w-full rounded-2xl" />
-                ) : !currentRental ? (
+                ) : !activeRental ? (
                   <div className="text-center py-8 text-[#4a5565]">
                     No active rentals.{' '}
-                    <Link
-                      to="/search"
-                      className="text-[#3A6EA5] hover:underline"
-                    >
+                    <Link to="/search" className="text-[#3A6EA5] hover:underline">
                       Find a property.
                     </Link>
                   </div>
                 ) : (
-                  <div className="bg-[#f5f7fa] rounded-2xl p-6">
-                    <div className="flex gap-6">
-                      <div className="flex-1">
+                  <div className="space-y-4">
+                    {dashboard!.activeRentals.map((rental) => (
+                      <div key={rental.id} className="bg-[#f5f7fa] rounded-2xl p-6">
                         <div className="flex items-start justify-between mb-4">
-                          <div>
-                            <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
-                              {currentRental.propertyName}
-                            </h3>
-                          </div>
+                          <h3 className="font-semibold text-lg text-[#1a1a1a]">
+                            {rental.propertyName}
+                          </h3>
                           <Badge className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">
-                            Active
+                            {rental.status}
                           </Badge>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
-                            <p className="text-xs text-[#6a7282] mb-1">
-                              Start Date
-                            </p>
+                            <p className="text-xs text-[#6a7282] mb-1">Start Date</p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
-                              {currentRental.startDate}
+                              {formatDate(rental.startDate)}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-[#6a7282] mb-1">
-                              End Date
-                            </p>
+                            <p className="text-xs text-[#6a7282] mb-1">End Date</p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
-                              {currentRental.expiryDate}
+                              {formatDate(rental.expiryDate)}
                             </p>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xs text-[#6a7282] mb-1">
-                              Monthly Rent
-                            </p>
+                            <p className="text-xs text-[#6a7282] mb-1">Monthly Rent</p>
                             <p className="text-xl font-bold text-[#3A6EA5]">
-                              {currentRental.monthlyRent.toLocaleString()} EGP
+                              {rental.monthlyRent.toLocaleString()} EGP
                             </p>
                           </div>
                           <div className="flex gap-2">
@@ -207,18 +232,47 @@ export function TenantDashboard() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
             </Card>
 
+            {/* Pending Booking Requests */}
+            {(dashboardLoading || (dashboard?.pendingBookingRequests?.length ?? 0) > 0) && (
+              <Card className="rounded-3xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-[#1a1a1a]">Pending Requests</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dashboardLoading ? (
+                    <Skeleton className="h-24 w-full rounded-2xl" />
+                  ) : (
+                    <div className="space-y-3">
+                      {dashboard!.pendingBookingRequests.map((req) => (
+                        <div key={req.id} className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-[#1a1a1a]">{req.propertyName}</p>
+                            <p className="text-xs text-[#6a7282] flex items-center gap-1 mt-1">
+                              <Calendar className="w-3 h-3" />
+                              {req.requestedDate ? formatDate(req.requestedDate) : '—'}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-100">
+                            {req.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Recommended Properties */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Recommended for You
-                </CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">Recommended for You</CardTitle>
               </CardHeader>
               <CardContent>
                 {recommendedLoading ? (
@@ -227,25 +281,23 @@ export function TenantDashboard() {
                     <Skeleton className="h-48 w-full rounded-2xl" />
                   </div>
                 ) : recommendedProperties.length === 0 ? (
-                  <p className="text-[#4a5565] text-center py-8">
-                    No recommendations available.
-                  </p>
+                  <p className="text-[#4a5565] text-center py-8">No recommendations available.</p>
                 ) : (
                   <div className="grid gap-6">
                     {recommendedProperties.map((property) => (
                       <PropertyCard
                         key={property.id}
-                        id={property.id}
-                        image={property.image ?? property.images?.[0] ?? ''}
+                        id={property.id.toString()}
+                        image={property.imagePath ?? ''}
                         title={property.title}
-                        location={property.location}
+                        location={property.address}
                         price={property.price}
-                        rating={property.rating ?? 0}
-                        reviews={property.reviews ?? 0}
+                        rating={property.averageRating ?? 0}
+                        reviews={property.ratings ?? 0}
                         type={property.type}
-                        beds={property.beds}
-                        baths={property.baths}
-                        guests={property.guests}
+                        beds={property.bedrooms}
+                        baths={property.bathrooms}
+                        guests={property.maxOccupants}
                       />
                     ))}
                   </div>
@@ -256,53 +308,188 @@ export function TenantDashboard() {
 
           {/* Sidebar */}
           <div className="space-y-8">
-            {/* Recent Activity */}
+            {/* Notifications */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">
-                  Recent Activity
-                </CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">Recent Notifications</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {NOTIFICATIONS.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 rounded-2xl transition-colors ${
-                        notification.unread
-                          ? 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
-                          : 'bg-[#f5f7fa]'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`w-2 h-2 rounded-full mt-2 ${
-                            notification.unread
-                              ? 'bg-[#3A6EA5]'
-                              : 'bg-[#6a7282]'
-                          }`}
-                        />
-                        <div className="flex-1">
-                          <p className="text-sm text-[#1a1a1a] mb-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-[#6a7282]">
-                            {notification.time}
-                          </p>
+                {dashboardLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-16 w-full rounded-2xl" />
+                    <Skeleton className="h-16 w-full rounded-2xl" />
+                  </div>
+                ) : !dashboard?.notifications?.length ? (
+                  <p className="text-sm text-[#6a7282] text-center py-6">No notifications yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {dashboard.notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className={`p-4 rounded-2xl transition-colors ${
+                          !n.isRead
+                            ? 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
+                            : 'bg-[#f5f7fa]'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                              !n.isRead ? 'bg-[#3A6EA5]' : 'bg-[#6a7282]'
+                            }`}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-[#1a1a1a] mb-1 leading-snug">{n.title}</p>
+                            <p className="text-xs text-[#6a7282] flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {timeAgo(n.createdAt)}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* All Contracts */}
+            {(dashboardLoading || (dashboard?.allContracts?.length ?? 0) > 0) && (
+              <Card className="rounded-3xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-xl text-[#1a1a1a]">Contracts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dashboardLoading ? (
+                    <Skeleton className="h-20 w-full rounded-2xl" />
+                  ) : (
+                    <div className="space-y-3">
+                      {dashboard!.allContracts.map((c) => (
+                        <div key={c.id} className="bg-[#f5f7fa] rounded-2xl p-4">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm font-medium text-[#1a1a1a]">{c.propertyName}</p>
+                            <Badge
+                              variant="outline"
+                              className={
+                                c.status === 'Active'
+                                  ? 'text-green-700 border-green-300 bg-green-50'
+                                  : 'text-[#6a7282] border-[#d1d5db]'
+                              }
+                            >
+                              {c.status}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-[#6a7282]">
+                            {formatDate(c.startDate)} → {formatDate(c.expiryDate)}
+                          </p>
+                          {c.documentUrl && (
+                            <a
+                              href={c.documentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-[#3A6EA5] hover:underline mt-2"
+                            >
+                              <FileText className="w-3 h-3" />
+                              View Document
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Saved Properties */}
+            {(dashboardLoading || (dashboard?.savedProperties?.length ?? 0) > 0) && (
+              <Card className="rounded-3xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-xl text-[#1a1a1a] flex items-center justify-between">
+                    <span>Saved Properties</span>
+                    <Link
+                      to="/saved"
+                      className="text-sm font-normal text-[#3A6EA5] hover:underline"
+                    >
+                      View all
+                    </Link>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dashboardLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 w-full rounded-2xl" />
+                      <Skeleton className="h-16 w-full rounded-2xl" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {dashboard!.savedProperties.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center gap-3 bg-[#f5f7fa] rounded-2xl p-3"
+                        >
+                          {p.imageUrl && (
+                            <img
+                              src={p.imageUrl}
+                              alt={p.title}
+                              className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-[#1a1a1a] truncate">{p.title}</p>
+                            <p className="text-xs text-[#6a7282] truncate">{p.location}</p>
+                            <p className="text-sm font-bold text-[#3A6EA5]">
+                              {p.price.toLocaleString()} EGP
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Payment History */}
+            {(dashboardLoading || (dashboard?.paidPayments?.length ?? 0) > 0) && (
+              <Card className="rounded-3xl shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-xl text-[#1a1a1a]">Payment History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dashboardLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 w-full rounded-2xl" />
+                      <Skeleton className="h-16 w-full rounded-2xl" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {dashboard!.paidPayments.map((p) => (
+                        <div key={p.id} className="bg-[#f5f7fa] rounded-2xl p-4">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm font-medium text-[#1a1a1a] truncate flex-1 mr-2">
+                              {p.propertyName}
+                            </p>
+                            <p className="text-sm font-bold text-green-600 flex-shrink-0">
+                              {p.amount.toLocaleString()} EGP
+                            </p>
+                          </div>
+                          <p className="text-xs text-[#6a7282] flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {formatDate(p.paidAt)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Quick Actions */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">
-                  Quick Actions
-                </CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button
@@ -320,39 +507,6 @@ export function TenantDashboard() {
                 </Button>
                 <Button variant="outline" className="w-full rounded-xl" asChild>
                   <Link to="/messages">Contact Landlord</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Profile Completion */}
-            <Card className="rounded-3xl shadow-lg bg-gradient-to-br from-[#f5f7fa] to-white">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar className="w-12 h-12 border-2 border-[#3A6EA5]">
-                    {user?.avatarUrl && (
-                      <AvatarFallback>{user.firstName[0]}</AvatarFallback>
-                    )}
-                    <AvatarFallback>
-                      {user?.firstName?.[0] ?? '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-[#1a1a1a] mb-2">
-                      Complete Your Profile
-                    </h3>
-                    <div className="w-full bg-[#f5f7fa] rounded-full h-2 overflow-hidden">
-                      <div className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] h-full w-[75%]" />
-                    </div>
-                    <p className="text-xs text-[#6a7282] mt-2">75% Complete</p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
-                  asChild
-                >
-                  <Link to="/profile-settings">Complete Profile</Link>
                 </Button>
               </CardContent>
             </Card>

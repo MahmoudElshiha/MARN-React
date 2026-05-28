@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import {
   Search,
   Menu,
@@ -10,16 +10,138 @@ import {
   HelpCircle,
   Phone,
   Settings,
+  LogOut,
+  LayoutDashboard,
+  ChevronDown,
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useAuth } from '@/hooks/useAuth'
+import { propertyService } from '@/services/propertyService'
+import { decodeUserFromToken } from '@/utils/tokenUtils'
+
+const ROLE_DASHBOARDS: Record<string, { label: string; path: string }[]> = {
+  owner: [
+    { label: 'Owner Dashboard', path: '/owner-dashboard' },
+    { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
+  ],
+  admin: [{ label: 'Admin Dashboard', path: '/admin-dashboard' }],
+  tenant: [{ label: 'Tenant Dashboard', path: '/tenant-dashboard' }],
+}
+
+function DashboardButton() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const dashboards = (user?.role && ROLE_DASHBOARDS[user.role]) ?? [
+    { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
+  ]
+
+  // Close when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  if (dashboards.length === 1) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="group rounded-xl hover:bg-[#3A6EA5]/10"
+        asChild
+      >
+        <Link to={dashboards[0].path}>
+          <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
+        </Link>
+      </Button>
+    )
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <Button
+        variant="ghost"
+        className="group rounded-xl hover:bg-[#3A6EA5]/10 px-2 gap-1"
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
+        <ChevronDown
+          className={`w-3 h-3 transition-[transform,color] duration-200 group-hover:text-[#3A6EA5] ${open ? 'rotate-180' : ''}`}
+        />
+      </Button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-[#3A6EA5]/20 bg-white shadow-lg shadow-[#3A6EA5]/10 overflow-hidden z-[200]"
+          >
+            {dashboards.map((d) => (
+              <button
+                key={d.path}
+                onClick={() => {
+                  navigate(d.path)
+                  setOpen(false)
+                }}
+                className="group flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-[#1a1a1a] transition-colors hover:bg-[#3A6EA5] hover:text-white"
+              >
+                <LayoutDashboard className="w-4 h-4 shrink-0 text-[#3A6EA5] transition-colors group-hover:text-white" />
+                {d.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 export function Navigation() {
   const location = useLocation()
+  const navigate = useNavigate()
   const isHome = location.pathname === '/'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isAuthenticated, login, logout, user } = useAuth()
+  const [isBecomeHostLoading, setIsBecomeHostLoading] = useState(false)
+
+  async function handleBecomeHost() {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    try {
+      setIsBecomeHostLoading(true)
+      const res = await propertyService.becomeOwner()
+      const newToken = res.data
+      const remember = !!localStorage.getItem('token')
+      const updatedUser = decodeUserFromToken(newToken)
+      login(newToken, updatedUser, remember)
+      navigate('/owner-dashboard')
+    } catch (err) {
+      console.error('Become owner failed:', err)
+    } finally {
+      setIsBecomeHostLoading(false)
+    }
+  }
+
+  function handleLogout() {
+    logout()
+    setIsMenuOpen(false)
+    navigate('/')
+  }
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/' },
@@ -58,39 +180,32 @@ export function Navigation() {
 
             {/* Navigation Links */}
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                className="text-[#1a1a1a] hover:bg-[#9CBBDC]/20 rounded-xl"
-                asChild
+              <Link
+                to="/search"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] rounded-xl transition-colors"
               >
-                <Link to="/search">Explore</Link>
-              </Button>
+                Explore
+              </Link>
 
-              <Button
-                className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
-                asChild
-              >
-                <Link to="/owner-dashboard">Become a Host</Link>
-              </Button>
+              {user?.role === 'tenant' && (
+                <Button
+                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
+                  disabled={isBecomeHostLoading}
+                  onClick={handleBecomeHost}
+                >
+                  {isBecomeHostLoading ? 'Please wait…' : 'Become a Host'}
+                </Button>
+              )}
 
               <div className="flex items-center gap-2">
+                <DashboardButton />
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-xl hover:bg-[#9CBBDC]/20 transition-all"
+                  className="group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
                   onClick={() => setIsMenuOpen(true)}
                 >
-                  <Menu className="w-5 h-5 text-[#1a1a1a]" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-xl hover:bg-[#9CBBDC]/20"
-                  asChild
-                >
-                  <Link to="/tenant-dashboard">
-                    <User className="w-5 h-5" />
-                  </Link>
+                  <Menu className="w-5 h-5 text-[#1a1a1a] transition-colors group-hover:text-[#3A6EA5]" />
                 </Button>
               </div>
             </div>
@@ -182,14 +297,24 @@ export function Navigation() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
-                    >
-                      <User className="w-5 h-5" />
-                      <span className="font-medium">Login / Sign Up</span>
-                    </Link>
+                    {isAuthenticated ? (
+                      <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-medium">Logout</span>
+                      </button>
+                    ) : (
+                      <Link
+                        to="/login"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
+                      >
+                        <User className="w-5 h-5" />
+                        <span className="font-medium">Login / Sign Up</span>
+                      </Link>
+                    )}
                   </motion.div>
                 </div>
 

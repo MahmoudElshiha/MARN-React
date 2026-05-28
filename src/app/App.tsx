@@ -23,6 +23,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ChatbotPage } from './pages/ChatbotPage'
 import { AdminDashboardPage } from './pages/AdminDashboardPage'
 import { OTPVerificationPage } from './pages/OTPVerificationPage'
+import { TwoFactorPage } from './pages/TwoFactorPage'
 import { ConfirmEmailPage } from './pages/ConfirmEmailPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { ChatWithRentalRequestPage } from './pages/ChatWithRentalRequestPage'
@@ -84,6 +85,9 @@ export default function App() {
               </GuestRoute>
             }
           />
+          {/* 2FA verification — reached via router state from /login, not a GuestRoute
+              so the guard inside the page handles missing state */}
+          <Route path="/2fa-verification" element={<TwoFactorPage />} />
           <Route
             path="/confirm-email"
             element={
@@ -105,7 +109,7 @@ export default function App() {
           <Route
             path="/tenant-dashboard"
             element={
-              <ProtectedRoute roles={['tenant']}>
+              <ProtectedRoute roles={['tenant', 'owner']}>
                 <TenantDashboard />
               </ProtectedRoute>
             }

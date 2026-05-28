@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/userService'
-import type { UpdateProfilePayload } from '@/services/userService'
+import type {
+  UpdateProfilePayload,
+  ChangePasswordPayload,
+  UpdateLegalProfilePayload,
+  Toggle2FAPayload,
+  UpdateRoommatePreferencesPayload,
+} from '@/services/userService'
 
 export function useProfile() {
   const queryClient = useQueryClient()
@@ -18,6 +24,27 @@ export function useProfile() {
     },
   })
 
+  const updateLegal = useMutation({
+    mutationFn: (payload: UpdateLegalProfilePayload) =>
+      userService.updateLegalProfile(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    },
+  })
+
+  const changePassword = useMutation({
+    mutationFn: (payload: ChangePasswordPayload) =>
+      userService.changePassword(payload),
+  })
+
+  const toggle2FA = useMutation({
+    mutationFn: (payload: Toggle2FAPayload) =>
+      userService.toggle2FA(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    },
+  })
+
   const uploadAvatar = useMutation({
     mutationFn: (file: File) => userService.uploadAvatar(file),
     onSuccess: () => {
@@ -25,5 +52,13 @@ export function useProfile() {
     },
   })
 
-  return { ...query, update, uploadAvatar }
+  const updateRoommate = useMutation({
+    mutationFn: (payload: UpdateRoommatePreferencesPayload) =>
+      userService.updateRoommatePreferences(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    },
+  })
+
+  return { ...query, update, updateLegal, changePassword, uploadAvatar, toggle2FA, updateRoommate }
 }

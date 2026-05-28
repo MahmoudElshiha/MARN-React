@@ -1,51 +1,289 @@
-import { apiClient } from './apiClient'
-import type { ApiResponse, PaginatedResponse } from '@/types/common'
-import type { User } from '@/types/user'
+import { apiClient, axiosInstance } from './apiClient'
+import type { ApiResponse, SearchPaginatedResponse } from '@/types/common'
+import type { components } from '@/types/api.generated'
 
-export interface AdminStats {
-  totalUsers: number
-  totalListings: number
-  pendingVerifications: number
-  activeContracts: number
-  revenueData: { month: string; revenue: number }[]
+export interface AdminStatMetric {
+  value: number
+  trendPercentage: number
 }
 
-export interface PendingVerification {
-  id: number
-  userId?: string
-  userName: string
-  propertyId?: string
-  propertyName: string
-  date: string
-  status: 'pending' | 'approved' | 'rejected'
-  type: 'property' | 'identity'
+export interface AdminRevenueSummary {
+  totalRevenue: number
+  totalSales: number
+  newUsersThisMonth: number
+  activeContracts: number
+  revenueTrendPercentage: number
+}
+
+export interface AdminContractSummary {
+  all: number
+  active: number
+  pending: number
+  expired: number
+  cancelled: number
+}
+
+export interface AdminMonthlyRevenue {
+  year: number
+  month: number
+  label: string
+  revenue: number
+  sales: number
+}
+
+export interface AdminStats {
+  totalUsers: AdminStatMetric
+  totalProperties: AdminStatMetric
+  pendingVerifications: AdminStatMetric
+  totalContracts: AdminStatMetric
+  revenueSummary: AdminRevenueSummary
+  contractSummary: AdminContractSummary
+  monthlyRevenue: AdminMonthlyRevenue[]
+}
+
+export interface AdminUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  status: string
+  joinDate: string
+}
+
+export interface AdminUserStatsItem {
+  userId: string
+  fullName: string
+  email: string
+  profileImage: string | null
+  accountStatus: string
+  accountStatusDisplayName: string
+  isDeleted: boolean
+  createdAt: string
+  roles: string[]
+  rolesDisplayNames: string[]
+  ownedPropertiesCount: number
+  activePropertiesCount: number
+  renterContractsCount: number
+  ownerContractsCount: number
+  activeContractsCount: number
+  cancelledContractsCount: number
+  paymentsMadeCount: number
+  paymentsReceivedCount: number
+  totalPaidAmount: number
+  totalReceivedAmount: number
+  reportsSubmittedCount: number
+  reportsAgainstUserCount: number
+}
+
+export interface AdminStatusBreakdown {
+  status: string
+  statusDisplayName: string
+  count: number
+}
+
+export interface AdminRoleBreakdown {
+  roleName: string
+  roleNameDisplayName: string
+  count: number
+}
+
+export interface AdminNewUsersOverTime {
+  periodStartUtc: string
+  label: string
+  count: number
+}
+
+export interface AdminUserStats {
+  appliedPeriod: {
+    period: string
+    fromUtc: string | null
+    toUtc: string | null
+    grouping: string
+  }
+  totalUsers: number
+  deletedUsers: number
+  statusBreakdown: AdminStatusBreakdown[]
+  roleBreakdown: AdminRoleBreakdown[]
+  newUsersOverTime: AdminNewUsersOverTime[]
+  users: {
+    items: AdminUserStatsItem[]
+    pageNumber: number
+    pageSize: number
+    totalCount: number
+    totalPages: number
+  }
+}
+
+export interface PendingUserVerification {
+  userId: string
+  fullName: string
+  email: string
+  phoneNumber: string | null
+  profileImage: string | null
+  createdAt: string
+  accountStatus: string
+  accountStatusDisplayName: string
+  frontIdPhoto: string | null
+  backIdPhoto: string | null
+  arabicFullName: string | null
+  arabicAddress: string | null
+  nationalIDNumber: string | null
+}
+
+export interface AdminRoleUser {
+  userId: string
+  fullName: string
+  email: string
+  profileImage: string | null
+  accountStatus: string
+  accountStatusDisplayName: string
+  isDeleted: boolean
+  createdAt: string
+  roles: string[]
+  rolesDisplayNames: string[]
+}
+
+export interface AdminRoleUsersResult {
+  items: AdminRoleUser[]
+  pageNumber: number
+  pageSize: number
+  totalCount: number
+  totalPages: number
+}
+
+export interface AdminAnalyticsReport {
+  reportId: number
+  scope: string
+  scopeDisplayName: string
+  format: string
+  formatDisplayName: string
+  period: string
+  periodDisplayName: string
+  fileName: string
+  fileSizeBytes: number | null
+  generatedAt: string
+  fromUtc: string | null
+  toUtc: string | null
+}
+
+export interface AdminAnalyticsReportsResult {
+  items: AdminAnalyticsReport[]
+  pageNumber: number
+  pageSize: number
+  totalCount: number
+  totalPages: number
+}
+
+export type GenerateReportPayload = components['schemas']['AdminAnalyticsReportGenerateRequestDto']
+
+// PATCH with no request body — removes Content-Type so ASP.NET doesn't attempt to read an absent body
+const patchNoBody = (url: string) =>
+  axiosInstance
+    .patch(url, undefined, {
+      transformRequest: (_, headers) => {
+        delete headers['Content-Type']
+        return undefined
+      },
+    })
+    .then((r) => r.data)
+
+// No schema in swagger — defined manually from API docs
+export interface PendingPropertyVerification {
+  propertyId: number
+  title: string
+  address: string
+  governorate: string
+  type: string
+  typeDisplayName: string
+  status: string
+  statusDisplayName: string
+  ownerFullName: string
+  ownerEmail: string
+  ownerUserId: string
+  submittedAt: string
+  mainImage: string | null
+}
+
+export interface PendingPropertyVerificationDetail extends PendingPropertyVerification {
+  description: string | null
+  ownershipDocumentUrl: string | null
+  images: string[]
 }
 
 export const adminService = {
-  getStats: () => apiClient.get<ApiResponse<AdminStats>>('/Admin/stats'),
+  getStats: () =>
+    apiClient.get<ApiResponse<AdminStats>>('/api/Admin/dashboard/overview'),
 
   getUsers: (page = 1, pageSize = 20) =>
-    apiClient.get<PaginatedResponse<User>>(
-      `/Admin/users?page=${page}&pageSize=${pageSize}`,
+    apiClient.get<ApiResponse<SearchPaginatedResponse<AdminUser>>>(
+      `/api/Admin/users?pageNumber=${page}&pageSize=${pageSize}`,
     ),
 
-  getVerifications: () =>
-    apiClient.get<PaginatedResponse<PendingVerification>>(
-      '/Admin/verifications',
+  getUserStats: (page = 1, pageSize = 20) =>
+    apiClient.get<ApiResponse<AdminUserStats>>(
+      `/api/Admin/stats/users?pageNumber=${page}&pageSize=${pageSize}`,
     ),
 
-  approveVerification: (id: number) =>
-    apiClient.post<ApiResponse<void>>(`/Admin/verifications/${id}/approve`),
+  getVerifications: (page = 1, pageSize = 20) =>
+    apiClient.get<ApiResponse<SearchPaginatedResponse<PendingUserVerification>>>(
+      `/api/Admin/verifications/users/pending?pageNumber=${page}&pageSize=${pageSize}`,
+    ),
 
-  rejectVerification: (id: number) =>
-    apiClient.post<ApiResponse<void>>(`/Admin/verifications/${id}/reject`),
+  getUserVerification: (userId: string) =>
+    apiClient.get<ApiResponse<PendingUserVerification>>(
+      `/api/Admin/verifications/users/${userId}`,
+    ),
+
+  approveVerification: (userId: string) =>
+    patchNoBody(`/api/Admin/verifications/users/${userId}/approve`),
+
+  rejectVerification: (userId: string, reason: string) =>
+    apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/users/${userId}/decline`, { reason }),
 
   banUser: (userId: string) =>
-    apiClient.post<ApiResponse<void>>(`/Admin/users/${userId}/ban`),
+    patchNoBody(`/api/Admin/users/${userId}/ban`),
 
-  suspendUser: (userId: string) =>
-    apiClient.post<ApiResponse<void>>(`/Admin/users/${userId}/suspend`),
+  unbanUser: (userId: string) =>
+    patchNoBody(`/api/Admin/users/${userId}/unban`),
 
   restoreUser: (userId: string) =>
-    apiClient.post<ApiResponse<void>>(`/Admin/users/${userId}/restore`),
+    patchNoBody(`/api/Admin/users/${userId}/restore`),
+
+  getRoleUsers: (page = 1, pageSize = 20, search?: string) => {
+    const params = new URLSearchParams({ pageNumber: String(page), pageSize: String(pageSize) })
+    if (search) params.append('Search', search)
+    return apiClient.get<ApiResponse<AdminRoleUsersResult>>(`/api/Admin/roles/users?${params}`)
+  },
+
+  updateUserRoles: (userId: string, roles: string[]) =>
+    apiClient.patch<ApiResponse<void>>(`/api/Admin/roles/users/${userId}`, { roles }),
+
+  generateReport: (payload: GenerateReportPayload) =>
+    apiClient.post<void>('/api/Admin/analytics-reports/generate', payload),
+
+  getAnalyticsReports: (page = 1, pageSize = 20) =>
+    apiClient.get<ApiResponse<AdminAnalyticsReportsResult>>(
+      `/api/Admin/analytics-reports?PageNumber=${page}&PageSize=${pageSize}`,
+    ),
+
+  downloadAnalyticsReport: (reportId: number) =>
+    axiosInstance.get<Blob>(`/api/Admin/analytics-reports/${reportId}/download`, {
+      responseType: 'blob',
+    }),
+
+  getPendingPropertyVerifications: (page = 1, pageSize = 20) =>
+    apiClient.get<ApiResponse<SearchPaginatedResponse<PendingPropertyVerification>>>(
+      `/api/Admin/verifications/properties/pending?PageNumber=${page}&PageSize=${pageSize}`,
+    ),
+
+  getPropertyVerification: (propertyId: number) =>
+    apiClient.get<ApiResponse<PendingPropertyVerificationDetail>>(
+      `/api/Admin/verifications/properties/${propertyId}`,
+    ),
+
+  approvePropertyVerification: (propertyId: number) =>
+    patchNoBody(`/api/Admin/verifications/properties/${propertyId}/approve`),
+
+  declinePropertyVerification: (propertyId: number, reason: string) =>
+    apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/properties/${propertyId}/decline`, { reason }),
 }

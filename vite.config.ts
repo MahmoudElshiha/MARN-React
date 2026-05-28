@@ -15,6 +15,8 @@ function figmaAssetResolver() {
   }
 }
 
+const API_BASE = process.env.VITE_API_BASE_URL ?? 'https://marn.runasp.net'
+
 export default defineConfig({
   plugins: [
     figmaAssetResolver(),
@@ -27,6 +29,16 @@ export default defineConfig({
     alias: {
       // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
+    },
+  },
+
+  server: {
+    proxy: {
+      '/api': {
+        target: API_BASE,
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
 
