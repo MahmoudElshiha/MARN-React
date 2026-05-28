@@ -9,7 +9,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
+    "scaffold": "node scripts/scaffold-endpoint.mjs",
+    "types:generate": "npx openapi-typescript https://marn.runasp.net/swagger/v1/swagger.json -o src/types/api.generated.ts"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
