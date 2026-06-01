@@ -38,13 +38,14 @@ export function SignUpPage() {
     },
     onError: (error) => {
       if (error instanceof HttpError) {
-        setFieldErrors(error.validationErrors ?? {})
-        const flat = error.errors?.join(' ')
+        const { general: generalErrors, ...fieldValidationErrors } =
+          error.validationErrors ?? {}
+        setFieldErrors(fieldValidationErrors)
+        const flat =
+          error.errors?.join(' ') ?? generalErrors?.join(' ')
         setErrorMessage(
           flat ??
-            (Object.keys(error.validationErrors ?? {}).length
-              ? ''
-              : error.message),
+            (Object.keys(fieldValidationErrors).length ? '' : error.message),
         )
       } else {
         setErrorMessage('Something went wrong. Please try again.')
