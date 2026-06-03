@@ -60,7 +60,8 @@ export function useAdminAnalyticsReports(page = 1, pageSize = 20) {
 export function useGenerateReport() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: GenerateReportPayload) => adminService.generateReport(payload),
+    mutationFn: (payload: GenerateReportPayload) =>
+      adminService.generateReport(payload),
     onSuccess: () => {
       toast.success('Report generated successfully')
       queryClient.invalidateQueries({ queryKey: ['adminAnalyticsReports'] })

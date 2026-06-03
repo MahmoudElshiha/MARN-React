@@ -1,16 +1,23 @@
 import { apiClient } from './apiClient'
 import { getImageUrl } from '@/constants/assets'
 import type { ApiResponse, SearchPaginatedResponse } from '@/types/common'
-import type { Property, SearchProperty, PropertyFilters } from '@/types/property'
+import type {
+  Property,
+  SearchProperty,
+  PropertyFilters,
+} from '@/types/property'
 
 function buildSearchQuery(filters: PropertyFilters): string {
   const params = new URLSearchParams()
 
   // text / geo
   if (filters.keyword) params.set('Keyword', filters.keyword)
-  if (filters.latitude !== undefined) params.set('Latitude', String(filters.latitude))
-  if (filters.longitude !== undefined) params.set('Longitude', String(filters.longitude))
-  if (filters.radiusKm !== undefined) params.set('RadiusKm', String(filters.radiusKm))
+  if (filters.latitude !== undefined)
+    params.set('Latitude', String(filters.latitude))
+  if (filters.longitude !== undefined)
+    params.set('Longitude', String(filters.longitude))
+  if (filters.radiusKm !== undefined)
+    params.set('RadiusKm', String(filters.radiusKm))
 
   // location enums
   if (filters.city) params.set('City', filters.city)
@@ -19,16 +26,22 @@ function buildSearchQuery(filters: PropertyFilters): string {
   // property attributes
   if (filters.type) params.set('Type', filters.type)
   if (filters.rentalUnit) params.set('RentalUnit', filters.rentalUnit)
-  if (filters.isShared !== undefined) params.set('IsShared', String(filters.isShared))
+  if (filters.isShared !== undefined)
+    params.set('IsShared', String(filters.isShared))
 
   // price
-  if (filters.minPrice !== undefined) params.set('MinPrice', String(filters.minPrice))
-  if (filters.maxPrice !== undefined) params.set('MaxPrice', String(filters.maxPrice))
+  if (filters.minPrice !== undefined)
+    params.set('MinPrice', String(filters.minPrice))
+  if (filters.maxPrice !== undefined)
+    params.set('MaxPrice', String(filters.maxPrice))
 
   // rooms / occupants
-  if (filters.minBedrooms !== undefined) params.set('MinBedrooms', String(filters.minBedrooms))
-  if (filters.minBeds !== undefined) params.set('MinBeds', String(filters.minBeds))
-  if (filters.minBathrooms !== undefined) params.set('MinBathrooms', String(filters.minBathrooms))
+  if (filters.minBedrooms !== undefined)
+    params.set('MinBedrooms', String(filters.minBedrooms))
+  if (filters.minBeds !== undefined)
+    params.set('MinBeds', String(filters.minBeds))
+  if (filters.minBathrooms !== undefined)
+    params.set('MinBathrooms', String(filters.minBathrooms))
   if (filters.minMaxOccupants !== undefined)
     params.set('MinMaxOccupants', String(filters.minMaxOccupants))
 
@@ -39,7 +52,8 @@ function buildSearchQuery(filters: PropertyFilters): string {
     params.set('MaxSquareMeters', String(filters.maxSquareMeters))
 
   // rating
-  if (filters.minRating !== undefined) params.set('MinRating', String(filters.minRating))
+  if (filters.minRating !== undefined)
+    params.set('MinRating', String(filters.minRating))
 
   // amenities — repeated param
   if (filters.amenities?.length) {
@@ -53,7 +67,8 @@ function buildSearchQuery(filters: PropertyFilters): string {
 
   // pagination
   if (filters.page !== undefined) params.set('Page', String(filters.page))
-  if (filters.pageSize !== undefined) params.set('PageSize', String(filters.pageSize))
+  if (filters.pageSize !== undefined)
+    params.set('PageSize', String(filters.pageSize))
 
   const qs = params.toString()
   return qs ? `?${qs}` : ''
@@ -62,9 +77,9 @@ function buildSearchQuery(filters: PropertyFilters): string {
 export const propertyService = {
   getProperties: (filters: PropertyFilters = {}) =>
     apiClient
-      .get<ApiResponse<SearchPaginatedResponse<SearchProperty>>>(
-        `/api/Property/search${buildSearchQuery(filters)}`,
-      )
+      .get<
+        ApiResponse<SearchPaginatedResponse<SearchProperty>>
+      >(`/api/Property/search${buildSearchQuery(filters)}`)
       .then((res) => {
         if (res.data?.data?.items) {
           res.data.data.items = res.data.data.items.map((p) => ({
@@ -79,7 +94,7 @@ export const propertyService = {
     apiClient.get<ApiResponse<Property>>(`/api/Property/${id}`),
 
   createProperty: (data: FormData) =>
-    apiClient.post<ApiResponse<Property>>('/api/Property', data),
+    apiClient.post<ApiResponse<Property>>('/api/Property/add', data),
 
   updateProperty: (id: string, data: FormData) =>
     apiClient.put<ApiResponse<Property>>(`/api/Property/${id}`, data),

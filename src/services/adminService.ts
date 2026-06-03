@@ -174,7 +174,8 @@ export interface AdminAnalyticsReportsResult {
   totalPages: number
 }
 
-export type GenerateReportPayload = components['schemas']['AdminAnalyticsReportGenerateRequestDto']
+export type GenerateReportPayload =
+  components['schemas']['AdminAnalyticsReportGenerateRequestDto']
 
 // PATCH with no request body — removes Content-Type so ASP.NET doesn't attempt to read an absent body
 const patchNoBody = (url: string) =>
@@ -225,7 +226,9 @@ export const adminService = {
     ),
 
   getVerifications: (page = 1, pageSize = 20) =>
-    apiClient.get<ApiResponse<SearchPaginatedResponse<PendingUserVerification>>>(
+    apiClient.get<
+      ApiResponse<SearchPaginatedResponse<PendingUserVerification>>
+    >(
       `/api/Admin/verifications/users/pending?pageNumber=${page}&pageSize=${pageSize}`,
     ),
 
@@ -238,10 +241,12 @@ export const adminService = {
     patchNoBody(`/api/Admin/verifications/users/${userId}/approve`),
 
   rejectVerification: (userId: string, reason: string) =>
-    apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/users/${userId}/decline`, { reason }),
+    apiClient.patch<ApiResponse<boolean>>(
+      `/api/Admin/verifications/users/${userId}/decline`,
+      { reason },
+    ),
 
-  banUser: (userId: string) =>
-    patchNoBody(`/api/Admin/users/${userId}/ban`),
+  banUser: (userId: string) => patchNoBody(`/api/Admin/users/${userId}/ban`),
 
   unbanUser: (userId: string) =>
     patchNoBody(`/api/Admin/users/${userId}/unban`),
@@ -250,13 +255,20 @@ export const adminService = {
     patchNoBody(`/api/Admin/users/${userId}/restore`),
 
   getRoleUsers: (page = 1, pageSize = 20, search?: string) => {
-    const params = new URLSearchParams({ pageNumber: String(page), pageSize: String(pageSize) })
+    const params = new URLSearchParams({
+      pageNumber: String(page),
+      pageSize: String(pageSize),
+    })
     if (search) params.append('Search', search)
-    return apiClient.get<ApiResponse<AdminRoleUsersResult>>(`/api/Admin/roles/users?${params}`)
+    return apiClient.get<ApiResponse<AdminRoleUsersResult>>(
+      `/api/Admin/roles/users?${params}`,
+    )
   },
 
   updateUserRoles: (userId: string, roles: string[]) =>
-    apiClient.patch<ApiResponse<void>>(`/api/Admin/roles/users/${userId}`, { roles }),
+    apiClient.patch<ApiResponse<void>>(`/api/Admin/roles/users/${userId}`, {
+      roles,
+    }),
 
   generateReport: (payload: GenerateReportPayload) =>
     apiClient.post<void>('/api/Admin/analytics-reports/generate', payload),
@@ -267,12 +279,17 @@ export const adminService = {
     ),
 
   downloadAnalyticsReport: (reportId: number) =>
-    axiosInstance.get<Blob>(`/api/Admin/analytics-reports/${reportId}/download`, {
-      responseType: 'blob',
-    }),
+    axiosInstance.get<Blob>(
+      `/api/Admin/analytics-reports/${reportId}/download`,
+      {
+        responseType: 'blob',
+      },
+    ),
 
   getPendingPropertyVerifications: (page = 1, pageSize = 20) =>
-    apiClient.get<ApiResponse<SearchPaginatedResponse<PendingPropertyVerification>>>(
+    apiClient.get<
+      ApiResponse<SearchPaginatedResponse<PendingPropertyVerification>>
+    >(
       `/api/Admin/verifications/properties/pending?PageNumber=${page}&PageSize=${pageSize}`,
     ),
 
@@ -285,5 +302,8 @@ export const adminService = {
     patchNoBody(`/api/Admin/verifications/properties/${propertyId}/approve`),
 
   declinePropertyVerification: (propertyId: number, reason: string) =>
-    apiClient.patch<ApiResponse<boolean>>(`/api/Admin/verifications/properties/${propertyId}/decline`, { reason }),
+    apiClient.patch<ApiResponse<boolean>>(
+      `/api/Admin/verifications/properties/${propertyId}/decline`,
+      { reason },
+    ),
 }

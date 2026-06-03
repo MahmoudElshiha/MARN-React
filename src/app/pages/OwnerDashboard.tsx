@@ -33,7 +33,7 @@ import {
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { useOwnerDashboard } from '@/hooks/useOwnerDashboard'
-import { useBookingRequests } from '@/hooks/useBookingRequests'
+import { useBookingMutations } from '@/hooks/useBookingRequests'
 
 const getContractStatusBadge = (status: string) => {
   const styles: Record<string, string> = {
@@ -57,7 +57,7 @@ export function OwnerDashboard() {
   const { data: dashboardResponse, isLoading } = useOwnerDashboard()
 
   // Keep booking-request mutations (accept / reject) from the dedicated hook
-  const { accept, reject } = useBookingRequests()
+  const { accept, reject } = useBookingMutations()
 
   const dashboard = dashboardResponse?.data
 
@@ -74,8 +74,12 @@ export function OwnerDashboard() {
   // Map API earning entries → chart-friendly shape.
   // The actual server field name for the value is unknown (empty arrays in sample);
   // fall back through common alternatives until one is defined.
-  const pickEarning = (e: { amount?: number; earning?: number; value?: number; total?: number }) =>
-    e.amount ?? e.earning ?? e.value ?? e.total ?? 0
+  const pickEarning = (e: {
+    amount?: number
+    earning?: number
+    value?: number
+    total?: number
+  }) => e.amount ?? e.earning ?? e.value ?? e.total ?? 0
 
   const monthlyChartData = (dashboard?.monthlyEarning ?? []).map((e) => ({
     month: e.month,
@@ -206,7 +210,8 @@ export function OwnerDashboard() {
               ) : (
                 <>
                   <div className="text-4xl font-bold text-[#3A6EA5] mb-1">
-                    {(dashboard?.withdrawableEarnings ?? 0).toLocaleString()} EGP
+                    {(dashboard?.withdrawableEarnings ?? 0).toLocaleString()}{' '}
+                    EGP
                   </div>
                   <p className="text-[#4a5565] text-sm mb-1">
                     On hold:{' '}
@@ -339,9 +344,9 @@ export function OwnerDashboard() {
                     No pending booking requests.
                   </p>
                 ) : (
-                  pendingRequests.map((request) => (
+                  pendingRequests.map((request, index) => (
                     <div
-                      key={request.id}
+                      key={request.id ?? index}
                       className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow border border-[#3A6EA5]/10"
                     >
                       <div className="flex flex-col gap-4">
@@ -351,15 +356,15 @@ export function OwnerDashboard() {
                               <AvatarImage src={request.tenantAvatarUrl} />
                             )}
                             <AvatarFallback>
-                              {request.tenant.charAt(0)}
+                              {(request.tenant ?? request.tenantName ?? '?').charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
-                              {request.tenant}
+                              {request.tenant ?? request.tenantName ?? 'Unknown Tenant'}
                             </h3>
                             <p className="text-sm text-[#4a5565] mb-2">
-                              {request.property}
+                              {request.property ?? request.propertyName ?? request.propertyTitle ?? 'Unknown Property'}
                             </p>
                             <div className="flex items-center gap-4 text-sm">
                               <div className="flex items-center gap-1 text-[#6a7282]">
@@ -459,9 +464,9 @@ export function OwnerDashboard() {
                             </td>
                           </tr>
                         ) : (
-                          contracts.map((contract) => (
+                          contracts.map((contract, index) => (
                             <tr
-                              key={contract.id}
+                              key={contract.id ?? index}
                               className="border-b border-[#3A6EA5]/10 hover:bg-[#f5f7fa] transition-colors"
                             >
                               <td className="py-4 px-4 text-[#1a1a1a] font-medium">
@@ -776,28 +781,34 @@ export function OwnerDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">Total Properties</p>
-                  <p className="text-2xl font-bold text-[#3A6EA5]">
+                  <p className="text-sm text-[#6a7282] mb-1">
+                    Total Properties
+                  </p>
+                  <div className="text-2xl font-bold text-[#3A6EA5]">
                     {isLoading ? (
                       <Skeleton className="h-8 w-12 inline-block" />
                     ) : (
                       totalProperties
                     )}
-                  </p>
+                  </div>
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">Pending Requests</p>
-                  <p className="text-2xl font-bold text-[#3A6EA5]">
+                  <p className="text-sm text-[#6a7282] mb-1">
+                    Pending Requests
+                  </p>
+                  <div className="text-2xl font-bold text-[#3A6EA5]">
                     {isLoading ? (
                       <Skeleton className="h-8 w-12 inline-block" />
                     ) : (
-                      dashboard?.pendingBookingRequestsCount ?? 0
+                      (dashboard?.pendingBookingRequestsCount ?? 0)
                     )}
-                  </p>
+                  </div>
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">Active Contracts</p>
-                  <p className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
+                  <p className="text-sm text-[#6a7282] mb-1">
+                    Active Contracts
+                  </p>
+                  <div className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
                     {isLoading ? (
                       <Skeleton className="h-8 w-12 inline-block" />
                     ) : (
@@ -806,11 +817,11 @@ export function OwnerDashboard() {
                         <Eye className="w-5 h-5" />
                       </>
                     )}
-                  </p>
+                  </div>
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
                   <p className="text-sm text-[#6a7282] mb-1">Average Rating</p>
-                  <p className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
+                  <div className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
                     {isLoading ? (
                       <Skeleton className="h-8 w-12 inline-block" />
                     ) : (
@@ -819,7 +830,7 @@ export function OwnerDashboard() {
                         <Star className="w-5 h-5 fill-[#3A6EA5]" />
                       </>
                     )}
-                  </p>
+                  </div>
                   <p className="text-xs text-[#6a7282] mt-1">
                     {dashboard?.ratingsCount ?? 0} reviews
                   </p>

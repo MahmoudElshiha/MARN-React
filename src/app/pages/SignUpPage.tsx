@@ -41,8 +41,7 @@ export function SignUpPage() {
         const { general: generalErrors, ...fieldValidationErrors } =
           error.validationErrors ?? {}
         setFieldErrors(fieldValidationErrors)
-        const flat =
-          error.errors?.join(' ') ?? generalErrors?.join(' ')
+        const flat = error.errors?.join(' ') ?? generalErrors?.join(' ')
         setErrorMessage(
           flat ??
             (Object.keys(fieldValidationErrors).length ? '' : error.message),

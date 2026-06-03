@@ -242,10 +242,15 @@ export interface OwnerDashboardContract {
 export interface OwnerDashboardBookingRequest {
   id: string
   /** Server field: "tenant" (matches BookingRequest.tenant) */
-  tenant: string
+  tenant?: string
+  /** Alternative field name the server may use */
+  tenantName?: string
   tenantAvatarUrl?: string | null
   /** Server field: "property" (matches BookingRequest.property) */
-  property: string
+  property?: string
+  /** Alternative field names the server may use */
+  propertyName?: string
+  propertyTitle?: string
   /** Server field: "requestedDates" — a pre-formatted string, not an ISO date */
   requestedDates: string
   /** Values: 'pending' | 'accepted' | 'rejected' | 'cancelled' (all lowercase) */
@@ -299,10 +304,14 @@ export const userService = {
     apiClient.get<ApiResponse<PublicProfile>>('/api/Profile/profile'),
 
   getRenterDashboard: () =>
-    apiClient.get<ApiResponse<RenterDashboard>>('/api/Profile/renter-dashboard'),
+    apiClient.get<ApiResponse<RenterDashboard>>(
+      '/api/Profile/renter-dashboard',
+    ),
 
   getOwnerDashboard: () =>
-    apiClient.get<ApiResponse<OwnerDashboardData>>('/api/Profile/owner-dashboard'),
+    apiClient.get<ApiResponse<OwnerDashboardData>>(
+      '/api/Profile/owner-dashboard',
+    ),
 
   updateProfile: (payload: UpdateProfilePayload) => {
     const form = new FormData()
@@ -330,14 +339,20 @@ export const userService = {
     form.append('NationalIDNumber', payload.nationalIDNumber)
     if (payload.frontIdPhoto) form.append('FrontIdPhoto', payload.frontIdPhoto)
     if (payload.backIdPhoto) form.append('BackIdPhoto', payload.backIdPhoto)
-    return apiClient.put<ApiResponse<Profile>>('/api/Profile/edit-profile-legal', form)
+    return apiClient.put<ApiResponse<Profile>>(
+      '/api/Profile/edit-profile-legal',
+      form,
+    )
   },
 
   changePassword: (payload: ChangePasswordPayload) =>
     apiClient.put<void>('/api/Profile/change-password', payload),
 
   updateRoommatePreferences: (payload: UpdateRoommatePreferencesPayload) =>
-    apiClient.put<ApiResponse<Profile>>('/api/Profile/edit-profile-roommate-preferences', payload),
+    apiClient.put<ApiResponse<Profile>>(
+      '/api/Profile/edit-profile-roommate-preferences',
+      payload,
+    ),
 
   toggle2FA: (payload: Toggle2FAPayload) =>
     apiClient.put<ApiResponse<boolean>>('/api/Profile/toggle-2fa', payload),

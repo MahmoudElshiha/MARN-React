@@ -62,7 +62,10 @@ export function TwoFactorPage() {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault()
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    const pastedData = e.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, 6)
     if (!pastedData) return
 
     const newOtp = [...otp]
@@ -89,7 +92,9 @@ export function TwoFactorPage() {
         },
         onError: (err) => {
           const msg =
-            err instanceof Error ? err.message : 'Invalid code. Please try again.'
+            err instanceof Error
+              ? err.message
+              : 'Invalid code. Please try again.'
           toast.error(msg)
           // Clear OTP inputs on error so the user can re-enter
           setOtp(['', '', '', '', '', ''])
@@ -141,7 +146,10 @@ export function TwoFactorPage() {
                 <label className="text-[#1a1a1a] text-sm font-medium mb-3 block text-center">
                   Enter 6-digit code
                 </label>
-                <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+                <div
+                  className="flex gap-2 justify-center"
+                  onPaste={handlePaste}
+                >
                   {otp.map((digit, index) => (
                     <Input
                       key={index}

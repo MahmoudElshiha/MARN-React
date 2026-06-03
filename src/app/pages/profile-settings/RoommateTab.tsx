@@ -16,7 +16,12 @@ import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { EnumSelect } from '../../components/EnumSelect'
 import { Switch } from '../../components/ui/switch'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card'
 import { Skeleton } from '../../components/ui/skeleton'
 import { Slider } from '../../components/ui/slider'
 import { Separator } from '../../components/ui/separator'
@@ -193,8 +198,12 @@ export function RoommateTab() {
         workScheduleImportance: settings.workScheduleImportance,
         sharingLevel: settings.sharingLevel || null,
         sharingLevelImportance: settings.sharingLevelImportance,
-        budgetRangeMin: settings.budgetRangeMin ? Number(settings.budgetRangeMin) : null,
-        budgetRangeMax: settings.budgetRangeMax ? Number(settings.budgetRangeMax) : null,
+        budgetRangeMin: settings.budgetRangeMin
+          ? Number(settings.budgetRangeMin)
+          : null,
+        budgetRangeMax: settings.budgetRangeMax
+          ? Number(settings.budgetRangeMax)
+          : null,
         budgetImportance: settings.budgetImportance,
       },
       {
@@ -243,7 +252,8 @@ export function RoommateTab() {
               Roommate Preferences & Lifestyle
             </CardTitle>
             <p className="text-sm text-[#4a5565] mt-1">
-              Help potential roommates understand your lifestyle and compatibility.
+              Help potential roommates understand your lifestyle and
+              compatibility.
             </p>
           </div>
         </div>
@@ -254,7 +264,9 @@ export function RoommateTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <MapPin className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">Location & Search</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">
+              Location & Search
+            </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
@@ -286,14 +298,18 @@ export function RoommateTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Coffee className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">Lifestyle & Preferences</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">
+              Lifestyle & Preferences
+            </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {/* Smoking */}
             <div>
               <Label className="text-[#1a1a1a] mb-3 block">Smoking</Label>
               <div className="flex items-center justify-between p-4 bg-white rounded-2xl">
-                <span className="text-[#1a1a1a]">{settings.smoking ? 'Yes' : 'No'}</span>
+                <span className="text-[#1a1a1a]">
+                  {settings.smoking ? 'Yes' : 'No'}
+                </span>
                 <Switch
                   checked={settings.smoking}
                   onCheckedChange={(v) => patch({ smoking: v })}
@@ -310,7 +326,9 @@ export function RoommateTab() {
             <div>
               <Label className="text-[#1a1a1a] mb-3 block">Pets</Label>
               <div className="flex items-center justify-between p-4 bg-white rounded-2xl">
-                <span className="text-[#1a1a1a]">{settings.pets ? 'Yes' : 'No'}</span>
+                <span className="text-[#1a1a1a]">
+                  {settings.pets ? 'Yes' : 'No'}
+                </span>
                 <Switch
                   checked={settings.pets}
                   onCheckedChange={(v) => patch({ pets: v })}
@@ -401,7 +419,9 @@ export function RoommateTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Briefcase className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">Social & Work</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">
+              Social & Work
+            </h3>
           </div>
           <div className="space-y-6">
             {/* Noise Tolerance */}
@@ -413,8 +433,8 @@ export function RoommateTab() {
                   <span>
                     {settings.noiseTolerance[0] <= 2 && 'Low'}
                     {settings.noiseTolerance[0] === 3 && 'Medium'}
-                    {settings.noiseTolerance[0] >= 4 && 'High'}
-                    {' '}({settings.noiseTolerance[0]}/5)
+                    {settings.noiseTolerance[0] >= 4 && 'High'} (
+                    {settings.noiseTolerance[0]}/5)
                   </span>
                 </div>
               </div>
@@ -493,13 +513,17 @@ export function RoommateTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Wallet className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">Budget Range</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">
+              Budget Range
+            </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="budget-min" className="text-[#1a1a1a] mb-2 block">
                 Minimum{' '}
-                <span className="text-[#4a5565] text-sm font-normal">(per month)</span>
+                <span className="text-[#4a5565] text-sm font-normal">
+                  (per month)
+                </span>
               </Label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a5565] text-sm font-medium">
@@ -520,7 +544,9 @@ export function RoommateTab() {
             <div>
               <Label htmlFor="budget-max" className="text-[#1a1a1a] mb-2 block">
                 Maximum{' '}
-                <span className="text-[#4a5565] text-sm font-normal">(per month)</span>
+                <span className="text-[#4a5565] text-sm font-normal">
+                  (per month)
+                </span>
               </Label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a5565] text-sm font-medium">
@@ -550,7 +576,9 @@ export function RoommateTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Shield className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">Visibility Settings</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">
+              Visibility Settings
+            </h3>
           </div>
           <div className="bg-white rounded-2xl p-6">
             <div className="flex items-center justify-between">
@@ -574,8 +602,8 @@ export function RoommateTab() {
               <div className="mt-4 p-4 bg-[#F2F4F6] rounded-xl flex items-start gap-3">
                 <Shield className="w-5 h-5 text-[#3A6EA5] mt-0.5 shrink-0" />
                 <p className="text-sm text-[#1a1a1a]">
-                  Your roommate preferences are stored but hidden from other users. Enable
-                  visibility to help potential roommates find you.
+                  Your roommate preferences are stored but hidden from other
+                  users. Enable visibility to help potential roommates find you.
                 </p>
               </div>
             )}
