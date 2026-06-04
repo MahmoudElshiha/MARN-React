@@ -29,6 +29,7 @@ export function useBookingRequests() {
     mutationFn: (requestId: string) => rentalService.acceptRequest(requestId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookingRequests'] })
+      queryClient.invalidateQueries({ queryKey: ['ownerDashboard'] })
     },
   })
 
@@ -36,8 +37,32 @@ export function useBookingRequests() {
     mutationFn: (requestId: string) => rentalService.rejectRequest(requestId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookingRequests'] })
+      queryClient.invalidateQueries({ queryKey: ['ownerDashboard'] })
     },
   })
 
   return { ...query, accept, reject }
+}
+
+/** Mutations-only variant – does NOT fire the booking-requests query. */
+export function useBookingMutations() {
+  const queryClient = useQueryClient()
+
+  const accept = useMutation({
+    mutationFn: (requestId: string) => rentalService.acceptRequest(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookingRequests'] })
+      queryClient.invalidateQueries({ queryKey: ['ownerDashboard'] })
+    },
+  })
+
+  const reject = useMutation({
+    mutationFn: (requestId: string) => rentalService.rejectRequest(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookingRequests'] })
+      queryClient.invalidateQueries({ queryKey: ['ownerDashboard'] })
+    },
+  })
+
+  return { accept, reject }
 }

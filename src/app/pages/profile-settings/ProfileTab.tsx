@@ -4,7 +4,12 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Textarea } from '../../components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card'
 import { Skeleton } from '../../components/ui/skeleton'
 import { toast } from 'sonner'
 import { getImageUrl } from '@/constants/assets'
@@ -42,7 +47,9 @@ export function ProfileTab() {
           country: apiProfile.country ?? '',
           gender: apiProfile.gender ?? '',
           language: apiProfile.language ?? '',
-          dateOfBirth: apiProfile.dateOfBirth ? apiProfile.dateOfBirth.split('T')[0] : '',
+          dateOfBirth: apiProfile.dateOfBirth
+            ? apiProfile.dateOfBirth.split('T')[0]
+            : '',
           bio: apiProfile.bio ?? '',
         })
       })
@@ -103,29 +110,42 @@ export function ProfileTab() {
       {/* Profile Information */}
       <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 lg:col-span-2">
         <CardHeader>
-          <CardTitle className="text-2xl text-[#1a1a1a]">Personal Information</CardTitle>
+          <CardTitle className="text-2xl text-[#1a1a1a]">
+            Personal Information
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="firstName" className="text-[#1a1a1a] mb-2 block">First Name</Label>
+              <Label htmlFor="firstName" className="text-[#1a1a1a] mb-2 block">
+                First Name
+              </Label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="firstName"
                   value={profileData.firstName}
                   onChange={(e) => {
-                    setProfileData({ ...profileData, firstName: e.target.value })
+                    setProfileData({
+                      ...profileData,
+                      firstName: e.target.value,
+                    })
                     clearFieldError('FirstName')
                   }}
                   className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.FirstName ? 'border-red-400' : ''}`}
                 />
               </div>
-              {fieldErrors.FirstName && <p className="text-xs text-red-500 mt-1">{fieldErrors.FirstName}</p>}
+              {fieldErrors.FirstName && (
+                <p className="text-xs text-red-500 mt-1">
+                  {fieldErrors.FirstName}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="lastName" className="text-[#1a1a1a] mb-2 block">Last Name</Label>
+              <Label htmlFor="lastName" className="text-[#1a1a1a] mb-2 block">
+                Last Name
+              </Label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
@@ -138,11 +158,17 @@ export function ProfileTab() {
                   className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.LastName ? 'border-red-400' : ''}`}
                 />
               </div>
-              {fieldErrors.LastName && <p className="text-xs text-red-500 mt-1">{fieldErrors.LastName}</p>}
+              {fieldErrors.LastName && (
+                <p className="text-xs text-red-500 mt-1">
+                  {fieldErrors.LastName}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="email" className="text-[#1a1a1a] mb-2 block">Email Address</Label>
+              <Label htmlFor="email" className="text-[#1a1a1a] mb-2 block">
+                Email Address
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
@@ -153,11 +179,15 @@ export function ProfileTab() {
                   className="pl-12 bg-[#9CBBDC]/20 rounded-xl border-[#3A6EA5]/20 cursor-not-allowed"
                 />
               </div>
-              <p className="text-xs text-[#4a5565] mt-1">Email cannot be changed</p>
+              <p className="text-xs text-[#4a5565] mt-1">
+                Email cannot be changed
+              </p>
             </div>
 
             <div>
-              <Label htmlFor="phone" className="text-[#1a1a1a] mb-2 block">Phone Number</Label>
+              <Label htmlFor="phone" className="text-[#1a1a1a] mb-2 block">
+                Phone Number
+              </Label>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
@@ -170,22 +200,38 @@ export function ProfileTab() {
                   className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.PhoneNumber ? 'border-red-400' : ''}`}
                 />
               </div>
-              {fieldErrors.PhoneNumber && <p className="text-xs text-red-500 mt-1">{fieldErrors.PhoneNumber}</p>}
+              {fieldErrors.PhoneNumber && (
+                <p className="text-xs text-red-500 mt-1">
+                  {fieldErrors.PhoneNumber}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="dateOfBirth" className="text-[#1a1a1a] mb-2 block">Date of Birth</Label>
+              <Label
+                htmlFor="dateOfBirth"
+                className="text-[#1a1a1a] mb-2 block"
+              >
+                Date of Birth
+              </Label>
               <Input
                 id="dateOfBirth"
                 type="date"
                 value={profileData.dateOfBirth}
                 onChange={(e) => {
-                  setProfileData({ ...profileData, dateOfBirth: e.target.value })
+                  setProfileData({
+                    ...profileData,
+                    dateOfBirth: e.target.value,
+                  })
                   clearFieldError('DateOfBirth')
                 }}
                 className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.DateOfBirth ? 'border-red-400' : ''}`}
               />
-              {fieldErrors.DateOfBirth && <p className="text-xs text-red-500 mt-1">{fieldErrors.DateOfBirth}</p>}
+              {fieldErrors.DateOfBirth && (
+                <p className="text-xs text-red-500 mt-1">
+                  {fieldErrors.DateOfBirth}
+                </p>
+              )}
             </div>
 
             <div>
@@ -199,7 +245,11 @@ export function ProfileTab() {
                   clearFieldError('Country')
                 }}
               />
-              {fieldErrors.Country && <p className="text-xs text-red-500 mt-1">{fieldErrors.Country}</p>}
+              {fieldErrors.Country && (
+                <p className="text-xs text-red-500 mt-1">
+                  {fieldErrors.Country}
+                </p>
+              )}
             </div>
 
             <div>
@@ -213,7 +263,11 @@ export function ProfileTab() {
                   clearFieldError('Gender')
                 }}
               />
-              {fieldErrors.Gender && <p className="text-xs text-red-500 mt-1">{fieldErrors.Gender}</p>}
+              {fieldErrors.Gender && (
+                <p className="text-xs text-red-500 mt-1">
+                  {fieldErrors.Gender}
+                </p>
+              )}
             </div>
 
             <div>
@@ -227,12 +281,18 @@ export function ProfileTab() {
                   clearFieldError('Language')
                 }}
               />
-              {fieldErrors.Language && <p className="text-xs text-red-500 mt-1">{fieldErrors.Language}</p>}
+              {fieldErrors.Language && (
+                <p className="text-xs text-red-500 mt-1">
+                  {fieldErrors.Language}
+                </p>
+              )}
             </div>
           </div>
 
           <div>
-            <Label htmlFor="bio" className="text-[#1a1a1a] mb-2 block">Bio</Label>
+            <Label htmlFor="bio" className="text-[#1a1a1a] mb-2 block">
+              Bio
+            </Label>
             <Textarea
               id="bio"
               value={profileData.bio}
@@ -243,11 +303,16 @@ export function ProfileTab() {
               className={`bg-white rounded-xl border-[#3A6EA5]/20 min-h-[120px] ${fieldErrors.Bio ? 'border-red-400' : ''}`}
               placeholder="Tell us about yourself..."
             />
-            {fieldErrors.Bio && <p className="text-xs text-red-500 mt-1">{fieldErrors.Bio}</p>}
+            {fieldErrors.Bio && (
+              <p className="text-xs text-red-500 mt-1">{fieldErrors.Bio}</p>
+            )}
           </div>
 
           <div className="flex gap-4 justify-end">
-            <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20">
+            <Button
+              variant="outline"
+              className="rounded-xl border-[#3A6EA5]/20"
+            >
               Cancel
             </Button>
             <Button
@@ -274,7 +339,9 @@ export function ProfileTab() {
                     onError: (err) => {
                       if (err instanceof HttpError && err.validationErrors) {
                         const flat: Record<string, string> = {}
-                        for (const [key, msgs] of Object.entries(err.validationErrors)) {
+                        for (const [key, msgs] of Object.entries(
+                          err.validationErrors,
+                        )) {
                           flat[key] = msgs[0]
                         }
                         setFieldErrors(flat)

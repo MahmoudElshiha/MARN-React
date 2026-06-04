@@ -39,6 +39,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
       },
+      '/images': {
+        target: API_BASE,
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
 

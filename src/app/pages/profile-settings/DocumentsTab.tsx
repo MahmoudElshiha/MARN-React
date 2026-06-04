@@ -3,7 +3,12 @@ import { IdCard } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card'
 import { FileUpload } from '../../components/ui/file-upload'
 import { toast } from 'sonner'
 import { useProfile } from '@/hooks/useProfile'
@@ -48,12 +53,16 @@ export function DocumentsTab() {
 
     if (apiProfile.frontIdPhoto) {
       fetchAsFile(apiProfile.frontIdPhoto).then(
-        (file) => file && setIdentityVerification((prev) => ({ ...prev, frontIdCard: file })),
+        (file) =>
+          file &&
+          setIdentityVerification((prev) => ({ ...prev, frontIdCard: file })),
       )
     }
     if (apiProfile.backIdPhoto) {
       fetchAsFile(apiProfile.backIdPhoto).then(
-        (file) => file && setIdentityVerification((prev) => ({ ...prev, backIdCard: file })),
+        (file) =>
+          file &&
+          setIdentityVerification((prev) => ({ ...prev, backIdCard: file })),
       )
     }
   }, [apiProfile])
@@ -89,7 +98,11 @@ export function DocumentsTab() {
             }
             setFieldErrors(flat)
           } else {
-            toast.error(err instanceof HttpError ? err.message : 'Failed to submit documents.')
+            toast.error(
+              err instanceof HttpError
+                ? err.message
+                : 'Failed to submit documents.',
+            )
           }
         },
       },
@@ -102,7 +115,9 @@ export function DocumentsTab() {
         <div className="flex items-center gap-3">
           <IdCard className="w-6 h-6 text-[#3A6EA5]" />
           <div>
-            <CardTitle className="text-2xl text-[#1a1a1a]">Identity Verification</CardTitle>
+            <CardTitle className="text-2xl text-[#1a1a1a]">
+              Identity Verification
+            </CardTitle>
             <p className="text-sm text-[#4a5565] mt-1">
               Upload your identification documents for account verification
             </p>
@@ -112,42 +127,71 @@ export function DocumentsTab() {
       <CardContent className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <Label className="text-[#1a1a1a] mb-2 block">Front Side of ID Card</Label>
+            <Label className="text-[#1a1a1a] mb-2 block">
+              Front Side of ID Card
+            </Label>
             <FileUpload
               id="frontIdCard"
               value={identityVerification.frontIdCard}
-              initialUrl={apiProfile?.frontIdPhoto ? getImageUrl(apiProfile.frontIdPhoto) : null}
+              initialUrl={
+                apiProfile?.frontIdPhoto
+                  ? getImageUrl(apiProfile.frontIdPhoto)
+                  : null
+              }
               onChange={(file) =>
-                setIdentityVerification({ ...identityVerification, frontIdCard: file })
+                setIdentityVerification({
+                  ...identityVerification,
+                  frontIdCard: file,
+                })
               }
               onClear={() =>
-                setIdentityVerification({ ...identityVerification, frontIdCard: null })
+                setIdentityVerification({
+                  ...identityVerification,
+                  frontIdCard: null,
+                })
               }
             />
           </div>
 
           <div>
-            <Label className="text-[#1a1a1a] mb-2 block">Back Side of ID Card</Label>
+            <Label className="text-[#1a1a1a] mb-2 block">
+              Back Side of ID Card
+            </Label>
             <FileUpload
               id="backIdCard"
               value={identityVerification.backIdCard}
-              initialUrl={apiProfile?.backIdPhoto ? getImageUrl(apiProfile.backIdPhoto) : null}
+              initialUrl={
+                apiProfile?.backIdPhoto
+                  ? getImageUrl(apiProfile.backIdPhoto)
+                  : null
+              }
               onChange={(file) =>
-                setIdentityVerification({ ...identityVerification, backIdCard: file })
+                setIdentityVerification({
+                  ...identityVerification,
+                  backIdCard: file,
+                })
               }
               onClear={() =>
-                setIdentityVerification({ ...identityVerification, backIdCard: null })
+                setIdentityVerification({
+                  ...identityVerification,
+                  backIdCard: null,
+                })
               }
             />
           </div>
 
           <div>
-            <Label htmlFor="nameArabic" className="text-[#1a1a1a] mb-2 block">Name in Arabic</Label>
+            <Label htmlFor="nameArabic" className="text-[#1a1a1a] mb-2 block">
+              Name in Arabic
+            </Label>
             <Input
               id="nameArabic"
               value={identityVerification.nameArabic}
               onChange={(e) => {
-                setIdentityVerification({ ...identityVerification, nameArabic: e.target.value })
+                setIdentityVerification({
+                  ...identityVerification,
+                  nameArabic: e.target.value,
+                })
                 clearFieldError('ArabicFullName')
               }}
               className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ArabicFullName ? 'border-red-400' : ''}`}
@@ -155,19 +199,27 @@ export function DocumentsTab() {
               dir="rtl"
             />
             {fieldErrors.ArabicFullName && (
-              <p className="text-xs text-red-500 mt-1">{fieldErrors.ArabicFullName}</p>
+              <p className="text-xs text-red-500 mt-1">
+                {fieldErrors.ArabicFullName}
+              </p>
             )}
           </div>
 
           <div>
-            <Label htmlFor="addressArabic" className="text-[#1a1a1a] mb-2 block">
+            <Label
+              htmlFor="addressArabic"
+              className="text-[#1a1a1a] mb-2 block"
+            >
               Address in Arabic
             </Label>
             <Input
               id="addressArabic"
               value={identityVerification.addressArabic}
               onChange={(e) => {
-                setIdentityVerification({ ...identityVerification, addressArabic: e.target.value })
+                setIdentityVerification({
+                  ...identityVerification,
+                  addressArabic: e.target.value,
+                })
                 clearFieldError('ArabicAddress')
               }}
               className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ArabicAddress ? 'border-red-400' : ''}`}
@@ -175,12 +227,17 @@ export function DocumentsTab() {
               dir="rtl"
             />
             {fieldErrors.ArabicAddress && (
-              <p className="text-xs text-red-500 mt-1">{fieldErrors.ArabicAddress}</p>
+              <p className="text-xs text-red-500 mt-1">
+                {fieldErrors.ArabicAddress}
+              </p>
             )}
           </div>
 
           <div className="md:col-span-2">
-            <Label htmlFor="nationalIdNumber" className="text-[#1a1a1a] mb-2 block">
+            <Label
+              htmlFor="nationalIdNumber"
+              className="text-[#1a1a1a] mb-2 block"
+            >
               National ID Number
             </Label>
             <Input
@@ -197,7 +254,9 @@ export function DocumentsTab() {
               placeholder="Enter your national ID number"
             />
             {fieldErrors.NationalIDNumber && (
-              <p className="text-xs text-red-500 mt-1">{fieldErrors.NationalIDNumber}</p>
+              <p className="text-xs text-red-500 mt-1">
+                {fieldErrors.NationalIDNumber}
+              </p>
             )}
           </div>
         </div>

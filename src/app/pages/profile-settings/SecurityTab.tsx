@@ -4,7 +4,12 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
 import { Switch } from '../../components/ui/switch'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -62,7 +67,11 @@ export function SecurityTab() {
             }
             setFieldErrors(flat)
           } else {
-            toast.error(err instanceof HttpError ? err.message : 'Failed to update password.')
+            toast.error(
+              err instanceof HttpError
+                ? err.message
+                : 'Failed to update password.',
+            )
           }
         },
       },
@@ -96,7 +105,9 @@ export function SecurityTab() {
         },
         onError: (err) => {
           setTwoFaPasswordError(
-            err instanceof HttpError ? err.message : 'Incorrect password. Please try again.',
+            err instanceof HttpError
+              ? err.message
+              : 'Incorrect password. Please try again.',
           )
         },
       },
@@ -109,15 +120,22 @@ export function SecurityTab() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <Shield className="w-6 h-6 text-[#3A6EA5]" />
-            <CardTitle className="text-2xl text-[#1a1a1a]">Security Settings</CardTitle>
+            <CardTitle className="text-2xl text-[#1a1a1a]">
+              Security Settings
+            </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
           <div>
-            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">Change Password</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">
+              Change Password
+            </h3>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="current-password" className="text-[#1a1a1a] mb-2 block">
+                <Label
+                  htmlFor="current-password"
+                  className="text-[#1a1a1a] mb-2 block"
+                >
                   Current Password
                 </Label>
                 <div className="relative">
@@ -134,13 +152,18 @@ export function SecurityTab() {
                   />
                 </div>
                 {fieldErrors.CurrentPassword && (
-                  <p className="text-xs text-red-500 mt-1">{fieldErrors.CurrentPassword}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    {fieldErrors.CurrentPassword}
+                  </p>
                 )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="new-password" className="text-[#1a1a1a] mb-2 block">
+                  <Label
+                    htmlFor="new-password"
+                    className="text-[#1a1a1a] mb-2 block"
+                  >
                     New Password
                   </Label>
                   <Input
@@ -154,11 +177,16 @@ export function SecurityTab() {
                     className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.NewPassword ? 'border-red-400' : ''}`}
                   />
                   {fieldErrors.NewPassword && (
-                    <p className="text-xs text-red-500 mt-1">{fieldErrors.NewPassword}</p>
+                    <p className="text-xs text-red-500 mt-1">
+                      {fieldErrors.NewPassword}
+                    </p>
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="confirm-password" className="text-[#1a1a1a] mb-2 block">
+                  <Label
+                    htmlFor="confirm-password"
+                    className="text-[#1a1a1a] mb-2 block"
+                  >
                     Confirm Password
                   </Label>
                   <Input
@@ -172,7 +200,9 @@ export function SecurityTab() {
                     className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ConfirmNewPassword ? 'border-red-400' : ''}`}
                   />
                   {fieldErrors.ConfirmNewPassword && (
-                    <p className="text-xs text-red-500 mt-1">{fieldErrors.ConfirmNewPassword}</p>
+                    <p className="text-xs text-red-500 mt-1">
+                      {fieldErrors.ConfirmNewPassword}
+                    </p>
                   )}
                 </div>
               </div>
@@ -188,7 +218,9 @@ export function SecurityTab() {
           </div>
 
           <div className="border-t border-[#3A6EA5]/20 pt-8">
-            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">Two-Factor Authentication</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">
+              Two-Factor Authentication
+            </h3>
             <div className="flex items-center justify-between p-6 bg-white rounded-2xl">
               <div>
                 <p className="font-medium text-[#1a1a1a]">Enable 2FA</p>
@@ -212,7 +244,9 @@ export function SecurityTab() {
         <DialogContent className="bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#1a1a1a]">
-              {twoFactorEnabled ? 'Disable Two-Factor Authentication' : 'Enable Two-Factor Authentication'}
+              {twoFactorEnabled
+                ? 'Disable Two-Factor Authentication'
+                : 'Enable Two-Factor Authentication'}
             </DialogTitle>
             <DialogDescription className="text-[#4a5565]">
               Enter your account password to confirm
@@ -220,7 +254,10 @@ export function SecurityTab() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="twofa-password" className="text-[#1a1a1a] mb-2 block">
+              <Label
+                htmlFor="twofa-password"
+                className="text-[#1a1a1a] mb-2 block"
+              >
                 Password
               </Label>
               <div className="relative">
@@ -239,7 +276,9 @@ export function SecurityTab() {
                 />
               </div>
               {twoFaPasswordError && (
-                <p className="text-xs text-red-500 mt-1">{twoFaPasswordError}</p>
+                <p className="text-xs text-red-500 mt-1">
+                  {twoFaPasswordError}
+                </p>
               )}
             </div>
           </div>

@@ -38,8 +38,7 @@ export function useProfile() {
   })
 
   const toggle2FA = useMutation({
-    mutationFn: (payload: Toggle2FAPayload) =>
-      userService.toggle2FA(payload),
+    mutationFn: (payload: Toggle2FAPayload) => userService.toggle2FA(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] })
     },
@@ -60,5 +59,13 @@ export function useProfile() {
     },
   })
 
-  return { ...query, update, updateLegal, changePassword, uploadAvatar, toggle2FA, updateRoommate }
+  return {
+    ...query,
+    update,
+    updateLegal,
+    changePassword,
+    uploadAvatar,
+    toggle2FA,
+    updateRoommate,
+  }
 }

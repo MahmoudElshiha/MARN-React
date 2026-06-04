@@ -35,7 +35,9 @@ export function FileUpload({
     if (!file) return
 
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      toast.error(`Image size exceeds ${MAX_SIZE_MB}MB. Please choose a smaller file.`)
+      toast.error(
+        `Image size exceeds ${MAX_SIZE_MB}MB. Please choose a smaller file.`,
+      )
       e.target.value = ''
       return
     }

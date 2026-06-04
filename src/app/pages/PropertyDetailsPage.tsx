@@ -18,6 +18,12 @@ import {
   Calendar,
   Users,
   MessageSquare,
+  Check,
+  Tv,
+  Utensils,
+  Maximize,
+  ShieldCheck,
+  Thermometer,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
@@ -31,6 +37,7 @@ import { Skeleton } from '../components/ui/skeleton'
 import { format } from 'date-fns'
 import { ImageWithFallback } from '../components/figma/ImageWithFallback'
 import { useProperty } from '@/hooks/useProperty'
+import { getImageUrl } from '@/constants/assets'
 
 const AMENITY_ICONS: Record<string, React.ElementType> = {
   WiFi: Wifi,
@@ -38,9 +45,20 @@ const AMENITY_ICONS: Record<string, React.ElementType> = {
   'Air Conditioning': Wind,
   Heating: Flame,
   'Washer/Dryer': Shirt,
+  Washer: Shirt,
+  Dryer: Wind,
   Gym: Dumbbell,
   Pool: Waves,
   'Pet Friendly': Dog,
+  TV: Tv,
+  Kitchen: Utensils,
+  Dishwasher: Utensils,
+  Microwave: Utensils,
+  Refrigerator: Thermometer,
+  Balcony: Maximize,
+  Elevator: Maximize,
+  'Security System': ShieldCheck,
+  'Storage Space': Maximize,
 }
 
 export function PropertyDetailsPage() {
@@ -53,11 +71,18 @@ export function PropertyDetailsPage() {
   const [checkOut, setCheckOut] = useState<Date>()
 
   const property = data?.data
-  const images = property?.images?.length
-    ? property.images
-    : property?.image
-      ? [property.image]
-      : []
+  const images: string[] = (() => {
+    const p = property as any
+    // API returns a `media` array of { path, isPrimary } objects
+    if (p?.media?.length) {
+      return p.media.map((m: any) => m.path ?? m.url ?? '')
+        .filter(Boolean) as string[]
+    }
+    if (p?.images?.length) return p.images as string[]
+    if (p?.imagePath) return [p.imagePath as string]
+    if (p?.image) return [p.image as string]
+    return []
+  })()
 
   const nextImage = () =>
     setCurrentImageIndex((prev) => (prev + 1) % Math.max(images.length, 1))
@@ -119,7 +144,7 @@ export function PropertyDetailsPage() {
                 <Skeleton className="w-full h-full" />
               ) : images.length > 0 ? (
                 <ImageWithFallback
-                  src={images[currentImageIndex]}
+                  src={getImageUrl(images[currentImageIndex])}
                   alt="Property"
                   className="w-full h-full object-cover"
                 />
@@ -153,11 +178,10 @@ export function PropertyDetailsPage() {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`h-2 rounded-full transition-all ${
-                      index === currentImageIndex
+                    className={`h-2 rounded-full transition-all ${index === currentImageIndex
                         ? 'bg-white w-8'
                         : 'bg-white/50 hover:bg-white/75 w-2'
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -212,7 +236,7 @@ export function PropertyDetailsPage() {
                     </span>
                     <span className="text-[#4a5565]">•</span>
                     <span className="text-[#1a1a1a]">
-                      {property?.beds} beds • {property?.baths} baths
+                      {(property as any)?.bedrooms ?? property?.beds} {((property as any)?.bedrooms ?? property?.beds) === 1 ? 'bed' : 'beds'} • {(property as any)?.bathrooms ?? property?.baths} {((property as any)?.bathrooms ?? property?.baths) === 1 ? 'bath' : 'baths'}
                       {property?.area ? ` • ${property.area} sq ft` : ''}
                     </span>
                   </div>
@@ -246,18 +270,22 @@ export function PropertyDetailsPage() {
                   Amenities
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {property.amenities.map((name) => {
+                  {property.amenities.map((amenityItem: any) => {
+                    const name = typeof amenityItem === 'string'
+                      ? amenityItem
+                      : (amenityItem.amenityDisplayName || amenityItem.amenity)
+                    const key = typeof amenityItem === 'string' ? amenityItem : (amenityItem.id || name)
                     const Icon = AMENITY_ICONS[name]
                     return (
                       <div
-                        key={name}
+                        key={key}
                         className="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl"
                       >
                         <div className="w-12 h-12 rounded-xl bg-[#9CBBDC]/20 flex items-center justify-center">
                           {Icon ? (
                             <Icon className="w-6 h-6 text-[#3A6EA5]" />
                           ) : (
-                            <span className="text-xs text-[#3A6EA5]">✓</span>
+                            <Check className="w-6 h-6 text-[#3A6EA5]" />
                           )}
                         </div>
                         <span className="text-sm text-[#1a1a1a] text-center">

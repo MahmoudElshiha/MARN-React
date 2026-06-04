@@ -37,11 +37,12 @@ function timeAgo(iso: string) {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-
 export function TenantDashboard() {
   const { user } = useAuth()
-  const { data: dashboardRes, isLoading: dashboardLoading } = useRenterDashboard()
-  const { data: recommendedData, isLoading: recommendedLoading } = useProperties({ pageSize: 2 })
+  const { data: dashboardRes, isLoading: dashboardLoading } =
+    useRenterDashboard()
+  const { data: recommendedData, isLoading: recommendedLoading } =
+    useProperties({ pageSize: 2 })
 
   const dashboard = dashboardRes?.data
   const recommendedProperties = recommendedData?.data?.items ?? []
@@ -92,7 +93,9 @@ export function TenantDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/80 mb-1">
-                    {dashboard?.nextPayment ? 'Next Payment Due' : 'Current Rent'}
+                    {dashboard?.nextPayment
+                      ? 'Next Payment Due'
+                      : 'Current Rent'}
                   </p>
                   {dashboardLoading ? (
                     <Skeleton className="h-8 w-28 bg-white/30" />
@@ -139,7 +142,9 @@ export function TenantDashboard() {
                 <span className="text-base">Saved Properties</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
-                {dashboardLoading ? '…' : (dashboard?.savedPropertiesCount ?? 0)}
+                {dashboardLoading
+                  ? '…'
+                  : (dashboard?.savedPropertiesCount ?? 0)}
               </p>
             </CardContent>
           </Card>
@@ -152,7 +157,9 @@ export function TenantDashboard() {
                 <span className="text-base">Notifications</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
-                {dashboardLoading ? '…' : (dashboard?.unreadNotificationsCount ?? 0)}
+                {dashboardLoading
+                  ? '…'
+                  : (dashboard?.unreadNotificationsCount ?? 0)}
               </p>
             </CardContent>
           </Card>
@@ -164,7 +171,9 @@ export function TenantDashboard() {
             {/* Active Rentals */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">Active Rentals</CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">
+                  Active Rentals
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {dashboardLoading ? (
@@ -172,14 +181,20 @@ export function TenantDashboard() {
                 ) : !activeRental ? (
                   <div className="text-center py-8 text-[#4a5565]">
                     No active rentals.{' '}
-                    <Link to="/search" className="text-[#3A6EA5] hover:underline">
+                    <Link
+                      to="/search"
+                      className="text-[#3A6EA5] hover:underline"
+                    >
                       Find a property.
                     </Link>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {dashboard!.activeRentals.map((rental) => (
-                      <div key={rental.id} className="bg-[#f5f7fa] rounded-2xl p-6">
+                      <div
+                        key={rental.id}
+                        className="bg-[#f5f7fa] rounded-2xl p-6"
+                      >
                         <div className="flex items-start justify-between mb-4">
                           <h3 className="font-semibold text-lg text-[#1a1a1a]">
                             {rental.propertyName}
@@ -191,13 +206,17 @@ export function TenantDashboard() {
 
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
-                            <p className="text-xs text-[#6a7282] mb-1">Start Date</p>
+                            <p className="text-xs text-[#6a7282] mb-1">
+                              Start Date
+                            </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {formatDate(rental.startDate)}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-[#6a7282] mb-1">End Date</p>
+                            <p className="text-xs text-[#6a7282] mb-1">
+                              End Date
+                            </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {formatDate(rental.expiryDate)}
                             </p>
@@ -206,7 +225,9 @@ export function TenantDashboard() {
 
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xs text-[#6a7282] mb-1">Monthly Rent</p>
+                            <p className="text-xs text-[#6a7282] mb-1">
+                              Monthly Rent
+                            </p>
                             <p className="text-xl font-bold text-[#3A6EA5]">
                               {rental.monthlyRent.toLocaleString()} EGP
                             </p>
@@ -239,10 +260,13 @@ export function TenantDashboard() {
             </Card>
 
             {/* Pending Booking Requests */}
-            {(dashboardLoading || (dashboard?.pendingBookingRequests?.length ?? 0) > 0) && (
+            {(dashboardLoading ||
+              (dashboard?.pendingBookingRequests?.length ?? 0) > 0) && (
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-[#1a1a1a]">Pending Requests</CardTitle>
+                  <CardTitle className="text-2xl text-[#1a1a1a]">
+                    Pending Requests
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {dashboardLoading ? (
@@ -250,15 +274,25 @@ export function TenantDashboard() {
                   ) : (
                     <div className="space-y-3">
                       {dashboard!.pendingBookingRequests.map((req) => (
-                        <div key={req.id} className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+                        <div
+                          key={req.id}
+                          className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between"
+                        >
                           <div>
-                            <p className="font-medium text-[#1a1a1a]">{req.propertyName}</p>
+                            <p className="font-medium text-[#1a1a1a]">
+                              {req.propertyName}
+                            </p>
                             <p className="text-xs text-[#6a7282] flex items-center gap-1 mt-1">
                               <Calendar className="w-3 h-3" />
-                              {req.requestedDate ? formatDate(req.requestedDate) : '—'}
+                              {req.requestedDate
+                                ? formatDate(req.requestedDate)
+                                : '—'}
                             </p>
                           </div>
-                          <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-100">
+                          <Badge
+                            variant="outline"
+                            className="text-amber-700 border-amber-300 bg-amber-100"
+                          >
                             {req.status}
                           </Badge>
                         </div>
@@ -272,7 +306,9 @@ export function TenantDashboard() {
             {/* Recommended Properties */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">Recommended for You</CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">
+                  Recommended for You
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {recommendedLoading ? (
@@ -281,7 +317,9 @@ export function TenantDashboard() {
                     <Skeleton className="h-48 w-full rounded-2xl" />
                   </div>
                 ) : recommendedProperties.length === 0 ? (
-                  <p className="text-[#4a5565] text-center py-8">No recommendations available.</p>
+                  <p className="text-[#4a5565] text-center py-8">
+                    No recommendations available.
+                  </p>
                 ) : (
                   <div className="grid gap-6">
                     {recommendedProperties.map((property) => (
@@ -311,7 +349,9 @@ export function TenantDashboard() {
             {/* Notifications */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">Recent Notifications</CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">
+                  Recent Notifications
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {dashboardLoading ? (
@@ -320,7 +360,9 @@ export function TenantDashboard() {
                     <Skeleton className="h-16 w-full rounded-2xl" />
                   </div>
                 ) : !dashboard?.notifications?.length ? (
-                  <p className="text-sm text-[#6a7282] text-center py-6">No notifications yet.</p>
+                  <p className="text-sm text-[#6a7282] text-center py-6">
+                    No notifications yet.
+                  </p>
                 ) : (
                   <div className="space-y-3">
                     {dashboard.notifications.map((n) => (
@@ -339,7 +381,9 @@ export function TenantDashboard() {
                             }`}
                           />
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-[#1a1a1a] mb-1 leading-snug">{n.title}</p>
+                            <p className="text-sm text-[#1a1a1a] mb-1 leading-snug">
+                              {n.title}
+                            </p>
                             <p className="text-xs text-[#6a7282] flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {timeAgo(n.createdAt)}
@@ -354,10 +398,13 @@ export function TenantDashboard() {
             </Card>
 
             {/* All Contracts */}
-            {(dashboardLoading || (dashboard?.allContracts?.length ?? 0) > 0) && (
+            {(dashboardLoading ||
+              (dashboard?.allContracts?.length ?? 0) > 0) && (
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-xl text-[#1a1a1a]">Contracts</CardTitle>
+                  <CardTitle className="text-xl text-[#1a1a1a]">
+                    Contracts
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {dashboardLoading ? (
@@ -365,9 +412,14 @@ export function TenantDashboard() {
                   ) : (
                     <div className="space-y-3">
                       {dashboard!.allContracts.map((c) => (
-                        <div key={c.id} className="bg-[#f5f7fa] rounded-2xl p-4">
+                        <div
+                          key={c.id}
+                          className="bg-[#f5f7fa] rounded-2xl p-4"
+                        >
                           <div className="flex items-center justify-between mb-1">
-                            <p className="text-sm font-medium text-[#1a1a1a]">{c.propertyName}</p>
+                            <p className="text-sm font-medium text-[#1a1a1a]">
+                              {c.propertyName}
+                            </p>
                             <Badge
                               variant="outline"
                               className={
@@ -380,7 +432,8 @@ export function TenantDashboard() {
                             </Badge>
                           </div>
                           <p className="text-xs text-[#6a7282]">
-                            {formatDate(c.startDate)} → {formatDate(c.expiryDate)}
+                            {formatDate(c.startDate)} →{' '}
+                            {formatDate(c.expiryDate)}
                           </p>
                           {c.documentUrl && (
                             <a
@@ -402,7 +455,8 @@ export function TenantDashboard() {
             )}
 
             {/* Saved Properties */}
-            {(dashboardLoading || (dashboard?.savedProperties?.length ?? 0) > 0) && (
+            {(dashboardLoading ||
+              (dashboard?.savedProperties?.length ?? 0) > 0) && (
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl text-[#1a1a1a] flex items-center justify-between">
@@ -436,8 +490,12 @@ export function TenantDashboard() {
                             />
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-[#1a1a1a] truncate">{p.title}</p>
-                            <p className="text-xs text-[#6a7282] truncate">{p.location}</p>
+                            <p className="text-sm font-medium text-[#1a1a1a] truncate">
+                              {p.title}
+                            </p>
+                            <p className="text-xs text-[#6a7282] truncate">
+                              {p.location}
+                            </p>
                             <p className="text-sm font-bold text-[#3A6EA5]">
                               {p.price.toLocaleString()} EGP
                             </p>
@@ -451,10 +509,13 @@ export function TenantDashboard() {
             )}
 
             {/* Payment History */}
-            {(dashboardLoading || (dashboard?.paidPayments?.length ?? 0) > 0) && (
+            {(dashboardLoading ||
+              (dashboard?.paidPayments?.length ?? 0) > 0) && (
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-xl text-[#1a1a1a]">Payment History</CardTitle>
+                  <CardTitle className="text-xl text-[#1a1a1a]">
+                    Payment History
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {dashboardLoading ? (
@@ -465,7 +526,10 @@ export function TenantDashboard() {
                   ) : (
                     <div className="space-y-3">
                       {dashboard!.paidPayments.map((p) => (
-                        <div key={p.id} className="bg-[#f5f7fa] rounded-2xl p-4">
+                        <div
+                          key={p.id}
+                          className="bg-[#f5f7fa] rounded-2xl p-4"
+                        >
                           <div className="flex items-center justify-between mb-1">
                             <p className="text-sm font-medium text-[#1a1a1a] truncate flex-1 mr-2">
                               {p.propertyName}
@@ -489,7 +553,9 @@ export function TenantDashboard() {
             {/* Quick Actions */}
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
-                <CardTitle className="text-xl text-[#1a1a1a]">Quick Actions</CardTitle>
+                <CardTitle className="text-xl text-[#1a1a1a]">
+                  Quick Actions
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button

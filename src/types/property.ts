@@ -80,9 +80,10 @@ export interface Property {
   guests: number
   area?: number
   squareMeters?: number
-  images: string[]
+  images?: string[]
   /** Primary listing image — first entry of images or standalone thumbnail. */
   image?: string
+  imagePath?: string
   amenities: string[]
   rating?: number
   reviews?: number

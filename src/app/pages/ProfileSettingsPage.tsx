@@ -17,7 +17,9 @@ export function ProfileSettingsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Account Settings</h1>
+          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
+            Account Settings
+          </h1>
           <p className="text-lg text-[#4a5565] mb-8">
             Manage your account settings and preferences
           </p>
