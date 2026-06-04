@@ -63,12 +63,12 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ---
 
 ### POST `/api/Account/external/google`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
-- **Options:** Google OAuth credential payload
+- **Status:** ✅ Wired
+- **Service:** `authService.googleLogin()`
+- **Hook:** `useGoogleAuth()` (`src/hooks/useGoogleLogin.ts`)
+- **Options:** `{ idToken, rememberMe }` — `GoogleLoginPayload`
 - **Response:** `{ token, ... }` (same as login; creates account on first login)
-- **Notes:** Add `authService.googleLogin()` + wire to the Google button in the login page.
+- **Notes:** ID token obtained via Google's official widget (`@react-oauth/google`). UI lives in `GoogleAuthButton` (`src/app/components/figma/`), used on both the login and sign-up pages; supports the 2FA branch (email decoded from the temp JWT). Requires `VITE_GOOGLE_CLIENT_ID` env var.
 
 ---
 
