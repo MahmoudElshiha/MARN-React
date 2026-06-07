@@ -49,15 +49,15 @@ export function TermsPage() {
     },
     {
       title: '12. Dispute Resolution',
-      content: `Any disputes arising from these terms or use of the platform shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association. The arbitration shall take place in San Francisco, California. You waive your right to participate in class action lawsuits or class-wide arbitration.`,
+      content: `Any disputes arising from these terms or use of the platform shall be resolved through binding arbitration in accordance with the rules of the Cairo Regional Centre for International Commercial Arbitration (CRCICA). The arbitration shall take place in Cairo, Egypt. You waive your right to participate in class action lawsuits or class-wide arbitration.`,
     },
     {
       title: '13. Governing Law',
-      content: `These Terms of Service are governed by the laws of the State of California, without regard to its conflict of law provisions. Any legal action or proceeding shall be brought exclusively in the courts located in San Francisco, California.`,
+      content: `These Terms of Service are governed by the laws of the Arab Republic of Egypt, without regard to its conflict of law provisions. Any legal action or proceeding shall be brought exclusively in the courts located in Cairo, Egypt.`,
     },
     {
       title: '14. Contact Information',
-      content: `If you have questions about these Terms of Service, please contact us at: Email: legal@marn.com, Phone: +1 (555) 123-4567, Address: 123 Real Estate Ave, Suite 100, San Francisco, CA 94105`,
+      content: `If you have questions about these Terms of Service, please contact us at: Email: legal@marn.com, Phone: +20 100 123 4567, Address: 123 Tahrir Square, Downtown, Cairo, Egypt`,
     },
   ]
 

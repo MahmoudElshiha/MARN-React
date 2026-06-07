@@ -65,6 +65,24 @@ const activePropertyIcon = new L.DivIcon({
   popupAnchor: [18, -44],
 })
 
+// "You are here" user location marker
+const userLocationIcon = new L.DivIcon({
+  className: 'user-location-marker',
+  html: `
+    <div style="
+      width: 20px; height: 20px;
+      background: #3A6EA5;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 0 0 6px rgba(58,110,165,0.25), 0 4px 12px rgba(58,110,165,0.4);
+      animation: userPulse 2s ease-in-out infinite;
+    "></div>
+  `,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+  popupAnchor: [0, -14],
+})
+
 /* ── Geocoding cache & rate-limited fetcher ────────────────────────── */
 
 interface GeoResult {
@@ -119,6 +137,8 @@ function FitBounds({ positions }: { positions: [number, number][] }) {
 
 interface PropertyMapProps {
   properties: SearchProperty[]
+  userLat?: number
+  userLng?: number
 }
 
 interface GeocodedProperty extends SearchProperty {
@@ -126,7 +146,7 @@ interface GeocodedProperty extends SearchProperty {
   lng: number
 }
 
-export function PropertyMap({ properties }: PropertyMapProps) {
+export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) {
   const [geocoded, setGeocoded] = useState<GeocodedProperty[]>([])
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [geocodingProgress, setGeocodingProgress] = useState({ done: 0, total: 0 })
@@ -190,10 +210,19 @@ export function PropertyMap({ properties }: PropertyMapProps) {
     [geocoded]
   )
 
-  const center = useMemo<[number, number]>(
-    () => (positions.length > 0 ? positions[0] : defaultCenter),
-    [positions]
-  )
+  // Include user location in fit-bounds when available
+  const allPositions = useMemo<[number, number][]>(() => {
+    const pts = [...positions]
+    if (userLat !== undefined && userLng !== undefined) {
+      pts.push([userLat, userLng])
+    }
+    return pts
+  }, [positions, userLat, userLng])
+
+  const center = useMemo<[number, number]>(() => {
+    if (userLat !== undefined && userLng !== undefined) return [userLat, userLng]
+    return positions.length > 0 ? positions[0] : defaultCenter
+  }, [positions, userLat, userLng])
 
   return (
     <div className="relative mb-8 rounded-3xl overflow-hidden shadow-lg shadow-black/5 border border-[#3A6EA5]/10">
@@ -237,7 +266,7 @@ export function PropertyMap({ properties }: PropertyMapProps) {
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
 
-        {positions.length > 0 && <FitBounds positions={positions} />}
+        {allPositions.length > 0 && <FitBounds positions={allPositions} />}
 
         {geocoded.map((property) => (
           <Marker
@@ -327,6 +356,25 @@ export function PropertyMap({ properties }: PropertyMapProps) {
             </Popup>
           </Marker>
         ))}
+
+        {/* "You are here" user location marker */}
+        {userLat !== undefined && userLng !== undefined && (
+          <Marker
+            position={[userLat, userLng]}
+            icon={userLocationIcon}
+            zIndexOffset={1000}
+          >
+            <Popup
+              closeButton={false}
+              minWidth={120}
+              className="user-location-popup"
+            >
+              <div className="text-center py-1 px-2">
+                <p className="font-semibold text-sm text-[#3A6EA5] mb-0">You are here</p>
+              </div>
+            </Popup>
+          </Marker>
+        )}
       </MapContainer>
 
       {/* Inline styles for popup customization and marker animation */}
@@ -366,6 +414,18 @@ export function PropertyMap({ properties }: PropertyMapProps) {
         @keyframes markerPulse {
           0%, 100% { transform: rotate(-45deg) scale(1); }
           50% { transform: rotate(-45deg) scale(1.08); }
+        }
+        @keyframes userPulse {
+          0%, 100% { box-shadow: 0 0 0 6px rgba(58,110,165,0.25), 0 4px 12px rgba(58,110,165,0.4); }
+          50% { box-shadow: 0 0 0 12px rgba(58,110,165,0.1), 0 4px 16px rgba(58,110,165,0.3); }
+        }
+        .user-location-popup .leaflet-popup-content-wrapper {
+          padding: 4px 8px;
+          border-radius: 12px;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .user-location-popup .leaflet-popup-content {
+          margin: 0;
         }
       `}</style>
     </div>

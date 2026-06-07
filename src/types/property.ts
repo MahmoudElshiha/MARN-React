@@ -4,8 +4,6 @@ export type PropertyType =
   | 'Apartment'
   | 'House'
   | 'Room'
-  | 'Villa'
-  | 'Studio'
   | 'SharedRoom'
 
 export type RentalUnit = 'Daily' | 'Monthly' | 'Yearly'

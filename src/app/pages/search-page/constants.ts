@@ -23,8 +23,6 @@ export const PROPERTY_TYPES: PropertyType[] = [
   'Apartment',
   'House',
   'Room',
-  'Villa',
-  'Studio',
   'SharedRoom',
 ]
 

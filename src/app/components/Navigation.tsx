@@ -31,77 +31,61 @@ const ROLE_DASHBOARDS: Record<string, { label: string; path: string }[]> = {
   tenant: [{ label: 'Tenant Dashboard', path: '/tenant-dashboard' }],
 }
 
-function DashboardButton() {
+function BurgerDashboardItem({ closeMenu }: { closeMenu: () => void }) {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
 
   const dashboards = (user?.role && ROLE_DASHBOARDS[user.role]) ?? [
     { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
   ]
 
-  // Close when clicking outside
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
   if (dashboards.length === 1) {
     return (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="group rounded-xl hover:bg-[#3A6EA5]/10"
-        asChild
+      <Link
+        to={dashboards[0].path}
+        onClick={closeMenu}
+        className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
       >
-        <Link to={dashboards[0].path}>
-          <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
-        </Link>
-      </Button>
+        <LayoutDashboard className="w-5 h-5" />
+        <span className="font-medium">{dashboards[0].label}</span>
+      </Link>
     )
   }
 
   return (
-    <div ref={ref} className="relative">
-      <Button
-        variant="ghost"
-        className="group rounded-xl hover:bg-[#3A6EA5]/10 px-2 gap-1"
-        onClick={() => setOpen((prev) => !prev)}
+    <div className="space-y-1">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
       >
-        <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
+        <div className="flex items-center gap-4">
+          <LayoutDashboard className="w-5 h-5" />
+          <span className="font-medium">Dashboard</span>
+        </div>
         <ChevronDown
-          className={`w-3 h-3 transition-[transform,color] duration-200 group-hover:text-[#3A6EA5] ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 transition-[transform] duration-200 ${open ? 'rotate-180' : ''}`}
         />
-      </Button>
-
+      </button>
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 w-52 rounded-xl border border-[#3A6EA5]/20 bg-white shadow-lg shadow-[#3A6EA5]/10 overflow-hidden z-[200]"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden pl-12 pr-4"
           >
-            {dashboards.map((d) => (
-              <button
-                key={d.path}
-                onClick={() => {
-                  navigate(d.path)
-                  setOpen(false)
-                }}
-                className="group flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-[#1a1a1a] transition-colors hover:bg-[#3A6EA5] hover:text-white"
-              >
-                <LayoutDashboard className="w-4 h-4 shrink-0 text-[#3A6EA5] transition-colors group-hover:text-white" />
-                {d.label}
-              </button>
-            ))}
+            <div className="flex flex-col gap-1 py-2">
+              {dashboards.map((d) => (
+                <Link
+                  key={d.path}
+                  to={d.path}
+                  onClick={closeMenu}
+                  className="px-4 py-2 text-sm font-medium text-[#6a7282] hover:text-[#3A6EA5] hover:bg-[#3A6EA5]/5 rounded-lg transition-colors"
+                >
+                  {d.label}
+                </Link>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -149,7 +133,7 @@ export function Navigation() {
     { icon: MessageCircle, label: 'Chat Support', path: '/chatbot' },
     { icon: HelpCircle, label: 'FAQ', path: '/faq' },
     { icon: Phone, label: 'Contact', path: '/contact' },
-    { icon: Settings, label: 'Settings', path: '/profile-settings' },
+    { icon: User, label: 'Profile Settings', path: '/profile-settings' },
   ]
 
   return (
@@ -165,24 +149,35 @@ export function Navigation() {
               <span className="text-2xl font-bold text-[#1a1a1a]">MARN</span>
             </Link>
 
-            {/* Search Bar - Hidden on Home */}
+            {/* Search Bar - Hidden on Home and Mobile */}
             {!isHome && (
-              <div className="flex-1 max-w-2xl">
+              <form
+                className="hidden md:block flex-1 max-w-2xl"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.currentTarget)
+                  const q = formData.get('q')
+                  if (q) {
+                    navigate(`/search?q=${encodeURIComponent(q.toString())}`)
+                  }
+                }}
+              >
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
                   <Input
+                    name="q"
                     placeholder="Search by location, property type..."
                     className="pl-12 pr-4 py-6 bg-white rounded-2xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] transition-all"
                   />
                 </div>
-              </div>
+              </form>
             )}
 
             {/* Navigation Links */}
             <div className="flex items-center gap-4">
               <Link
                 to="/search"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] rounded-xl transition-colors"
+                className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] rounded-xl transition-colors"
               >
                 Explore
               </Link>
@@ -198,7 +193,28 @@ export function Navigation() {
               )}
 
               <div className="flex items-center gap-2">
-                <DashboardButton />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
+                  asChild
+                >
+                  <Link to="/search">
+                    <Search className="w-5 h-5 text-[#1a1a1a] transition-colors group-hover:text-[#3A6EA5]" />
+                  </Link>
+                </Button>
+                {isAuthenticated && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden md:flex group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
+                    asChild
+                  >
+                    <Link to="/profile-settings">
+                      <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
+                    </Link>
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -285,6 +301,16 @@ export function Navigation() {
                       </motion.div>
                     )
                   })}
+
+                  {isAuthenticated && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: menuItems.length * 0.05 }}
+                    >
+                      <BurgerDashboardItem closeMenu={() => setIsMenuOpen(false)} />
+                    </motion.div>
+                  )}
                 </div>
 
                 {/* Divider */}

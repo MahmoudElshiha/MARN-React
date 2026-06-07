@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router'
 import { ImageWithFallback } from './figma/ImageWithFallback'
+import { toast } from 'sonner'
+import { propertyService } from '@/services/propertyService'
 
 interface PropertyCardProps {
   id: string
@@ -16,6 +18,7 @@ interface PropertyCardProps {
   beds?: number
   baths?: number
   guests?: number
+  isSaved?: boolean
 }
 
 export function PropertyCard({
@@ -30,8 +33,28 @@ export function PropertyCard({
   beds,
   baths,
   guests,
+  isSaved,
 }: PropertyCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(isSaved || false)
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    // Optimistic update
+    setIsFavorite(!isFavorite)
+    try {
+      await propertyService.toggleSaveProperty(id)
+      if (!isFavorite) {
+        toast.success('Added to saved properties')
+      } else {
+        toast.success('Removed from saved properties')
+      }
+    } catch (error) {
+      console.error('Failed to toggle save property', error)
+      toast.error('Failed to update saved properties')
+      // Revert optimistic update
+      setIsFavorite(isFavorite)
+    }
+  }
 
   return (
     <motion.div
@@ -51,10 +74,7 @@ export function PropertyCard({
 
             {/* Favorite Button */}
             <button
-              onClick={(e) => {
-                e.preventDefault()
-                setIsFavorite(!isFavorite)
-              }}
+              onClick={handleToggleFavorite}
               className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform"
             >
               <Heart

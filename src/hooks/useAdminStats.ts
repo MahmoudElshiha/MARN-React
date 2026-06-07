@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { adminService } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -16,6 +16,7 @@ export function useAdminUsers(page = 1, pageSize = 20) {
   return useQuery({
     queryKey: ['adminUsers', page, pageSize],
     queryFn: () => adminService.getUsers(page, pageSize),
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -23,6 +24,7 @@ export function useAdminVerifications(page = 1, pageSize = 20) {
   return useQuery({
     queryKey: ['adminVerifications', page, pageSize],
     queryFn: () => adminService.getVerifications(page, pageSize),
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -30,6 +32,7 @@ export function useAdminUserStats(page = 1, pageSize = 20) {
   return useQuery({
     queryKey: ['adminUserStats', page, pageSize],
     queryFn: () => adminService.getUserStats(page, pageSize),
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -46,6 +49,7 @@ export function useAdminRoleUsers(page = 1, pageSize = 20, search?: string) {
   return useQuery({
     queryKey: ['adminRoleUsers', page, pageSize, search],
     queryFn: () => adminService.getRoleUsers(page, pageSize, search),
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -54,6 +58,7 @@ export function useAdminAnalyticsReports(page = 1, pageSize = 20) {
     queryKey: ['adminAnalyticsReports', page, pageSize],
     queryFn: () => adminService.getAnalyticsReports(page, pageSize),
     staleTime: 30 * 1000,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -74,6 +79,7 @@ export function useAdminPropertyVerifications(page = 1, pageSize = 20) {
   return useQuery({
     queryKey: ['adminPropertyVerifications', page, pageSize],
     queryFn: () => adminService.getPendingPropertyVerifications(page, pageSize),
+    placeholderData: keepPreviousData,
   })
 }
 

@@ -90,14 +90,7 @@ export function Footer() {
                   How It Works
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/pricing"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  Pricing
-                </Link>
-              </li>
+
             </ul>
           </div>
 
