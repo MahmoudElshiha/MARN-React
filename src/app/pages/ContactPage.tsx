@@ -38,14 +38,14 @@ export function ContactPage() {
     {
       icon: Phone,
       title: 'Call Us',
-      details: '+1 (555) 123-4567',
-      description: 'Mon-Fri from 8am to 6pm PST',
+      details: '+20 100 123 4567',
+      description: 'Mon-Fri from 8am to 6pm EET',
     },
     {
       icon: MapPin,
       title: 'Visit Us',
-      details: '123 Real Estate Ave, Suite 100',
-      description: 'San Francisco, CA 94105',
+      details: '123 Tahrir Square, Downtown',
+      description: 'Cairo, Egypt',
     },
     {
       icon: Clock,

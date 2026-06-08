@@ -177,7 +177,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ### GET `/api/Admin/analytics-reports/{reportId}/download`
 - **Status:** ✅ Wired
 - **Service:** `adminService.downloadAnalyticsReport(reportId)` → `src/services/adminService.ts`
-- **Hook:** Called directly via `handleDownloadReport` in `AdminDashboardPage`
+- **Hook:** Called directly via `handleDownloadReport` in `ReportsTab.tsx`
 - **Options:** `reportId` path param
 - **Response:** File blob — `responseType: 'blob'`
 - **Notes:** Triggers browser download with filename from `AdminAnalyticsReport.fileName`.
@@ -297,7 +297,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ### PATCH `/api/Admin/verifications/users/{userId}/approve`
 - **Status:** ✅ Wired
 - **Service:** `adminService.approveVerification(userId)` → `src/services/adminService.ts`
-- **Hook:** Inline `useMutation` in `AdminDashboardPage`
+- **Hook:** Inline `useMutation` in `VerificationsTab.tsx`
 - **Options:** `userId` path param
 - **Response:** `ApiResponse<boolean>`
 - **Notes:** —
@@ -307,7 +307,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ### PATCH `/api/Admin/verifications/users/{userId}/decline`
 - **Status:** ✅ Wired
 - **Service:** `adminService.rejectVerification(userId, reason)` → `src/services/adminService.ts`
-- **Hook:** Inline `useMutation` in `AdminDashboardPage`
+- **Hook:** Inline `useMutation` in `VerificationsTab.tsx`
 - **Options:** `userId` path param + `{ reason }` body
 - **Response:** `ApiResponse<boolean>`
 - **Notes:** —
@@ -320,7 +320,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 - **Hook:** `useAdminPropertyVerifications` in `src/hooks/useAdminStats.ts`
 - **Options:** `pageNumber`, `pageSize`
 - **Response:** Paged list of properties awaiting ownership-document review
-- **Notes:** 4th tab "Property Verifications" in `AdminDashboardPage`. Interfaces defined manually (swagger has `content?: never`).
+- **Notes:** "Property Verifications" tab in `PropertyVerificationsTab.tsx`. Interfaces defined manually (swagger has `content?: never`).
 
 ---
 
@@ -337,7 +337,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ### PATCH `/api/Admin/verifications/properties/{propertyId}/approve`
 - **Status:** ✅ Wired
 - **Service:** `adminService.approvePropertyVerification(propertyId)`
-- **Hook:** Inline `useMutation` (`approvePropertyVerification`) in `AdminDashboardPage`
+- **Hook:** Inline `useMutation` (`approvePropertyVerification`) in `PropertyVerificationsTab.tsx`
 - **Options:** `propertyId` path param
 - **Response:** `ApiResponse<boolean>`
 - **Notes:** —
@@ -347,7 +347,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ### PATCH `/api/Admin/verifications/properties/{propertyId}/decline`
 - **Status:** ✅ Wired
 - **Service:** `adminService.declinePropertyVerification(propertyId, reason)`
-- **Hook:** Inline `useMutation` (`declinePropertyVerification`) in `AdminDashboardPage`
+- **Hook:** Inline `useMutation` (`declinePropertyVerification`) in `PropertyVerificationsTab.tsx`
 - **Options:** `propertyId` path param + `{ reason }` body
 - **Response:** `ApiResponse<boolean>`
 - **Notes:** —
@@ -387,7 +387,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ### PATCH `/api/Admin/users/{userId}/ban`
 - **Status:** ✅ Wired
 - **Service:** `adminService.banUser(userId)` → `src/services/adminService.ts`
-- **Hook:** Inline `useMutation` in `AdminDashboardPage`
+- **Hook:** Inline `useMutation` in `UserManagementTab.tsx`
 - **Options:** `userId` path param
 - **Response:** 200 no body (`content?: never`)
 - **Notes:** Fixed from POST → PATCH. Ban button shown for non-banned, non-deleted users.
@@ -397,7 +397,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ### PATCH `/api/Admin/users/{userId}/unban`
 - **Status:** ✅ Wired
 - **Service:** `adminService.unbanUser(userId)` → `src/services/adminService.ts`
-- **Hook:** Inline `useMutation` in `AdminDashboardPage`
+- **Hook:** Inline `useMutation` in `UserManagementTab.tsx`
 - **Options:** `userId` path param
 - **Response:** 200 no body (`content?: never`)
 - **Notes:** Renamed from the broken `suspendUser` (which called non-existent `/suspend`). "Unban" button shown for `accountStatus === 'Banned'` users. Reverts to `StatusBeforeBan` per swagger.
@@ -407,7 +407,7 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ### PATCH `/api/Admin/users/{userId}/restore`
 - **Status:** ✅ Wired
 - **Service:** `adminService.restoreUser(userId)` → `src/services/adminService.ts`
-- **Hook:** Inline `useMutation` in `AdminDashboardPage`
+- **Hook:** Inline `useMutation` in `UserManagementTab.tsx`
 - **Options:** `userId` path param
 - **Response:** 200 no body (`content?: never`)
 - **Notes:** Fixed from POST → PATCH. "Restore" button shown only for `user.isDeleted === true`.

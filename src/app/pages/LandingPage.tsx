@@ -11,7 +11,7 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { PropertyCard } from '../components/PropertyCard'
 import { motion } from 'motion/react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { ImageWithFallback } from '../components/figma/ImageWithFallback'
 
 const FEATURED_PROPERTIES = [
@@ -31,12 +31,12 @@ const FEATURED_PROPERTIES = [
   {
     id: '2',
     image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800',
-    title: 'Cozy Studio in Zamalek',
+    title: 'Cozy Apartment in Zamalek',
     location: 'Cairo, Egypt',
     price: 8500,
     rating: 4.8,
     reviews: 89,
-    type: 'Studio',
+    type: 'Apartment',
     beds: 1,
     baths: 1,
     guests: 2,
@@ -44,7 +44,7 @@ const FEATURED_PROPERTIES = [
   {
     id: '3',
     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
-    title: 'Luxury Villa in New Cairo',
+    title: 'Luxury House in New Cairo',
     location: 'Cairo, Egypt',
     price: 35000,
     rating: 5.0,
@@ -115,6 +115,8 @@ const TESTIMONIALS = [
 ]
 
 export function LandingPage() {
+  const navigate = useNavigate()
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -140,25 +142,36 @@ export function LandingPage() {
 
             {/* Search Bar */}
             <div className="bg-white rounded-3xl shadow-2xl shadow-[#3A6EA5]/20 p-3 max-w-3xl mx-auto border border-[#3A6EA5]/10">
-              <div className="flex flex-col md:flex-row gap-3">
+              <form 
+                className="flex flex-col md:flex-row gap-3"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.currentTarget)
+                  const q = formData.get('q')
+                  if (q) {
+                    navigate(`/search?q=${encodeURIComponent(q.toString())}`)
+                  } else {
+                    navigate('/search')
+                  }
+                }}
+              >
                 <div className="flex-1 relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
                   <Input
+                    name="q"
                     placeholder="Enter location..."
                     className="pl-12 pr-4 py-6 bg-[#f8f9fb] rounded-2xl border-none focus:bg-white"
                   />
                 </div>
                 <Button
+                  type="submit"
                   size="lg"
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl px-8 py-6 shadow-lg shadow-[#3A6EA5]/30"
-                  asChild
                 >
-                  <Link to="/search">
-                    <Search className="w-5 h-5 mr-2" />
-                    Search Properties
-                  </Link>
+                  <Search className="w-5 h-5 mr-2" />
+                  Search Properties
                 </Button>
-              </div>
+              </form>
             </div>
 
             {/* Quick Stats */}
@@ -341,8 +354,7 @@ export function LandingPage() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-[#3A6EA5] rounded-2xl px-8 py-6"
+                className="bg-[#1e3a5f] text-white hover:bg-[#13253c] shadow-lg shadow-[#1e3a5f]/20 rounded-2xl px-8 py-6"
                 asChild
               >
                 <Link to="/owner-dashboard">List Your Property</Link>

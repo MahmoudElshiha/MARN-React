@@ -104,4 +104,7 @@ export const propertyService = {
 
   becomeOwner: () =>
     apiClient.post<ApiResponse<string>>('/api/Property/become-owner'),
+
+  toggleSaveProperty: (id: string) =>
+    apiClient.post<ApiResponse<void>>(`/api/Property/save/${id}`),
 }

@@ -1,12 +1,22 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { useSearchParams } from 'react-router'
 import type { PropertyFilters, PropertyType, RentalUnit } from '@/types/property'
 import { AMENITY_OPTIONS } from '@/types/property'
 import { SORT_OPTIONS, PAGE_SIZE } from './constants'
 
 export function useSearchFilters() {
+  const [searchParams] = useSearchParams()
+  const initialKeyword = searchParams.get('q') || ''
+
   // ── search & geo ───────────────────────────────────────────────────────────
-  const [keyword, setKeyword] = useState('')
-  const [committedKw, setCommittedKw] = useState('')
+  const [keyword, setKeyword] = useState(initialKeyword)
+  const [committedKw, setCommittedKw] = useState(initialKeyword)
+
+  useEffect(() => {
+    const q = searchParams.get('q') || ''
+    setKeyword(q)
+    setCommittedKw(q)
+  }, [searchParams])
 
   // ── location enums ─────────────────────────────────────────────────────────
   const [city, setCity] = useState<string>('')
@@ -20,11 +30,11 @@ export function useSearchFilters() {
 
   // ── property filters ───────────────────────────────────────────────────────
   const [propertyType, setPropertyType] = useState<PropertyType | ''>('')
-  const [rentalUnit, setRentalUnit] = useState<RentalUnit | ''>('')
   const [isShared, setIsShared] = useState<string>('')
 
   // ── price ──────────────────────────────────────────────────────────────────
   const [priceRange, setPriceRange] = useState([500, 10000])
+  const [committedPriceRange, setCommittedPriceRange] = useState([500, 10000])
 
   // ── rooms ──────────────────────────────────────────────────────────────────
   const [selectedBeds, setSelectedBeds] = useState('Any')
@@ -48,6 +58,12 @@ export function useSearchFilters() {
   const [showMap, setShowMap] = useState(false)
   const [amenitiesExpanded, setAmenitiesExpanded] = useState(false)
 
+  // ── geo-search (postal code / my location) ─────────────────────────────────
+  const [userLat, setUserLat] = useState<number | undefined>(undefined)
+  const [userLng, setUserLng] = useState<number | undefined>(undefined)
+  const [radiusKm, setRadiusKm] = useState(10)
+  const [locationLabel, setLocationLabel] = useState('')
+
   // ── build filters ──────────────────────────────────────────────────────────
   const sortOpt = SORT_OPTIONS[sortIndex]
 
@@ -56,10 +72,9 @@ export function useSearchFilters() {
     city: city || undefined,
     governorate: governorate || undefined,
     type: (propertyType as PropertyType) || undefined,
-    rentalUnit: (rentalUnit as RentalUnit) || undefined,
     isShared: isShared === '' ? undefined : isShared === 'true',
-    minPrice: priceRange[0],
-    maxPrice: priceRange[1],
+    minPrice: committedPriceRange[0],
+    maxPrice: committedPriceRange[1],
     minBedrooms:
       selectedBeds !== 'Any'
         ? parseInt(selectedBeds.replace('+', ''))
@@ -74,6 +89,10 @@ export function useSearchFilters() {
     amenities: selectedAmenities.length ? selectedAmenities : undefined,
     sortBy: sortOpt.sortBy,
     sortAscending: sortOpt.sortAscending,
+    // geo-search
+    latitude: userLat,
+    longitude: userLng,
+    radiusKm: userLat !== undefined ? radiusKm : undefined,
     page,
     pageSize: PAGE_SIZE,
   }
@@ -94,9 +113,9 @@ export function useSearchFilters() {
     setCity('')
     setGovernorate('')
     setPropertyType('')
-    setRentalUnit('')
     setIsShared('')
     setPriceRange([500, 10000])
+    setCommittedPriceRange([500, 10000])
     setSelectedBeds('Any')
     setSelectedBaths('Any')
     setMinArea('')
@@ -104,6 +123,31 @@ export function useSearchFilters() {
     setMinRating('')
     setSelectedAmenities([])
     setSortIndex(0)
+    setPage(1)
+    // clear geo
+    setUserLat(undefined)
+    setUserLng(undefined)
+    setRadiusKm(10)
+    setLocationLabel('')
+  }, [])
+
+  const setUserLocation = useCallback(
+    (lat: number, lng: number, label: string) => {
+      setUserLat(lat)
+      setUserLng(lng)
+      setLocationLabel(label)
+      setPage(1)
+      // Auto-switch to "Nearest" sort
+      const nearestIdx = SORT_OPTIONS.findIndex((o) => o.sortBy === 'Distance')
+      if (nearestIdx !== -1) setSortIndex(nearestIdx)
+    },
+    [],
+  )
+
+  const clearUserLocation = useCallback(() => {
+    setUserLat(undefined)
+    setUserLng(undefined)
+    setLocationLabel('')
     setPage(1)
   }, [])
 
@@ -117,7 +161,6 @@ export function useSearchFilters() {
     city,
     governorate,
     propertyType,
-    rentalUnit,
     isShared,
     selectedBeds !== 'Any',
     selectedBaths !== 'Any',
@@ -142,12 +185,11 @@ export function useSearchFilters() {
     setGovernorate: handleSetGovernorate,
     propertyType,
     setPropertyType,
-    rentalUnit,
-    setRentalUnit,
     isShared,
     setIsShared,
     priceRange,
     setPriceRange,
+    setCommittedPriceRange,
     selectedBeds,
     setSelectedBeds,
     selectedBaths,
@@ -176,5 +218,13 @@ export function useSearchFilters() {
     toggleAmenity,
     resetFilters,
     commitKeyword,
+    // Geo-search
+    userLat,
+    userLng,
+    radiusKm,
+    setRadiusKm,
+    locationLabel,
+    setUserLocation,
+    clearUserLocation,
   }
 }

@@ -2,6 +2,10 @@ import { motion } from 'motion/react'
 import { Users, Target, Award, Heart, Shield, TrendingUp } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Link } from 'react-router'
+import ahmedImg from '@/assets/Team Images/Ahmed Makled.jpg'
+import faresImg from '@/assets/Team Images/Fares Eldagen.jpg'
+import mahmoudImg from '@/assets/Team Images/Mahmoud Elshi7a.jpg'
+import mazinImg from '@/assets/Team Images/Mazin Rabie.jpg'
 
 export function AboutPage() {
   const values = [
@@ -33,29 +37,36 @@ export function AboutPage() {
 
   const team = [
     {
-      name: 'Sarah Johnson',
-      role: 'CEO & Founder',
-      image:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
+      name: 'Abd Alrahman Eissa',
+      role: 'AI Developer',
+      image: 'https://ui-avatars.com/api/?name=Abd+Alrahman+Eissa&background=3A6EA5&color=fff&size=400',
     },
     {
-      name: 'Michael Chen',
-      role: 'CTO',
-      image:
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
+      name: 'Fares Eldagen',
+      role: 'Team leader & Back-end Developer',
+      image: faresImg,
     },
     {
-      name: 'Emily Rodriguez',
-      role: 'Head of Operations',
-      image:
-        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
+      name: 'Mazin Rabie',
+      role: 'Back-end Developer',
+      image: mazinImg,
     },
     {
-      name: 'David Kim',
-      role: 'Head of Product',
-      image:
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop',
+      name: 'Mahmoud Elshiha',
+      role: 'Front-end Developer',
+      image: mahmoudImg,
     },
+    {
+      name: 'Kareem Foda',
+      role: 'Front-end Developer & UI Designer',
+      image: 'https://ui-avatars.com/api/?name=Kareem+Foda&background=3A6EA5&color=fff&size=400',
+    },
+    {
+      name: 'Ahmed Makled',
+      role: 'Mobile App Developer',
+      image: ahmedImg,
+    },
+
   ]
 
   return (
@@ -204,7 +215,7 @@ export function AboutPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {team.map((member, index) => (
               <motion.div
                 key={member.name}
@@ -253,8 +264,7 @@ export function AboutPage() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-[#3A6EA5] rounded-2xl px-8 py-6"
+              className="bg-[#1e3a5f] text-white hover:bg-[#13253c] shadow-lg shadow-[#1e3a5f]/20 rounded-2xl px-8 py-6"
               asChild
             >
               <Link to="/owner-dashboard">List Your Property</Link>

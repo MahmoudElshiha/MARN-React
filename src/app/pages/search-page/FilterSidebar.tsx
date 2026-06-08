@@ -23,6 +23,7 @@ import {
 } from './constants'
 
 interface FilterSidebarProps {
+  onCloseMobile?: () => void
   keyword: string
   onKeywordChange: (v: string) => void
   onKeywordCommit: (v: string) => void
@@ -40,14 +41,12 @@ interface FilterSidebarProps {
   propertyType: PropertyType | ''
   onPropertyTypeChange: (v: PropertyType | '') => void
   
-  rentalUnit: RentalUnit | ''
-  onRentalUnitChange: (v: RentalUnit | '') => void
-  
   isShared: string
   onIsSharedChange: (v: string) => void
   
   priceRange: number[]
   onPriceRangeChange: (v: number[]) => void
+  onPriceRangeCommit: (v: number[]) => void
   
   selectedBeds: string
   onBedsChange: (v: string) => void
@@ -71,9 +70,11 @@ interface FilterSidebarProps {
   
   activeFilterCount: number
   onResetFilters: () => void
+  onCloseMobile?: () => void
 }
 
 export function FilterSidebar({
+  onCloseMobile,
   keyword,
   onKeywordChange,
   onKeywordCommit,
@@ -87,12 +88,11 @@ export function FilterSidebar({
   governoratesLoading,
   propertyType,
   onPropertyTypeChange,
-  rentalUnit,
-  onRentalUnitChange,
   isShared,
   onIsSharedChange,
   priceRange,
   onPriceRangeChange,
+  onPriceRangeCommit,
   selectedBeds,
   onBedsChange,
   selectedBaths,
@@ -116,8 +116,8 @@ export function FilterSidebar({
     : cityOptions
 
   return (
-    <aside className="w-80 flex-shrink-0">
-      <div className="sticky top-24 bg-white rounded-3xl p-6 shadow-lg shadow-black/5 border border-[#3A6EA5]/10 space-y-7 max-h-[calc(100vh-7rem)] overflow-y-auto">
+    <aside className="w-full lg:w-80 flex-shrink-0">
+      <div className="lg:sticky lg:top-24 bg-white lg:rounded-3xl p-6 lg:shadow-lg shadow-black/5 lg:border border-[#3A6EA5]/10 space-y-7 h-full lg:h-auto lg:max-h-[calc(100vh-7rem)] overflow-y-auto">
         {/* Sidebar header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -129,14 +129,24 @@ export function FilterSidebar({
               </Badge>
             )}
           </div>
-          {activeFilterCount > 0 && (
-            <button
-              onClick={onResetFilters}
-              className="text-xs text-[#3A6EA5] hover:underline flex items-center gap-1"
-            >
-              <X className="w-3 h-3" /> Clear all
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {activeFilterCount > 0 && (
+              <button
+                onClick={onResetFilters}
+                className="text-xs text-[#3A6EA5] hover:underline flex items-center gap-1"
+              >
+                <X className="w-3 h-3" /> Clear all
+              </button>
+            )}
+            {onCloseMobile && (
+              <button
+                onClick={onCloseMobile}
+                className="lg:hidden p-2 -mr-2 text-[#6a7282] hover:text-[#1a1a1a]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ── Keyword search ── */}
@@ -144,7 +154,7 @@ export function FilterSidebar({
           <Label className="text-[#1a1a1a] mb-2 block">Keyword</Label>
           <div className="relative">
             <Input
-              placeholder="e.g. studio near campus…"
+              placeholder="e.g. apartment near campus…"
               value={keyword}
               onChange={(e) => onKeywordChange(e.target.value)}
               onKeyDown={(e) => {
@@ -227,28 +237,7 @@ export function FilterSidebar({
           </div>
         </div>
 
-        {/* ── Rental Unit ── */}
-        <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Rental Duration</Label>
-          <Select
-            value={rentalUnit}
-            onValueChange={(v) =>
-              onRentalUnitChange(v === '__all' ? '' : (v as RentalUnit))
-            }
-          >
-            <SelectTrigger className="rounded-xl bg-[#f5f7fa] border-[#3A6EA5]/20">
-              <SelectValue placeholder="Any duration" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__all">Any duration</SelectItem>
-              {RENTAL_UNITS.map((u) => (
-                <SelectItem key={u.value} value={u.value}>
-                  {u.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+
 
         {/* ── Shared / Private ── */}
         <div>
@@ -273,7 +262,7 @@ export function FilterSidebar({
         {/* ── Price Range ── */}
         <div>
           <Label className="text-[#1a1a1a] mb-2 block">
-            Price Range{rentalUnit ? ` (${rentalUnit})` : ''}
+            Price Range
           </Label>
           <Slider
             min={500}
@@ -281,6 +270,7 @@ export function FilterSidebar({
             step={100}
             value={priceRange}
             onValueChange={onPriceRangeChange}
+            onValueCommit={onPriceRangeCommit}
             className="mb-3"
           />
           <div className="flex justify-between text-sm text-[#6a7282]">

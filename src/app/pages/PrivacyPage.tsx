@@ -8,6 +8,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
+
 export function PrivacyPage() {
   const sections = [
     {
@@ -32,7 +33,7 @@ export function PrivacyPage() {
     },
     {
       title: '5. Your Privacy Rights',
-      content: `You have the following rights regarding your personal information:\n\n• Access: Request a copy of the personal information we hold about you\n• Correction: Update or correct inaccurate information\n• Deletion: Request deletion of your personal information (subject to legal obligations)\n• Portability: Receive your data in a structured, machine-readable format\n• Opt-Out: Unsubscribe from marketing communications at any time\n• Do Not Sell: California residents can opt-out of the sale of personal information (we don't sell data)\n\nTo exercise these rights, contact us at privacy@marn.com or through your account settings.`,
+      content: `You have the following rights regarding your personal information:\n\n• Access: Request a copy of the personal information we hold about you\n• Correction: Update or correct inaccurate information\n• Deletion: Request deletion of your personal information (subject to legal obligations)\n• Portability: Receive your data in a structured, machine-readable format\n• Opt-Out: Unsubscribe from marketing communications at any time\n• Do Not Sell: Egyptian residents have the right to object to data processing for direct marketing (we don't sell data)\n\nTo exercise these rights, contact us at kareemmustafafoda@gmail.com or through your account settings.`,
     },
     {
       title: '6. Cookies and Tracking Technologies',
@@ -48,15 +49,15 @@ export function PrivacyPage() {
     },
     {
       title: '9. International Data Transfers',
-      content: `Your information may be transferred to and processed in countries other than your country of residence. These countries may have different data protection laws. By using our services, you consent to the transfer of your information to the United States and other countries where we operate.`,
+      content: `Your information may be transferred to and processed in countries other than your country of residence. These countries may have different data protection laws. By using our services, you consent to the transfer of your information to Egypt and other countries where we operate.`,
     },
     {
       title: '10. Data Retention',
       content: `We retain your personal information for as long as necessary to:\n\n• Provide our services to you\n• Comply with legal obligations\n• Resolve disputes and enforce our agreements\n• Maintain business records\n\nWhen you delete your account, we will delete or anonymize your personal information within 30 days, except where we are required to retain it for legal purposes.`,
     },
     {
-      title: '11. California Privacy Rights',
-      content: `California residents have additional rights under the California Consumer Privacy Act (CCPA):\n\n• Right to know what personal information is collected\n• Right to know if personal information is sold or disclosed\n• Right to opt-out of the sale of personal information\n• Right to deletion of personal information\n• Right to non-discrimination for exercising CCPA rights\n\nTo exercise these rights, email privacy@marn.com or call 1-555-PRIVACY.`,
+      title: '11. Egyptian Privacy Rights',
+      content: `Egyptian residents have additional rights under the Egyptian Personal Data Protection Law (PDPL):\n\n• Right to know what personal data is being processed\n• Right to access personal data\n• Right to correct or modify personal data\n• Right to deletion of personal data\n• Right to object to the processing of personal data\n\nTo exercise these rights, email kareemmustafafoda@gmail.com or call +20 100 123 4567.`,
     },
     {
       title: '12. Changes to This Privacy Policy',
@@ -64,7 +65,7 @@ export function PrivacyPage() {
     },
     {
       title: '13. Contact Us',
-      content: `If you have questions or concerns about this Privacy Policy, please contact us:\n\nEmail: privacy@marn.com\nPhone: +1 (555) 123-4567\nAddress: 123 Real Estate Ave, Suite 100, San Francisco, CA 94105\n\nData Protection Officer: dpo@marn.com`,
+      content: `If you have questions or concerns about this Privacy Policy, please contact us:\n\nEmail: kareemmustafafoda@gmail.com\nPhone: +20 100 123 4567\nAddress: 123 Real Estate Ave, Maadi, Cairo, Egypt 11431\n\nData Protection Officer: dpo@marn.com`,
     },
   ]
 
@@ -79,9 +80,9 @@ export function PrivacyPage() {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-3 mb-6">
               <Shield className="w-12 h-12 text-[#3A6EA5]" />
-              <h1 className="text-6xl font-bold text-[#1a1a1a]">
+              <h1 className="text-4xl md:text-6xl font-bold text-[#1a1a1a] text-center">
                 Privacy Policy
               </h1>
             </div>
@@ -100,8 +101,8 @@ export function PrivacyPage() {
       <section className="py-12 bg-[#9CBBDC]/10">
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl p-6 shadow-lg shadow-[#3A6EA5]/10 flex items-start gap-4">
-              <AlertCircle className="w-6 h-6 text-[#3A6EA5] flex-shrink-0 mt-1" />
+            <div className="bg-white rounded-2xl p-6 shadow-lg shadow-[#3A6EA5]/10 flex flex-col md:flex-row items-start gap-4">
+              <AlertCircle className="w-8 h-8 md:w-6 md:h-6 text-[#3A6EA5] flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-semibold text-[#1a1a1a] mb-2">
                   Your Privacy Matters
@@ -133,17 +134,17 @@ export function PrivacyPage() {
                   transition={{ duration: 0.5, delay: index * 0.05 }}
                   className="bg-[#F2F4F6] rounded-2xl p-8 shadow-lg shadow-[#3A6EA5]/10"
                 >
-                  <div className="flex items-start gap-4 mb-4">
+                  <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
                     {Icon && (
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center flex-shrink-0">
                         <Icon className="w-6 h-6 text-white" />
                       </div>
                     )}
-                    <h2 className="text-2xl font-bold text-[#1a1a1a] mt-1">
+                    <h2 className="text-xl md:text-2xl font-bold text-[#1a1a1a] mt-1 md:mt-0">
                       {section.title}
                     </h2>
                   </div>
-                  <p className="text-[#4a5565] leading-relaxed whitespace-pre-line ml-16">
+                  <p className="text-[#4a5565] leading-relaxed whitespace-pre-line md:ml-16">
                     {section.content}
                   </p>
                 </motion.div>
@@ -156,20 +157,25 @@ export function PrivacyPage() {
       {/* Footer CTA */}
       <section className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] py-16">
         <div className="max-w-[1440px] mx-auto px-8 text-center">
-          <Lock className="w-16 h-16 text-white mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <Lock className="w-12 h-12 md:w-16 md:h-16 text-white mx-auto mb-6" />
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
             Questions About Your Privacy?
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Our privacy team is here to address your concerns
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <a
-              href="mailto:privacy@marn.com"
-              className="inline-flex items-center justify-center px-8 py-4 bg-white text-[#3A6EA5] rounded-2xl font-semibold hover:bg-white/90 transition-colors shadow-lg"
+            <button
+              onClick={() =>
+                window.open(
+                  'https://mail.google.com/mail/?view=cm&fs=1&to=kareemmustafafoda@gmail.com&su=Privacy%20Question',
+                  '_blank'
+                )
+              }
+              className="inline-flex items-center justify-center px-8 py-4 bg-white text-[#3A6EA5] rounded-2xl font-semibold hover:bg-white/90 transition-colors shadow-lg cursor-pointer"
             >
               Email Privacy Team
-            </a>
+            </button>
             <a
               href="/contact"
               className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-2xl font-semibold hover:bg-white hover:text-[#3A6EA5] transition-colors"

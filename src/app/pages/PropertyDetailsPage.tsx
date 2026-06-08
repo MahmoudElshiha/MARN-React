@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
 import {
   Star,
@@ -71,7 +71,7 @@ export function PropertyDetailsPage() {
   const [checkOut, setCheckOut] = useState<Date>()
 
   const property = data?.data
-  const images: string[] = (() => {
+  const images: string[] = useMemo(() => {
     const p = property as any
     // API returns a `media` array of { path, isPrimary } objects
     if (p?.media?.length) {
@@ -82,7 +82,20 @@ export function PropertyDetailsPage() {
     if (p?.imagePath) return [p.imagePath as string]
     if (p?.image) return [p.image as string]
     return []
-  })()
+  }, [property])
+
+  // Preload only adjacent images (not all) to avoid network/decode burst
+  useEffect(() => {
+    if (images.length === 0) return
+    const neighbors = [
+      images[(currentImageIndex + 1) % images.length],
+      images[(currentImageIndex - 1 + images.length) % images.length],
+    ].filter(Boolean)
+    neighbors.forEach((src) => {
+      const img = new Image()
+      img.src = getImageUrl(src)
+    })
+  }, [images, currentImageIndex])
 
   const nextImage = () =>
     setCurrentImageIndex((prev) => (prev + 1) % Math.max(images.length, 1))
@@ -143,11 +156,42 @@ export function PropertyDetailsPage() {
               {isLoading ? (
                 <Skeleton className="w-full h-full" />
               ) : images.length > 0 ? (
-                <ImageWithFallback
-                  src={getImageUrl(images[currentImageIndex])}
-                  alt="Property"
-                  className="w-full h-full object-cover"
-                />
+                /* Sliding window: only mount current + prev + next to cut DOM nodes from N→3 */
+                (() => {
+                  const len = images.length
+                  const windowIndices =
+                    len <= 3
+                      ? images.map((_, i) => i)
+                      : [
+                          ...new Set([
+                            (currentImageIndex - 1 + len) % len,
+                            currentImageIndex,
+                            (currentImageIndex + 1) % len,
+                          ]),
+                        ]
+                  return windowIndices.map((index) => {
+                    const isActive = index === currentImageIndex
+                    return (
+                      <div
+                        key={images[index]}
+                        className={`absolute inset-0 transition-opacity duration-300 ${
+                          isActive
+                            ? 'opacity-100 z-10'
+                            : 'opacity-0 z-0 pointer-events-none'
+                        }`}
+                        style={isActive ? { willChange: 'opacity' } : undefined}
+                      >
+                        <ImageWithFallback
+                          src={getImageUrl(images[index])}
+                          alt={`Property ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          loading={isActive ? 'eager' : 'lazy'}
+                          decoding={isActive ? 'sync' : 'async'}
+                        />
+                      </div>
+                    )
+                  })
+                })()
               ) : (
                 <div className="w-full h-full bg-[#9CBBDC]/20 flex items-center justify-center text-[#4a5565]">
                   No images available

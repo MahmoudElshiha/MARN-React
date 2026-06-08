@@ -1,4 +1,4 @@
-import { MapIcon } from 'lucide-react'
+import { MapIcon, MapPin } from 'lucide-react'
 import { Button } from '@/app/components/ui/button'
 import {
   Select,
@@ -16,6 +16,8 @@ interface SearchHeaderProps {
   onSortChange: (index: number) => void
   showMap: boolean
   onToggleMap: () => void
+  locationLabel?: string
+  radiusKm?: number
 }
 
 export function SearchHeader({
@@ -25,6 +27,8 @@ export function SearchHeader({
   onSortChange,
   showMap,
   onToggleMap,
+  locationLabel,
+  radiusKm,
 }: SearchHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-8">
@@ -32,8 +36,14 @@ export function SearchHeader({
         <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
           Find Your Perfect Property
         </h1>
-        <p className="text-[#4a5565]">
+        <p className="text-[#4a5565] flex items-center gap-2 flex-wrap">
           {isLoading ? 'Searching…' : `${total.toLocaleString()} properties found`}
+          {locationLabel && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#3A6EA5]/10 rounded-full text-xs font-medium text-[#3A6EA5]">
+              <MapPin className="w-3 h-3" />
+              Near: {locationLabel} • {radiusKm}km
+            </span>
+          )}
         </p>
       </div>
 

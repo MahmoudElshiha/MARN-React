@@ -295,8 +295,7 @@ export function HowItWorksPage() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-[#3A6EA5] rounded-2xl px-8 py-6"
+              className="bg-[#1e3a5f] text-white hover:bg-[#13253c] shadow-lg shadow-[#1e3a5f]/20 rounded-2xl px-8 py-6"
               asChild
             >
               <Link to="/contact">Contact Us</Link>

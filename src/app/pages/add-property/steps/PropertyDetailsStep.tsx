@@ -44,7 +44,7 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
   const getFieldError = (field: keyof PropertyFormData, value: string) => {
     if (!touched[field]) return null
     if (!value?.trim()) return 'This field is required'
-    
+
     if (field === 'title' && (value.length < 10 || value.length > 100)) {
       return 'Title must be between 10 and 100 characters.'
     }
@@ -165,11 +165,11 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
         </div>
         <div>
           <Label htmlFor="zip" className="text-[#1a1a1a] mb-2 block">
-            ZIP Code <span className="text-red-500">*</span>
+            Postal Code <span className="text-red-500">*</span>
           </Label>
           <Input
             id="zip"
-            placeholder="94103"
+            placeholder="11564"
             className={getInputClass('zip', formData.zip)}
             value={localZip}
             onChange={(e) => setLocalZip(e.target.value)}

@@ -10,7 +10,10 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
   return (
     <div className="flex justify-center gap-2 mt-12">
       <button
-        onClick={() => onPageChange(Math.max(1, page - 1))}
+        onClick={() => {
+          onPageChange(Math.max(1, page - 1))
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }}
         disabled={page === 1}
         className="w-12 h-12 rounded-xl bg-[#f5f7fa] text-[#1a1a1a] hover:bg-[#9CBBDC] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
       >
@@ -31,7 +34,10 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
         return (
           <button
             key={p}
-            onClick={() => onPageChange(p)}
+            onClick={() => {
+              onPageChange(p)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
             className={`w-12 h-12 rounded-xl transition-all ${
               p === page
                 ? 'bg-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
@@ -43,7 +49,10 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
         )
       })}
       <button
-        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+        onClick={() => {
+          onPageChange(Math.min(totalPages, page + 1))
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }}
         disabled={page === totalPages}
         className="w-12 h-12 rounded-xl bg-[#f5f7fa] text-[#1a1a1a] hover:bg-[#9CBBDC] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
       >
