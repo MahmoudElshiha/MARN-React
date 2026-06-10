@@ -13,8 +13,10 @@ import {
   CheckCircle,
   Building2,
 } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { useState } from 'react'
+import { useSubmitReport } from '@/hooks/useConversations'
+import { Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -70,17 +72,34 @@ const PROPERTIES = [
 
 export function ViewOwnerProfilePage() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
   const [showReportDialog, setShowReportDialog] = useState(false)
   const [reportReason, setReportReason] = useState('')
+  const submitReport = useSubmitReport()
 
   const handleReport = () => {
-    if (reportReason.trim()) {
-      toast.success('Report submitted successfully. We will review it shortly.')
-      setShowReportDialog(false)
-      setReportReason('')
-    } else {
+    if (!id || !reportReason.trim()) {
       toast.error('Please provide a reason for reporting')
+      return
     }
+
+    submitReport.mutate(
+      {
+        reportableType: 'User',
+        reportableTargetId: id,
+        reason: `${reportReason.trim()} REPORTMETAUSER ${id}`,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Report submitted successfully. We will review it shortly.')
+          setShowReportDialog(false)
+          setReportReason('')
+        },
+        onError: () => {
+          toast.error('Failed to submit report. Please try again.')
+        }
+      }
+    )
   }
 
   const handleChatClick = () => {
@@ -325,8 +344,10 @@ export function ViewOwnerProfilePage() {
             </Button>
             <Button
               onClick={handleReport}
+              disabled={!reportReason.trim() || submitReport.isPending}
               className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
             >
+              {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Submit Report
             </Button>
           </div>

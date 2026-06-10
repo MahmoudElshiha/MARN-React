@@ -65,3 +65,12 @@ export function useSendMessage() {
     },
   })
 }
+
+import { userService } from '@/services/userService'
+
+export function useSubmitReport() {
+  return useMutation({
+    mutationFn: (payload: { reportableType: string; reportableTargetId: string; reason: string }) =>
+      userService.submitReport(payload),
+  })
+}

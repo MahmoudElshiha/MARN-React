@@ -90,7 +90,7 @@ export const messageService = {
       conversationId: conversationId,
       senderId: m.senderId,
       sender: m.senderId === conversationId ? 'them' : 'me',
-      text: m.content,
+      text: m.content || m.text || m.message || '',
       time: m.sentAt ? new Date(m.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
       read: m.isRead
     }))

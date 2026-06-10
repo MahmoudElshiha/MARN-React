@@ -306,6 +306,9 @@ export const userService = {
   getPublicProfile: () =>
     apiClient.get<ApiResponse<PublicProfile>>('/api/Profile/profile'),
 
+  getUserProfileById: (id: string) =>
+    apiClient.get<ApiResponse<PublicProfile>>(`/api/Profile/profile/${id}`),
+
   getRenterDashboard: () =>
     apiClient.get<ApiResponse<RenterDashboard>>(
       '/api/Profile/renter-dashboard',
@@ -368,4 +371,7 @@ export const userService = {
       form,
     )
   },
+
+  submitReport: (payload: { reportableType: string; reportableTargetId: string; reason: string }) =>
+    apiClient.post<ApiResponse<any>>('/api/Reports', payload),
 }
