@@ -28,7 +28,16 @@ export function SearchPage() {
 
   const { data, isLoading } = useProperties(search.filters)
   const paginated = data?.data
-  const properties = paginated?.items ?? []
+  const rawProperties = paginated?.items ?? []
+  
+  const propertiesMap = new Map()
+  rawProperties.forEach(p => {
+    if (!propertiesMap.has(p.id) || p.isSaved) {
+      propertiesMap.set(p.id, p)
+    }
+  })
+  const properties = Array.from(propertiesMap.values())
+  
   const total = paginated?.totalCount ?? 0
   const totalPages = paginated?.totalPages ?? Math.max(1, Math.ceil(total / PAGE_SIZE))
 
@@ -70,7 +79,7 @@ export function SearchPage() {
             onClick={() => setShowMobileFilters(false)} 
           />
 
-          <div className={`fixed inset-y-0 left-0 z-50 w-80 lg:bg-transparent transform transition-transform duration-300 lg:relative lg:block lg:w-80 lg:translate-x-0 ${showMobileFilters ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className={`fixed inset-y-0 left-0 z-50 w-80 lg:bg-transparent transform transition-transform duration-300 lg:relative lg:z-10 lg:block lg:w-80 lg:translate-x-0 ${showMobileFilters ? 'translate-x-0' : '-translate-x-full'}`}>
             <FilterSidebar
               onCloseMobile={() => setShowMobileFilters(false)}
               keyword={search.keyword}

@@ -9,6 +9,7 @@ export interface Message {
   time: string
   attachmentUrl?: string
   read?: boolean
+  status?: 'sending' | 'sent' | 'error'
 }
 
 export interface ConversationParticipant {

@@ -1,5 +1,5 @@
 import { Heart, MapPin, Star } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router'
 import { ImageWithFallback } from './figma/ImageWithFallback'
@@ -36,6 +36,10 @@ export function PropertyCard({
   isSaved,
 }: PropertyCardProps) {
   const [isFavorite, setIsFavorite] = useState(isSaved || false)
+
+  useEffect(() => {
+    setIsFavorite(isSaved || false)
+  }, [isSaved])
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault()

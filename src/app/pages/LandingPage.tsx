@@ -13,6 +13,9 @@ import { PropertyCard } from '../components/PropertyCard'
 import { motion } from 'motion/react'
 import { Link, useNavigate } from 'react-router'
 import { ImageWithFallback } from '../components/figma/ImageWithFallback'
+import { useProperties } from '@/hooks/useProperties'
+import { getImageUrl } from '@/constants/assets'
+import { Skeleton } from '../components/ui/skeleton'
 
 const FEATURED_PROPERTIES = [
   {
@@ -116,6 +119,17 @@ const TESTIMONIALS = [
 
 export function LandingPage() {
   const navigate = useNavigate()
+  const { data, isLoading } = useProperties({ pageSize: 8, sortBy: 'Rating' })
+  const rawProperties = data?.data?.items ?? []
+  
+  // Deduplicate properties (fix for backend join bug returning duplicates for saved properties)
+  const propertiesMap = new Map()
+  rawProperties.forEach(p => {
+    if (!propertiesMap.has(p.id) || p.isSaved) {
+      propertiesMap.set(p.id, p)
+    }
+  })
+  const properties = Array.from(propertiesMap.values()).slice(0, 4)
 
   return (
     <div className="min-h-screen">
@@ -211,17 +225,57 @@ export function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {FEATURED_PROPERTIES.map((property, index) => (
-            <motion.div
-              key={property.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <PropertyCard {...property} />
-            </motion.div>
-          ))}
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-lg shadow-black/10 border border-[#3A6EA5]/10">
+                <Skeleton className="aspect-[4/3] w-full" />
+                <div className="p-5 space-y-3">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-6 w-1/3" />
+                </div>
+              </div>
+            ))
+          ) : properties.length > 0 ? (
+            properties.map((property, index) => (
+              <motion.div
+                key={property.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <PropertyCard
+                  id={String(property.id)}
+                  image={getImageUrl(property.imagePath)}
+                  title={property.title}
+                  location={property.address}
+                  price={property.price}
+                  rating={property.averageRating}
+                  reviews={property.ratings}
+                  type={property.type}
+                  beds={property.bedrooms}
+                  baths={property.bathrooms}
+                  guests={property.maxOccupants}
+                  isSaved={property.isSaved}
+                />
+              </motion.div>
+            ))
+          ) : (
+            FEATURED_PROPERTIES.map((property, index) => (
+              <motion.div
+                key={property.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <div className="pointer-events-none">
+                  <PropertyCard {...property} />
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
 
         <div className="text-center">

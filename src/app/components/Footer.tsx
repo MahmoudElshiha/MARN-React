@@ -17,10 +17,7 @@ export function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center">
-                <span className="text-white font-bold text-xl">M</span>
-              </div>
-              <span className="text-2xl font-bold text-white">MARN</span>
+              <img src="/Logo.png" alt="MARN Logo" className="h-16 w-auto rounded bg-white p-1" />
             </div>
             <p className="text-[#99a1af] mb-4">
               Your trusted platform for finding the perfect rental property and

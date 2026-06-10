@@ -19,6 +19,7 @@ import { Link } from 'react-router'
 import { useAuth } from '@/hooks/useAuth'
 import { useRenterDashboard } from '@/hooks/useRenterDashboard'
 import { useProperties } from '@/hooks/useProperties'
+import { getImageUrl } from '@/constants/assets'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-EG', {
@@ -137,15 +138,17 @@ export function TenantDashboard() {
           {/* Saved Properties */}
           <Card className="rounded-3xl shadow-lg hover:shadow-xl transition-shadow">
             <CardContent className="p-6">
-              <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
-                <Heart className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-base">Saved Properties</span>
-              </CardTitle>
-              <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
-                {dashboardLoading
-                  ? '…'
-                  : (dashboard?.savedPropertiesCount ?? 0)}
-              </p>
+              <Link to="/saved" className="block w-full h-full">
+                <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
+                  <Heart className="w-5 h-5 text-[#3A6EA5]" />
+                  <span className="text-base">Saved Properties</span>
+                </CardTitle>
+                <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
+                  {dashboardLoading
+                    ? '…'
+                    : (dashboard?.savedPropertiesCount ?? 0)}
+                </p>
+              </Link>
             </CardContent>
           </Card>
 
@@ -326,7 +329,7 @@ export function TenantDashboard() {
                       <PropertyCard
                         key={property.id}
                         id={property.id.toString()}
-                        image={property.imagePath ?? ''}
+                        image={getImageUrl(property.imagePath)}
                         title={property.title}
                         location={property.address}
                         price={property.price}
@@ -459,14 +462,8 @@ export function TenantDashboard() {
               (dashboard?.savedProperties?.length ?? 0) > 0) && (
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-xl text-[#1a1a1a] flex items-center justify-between">
-                    <span>Saved Properties</span>
-                    <Link
-                      to="/saved"
-                      className="text-sm font-normal text-[#3A6EA5] hover:underline"
-                    >
-                      View all
-                    </Link>
+                  <CardTitle className="text-xl text-[#1a1a1a]">
+                    Saved Properties
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -476,33 +473,43 @@ export function TenantDashboard() {
                       <Skeleton className="h-16 w-full rounded-2xl" />
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      {dashboard!.savedProperties.map((p) => (
-                        <div
-                          key={p.id}
-                          className="flex items-center gap-3 bg-[#f5f7fa] rounded-2xl p-3"
-                        >
-                          {p.imageUrl && (
+                    <>
+                      <div className="space-y-3">
+                        {dashboard!.savedProperties.map((p) => (
+                          <Link
+                            key={p.id}
+                            to={`/property/${(p as any).propertyId || p.id}`}
+                            className="flex items-center gap-3 bg-[#f5f7fa] rounded-2xl p-3 hover:bg-[#e8eef5] transition-colors"
+                          >
                             <img
-                              src={p.imageUrl}
+                              src={getImageUrl(p.imageUrl || p.imagePath || p.image || p.images?.[0] || '')}
                               alt={p.title}
                               className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
                             />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-[#1a1a1a] truncate">
-                              {p.title}
-                            </p>
-                            <p className="text-xs text-[#6a7282] truncate">
-                              {p.location}
-                            </p>
-                            <p className="text-sm font-bold text-[#3A6EA5]">
-                              {p.price.toLocaleString()} EGP
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-[#1a1a1a] truncate">
+                                {p.title}
+                              </p>
+                              <p className="text-xs text-[#6a7282] truncate">
+                                {p.location}
+                              </p>
+                              <p className="text-sm font-bold text-[#3A6EA5]">
+                                {p.price.toLocaleString()} EGP
+                              </p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                      <div className="mt-4">
+                        <Button
+                          variant="outline"
+                          className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
+                          asChild
+                        >
+                          <Link to="/saved">View all saved properties</Link>
+                        </Button>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
