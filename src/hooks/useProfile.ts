@@ -69,3 +69,11 @@ export function useProfile() {
     updateRoommate,
   }
 }
+
+export function useUserProfile(id: string | undefined) {
+  return useQuery({
+    queryKey: ['userProfile', id],
+    queryFn: () => userService.getUserProfileById(id!),
+    enabled: !!id,
+  })
+}

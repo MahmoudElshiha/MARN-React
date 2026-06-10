@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Send, Paperclip, MoreVertical, ChevronLeft, RefreshCw, Search } from 'lucide-react'
+import { Send, Paperclip, MoreVertical, ChevronLeft, RefreshCw, Search, ShieldAlert } from 'lucide-react'
 import { Textarea } from '../components/ui/textarea'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -11,9 +11,24 @@ import {
   useConversations,
   useMessages,
   useSendMessage,
+  useSubmitReport,
 } from '@/hooks/useConversations'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog'
+import { toast } from 'sonner'
 import { useDebounce } from '@/hooks/useDebounce'
-import type { Conversation } from '@/types/message'
+import type { Conversation, Message } from '@/types/message'
 import { messageService } from '@/services/messageService'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -32,6 +47,16 @@ export function MessagesPage() {
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const [reportReason, setReportReason] = useState('')
+  const [reportTarget, setReportTarget] = useState<'User' | 'Message'>('User')
+  const [reportedMessage, setReportedMessage] = useState<Message | null>(null)
+
+  const openReportModal = (type: 'User' | 'Message', msg?: Message) => {
+    setReportTarget(type)
+    setReportedMessage(msg || null)
+    setIsReportModalOpen(true)
+  }
 
   const autoSend = searchParams.get('autoSend')
   const recipientId = searchParams.get('recipientId')
@@ -72,8 +97,40 @@ export function MessagesPage() {
   const messages = useMemo(() => messagesData?.data ?? [], [messagesData])
 
   const sendMessage = useSendMessage()
+  const submitReport = useSubmitReport()
   const queryClient = useQueryClient()
   const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  const handleReportSubmit = () => {
+    if (!effectiveConversation?.participant.id || !reportReason.trim()) return
+    
+    const finalReason = reportTarget === 'Message' && reportedMessage 
+      ? `${reportReason.trim()} REPORTMETAMESSAGE ${reportedMessage.text}`
+      : `${reportReason.trim()} REPORTMETAUSER ${effectiveConversation.participant.id}`
+
+    const targetId = reportTarget === 'Message' && reportedMessage 
+      ? reportedMessage.id 
+      : effectiveConversation.participant.id
+
+    submitReport.mutate(
+      {
+        reportableType: reportTarget,
+        reportableTargetId: targetId,
+        reason: finalReason,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Report submitted successfully')
+          setIsReportModalOpen(false)
+          setReportReason('')
+          setReportedMessage(null)
+        },
+        onError: () => {
+          toast.error('Failed to submit report. Please try again.')
+        }
+      }
+    )
+  }
 
   useEffect(() => {
     if (!conversationsLoading) {
@@ -337,12 +394,32 @@ export function MessagesPage() {
                             {effectiveConversation.participant.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
+                        <div 
+                          className="cursor-pointer hover:underline"
+                          onClick={() => navigate(`/user/${effectiveConversation.participant.id}`)}
+                        >
                           <h3 className="font-semibold text-[#1a1a1a]">
                             {effectiveConversation.participant.name}
                           </h3>
                         </div>
                       </div>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="rounded-xl">
+                            <MoreVertical className="w-5 h-5 text-[#4a5565]" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl">
+                          <DropdownMenuItem 
+                            className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                            onClick={() => openReportModal('User')}
+                          >
+                            <ShieldAlert className="w-4 h-4 mr-2" />
+                            Report User
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
 
                     {/* Property Context */}
@@ -411,28 +488,49 @@ export function MessagesPage() {
                               </AvatarFallback>
                             </Avatar>
                           )}
-                          <div className={`max-w-[70%] flex flex-col ${message.sender === 'me' ? 'items-end' : 'items-start'}`}>
-                            <div
-                              className={`${
-                                message.sender === 'me'
-                                  ? 'bg-[#3A6EA5] text-white'
-                                  : 'bg-white text-[#1a1a1a]'
-                              } rounded-2xl px-4 py-3 ${message.status === 'sending' ? 'opacity-70' : ''}`}
-                            >
-                              {message.text.startsWith('data:image/') ? (
-                                <img src={message.text} alt="Photo" className="max-w-full rounded-lg mb-1" />
-                              ) : (
-                                <p className="text-sm mb-1">{message.text}</p>
-                              )}
-                              <p
-                                className={`text-xs ${
+                          <div className={`max-w-[70%] flex flex-col ${message.sender === 'me' ? 'items-end' : 'items-start'} group`}>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`${
                                   message.sender === 'me'
-                                    ? 'text-white/70'
-                                    : 'text-[#4a5565]'
-                                }`}
+                                    ? 'bg-[#3A6EA5] text-white'
+                                    : 'bg-white text-[#1a1a1a]'
+                                } rounded-2xl px-4 py-3 ${message.status === 'sending' ? 'opacity-70' : ''}`}
                               >
-                                {message.time}
-                              </p>
+                                {message.text.startsWith('data:image/') ? (
+                                  <img src={message.text} alt="Photo" className="max-w-full rounded-lg mb-1" />
+                                ) : (
+                                  <p className="text-sm mb-1">{message.text}</p>
+                                )}
+                                <p
+                                  className={`text-xs ${
+                                    message.sender === 'me'
+                                      ? 'text-white/70'
+                                      : 'text-[#4a5565]'
+                                  }`}
+                                >
+                                  {message.time}
+                                </p>
+                              </div>
+
+                              {message.sender !== 'me' && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <MoreVertical className="w-4 h-4 text-[#4a5565]" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="start" className="rounded-xl">
+                                    <DropdownMenuItem 
+                                      className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                                      onClick={() => openReportModal('Message', message)}
+                                    >
+                                      <ShieldAlert className="w-4 h-4 mr-2" />
+                                      Report Message
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
                             </div>
                             {message.status === 'error' && (
                               <div className="text-[#e53e3e] text-[11px] flex items-center gap-1 mt-1 pr-1">
@@ -509,6 +607,43 @@ export function MessagesPage() {
           </div>
         </Card>
       </div>
+
+      <Dialog open={isReportModalOpen} onOpenChange={(open) => {
+        setIsReportModalOpen(open)
+        if (!open) {
+          setReportReason('')
+          setReportedMessage(null)
+        }
+      }}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>{reportTarget === 'Message' ? 'Report Message' : 'Report User'}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-[#4a5565] mb-4">
+              Please provide a reason for reporting this {reportTarget.toLowerCase()}. Our moderation team will review this report shortly.
+            </p>
+            <Textarea
+              placeholder="Reason for report..."
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              className="min-h-[100px] rounded-xl resize-none"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReportModalOpen(false)} className="rounded-xl">
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleReportSubmit} 
+              disabled={!reportReason.trim() || submitReport.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
+            >
+              {submitReport.isPending ? 'Submitting...' : 'Submit Report'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

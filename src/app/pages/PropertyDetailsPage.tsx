@@ -24,6 +24,9 @@ import {
   Maximize,
   ShieldCheck,
   Thermometer,
+  Loader2,
+  ShieldAlert,
+  MoreVertical,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
@@ -33,6 +36,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '../components/ui/popover'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
 import { Skeleton } from '../components/ui/skeleton'
 import { format, formatDistanceToNow } from 'date-fns'
 import { Textarea } from '../components/ui/textarea'
@@ -42,6 +58,8 @@ import {
   usePropertyComments,
   useAddPropertyFeedback,
 } from '@/hooks/usePropertyFeedback'
+import { useSubmitReport } from '@/hooks/useConversations'
+import { useAddBookingRequest } from '@/hooks/useBookingRequests'
 import { ImageWithFallback } from '../components/figma/ImageWithFallback'
 import { useProperty } from '@/hooks/useProperty'
 import { getImageUrl } from '@/constants/assets'
@@ -93,10 +111,14 @@ export function PropertyDetailsPage() {
   const comments = commentsData?.data?.items || []
   
   const addFeedbackMutation = useAddPropertyFeedback()
+  const bookMutation = useAddBookingRequest()
+  const submitReport = useSubmitReport()
   
   const [newCommentText, setNewCommentText] = useState('')
   const [newCommentRating, setNewCommentRating] = useState(5)
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+  const [reportReason, setReportReason] = useState('')
 
   const handleSubmitComment = () => {
     if (!newCommentText.trim() || !id) return
@@ -116,6 +138,54 @@ export function PropertyDetailsPage() {
         setIsSubmittingComment(false)
         const msg = error?.message || 'Failed to add review'
         toast.error(msg)
+      }
+    })
+  }
+
+  const handleReportSubmit = () => {
+    if (!id || !reportReason.trim()) return
+    
+    submitReport.mutate(
+      {
+        reportableType: 'Property',
+        reportableTargetId: id,
+        reason: `${reportReason.trim()} REPORTMETAPROPERTY ${id}`,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Property reported successfully')
+          setIsReportModalOpen(false)
+          setReportReason('')
+        },
+        onError: () => {
+          toast.error('Failed to submit report. Please try again.')
+        }
+      }
+    )
+  }
+
+  const handleBookNow = () => {
+    if (!isAuthenticated) {
+      toast.error('Please log in to book this property')
+      navigate('/login')
+      return
+    }
+    if (!checkIn || !checkOut) {
+      toast.error('Please select move-in and move-out dates')
+      return
+    }
+    
+    bookMutation.mutate({
+      propertyId: id,
+      moveInDate: checkIn.toISOString(),
+      moveOutDate: checkOut.toISOString(),
+    }, {
+      onSuccess: () => {
+        toast.success('Booking request sent successfully!')
+        navigate('/tenant-dashboard')
+      },
+      onError: (error: any) => {
+        toast.error(error?.message || 'Failed to send booking request')
       }
     })
   }
@@ -251,6 +321,26 @@ export function PropertyDetailsPage() {
                 className={`w-5 h-5 ${isFavorite ? 'fill-[#3A6EA5] text-[#3A6EA5]' : ''}`}
               />
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-xl border-[#3A6EA5]/20 hover:bg-[#9CBBDC]/20"
+                >
+                  <MoreVertical className="w-5 h-5 text-[#4a5565]" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-xl">
+                <DropdownMenuItem 
+                  className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                  onClick={() => setIsReportModalOpen(true)}
+                >
+                  <ShieldAlert className="w-4 h-4 mr-2" />
+                  Report Property
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -463,9 +553,11 @@ export function PropertyDetailsPage() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-[#1a1a1a]">
-                      {effectiveOwnerName}
-                    </h3>
+                    <Link to={`/owner/${effectiveOwnerId}`} className="hover:underline">
+                      <h3 className="font-semibold text-lg text-[#1a1a1a]">
+                        {effectiveOwnerName}
+                      </h3>
+                    </Link>
                     <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                       <Star className="w-4 h-4 fill-[#3A6EA5] text-[#3A6EA5]" />
                       <span>{effectiveOwnerRating} rating • {effectiveOwnerPropertiesCount} properties</span>
@@ -709,8 +801,11 @@ export function PropertyDetailsPage() {
 
                     <Button
                       size="lg"
+                      disabled={bookMutation.isPending}
+                      onClick={handleBookNow}
                       className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30 mb-3"
                     >
+                      {bookMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                       Book Now
                     </Button>
 
@@ -749,6 +844,41 @@ export function PropertyDetailsPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={isReportModalOpen} onOpenChange={(open) => {
+        setIsReportModalOpen(open)
+        if (!open) setReportReason('')
+      }}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Report Property</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-[#4a5565] mb-4">
+              Please provide a reason for reporting this property. Our moderation team will review this report shortly.
+            </p>
+            <Textarea
+              placeholder="Reason for report..."
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              className="min-h-[100px] rounded-xl resize-none"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReportModalOpen(false)} className="rounded-xl">
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleReportSubmit} 
+              disabled={!reportReason.trim() || submitReport.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
+            >
+              {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Submit Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

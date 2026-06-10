@@ -21,4 +21,7 @@ export const rentalService = {
 
   getContractById: (id: string) =>
     apiClient.get<ApiResponse<Contract>>(`/api/Rentals/contracts/${id}`),
+
+  addBookingRequest: (payload: any) =>
+    apiClient.post<ApiResponse<any>>('/api/BookingRequest/add', payload),
 }

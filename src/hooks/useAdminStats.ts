@@ -2,7 +2,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { adminService } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { GenerateReportPayload } from '@/services/adminService'
+import type { GenerateReportPayload, ReviewModerationReportPayload } from '@/services/adminService'
 
 export function useAdminStats() {
   return useQuery({
@@ -102,5 +102,26 @@ export function useUpdateUserRoles() {
       queryClient.invalidateQueries({ queryKey: ['adminRoleUsers'] })
     },
     onError: () => toast.error('Failed to update roles'),
+  })
+}
+
+export function useAdminModerationReports(page = 1, pageSize = 20, search?: string) {
+  return useQuery({
+    queryKey: ['adminModerationReports', page, pageSize, search],
+    queryFn: () => adminService.getModerationReports(page, pageSize, search),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useReviewModerationReport() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ reportId, payload }: { reportId: number; payload: ReviewModerationReportPayload }) =>
+      adminService.reviewModerationReport(reportId, payload),
+    onSuccess: () => {
+      toast.success('Report reviewed successfully')
+      queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
+    },
+    onError: () => toast.error('Failed to review report'),
   })
 }

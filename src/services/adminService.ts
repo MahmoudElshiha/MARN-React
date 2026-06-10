@@ -177,6 +177,25 @@ export interface AdminAnalyticsReportsResult {
 export type GenerateReportPayload =
   components['schemas']['AdminAnalyticsReportGenerateRequestDto']
 
+export interface AdminModerationReport {
+  id: number
+  reportId: number
+  reportableType: string
+  reportableTypeDisplayName?: string
+  reportableTargetId: string
+  reason: string
+  status: string
+  statusDisplayName?: string
+  createdAt: string
+  reporterUserId?: string
+  reporterFullName?: string
+  reporterEmail?: string
+  internalNotes?: string
+  reviewedAt?: string
+}
+
+export type ReviewModerationReportPayload = components['schemas']['AdminReviewReportDto']
+
 // PATCH with no request body — removes Content-Type so ASP.NET doesn't attempt to read an absent body
 const patchNoBody = (url: string) =>
   axiosInstance
@@ -306,4 +325,18 @@ export const adminService = {
       `/api/Admin/verifications/properties/${propertyId}/decline`,
       { reason },
     ),
+
+  getModerationReports: (page = 1, pageSize = 20, search?: string) => {
+    const params = new URLSearchParams({
+      pageNumber: String(page),
+      pageSize: String(pageSize),
+    })
+    if (search) params.append('Search', search)
+    return apiClient.get<ApiResponse<SearchPaginatedResponse<AdminModerationReport>>>(
+      `/api/Admin/reports?${params}`,
+    )
+  },
+
+  reviewModerationReport: (reportId: number, payload: ReviewModerationReportPayload) =>
+    apiClient.patch<ApiResponse<void>>(`/api/Admin/reports/${reportId}/review`, payload),
 }
