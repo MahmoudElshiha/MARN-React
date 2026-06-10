@@ -88,6 +88,12 @@ export interface Property {
   ownerId?: string
   ownerName?: string
   ownerAvatarUrl?: string
+  ownerBio?: string
+  hostId?: string
+  hostName?: string
+  hostProfileImage?: string
+  hostBio?: string
+  propertiesCount?: number
   featured?: boolean
   isShared?: boolean
   rentalUnit?: RentalUnit
@@ -95,6 +101,7 @@ export interface Property {
   longitude?: number
   createdAt?: string
   updatedAt?: string
+  isSaved?: boolean
 }
 
 /** Lightweight shape returned by GET /api/Property/search */

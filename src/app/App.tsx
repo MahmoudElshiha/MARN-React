@@ -16,6 +16,7 @@ import { ContactPage } from './pages/ContactPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { NotificationsPage } from './pages/NotificationsPage'
 import { LoginPage } from './pages/LoginPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { ProfileSettingsPage } from './pages/ProfileSettingsPage'
@@ -33,6 +34,7 @@ import { ContractPage } from './pages/ContractPage'
 import { EditPropertyPage } from './pages/EditPropertyPage'
 import { PropertyByOwnerPage } from './pages/PropertyByOwnerPage'
 import { ModalTestPage } from './pages/ModalTestPage'
+import { SavedPropertiesPage } from './pages/SavedPropertiesPage'
 import { Toaster } from './components/ui/sonner'
 
 export default function App() {
@@ -181,6 +183,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ProfileSettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/saved"
+            element={
+              <ProtectedRoute>
+                <SavedPropertiesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             }
           />

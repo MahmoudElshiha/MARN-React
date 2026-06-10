@@ -81,8 +81,8 @@ export const propertyService = {
         ApiResponse<SearchPaginatedResponse<SearchProperty>>
       >(`/api/Property/search${buildSearchQuery(filters)}`)
       .then((res) => {
-        if (res.data?.data?.items) {
-          res.data.data.items = res.data.data.items.map((p) => ({
+        if (res.data?.items) {
+          res.data.items = res.data.items.map((p: any) => ({
             ...p,
             imagePath: getImageUrl(p.imagePath),
           }))

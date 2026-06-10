@@ -13,6 +13,7 @@ import {
   LogOut,
   LayoutDashboard,
   ChevronDown,
+  Bell,
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -21,6 +22,13 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/useAuth'
 import { propertyService } from '@/services/propertyService'
 import { decodeUserFromToken } from '@/utils/tokenUtils'
+import { notificationService } from '@/services/notificationService'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
 
 const ROLE_DASHBOARDS: Record<string, { label: string; path: string }[]> = {
   owner: [
@@ -98,8 +106,36 @@ export function Navigation() {
   const navigate = useNavigate()
   const isHome = location.pathname === '/'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [lang, setLang] = useState<'en' | 'ar'>('en')
   const { isAuthenticated, login, logout, user } = useAuth()
   const [isBecomeHostLoading, setIsBecomeHostLoading] = useState(false)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    let mounted = true
+    notificationService.getNotifications().then(data => {
+      if (mounted) {
+        setUnreadNotificationCount(data.filter(n => !n.isRead).length)
+      }
+    }).catch(console.error)
+
+    const handleReceived = () => setUnreadNotificationCount(prev => prev + 1)
+    const handleAllRead = () => setUnreadNotificationCount(0)
+    const handleMarkedRead = () => setUnreadNotificationCount(prev => Math.max(0, prev - 1))
+
+    window.addEventListener('notification-received', handleReceived)
+    window.addEventListener('notifications-all-read', handleAllRead)
+    window.addEventListener('notification-marked-read', handleMarkedRead)
+
+    return () => {
+      mounted = false
+      window.removeEventListener('notification-received', handleReceived)
+      window.removeEventListener('notifications-all-read', handleAllRead)
+      window.removeEventListener('notification-marked-read', handleMarkedRead)
+    }
+  }, [isAuthenticated])
 
   async function handleBecomeHost() {
     if (!isAuthenticated) {
@@ -142,11 +178,8 @@ export function Navigation() {
         <div className="max-w-[1440px] mx-auto px-8 py-4">
           <div className="flex items-center justify-between gap-8">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center">
-                <span className="text-white font-bold text-xl">M</span>
-              </div>
-              <span className="text-2xl font-bold text-[#1a1a1a]">MARN</span>
+            <Link to="/" className="flex items-center gap-2 lg:ml-6">
+              <img src="/Logo-header.png" alt="MARN Logo" className="h-16 w-auto rounded bg-white p-1" />
             </Link>
 
             {/* Search Bar - Hidden on Home and Mobile */}
@@ -175,13 +208,6 @@ export function Navigation() {
 
             {/* Navigation Links */}
             <div className="flex items-center gap-4">
-              <Link
-                to="/search"
-                className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] rounded-xl transition-colors"
-              >
-                Explore
-              </Link>
-
               {user?.role === 'tenant' && (
                 <Button
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
@@ -193,6 +219,35 @@ export function Navigation() {
               )}
 
               <div className="flex items-center gap-2">
+                {/* Language Dropdown */}
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <button className="hidden md:flex items-center justify-center w-8 h-8 rounded-full border border-[#3A6EA5]/20 overflow-hidden hover:opacity-80 transition-opacity mr-2 outline-none">
+                      <img 
+                        src={lang === 'en' ? 'https://flagcdn.com/w40/gb.png' : 'https://flagcdn.com/w40/eg.png'} 
+                        alt={lang === 'en' ? 'English' : 'Arabic'}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40 rounded-xl bg-white p-1 shadow-lg border border-[#3A6EA5]/10">
+                    <DropdownMenuItem 
+                      onClick={() => setLang('en')}
+                      className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'en' ? 'bg-[#f5f7fa]' : ''}`}
+                    >
+                      <img src="https://flagcdn.com/w40/gb.png" alt="UK Flag" className="w-5 h-5 rounded-full object-cover" />
+                      <span className="font-medium text-sm text-[#1a1a1a]">English</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setLang('ar')}
+                      className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'ar' ? 'bg-[#f5f7fa]' : ''}`}
+                    >
+                      <img src="https://flagcdn.com/w40/eg.png" alt="Egypt Flag" className="w-5 h-5 rounded-full object-cover" />
+                      <span className="font-medium text-sm text-[#1a1a1a]">Arabic</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -203,18 +258,37 @@ export function Navigation() {
                     <Search className="w-5 h-5 text-[#1a1a1a] transition-colors group-hover:text-[#3A6EA5]" />
                   </Link>
                 </Button>
+
                 {isAuthenticated && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hidden md:flex group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
-                    asChild
-                  >
-                    <Link to="/profile-settings">
-                      <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
-                    </Link>
-                  </Button>
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hidden md:flex group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
+                      asChild
+                    >
+                      <Link to="/notifications" className="relative">
+                        <Bell className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
+                        {unreadNotificationCount > 0 && (
+                          <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                            {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                          </span>
+                        )}
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hidden md:flex group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
+                      asChild
+                    >
+                      <Link to="/profile-settings">
+                        <User className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
+                      </Link>
+                    </Button>
+                  </>
                 )}
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -254,12 +328,34 @@ export function Navigation() {
               {/* Drawer Header */}
               <div className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="text-white font-bold text-2xl">M</span>
-                    </div>
-                    <span className="text-2xl font-bold text-white">MARN</span>
-                  </div>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden hover:opacity-80 transition-opacity outline-none">
+                        <img 
+                          src={lang === 'en' ? 'https://flagcdn.com/w40/gb.png' : 'https://flagcdn.com/w40/eg.png'} 
+                          alt={lang === 'en' ? 'English' : 'Arabic'}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-40 rounded-xl bg-white p-1 shadow-lg border border-[#3A6EA5]/10">
+                      <DropdownMenuItem 
+                        onClick={() => setLang('en')}
+                        className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'en' ? 'bg-[#f5f7fa]' : ''}`}
+                      >
+                        <img src="https://flagcdn.com/w40/gb.png" alt="UK Flag" className="w-5 h-5 rounded-full object-cover" />
+                        <span className="font-medium text-sm text-[#1a1a1a]">English</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => setLang('ar')}
+                        className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'ar' ? 'bg-[#f5f7fa]' : ''}`}
+                      >
+                        <img src="https://flagcdn.com/w40/eg.png" alt="Egypt Flag" className="w-5 h-5 rounded-full object-cover" />
+                        <span className="font-medium text-sm text-[#1a1a1a]">Arabic</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
                   <button
                     onClick={() => setIsMenuOpen(false)}
                     className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm hover:bg-white/30 flex items-center justify-center transition-colors"
@@ -289,11 +385,10 @@ export function Navigation() {
                         <Link
                           to={item.path}
                           onClick={() => setIsMenuOpen(false)}
-                          className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-                            isActive
-                              ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white shadow-lg shadow-[#3A6EA5]/30'
-                              : 'text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1'
-                          }`}
+                          className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${isActive
+                            ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white shadow-lg shadow-[#3A6EA5]/30'
+                            : 'text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1'
+                            }`}
                         >
                           <Icon className="w-5 h-5" />
                           <span className="font-medium">{item.label}</span>

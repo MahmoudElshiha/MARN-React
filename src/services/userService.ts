@@ -35,7 +35,10 @@ export interface DashboardSavedProperty {
   title: string
   price: number
   location: string
-  imageUrl?: string
+  imageUrl?: string | null
+  imagePath?: string | null
+  image?: string | null
+  images?: string[]
 }
 
 export interface DashboardContract {

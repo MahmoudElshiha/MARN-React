@@ -44,6 +44,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
       },
+      '/hubs': {
+        target: API_BASE,
+        changeOrigin: true,
+        secure: true,
+        ws: true,
+      },
     },
   },
 

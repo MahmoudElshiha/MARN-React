@@ -70,7 +70,6 @@ interface FilterSidebarProps {
   
   activeFilterCount: number
   onResetFilters: () => void
-  onCloseMobile?: () => void
 }
 
 export function FilterSidebar({
