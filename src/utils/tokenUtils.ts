@@ -23,16 +23,40 @@ function pickRole(raw: string | string[] | undefined): UserRole {
 }
 
 export function decodeUserFromToken(token: string): User {
-  const payloadB64 = token.split('.')[1]
-  const payload = JSON.parse(atob(payloadB64)) as Record<
+  const payloadB64Url = token.split('.')[1]
+  // Convert base64url to standard base64
+  const base64 = payloadB64Url.replace(/-/g, '+').replace(/_/g, '/')
+
+  // Safely decode base64 that might contain non-ASCII characters
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+      .join(''),
+  )
+
+  const payload = JSON.parse(jsonPayload) as Record<
     string,
-    string | string[]
+    string | string[] | undefined
   >
 
+  const rawRole =
+    payload[CLAIM_ROLE] ??
+    payload['role'] ??
+    payload['roles'] ??
+    payload['Role']
+  const rawId =
+    payload[CLAIM_ID] ??
+    payload['sub'] ??
+    payload['nameid'] ??
+    payload['id'] ??
+    payload['Id']
+  const rawEmail = payload[CLAIM_EMAIL] ?? payload['email'] ?? payload['Email']
+
   return {
-    id: (payload[CLAIM_ID] as string) ?? (payload['sub'] as string) ?? '',
-    email: (payload[CLAIM_EMAIL] as string) ?? '',
-    role: pickRole(payload[CLAIM_ROLE]),
+    id: (rawId as string) ?? '',
+    email: (rawEmail as string) ?? '',
+    role: pickRole(rawRole),
     firstName: '',
     lastName: '',
   }
