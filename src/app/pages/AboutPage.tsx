@@ -13,7 +13,7 @@ export function AboutPage() {
       icon: Shield,
       title: 'Trust & Safety',
       description:
-        'Every property and user is verified to ensure a secure experience for all our community members.',
+        'Every TEST TESTproperty and user is verified to ensure a secure experience for all our community members.',
     },
     {
       icon: Heart,
@@ -39,7 +39,8 @@ export function AboutPage() {
     {
       name: 'Abd Alrahman Eissa',
       role: 'AI Developer',
-      image: 'https://ui-avatars.com/api/?name=Abd+Alrahman+Eissa&background=3A6EA5&color=fff&size=400',
+      image:
+        'https://ui-avatars.com/api/?name=Abd+Alrahman+Eissa&background=3A6EA5&color=fff&size=400',
     },
     {
       name: 'Fares Eldagen',
@@ -59,14 +60,14 @@ export function AboutPage() {
     {
       name: 'Kareem Foda',
       role: 'Front-end Developer & UI Designer',
-      image: 'https://ui-avatars.com/api/?name=Kareem+Foda&background=3A6EA5&color=fff&size=400',
+      image:
+        'https://ui-avatars.com/api/?name=Kareem+Foda&background=3A6EA5&color=fff&size=400',
     },
     {
       name: 'Ahmed Makled',
       role: 'Mobile App Developer',
       image: ahmedImg,
     },
-
   ]
 
   return (
