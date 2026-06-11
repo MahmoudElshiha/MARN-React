@@ -2,11 +2,15 @@ import { apiClient } from './apiClient'
 import { HubConnectionBuilder, HubConnection, LogLevel } from '@microsoft/signalr'
 
 export interface AppNotification {
-  id: string
-  type: string | number
+  id: string | number
+  type: string
+  typeDisplayName: string
   title: string
   body: string
-  data?: any
+  data: any
+  actionType: string | null
+  actionTypeDisplayName: string
+  actionId: string | null
   isRead: boolean
   createdAt: string
 }
@@ -69,11 +73,7 @@ export const notificationService = {
 
   markAsRead: async (notificationId: string) => {
     const connection = await startNotificationConnection()
-    await connection.send("MarkNotificationAsRead", notificationId)
-  },
-
-  deleteNotification: async (notificationId: string) => {
-    const connection = await startNotificationConnection()
-    await connection.send("DeleteNotification", notificationId)
+    const parsedId = Number(notificationId)
+    await connection.send("MarkNotificationAsRead", isNaN(parsedId) ? notificationId : parsedId)
   }
 }

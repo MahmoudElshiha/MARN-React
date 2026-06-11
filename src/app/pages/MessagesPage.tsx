@@ -9,6 +9,7 @@ import { Skeleton } from '../components/ui/skeleton'
 import { useNavigate, useSearchParams } from 'react-router'
 import {
   useConversations,
+  useGlobalUsersSearch,
   useMessages,
   useSendMessage,
   useSubmitReport,
@@ -26,6 +27,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../components/ui/dialog'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '../components/ui/tabs'
 import { toast } from 'sonner'
 import { useDebounce } from '@/hooks/useDebounce'
 import type { Conversation, Message } from '@/types/message'
@@ -45,6 +52,7 @@ export function MessagesPage() {
   const [isMobileView, setIsMobileView] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
+  const [activeTab, setActiveTab] = useState<'recent' | 'global'>('recent')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
@@ -67,10 +75,17 @@ export function MessagesPage() {
   const autoText = searchParams.get('text')
 
   const { data: conversationsData, isLoading: conversationsLoading } =
-    useConversations(debouncedSearchQuery)
+    useConversations()
   const conversations = useMemo(
     () => conversationsData?.data ?? [],
     [conversationsData],
+  )
+
+  const { data: globalUsersData, isLoading: globalUsersLoading } =
+    useGlobalUsersSearch(debouncedSearchQuery)
+  const globalUsers = useMemo(
+    () => globalUsersData?.data ?? [],
+    [globalUsersData],
   )
 
   const displayConversations = useMemo(() => {
@@ -86,8 +101,13 @@ export function MessagesPage() {
       list.unshift(tempConversation)
     }
 
+    if (debouncedSearchQuery && activeTab === 'recent') {
+      const lowerQuery = debouncedSearchQuery.toLowerCase()
+      return list.filter(c => c.participant.name.toLowerCase().includes(lowerQuery))
+    }
+
     return list
-  }, [conversations, tempConversation])
+  }, [conversations, tempConversation, debouncedSearchQuery, activeTab])
 
   const effectiveConversation = selectedConversation ?? conversations[0] ?? null
 
@@ -105,7 +125,7 @@ export function MessagesPage() {
     if (!effectiveConversation?.participant.id || !reportReason.trim()) return
     
     const finalReason = reportTarget === 'Message' && reportedMessage 
-      ? `${reportReason.trim()} REPORTMETAMESSAGE ${reportedMessage.text}`
+      ? `${reportReason.trim()} REPORTMETAMESSAGE ${reportedMessage.text} REPORTMETAID ${reportedMessage.id}`
       : `${reportReason.trim()} REPORTMETAUSER ${effectiveConversation.participant.id}`
 
     const targetId = reportTarget === 'Message' && reportedMessage 
@@ -277,10 +297,16 @@ export function MessagesPage() {
               className={`border-r border-[#3A6EA5]/20 flex flex-col ${isMobileView && selectedConversation ? 'hidden lg:flex' : ''}`}
             >
               <div className="p-4 border-b border-[#3A6EA5]/10">
+                <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as 'recent' | 'global')} className="w-full mb-4">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="recent">Recent</TabsTrigger>
+                    <TabsTrigger value="global">Global</TabsTrigger>
+                  </TabsList>
+                </Tabs>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a5565]" />
                   <Input
-                    placeholder="Search messages..."
+                    placeholder={activeTab === 'recent' ? "Search conversations..." : "Search all users..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 bg-white border-[#3A6EA5]/20 rounded-xl"
@@ -288,63 +314,129 @@ export function MessagesPage() {
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto">
-                {isInitialLoad ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="p-4 flex gap-3 border-b border-[#3A6EA5]/10"
-                    >
-                      <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-3/4 rounded" />
-                        <Skeleton className="h-3 w-full rounded" />
+                {activeTab === 'recent' && (
+                  isInitialLoad ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="p-4 flex gap-3 border-b border-[#3A6EA5]/10"
+                      >
+                        <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-3/4 rounded" />
+                          <Skeleton className="h-3 w-full rounded" />
+                        </div>
                       </div>
+                    ))
+                  ) : displayConversations.length === 0 ? (
+                    <div className="p-8 text-center text-[#4a5565]">
+                      No conversations yet.
                     </div>
-                  ))
-                ) : displayConversations.length === 0 ? (
-                  <div className="p-8 text-center text-[#4a5565]">
-                    No conversations yet.
-                  </div>
-                ) : (
-                  displayConversations.map((conversation) => (
-                    <button
-                      key={conversation.id}
-                      onClick={() => {
-                        setSelectedConversation(conversation)
-                        setIsMobileView(true)
-                      }}
-                      className={`w-full p-4 flex gap-3 hover:bg-[#9CBBDC]/20 transition-colors border-b border-[#3A6EA5]/10 ${
-                        effectiveConversation?.id === conversation.id
-                          ? 'bg-[#9CBBDC]/20'
-                          : ''
-                      }`}
-                    >
-                      <Avatar className="w-12 h-12 flex-shrink-0">
-                        <AvatarImage src={conversation.participant.avatarUrl} />
-                        <AvatarFallback>
-                          {conversation.participant.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 text-left min-w-0">
-                        <div className="flex items-start justify-between mb-1">
-                          <h3 className="font-semibold text-[#1a1a1a] truncate">
-                            {conversation.participant.name}
-                          </h3>
-                          <span className="text-xs text-[#4a5565] flex-shrink-0 ml-2">
-                            {conversation.lastMessageTime}
-                          </span>
+                  ) : (
+                    displayConversations.map((conversation) => (
+                      <button
+                        key={conversation.id}
+                        onClick={() => {
+                          setSelectedConversation(conversation)
+                          setIsMobileView(true)
+                        }}
+                        className={`w-full p-4 flex gap-3 hover:bg-[#9CBBDC]/20 transition-colors border-b border-[#3A6EA5]/10 ${
+                          effectiveConversation?.id === conversation.id
+                            ? 'bg-[#9CBBDC]/20'
+                            : ''
+                        }`}
+                      >
+                        <Avatar className="w-12 h-12 flex-shrink-0">
+                          <AvatarImage src={conversation.participant.avatarUrl} />
+                          <AvatarFallback>
+                            {conversation.participant.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 text-left min-w-0">
+                          <div className="flex items-start justify-between mb-1">
+                            <h3 className="font-semibold text-[#1a1a1a] truncate">
+                              {conversation.participant.name}
+                            </h3>
+                            <span className="text-xs text-[#4a5565] flex-shrink-0 ml-2">
+                              {conversation.lastMessageTime}
+                            </span>
+                          </div>
+                          <p className="text-sm text-[#1a1a1a] truncate">
+                            {conversation.lastMessage}
+                          </p>
                         </div>
-                        <p className="text-sm text-[#1a1a1a] truncate">
-                          {conversation.lastMessage}
-                        </p>
+                        {conversation.unreadCount > 0 && (
+                          <div className="w-6 h-6 rounded-full bg-[#3A6EA5] text-white text-xs flex items-center justify-center flex-shrink-0">
+                            {conversation.unreadCount}
+                          </div>
+                        )}
+                      </button>
+                    ))
+                  )
+                )}
+
+                {activeTab === 'global' && (
+                  globalUsersLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="p-4 flex gap-3 border-b border-[#3A6EA5]/10"
+                      >
+                        <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
+                        <div className="flex-1 space-y-2 mt-2">
+                          <Skeleton className="h-4 w-3/4 rounded" />
+                        </div>
                       </div>
-                      {conversation.unreadCount > 0 && (
-                        <div className="w-6 h-6 rounded-full bg-[#3A6EA5] text-white text-xs flex items-center justify-center flex-shrink-0">
-                          {conversation.unreadCount}
+                    ))
+                  ) : debouncedSearchQuery.length < 2 ? (
+                    <div className="p-8 text-center text-[#4a5565]">
+                      Type at least 2 characters to search users globally.
+                    </div>
+                  ) : globalUsers.length === 0 ? (
+                    <div className="p-8 text-center text-[#4a5565]">
+                      No users found for "{debouncedSearchQuery}".
+                    </div>
+                  ) : (
+                    globalUsers.map((user) => (
+                      <button
+                        key={user.id}
+                        onClick={() => {
+                          const existingConv = displayConversations.find(c => c.participant.id === user.participant.id)
+                          if (existingConv) {
+                            setSelectedConversation(existingConv)
+                          } else {
+                            const newConv = {
+                              ...user,
+                              lastMessage: '',
+                              lastMessageTime: '',
+                              unreadCount: 0
+                            }
+                            setSelectedConversation(newConv)
+                            setTempConversation(newConv)
+                          }
+                          setActiveTab('recent')
+                          setIsMobileView(true)
+                        }}
+                        className={`w-full p-4 flex gap-3 hover:bg-[#9CBBDC]/20 transition-colors border-b border-[#3A6EA5]/10 ${
+                          effectiveConversation?.id === user.id
+                            ? 'bg-[#9CBBDC]/20'
+                            : ''
+                        }`}
+                      >
+                        <Avatar className="w-12 h-12 flex-shrink-0">
+                          <AvatarImage src={user.participant.avatarUrl} />
+                          <AvatarFallback>
+                            {user.participant.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 text-left min-w-0 flex flex-col justify-center">
+                          <h3 className="font-semibold text-[#1a1a1a] truncate">
+                            {user.participant.name}
+                          </h3>
                         </div>
-                      )}
-                    </button>
-                  ))
+                      </button>
+                    ))
+                  )
                 )}
               </div>
             </div>
@@ -495,12 +587,33 @@ export function MessagesPage() {
                                   message.sender === 'me'
                                     ? 'bg-[#3A6EA5] text-white'
                                     : 'bg-white text-[#1a1a1a]'
-                                } rounded-2xl px-4 py-3 ${message.status === 'sending' ? 'opacity-70' : ''}`}
+                                } rounded-2xl px-4 py-3 relative group/bubble ${message.status === 'sending' ? 'opacity-70' : ''}`}
                               >
+                                {message.sender !== 'me' && (
+                                  <div className="absolute top-1 right-1">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/bubble:opacity-100 transition-opacity rounded-full">
+                                          <MoreVertical className="w-3 h-3 text-[#4a5565]" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="rounded-xl">
+                                        <DropdownMenuItem 
+                                          className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                                          onClick={() => openReportModal('Message', message)}
+                                        >
+                                          <ShieldAlert className="w-4 h-4 mr-2" />
+                                          Report Message
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                )}
+
                                 {message.text.startsWith('data:image/') ? (
-                                  <img src={message.text} alt="Photo" className="max-w-full rounded-lg mb-1" />
+                                  <img src={message.text} alt="Photo" className={`max-w-full rounded-lg mb-1 ${message.sender !== 'me' ? 'mt-4' : ''}`} />
                                 ) : (
-                                  <p className="text-sm mb-1">{message.text}</p>
+                                  <p className={`text-sm mb-1 ${message.sender !== 'me' ? 'pr-6' : ''}`}>{message.text}</p>
                                 )}
                                 <p
                                   className={`text-xs ${
@@ -512,25 +625,6 @@ export function MessagesPage() {
                                   {message.time}
                                 </p>
                               </div>
-
-                              {message.sender !== 'me' && (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <MoreVertical className="w-4 h-4 text-[#4a5565]" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="start" className="rounded-xl">
-                                    <DropdownMenuItem 
-                                      className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
-                                      onClick={() => openReportModal('Message', message)}
-                                    >
-                                      <ShieldAlert className="w-4 h-4 mr-2" />
-                                      Report Message
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              )}
                             </div>
                             {message.status === 'error' && (
                               <div className="text-[#e53e3e] text-[11px] flex items-center gap-1 mt-1 pr-1">

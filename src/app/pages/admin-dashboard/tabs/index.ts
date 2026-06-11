@@ -1,5 +1,6 @@
 export { VerificationsTab } from './VerificationsTab'
-export { PropertyVerificationsTab } from './PropertyVerificationsTab'
+export { PropertyModerationTab } from './PropertyModerationTab'
 export { UserManagementTab } from './UserManagementTab'
 export { ReportsTab } from './ReportsTab'
 export { ModerationReportsTab } from './ModerationReportsTab'
+export { ContractsModerationTab } from './ContractsModerationTab'

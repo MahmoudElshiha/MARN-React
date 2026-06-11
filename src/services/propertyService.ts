@@ -99,6 +99,12 @@ export const propertyService = {
   updateProperty: (id: string, data: FormData) =>
     apiClient.put<ApiResponse<Property>>(`/api/Property/${id}`, data),
 
+  getPropertyForEdit: (id: string) =>
+    apiClient.get<ApiResponse<any>>(`/api/Property/edit/${id}`),
+
+  submitPropertyEdit: (id: string, data: FormData) =>
+    apiClient.put<ApiResponse<any>>(`/api/Property/edit/${id}`, data),
+
   deleteProperty: (id: string) =>
     apiClient.delete<ApiResponse<void>>(`/api/Property/${id}`),
 

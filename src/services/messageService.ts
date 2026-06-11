@@ -81,6 +81,29 @@ export const messageService = {
     return { data: mapped, total: mapped.length, page: 1, pageSize: 50 }
   },
 
+  searchUsers: async (search: string): Promise<PaginatedResponse<Conversation>> => {
+    const params = new URLSearchParams()
+    if (search) {
+      params.append('q', search)
+    }
+    const response = await apiClient.get<ApiResponse<any[]>>(`/api/Chat/search?${params.toString()}`)
+    const users = response.data || []
+    
+    const mapped: Conversation[] = users.map(u => ({
+      id: u.id,
+      participant: {
+        id: u.id,
+        name: u.userName || 'User',
+        avatarUrl: u.profileImage
+      },
+      lastMessage: '',
+      lastMessageTime: '',
+      unreadCount: 0
+    }))
+    
+    return { data: mapped, total: mapped.length, page: 1, pageSize: 50 }
+  },
+
   getMessages: async (conversationId: string): Promise<PaginatedResponse<Message>> => {
     const response = await apiClient.get<ApiResponse<any[]>>(`/api/Chat/history/${conversationId}`)
     const messages = response.data || []

@@ -95,23 +95,23 @@ const BENEFITS = [
 
 const TESTIMONIALS = [
   {
-    name: 'Sarah Johnson',
+    name: 'Fatima Hassan',
     role: 'Tenant',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+    image: 'https://images.unsplash.com/photo-1589571894960-20bbe2828d0a?w=200&fit=crop',
     rating: 5,
     text: 'MARN made finding my dream apartment so easy! The process was seamless and the support team was incredibly helpful.',
   },
   {
-    name: 'Michael Chen',
+    name: 'Ahmed Youssef',
     role: 'Property Owner',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&fit=crop',
     rating: 5,
     text: 'As a landlord, MARN has been a game-changer. I get quality tenants and the platform handles everything smoothly.',
   },
   {
-    name: 'Emily Rodriguez',
+    name: 'Laila Mahmoud',
     role: 'Roommate Seeker',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&fit=crop',
     rating: 5,
     text: 'The roommate matching feature is brilliant! I found the perfect roommate who shares my lifestyle and interests.',
   },

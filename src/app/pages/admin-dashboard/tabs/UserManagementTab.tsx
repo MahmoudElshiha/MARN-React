@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Eye,
   Ban,
@@ -21,25 +22,35 @@ import {
   TooltipTrigger,
 } from '../../../components/ui/tooltip'
 import {
-  useAdminRoleUsers,
+  useAdminUsers,
   useUpdateUserRoles,
 } from '@/hooks/useAdminStats'
-import { adminService, type AdminRoleUser } from '@/services/adminService'
+import { adminService, type AdminUserStatsItem } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { getStatusBadge } from '../utils'
 
-const ASSIGNABLE_ROLES = ['Admin']
+const ASSIGNABLE_ROLES = ['Admin', 'Owner']
 
 export function UserManagementTab() {
-  const [selectedUser, setSelectedUser] = useState<AdminRoleUser | null>(null)
+  const [selectedUser, setSelectedUser] = useState<AdminUserStatsItem | null>(null)
   const [pageSize, setPageSize] = useState(10)
   const [userSearch, setUserSearch] = useState('')
   const [activeUserSearch, setActiveUserSearch] = useState('')
+  
+  const [searchParams, setSearchParams] = useSearchParams()
+  const urlStatus = searchParams.get('userStatus')
+  const statusFilter = (urlStatus && urlStatus !== 'Unverified') ? urlStatus : 'Pending'
+  const setStatusFilter = (val: string) => {
+    setSearchParams((prev) => {
+      prev.set('userStatus', val)
+      return prev
+    })
+  }
 
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [actionType, setActionType] = useState<
-    'ban' | 'unban' | 'restore' | null
+    'ban' | 'unban' | 'restore' | 'delete' | null
   >(null)
   const [pendingUserId, setPendingUserId] = useState<string | null>(null)
 
@@ -51,14 +62,23 @@ export function UserManagementTab() {
 
   const queryClient = useQueryClient()
 
-  const { data: usersData, isLoading: usersLoading, isFetching: usersFetching } = useAdminRoleUsers(
+  const apiStatus = statusFilter === 'Deleted' ? 'All' : statusFilter
+  const includeDeleted = statusFilter === 'Deleted' || statusFilter === 'All'
+  
+  const { data: usersData, isLoading: usersLoading, isFetching: usersFetching } = useAdminUsers(
     1,
     pageSize,
     activeUserSearch || undefined,
+    apiStatus,
+    includeDeleted
   )
   const updateUserRoles = useUpdateUserRoles()
 
-  const users = usersData?.data?.items ?? []
+  let users = usersData?.data?.items ?? []
+  if (statusFilter === 'Deleted') {
+    users = users.filter(u => u.isDeleted)
+  }
+  
   const totalCount = usersData?.data?.totalCount ?? 0
 
   const userAction = useMutation({
@@ -67,10 +87,11 @@ export function UserManagementTab() {
       action,
     }: {
       userId: string
-      action: 'ban' | 'unban' | 'restore'
+      action: 'ban' | 'unban' | 'restore' | 'delete'
     }) => {
       if (action === 'ban') return adminService.banUser(userId)
       if (action === 'unban') return adminService.unbanUser(userId)
+      if (action === 'delete') return adminService.deleteUser(userId)
       return adminService.restoreUser(userId)
     },
     onSuccess: () => {
@@ -78,10 +99,13 @@ export function UserManagementTab() {
         ban: 'banned',
         unban: 'unbanned',
         restore: 'restored',
+        delete: 'deleted',
       }
       toast.success(`User ${labels[actionType!] ?? actionType} successfully`)
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] })
       queryClient.invalidateQueries({ queryKey: ['adminRoleUsers'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
+      queryClient.invalidateQueries({ queryKey: ['adminUserStats'] })
       setShowConfirmModal(false)
       setPendingUserId(null)
       setSelectedUser(null)
@@ -97,10 +121,16 @@ export function UserManagementTab() {
 
   const confirmRoleUpdate = () => {
     if (!pendingRoleUserId) return
+    const userToUpdate = users.find(u => u.userId === pendingRoleUserId)
+    const protectedRoles = userToUpdate?.roles.filter(r => !ASSIGNABLE_ROLES.includes(r)) || []
+    const finalRoles = [...selectedRoles, ...protectedRoles]
+
     updateUserRoles.mutate(
-      { userId: pendingRoleUserId, roles: selectedRoles },
+      { userId: pendingRoleUserId, roles: finalRoles },
       {
         onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['adminUsers'] })
+          queryClient.invalidateQueries({ queryKey: ['adminRoleUsers'] })
           setShowRolesModal(false)
           setPendingRoleUserId(null)
           setSelectedRoles([])
@@ -111,7 +141,7 @@ export function UserManagementTab() {
 
   const handleUserAction = (
     userId: string,
-    action: 'ban' | 'unban' | 'restore',
+    action: 'ban' | 'unban' | 'restore' | 'delete',
   ) => {
     setActionType(action)
     setPendingUserId(userId)
@@ -151,6 +181,19 @@ export function UserManagementTab() {
               </Button>
             </div>
           </div>
+          <div className="flex flex-wrap gap-2 mt-4">
+            {['Pending', 'Verified', 'Banned', 'Deleted', 'All'].map((status) => (
+              <Button
+                key={status}
+                variant={statusFilter === status ? 'default' : 'outline'}
+                size="sm"
+                className={statusFilter === status ? 'bg-[#3A6EA5] text-white rounded-xl' : 'rounded-xl border-[#3A6EA5]/20 text-[#4a5565]'}
+                onClick={() => setStatusFilter(status)}
+              >
+                {status}
+              </Button>
+            ))}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto overflow-y-auto max-h-[600px] border-b border-[#3A6EA5]/20">
@@ -172,7 +215,7 @@ export function UserManagementTab() {
                   <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
                     Join Date
                   </th>
-                  <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
+                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
                     Actions
                   </th>
                 </tr>
@@ -225,13 +268,13 @@ export function UserManagementTab() {
                       </td>
                       <td className="py-4 px-4">
                         <TooltipProvider delayDuration={200}>
-                          <div className="flex gap-2 justify-end">
+                          <div className="flex gap-2 justify-start">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  size="sm"
+                                  size="icon"
                                   variant="outline"
-                                  className="rounded-xl border-[#3A6EA5]/20"
+                                  className="rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0"
                                   onClick={() => setSelectedUser(user)}
                                 >
                                   <Eye className="w-4 h-4" />
@@ -246,9 +289,9 @@ export function UserManagementTab() {
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    size="sm"
+                                    size="icon"
                                     variant="outline"
-                                    className="border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white rounded-xl"
+                                    className="border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white rounded-xl w-8 h-8 shrink-0"
                                     disabled={updateUserRoles.isPending}
                                     onClick={() =>
                                       handleOpenRolesModal(
@@ -265,62 +308,80 @@ export function UserManagementTab() {
                                 </TooltipContent>
                               </Tooltip>
                             )}
-                            
                             {user.isDeleted ? (
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    size="sm"
-                                    className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                                    size="icon"
+                                    className="bg-green-600 hover:bg-green-700 text-white rounded-xl w-8 h-8 shrink-0"
                                     onClick={() =>
                                       handleUserAction(user.userId, 'restore')
                                     }
                                   >
-                                    <UserCheck className="w-4 h-4 mr-1" />
-                                    Restore
+                                    <UserCheck className="w-4 h-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>Restore User</p>
                                 </TooltipContent>
                               </Tooltip>
-                            ) : user.accountStatus === 'Banned' ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                                    onClick={() =>
-                                      handleUserAction(user.userId, 'unban')
-                                    }
-                                  >
-                                    <UserCheck className="w-4 h-4 mr-1" />
-                                    Unban
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Unban User</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            ) : !user.roles.includes('Admin') ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                                    onClick={() =>
-                                      handleUserAction(user.userId, 'ban')
-                                    }
-                                  >
-                                    <Ban className="w-4 h-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Ban User</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            ) : null}
+                            ) : (
+                              <>
+                                {user.accountStatus === 'Banned' ? (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        className="bg-green-600 hover:bg-green-700 text-white rounded-xl w-8 h-8 shrink-0"
+                                        onClick={() =>
+                                          handleUserAction(user.userId, 'unban')
+                                        }
+                                      >
+                                        <UserCheck className="w-4 h-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Unban User</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : !user.roles.includes('Admin') ? (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="outline"
+                                        className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl w-8 h-8 shrink-0"
+                                        onClick={() =>
+                                          handleUserAction(user.userId, 'ban')
+                                        }
+                                      >
+                                        <Ban className="w-4 h-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Ban User</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : null}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl w-8 h-8 shrink-0"
+                                      onClick={() =>
+                                        handleUserAction(user.userId, 'delete')
+                                      }
+                                    >
+                                      <XCircle className="w-4 h-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Delete User</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </>
+                            )}
                           </div>
                         </TooltipProvider>
                       </td>
@@ -427,26 +488,39 @@ export function UserManagementTab() {
                   <UserCheck className="w-4 h-4 mr-2" />
                   Restore
                 </Button>
-              ) : selectedUser.accountStatus === 'Banned' ? (
-                <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                  disabled={userAction.isPending}
-                  onClick={() => handleUserAction(selectedUser.userId, 'unban')}
-                >
-                  <UserCheck className="w-4 h-4 mr-2" />
-                  Unban
-                </Button>
-              ) : !selectedUser.roles.includes('Admin') ? (
-                <Button
-                  variant="outline"
-                  className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                  disabled={userAction.isPending}
-                  onClick={() => handleUserAction(selectedUser.userId, 'ban')}
-                >
-                  <Ban className="w-4 h-4 mr-2" />
-                  Ban
-                </Button>
-              ) : null}
+              ) : (
+                <>
+                  {selectedUser.accountStatus === 'Banned' ? (
+                    <Button
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                      disabled={userAction.isPending}
+                      onClick={() => handleUserAction(selectedUser.userId, 'unban')}
+                    >
+                      <UserCheck className="w-4 h-4 mr-2" />
+                      Unban
+                    </Button>
+                  ) : !selectedUser.roles.includes('Admin') ? (
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                      disabled={userAction.isPending}
+                      onClick={() => handleUserAction(selectedUser.userId, 'ban')}
+                    >
+                      <Ban className="w-4 h-4 mr-2" />
+                      Ban
+                    </Button>
+                  ) : null}
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                    disabled={userAction.isPending}
+                    onClick={() => handleUserAction(selectedUser.userId, 'delete')}
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </>
+              )}
               <Button
                 variant="outline"
                 className="rounded-xl border-[#3A6EA5]/20"
@@ -471,8 +545,8 @@ export function UserManagementTab() {
               Update User Roles
             </h3>
             <p className="text-[#4a5565] mb-6 text-sm">
-              Select the assignable roles for this user. Protected roles (Owner,
-              Renter) are preserved automatically.
+              Select the assignable roles for this user. Protected roles (like Renter)
+              are preserved automatically.
             </p>
             <div className="space-y-3 mb-6">
               {ASSIGNABLE_ROLES.map((role) => (
@@ -530,8 +604,9 @@ export function UserManagementTab() {
               Confirm Action
             </h3>
             <p className="text-[#4a5565] mb-6">
-              Are you sure you want to {actionType} this user? This action can
-              be reversed later.
+              Are you sure you want to {actionType} this user? 
+              {actionType === 'delete' && ' A standard notification will be shown.'}
+              {' '}This action can be reversed later.
             </p>
             <div className="flex gap-4">
               <Button

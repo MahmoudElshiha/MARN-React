@@ -12,10 +12,10 @@ export function useAdminStats() {
   })
 }
 
-export function useAdminUsers(page = 1, pageSize = 20) {
+export function useAdminUsers(page = 1, pageSize = 20, search?: string, status?: string, includeDeleted?: boolean) {
   return useQuery({
-    queryKey: ['adminUsers', page, pageSize],
-    queryFn: () => adminService.getUsers(page, pageSize),
+    queryKey: ['adminUsers', page, pageSize, search, status, includeDeleted],
+    queryFn: () => adminService.getUsers(page, pageSize, search, status, includeDeleted),
     placeholderData: keepPreviousData,
   })
 }
@@ -123,5 +123,33 @@ export function useReviewModerationReport() {
       queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
     },
     onError: () => toast.error('Failed to review report'),
+  })
+}
+
+export function useAdminProperties(page = 1, pageSize = 20, search?: string, status?: string) {
+  return useQuery({
+    queryKey: ['adminProperties', page, pageSize, search, status],
+    queryFn: () => adminService.getProperties(page, pageSize, search, status),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useAdminContracts(page = 1, pageSize = 20, search?: string, status?: string) {
+  return useQuery({
+    queryKey: ['adminContracts', page, pageSize, search, status],
+    queryFn: () => adminService.getContracts(page, pageSize, search, status),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useCancelContract() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (contractId: number) => adminService.cancelContract(contractId),
+    onSuccess: () => {
+      toast.success('Contract cancelled successfully')
+      queryClient.invalidateQueries({ queryKey: ['adminContracts'] })
+    },
+    onError: () => toast.error('Failed to cancel contract'),
   })
 }

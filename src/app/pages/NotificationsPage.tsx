@@ -3,13 +3,18 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Bell, CheckCircle, Info, MessageSquare, AlertTriangle, Check, Trash2, Home } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Card } from '../components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog'
+import { Skeleton } from '../components/ui/skeleton'
 import { Link } from 'react-router'
 import { notificationService, startNotificationConnection, AppNotification } from '@/services/notificationService'
 import { toast } from 'sonner'
+import { contractService } from '@/services/contractService'
+import { rentalService } from '@/services/rentalService'
+import { useQueryClient } from '@tanstack/react-query'
 
-type NotificationType = 'system' | 'message' | 'alert' | 'success'
+export type NotificationType = 'system' | 'message' | 'alert' | 'success'
 
-interface NotificationUI {
+export interface NotificationUI {
   id: string
   type: NotificationType
   title: string
@@ -17,31 +22,174 @@ interface NotificationUI {
   time: string
   isRead: boolean
   link?: string
+  backendType: string
+  actionType: string | null
+  actionId: string | null
+  data: any
 }
 
-const mapType = (backendType: string | number): NotificationType => {
-  const typeStr = String(backendType).toLowerCase()
-  if (typeStr.includes('message') || typeStr.includes('chat')) return 'message'
-  if (typeStr.includes('success') || typeStr.includes('approve')) return 'success'
-  if (typeStr.includes('alert') || typeStr.includes('payment') || typeStr.includes('warning')) return 'alert'
-  return 'system'
+export const mapType = (backendType: string, title?: string): NotificationType => {
+  if (backendType === 'AccountBanned' || title?.toLowerCase().includes('banned')) return 'alert';
+  switch (backendType) {
+    case 'NewMessage': return 'message';
+    case 'ContractSigned':
+    case 'ContractCompleted':
+    case 'PaymentArrived':
+    case 'PaymentSuccessful':
+    case 'PaymentReceived':
+    case 'AvailableForWithdrawal':
+    case 'ConnectAccountSuccess':
+    case 'WithdrawSuccess':
+    case 'PropertyAdded':
+    case 'PropertyEdited':
+      return 'success';
+    case 'BookingRequestCanceled':
+    case 'BookingRequestRejected':
+    case 'ContractCanceled':
+    case 'UpcomingPayment':
+    case 'DelayedPayment':
+    case 'PaymentFailed':
+    case 'ConnectAccountFailed':
+    case 'WithdrawFailed':
+    case 'PropertyDeleted':
+      return 'alert';
+    case 'General':
+    case 'NewBookingRequest':
+    case 'NewReview':
+    case 'ContractStarted':
+    default:
+      return 'system';
+  }
 }
 
-const mapNotification = (appNotif: AppNotification): NotificationUI => {
+export const getNotificationRoute = (actionType: string | null, actionId: string | null, backendType?: string, title?: string): string | undefined => {
+  if (backendType === 'NewBookingRequest') {
+    return '/owner-dashboard#pending-requests';
+  }
+  
+  if (
+    backendType === 'ContractPendingSignature' || 
+    backendType === 'ContractCreated' || 
+    backendType === 'NewContract' || 
+    backendType === 'ContractStarted' || 
+    backendType === 'ContractSigned'
+  ) {
+    return '/tenant-dashboard#contracts';
+  }
+
+  if (backendType === 'AccountBanned' || title?.toLowerCase().includes('banned')) {
+    return '/contact';
+  }
+
+  if (!actionType) return undefined;
+  
+  switch (actionType) {
+    case 'Property':
+      return actionId ? `/property/${actionId}` : undefined;
+    case 'ChatUser':
+      return actionId ? `/messages?user=${actionId}` : '/messages';
+    case 'EditProfile':
+      return '/profile-settings';
+    case 'RenterDashboard':
+      return '/tenant-dashboard';
+    case 'OwnerDashboard':
+      return '/owner-dashboard';
+    case 'Contract':
+      return actionId ? `/contract/${actionId}` : '/owner-dashboard';
+    case 'Payment':
+      return '/owner-dashboard';
+    default:
+      return undefined;
+  }
+}
+
+export const mapNotification = (appNotif: AppNotification): NotificationUI => {
   return {
     id: String(appNotif.id),
-    type: mapType(appNotif.type),
+    type: mapType(appNotif.type, appNotif.title),
     title: appNotif.title,
     message: appNotif.body,
     time: new Date(appNotif.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
     isRead: appNotif.isRead,
-    link: appNotif.data?.link // Assuming data might have a link property
+    link: getNotificationRoute(appNotif.actionType, appNotif.actionId, appNotif.type, appNotif.title),
+    backendType: appNotif.type,
+    actionType: appNotif.actionType,
+    actionId: appNotif.actionId,
+    data: appNotif.data
+  }
+}
+
+export const getIcon = (type: NotificationType) => {
+  switch (type) {
+    case 'message':
+      return <MessageSquare className="w-5 h-5 text-blue-500" />
+    case 'success':
+      return <CheckCircle className="w-5 h-5 text-green-500" />
+    case 'alert':
+      return <AlertTriangle className="w-5 h-5 text-amber-500" />
+    case 'system':
+    default:
+      return <Info className="w-5 h-5 text-[#3A6EA5]" />
+  }
+}
+
+export const getBgColor = (type: NotificationType) => {
+  switch (type) {
+    case 'message':
+      return 'bg-blue-50'
+    case 'success':
+      return 'bg-green-50'
+    case 'alert':
+      return 'bg-amber-50'
+    case 'system':
+    default:
+      return 'bg-[#3A6EA5]/10'
   }
 }
 
 export function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationUI[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'unread' | 'read'>('unread')
+  const [selectedNotification, setSelectedNotification] = useState<NotificationUI | null>(null)
+  const [isProcessingAction, setIsProcessingAction] = useState(false)
+  const queryClient = useQueryClient()
+
+  const handleNotificationClick = async (notification: NotificationUI) => {
+    setSelectedNotification(notification)
+    if (!notification.isRead) {
+      await markAsRead(notification.id)
+    }
+  }
+
+  const handleActionClick = async (actionType: 'create_contract' | 'sign_contract' | 'accept_booking' | 'decline_booking', id: string) => {
+    setIsProcessingAction(true)
+    try {
+      if (actionType === 'create_contract' || actionType === 'accept_booking') {
+        // accepting a booking IS creating the contract
+        await rentalService.acceptRequest(id)
+        toast.success("Booking request accepted and contract created")
+        queryClient.invalidateQueries({ queryKey: ['bookingRequests'] })
+        queryClient.invalidateQueries({ queryKey: ['ownerDashboard'] })
+      } else if (actionType === 'decline_booking') {
+        await rentalService.rejectRequest(id)
+        toast.success("Booking request declined")
+        queryClient.invalidateQueries({ queryKey: ['bookingRequests'] })
+        queryClient.invalidateQueries({ queryKey: ['ownerDashboard'] })
+      } else if (actionType === 'sign_contract') {
+        await contractService.signContract(Number(id))
+        toast.success("Contract signed successfully")
+        queryClient.invalidateQueries({ queryKey: ['contracts'] })
+        queryClient.invalidateQueries({ queryKey: ['renterDashboard'] })
+        queryClient.invalidateQueries({ queryKey: ['ownerDashboard'] })
+      }
+      setSelectedNotification(null)
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || "Failed to process action")
+    } finally {
+      setIsProcessingAction(false)
+    }
+  }
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -110,44 +258,10 @@ export function NotificationsPage() {
     }
   }
 
-  const deleteNotification = async (id: string) => {
-    try {
-      // Optimistic update
-      setNotifications(notifications.filter((n) => n.id !== id))
-      await notificationService.deleteNotification(id)
-    } catch (err) {
-      console.error('Failed to delete notification', err)
-      // We could optionally revert the optimistic update here
-    }
-  }
-
-  const getIcon = (type: NotificationType) => {
-    switch (type) {
-      case 'message':
-        return <MessageSquare className="w-5 h-5 text-blue-500" />
-      case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />
-      case 'alert':
-        return <AlertTriangle className="w-5 h-5 text-amber-500" />
-      case 'system':
-      default:
-        return <Info className="w-5 h-5 text-[#3A6EA5]" />
-    }
-  }
-
-  const getBgColor = (type: NotificationType) => {
-    switch (type) {
-      case 'message':
-        return 'bg-blue-50'
-      case 'success':
-        return 'bg-green-50'
-      case 'alert':
-        return 'bg-amber-50'
-      case 'system':
-      default:
-        return 'bg-[#3A6EA5]/10'
-    }
-  }
+  const displayedNotifications = notifications
+    .filter((n) => (activeTab === 'unread' ? !n.isRead : n.isRead))
+    // We can sort them here if they aren't already sorted from the backend (usually they are sorted by createdAt desc)
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-[#F2F4F6] py-12 px-4 sm:px-6 lg:px-8">
@@ -180,11 +294,49 @@ export function NotificationsPage() {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex items-center gap-2 border-b border-[#3A6EA5]/10 pb-4">
+          <button
+            onClick={() => setActiveTab('unread')}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === 'unread'
+                ? 'bg-[#3A6EA5] text-white shadow-md shadow-[#3A6EA5]/20'
+                : 'text-[#6a7282] hover:bg-[#3A6EA5]/5 hover:text-[#3A6EA5]'
+            }`}
+          >
+            Unread
+          </button>
+          <button
+            onClick={() => setActiveTab('read')}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === 'read'
+                ? 'bg-[#3A6EA5] text-white shadow-md shadow-[#3A6EA5]/20'
+                : 'text-[#6a7282] hover:bg-[#3A6EA5]/5 hover:text-[#3A6EA5]'
+            }`}
+          >
+            Read
+          </button>
+        </div>
+
         {/* Notifications List */}
         <Card className="bg-white rounded-3xl shadow-sm border-[#3A6EA5]/10 overflow-hidden">
           <div className="divide-y divide-[#3A6EA5]/10">
-            <AnimatePresence mode="popLayout">
-              {notifications.length === 0 ? (
+            {isLoading ? (
+              <div className="p-6 space-y-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <Skeleton className="w-12 h-12 rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-1/3" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <AnimatePresence mode="popLayout">
+                {displayedNotifications.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -208,14 +360,15 @@ export function NotificationsPage() {
                   </Button>
                 </motion.div>
               ) : (
-                notifications.map((notification) => (
+                displayedNotifications.map((notification) => (
                   <motion.div
                     key={notification.id}
                     layout
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -100 }}
-                    className={`p-6 transition-colors hover:bg-[#f5f7fa] relative group ${
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`p-6 transition-colors hover:bg-[#f5f7fa] relative group cursor-pointer ${
                       !notification.isRead ? 'bg-blue-50/30' : ''
                     }`}
                   >
@@ -247,12 +400,15 @@ export function NotificationsPage() {
                           {notification.message}
                         </p>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
                           {notification.link && (
                             <Button
                               asChild
                               variant="link"
                               className="h-auto p-0 text-[#3A6EA5] font-medium hover:text-[#2a5a8a]"
+                              onClick={() => {
+                                if (!notification.isRead) markAsRead(notification.id)
+                              }}
                             >
                               <Link to={notification.link}>View Details</Link>
                             </Button>
@@ -261,7 +417,7 @@ export function NotificationsPage() {
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                         {!notification.isRead && (
                           <Button
                             variant="ghost"
@@ -273,15 +429,6 @@ export function NotificationsPage() {
                             <Check className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => deleteNotification(notification.id)}
-                          className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       </div>
                     </div>
 
@@ -293,9 +440,73 @@ export function NotificationsPage() {
                 ))
               )}
             </AnimatePresence>
+            )}
           </div>
         </Card>
       </div>
+
+      {/* Notification Details Modal */}
+      <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+        <DialogContent className="sm:max-w-md p-6 bg-white border-[#3A6EA5]/20 rounded-2xl shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-xl">
+              {selectedNotification && (
+                <div className={`p-2 rounded-lg flex-shrink-0 ${getBgColor(selectedNotification.type)}`}>
+                  {getIcon(selectedNotification.type)}
+                </div>
+              )}
+              {selectedNotification?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription className="text-base text-[#6a7282] mt-4 leading-relaxed whitespace-pre-wrap">
+            {selectedNotification?.message}
+          </DialogDescription>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setSelectedNotification(null)} className="rounded-xl">
+              Close
+            </Button>
+            {selectedNotification?.backendType === 'NewBookingRequest' && selectedNotification?.actionId && (
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                  onClick={() => handleActionClick('accept_booking', selectedNotification.actionId!)} 
+                  disabled={isProcessingAction}
+                  className="rounded-xl bg-green-600 hover:bg-green-700 text-white flex-1"
+                >
+                  {isProcessingAction ? 'Accepting...' : 'Accept Request'}
+                </Button>
+                <Button 
+                  onClick={() => handleActionClick('decline_booking', selectedNotification.actionId!)} 
+                  disabled={isProcessingAction}
+                  variant="outline"
+                  className="rounded-xl border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 flex-1"
+                >
+                  {isProcessingAction ? 'Declining...' : 'Decline'}
+                </Button>
+              </div>
+            )}
+            {(selectedNotification?.backendType === 'ContractPendingSignature' || selectedNotification?.backendType === 'ContractCreated' || selectedNotification?.backendType === 'NewContract') && selectedNotification?.actionId && selectedNotification?.actionType === 'Contract' && (
+              <Button 
+                onClick={() => handleActionClick('sign_contract', selectedNotification.actionId!)} 
+                disabled={isProcessingAction}
+                className="rounded-xl bg-green-600 hover:bg-green-700 text-white"
+              >
+                {isProcessingAction ? 'Signing...' : 'Sign Contract'}
+              </Button>
+            )}
+            {selectedNotification?.link && (
+              <Button asChild className="rounded-xl bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">
+                <Link to={selectedNotification.link}>
+                  {selectedNotification.backendType === 'NewMessage' 
+                    ? 'Reply to Message' 
+                    : (selectedNotification.backendType === 'AccountBanned' || selectedNotification.title.toLowerCase().includes('banned'))
+                    ? 'Contact Support'
+                    : 'View Details'}
+                </Link>
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

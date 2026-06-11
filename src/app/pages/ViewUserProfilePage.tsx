@@ -32,31 +32,6 @@ import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
 import { toast } from 'sonner'
 
-const USER_PROFILE = {
-  name: 'Layla Hassan',
-  avatar: 'https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?w=400',
-  email: 'layla.hassan@example.com',
-  phone: '+20 1234 567 890',
-  location: 'Alexandria, Egypt',
-  joinDate: 'January 2024',
-  bio: 'Friendly and respectful tenant looking for a comfortable living space. I work remotely as a software engineer and enjoy a quiet environment. Non-smoker, no pets, and very clean.',
-  acceptsRoommates: true,
-  verified: true,
-  lifestyle: {
-    smoking: false,
-    pets: false,
-    sleepSchedule: 'Night owl',
-    noiseTolerance: 'Medium',
-    guestsFrequency: 'Occasionally',
-    workSchedule: 'Remote',
-    sharingLevel: 'Okay with Sharing',
-  },
-  education: {
-    level: "Bachelor's",
-    field: 'Computer Science',
-  },
-}
-
 export function ViewUserProfilePage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
