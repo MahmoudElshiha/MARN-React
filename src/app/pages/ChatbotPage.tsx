@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { ArrowLeft, Send, Paperclip, Bot, User } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Link } from 'react-router'
@@ -13,10 +14,12 @@ interface Message {
 }
 
 export function ChatbotPage() {
+  const { t } = useTranslation('messages')
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Hi! I'm MARN's virtual assistant. How can I help you today?",
+      text: t('chatbot.greeting'),
       sender: 'bot',
       timestamp: new Date(),
     },
@@ -96,10 +99,10 @@ export function ChatbotPage() {
   }
 
   const quickActions = [
-    'Find properties',
-    'Schedule a tour',
-    'Roommate matching',
-    'Pricing info',
+    t('chatbot.suggestions.findProperties'),
+    t('chatbot.suggestions.scheduleTour'),
+    t('chatbot.suggestions.roommateMatching'),
+    t('chatbot.suggestions.pricingInfo'),
   ]
 
   return (
@@ -119,9 +122,9 @@ export function ChatbotPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-[#1a1a1a]">
-                MARN Assistant
+                {t('chatbot.title')}
               </h1>
-              <p className="text-sm text-[#4a5565]">Always here to help</p>
+              <p className="text-sm text-[#4a5565]">{t('chatbot.alwaysHere')}</p>
             </div>
           </div>
           <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
@@ -141,11 +144,10 @@ export function ChatbotPage() {
                 <Bot className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-                How can I help you today?
+                {t('chatbot.howCanIHelp')}
               </h2>
               <p className="text-[#4a5565] mb-6">
-                Ask me anything about finding properties, scheduling tours, or
-                using MARN
+                {t('chatbot.helpDescription')}
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
                 {quickActions.map((action) => (
@@ -254,7 +256,7 @@ export function ChatbotPage() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type your message..."
+              placeholder={t('chatbot.typeYourMessage')}
               className="flex-1 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
             />
             <Button

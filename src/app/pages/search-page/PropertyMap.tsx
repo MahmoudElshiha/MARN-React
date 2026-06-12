@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { MapPin, Star, BedDouble, Bath, Users, Loader2 } from 'lucide-react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useTranslation } from 'react-i18next'
 import type { SearchProperty } from '@/types/property'
 import { getImageUrl } from '@/constants/assets'
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback'
@@ -127,6 +128,7 @@ interface GeocodedProperty extends SearchProperty {
 }
 
 export function PropertyMap({ properties }: PropertyMapProps) {
+  const { t } = useTranslation('properties')
   const [geocoded, setGeocoded] = useState<GeocodedProperty[]>([])
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [geocodingProgress, setGeocodingProgress] = useState({ done: 0, total: 0 })
@@ -202,7 +204,10 @@ export function PropertyMap({ properties }: PropertyMapProps) {
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-[#3A6EA5]/20">
           <Loader2 className="w-4 h-4 text-[#3A6EA5] animate-spin" />
           <span className="text-sm text-[#4a5565] font-medium">
-            Locating properties… {geocodingProgress.done}/{geocodingProgress.total}
+            {t('search.locatingProperties', {
+              done: geocodingProgress.done,
+              total: geocodingProgress.total,
+            })}
           </span>
           <div className="w-20 h-1.5 bg-[#e8eef5] rounded-full overflow-hidden">
             <div
@@ -220,7 +225,7 @@ export function PropertyMap({ properties }: PropertyMapProps) {
         <div className="absolute top-4 left-4 z-[1000] flex items-center gap-1.5 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-[#3A6EA5]/15">
           <MapPin className="w-3.5 h-3.5 text-[#3A6EA5]" />
           <span className="text-sm font-medium text-[#1a1a1a]">
-            {geocoded.length} {geocoded.length === 1 ? 'property' : 'properties'} on map
+            {t('search.onMap_other', { count: geocoded.length })}
           </span>
         </div>
       )}

@@ -1,22 +1,17 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { motion } from 'motion/react'
-import {
-  ArrowLeft,
-  Lock,
-  Eye,
-  EyeOff,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react'
+import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { useMutation } from '@tanstack/react-query'
 import { authService } from '@/services/authService'
 import { HttpError } from '@/services/httpErrors'
+import { useTranslation } from 'react-i18next'
 
 export function ResetPasswordPage() {
+  const { t } = useTranslation('auth')
   const [searchParams] = useSearchParams()
   const email = (searchParams.get('email') ?? '').trim()
   const token = (searchParams.get('token') ?? '').replace(/ /g, '+')
@@ -28,10 +23,7 @@ export function ResetPasswordPage() {
   const [localError, setLocalError] = useState('')
   const [serverErrors, setServerErrors] = useState<string[]>([])
   const [isSuccess, setIsSuccess] = useState(false)
-  const [formData, setFormData] = useState({
-    newPassword: '',
-    confirmPassword: '',
-  })
+  const [formData, setFormData] = useState({ newPassword: '', confirmPassword: '' })
 
   const { mutate: resetPassword, isPending: loading } = useMutation({
     mutationFn: () =>
@@ -47,9 +39,7 @@ export function ResetPasswordPage() {
         setServerErrors(error.errors)
       } else {
         setServerErrors([
-          error instanceof HttpError
-            ? error.message
-            : 'Something went wrong. Please try again.',
+          error instanceof HttpError ? error.message : t('resetPassword.somethingWentWrong'),
         ])
       }
     },
@@ -61,12 +51,12 @@ export function ResetPasswordPage() {
     setServerErrors([])
 
     if (formData.newPassword.length < 8) {
-      setLocalError('Password must be at least 8 characters long.')
+      setLocalError(t('resetPassword.errorMinLength'))
       return
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setLocalError('Passwords do not match.')
+      setLocalError(t('resetPassword.errorMismatch'))
       return
     }
 
@@ -87,18 +77,11 @@ export function ResetPasswordPage() {
               <CheckCircle className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-3xl font-bold text-[#1a1a1a] mb-3">
-              Password reset successful
+              {t('resetPassword.success.title')}
             </h2>
-            <p className="text-[#4a5565] mb-8">
-              Your password has been updated. You can now sign in with your new
-              password.
-            </p>
-            <Button
-              asChild
-              size="lg"
-              className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6"
-            >
-              <Link to="/login">Go to Sign In</Link>
+            <p className="text-[#4a5565] mb-8">{t('resetPassword.success.subtitle')}</p>
+            <Button asChild size="lg" className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6">
+              <Link to="/login">{t('resetPassword.success.goToSignIn')}</Link>
             </Button>
           </motion.div>
         </div>
@@ -120,18 +103,11 @@ export function ResetPasswordPage() {
               <XCircle className="w-10 h-10 text-red-500" />
             </div>
             <h2 className="text-2xl font-bold text-[#1a1a1a] mb-3">
-              Invalid reset link
+              {t('resetPassword.invalidLink.title')}
             </h2>
-            <p className="text-[#4a5565] mb-8">
-              This link is missing required information. Please request a new
-              password reset email.
-            </p>
-            <Button
-              asChild
-              size="lg"
-              className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6"
-            >
-              <Link to="/forgot-password">Request new link</Link>
+            <p className="text-[#4a5565] mb-8">{t('resetPassword.invalidLink.subtitle')}</p>
+            <Button asChild size="lg" className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6">
+              <Link to="/forgot-password">{t('resetPassword.invalidLink.requestNew')}</Link>
             </Button>
           </motion.div>
         </div>
@@ -148,20 +124,15 @@ export function ResetPasswordPage() {
           transition={{ duration: 0.6 }}
           className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl shadow-[#3A6EA5]/20"
         >
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors mb-6"
-          >
+          <Link to="/login" className="inline-flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors mb-6">
             <ArrowLeft className="w-4 h-4" />
-            Back to Login
+            {t('resetPassword.backToLogin')}
           </Link>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#1a1a1a] mb-2">
-              Set New Password
-            </h1>
+            <h1 className="text-3xl font-bold text-[#1a1a1a] mb-2">{t('resetPassword.title')}</h1>
             <p className="text-[#4a5565] text-sm">
-              Resetting password for{' '}
+              {t('resetPassword.resetingFor')}{' '}
               <span className="font-semibold text-[#1a1a1a]">{email}</span>
             </p>
           </div>
@@ -173,20 +144,15 @@ export function ResetPasswordPage() {
                   <p>{localError}</p>
                 ) : (
                   <ul className="list-disc list-inside space-y-1">
-                    {serverErrors.map((msg) => (
-                      <li key={msg}>{msg}</li>
-                    ))}
+                    {serverErrors.map((msg) => <li key={msg}>{msg}</li>)}
                   </ul>
                 )}
               </div>
             )}
 
             <div>
-              <Label
-                htmlFor="newPassword"
-                className="text-[#1a1a1a] mb-2 block"
-              >
-                New Password
+              <Label htmlFor="newPassword" className="text-[#1a1a1a] mb-2 block">
+                {t('resetPassword.newPasswordLabel')}
               </Label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -194,34 +160,21 @@ export function ResetPasswordPage() {
                   id="newPassword"
                   type={showPassword ? 'text' : 'password'}
                   value={formData.newPassword}
-                  onChange={(e) =>
-                    setFormData({ ...formData, newPassword: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                   required
                   disabled={loading}
                   className="pl-12 pr-12 py-6 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
-                  placeholder="Enter your new password"
+                  placeholder={t('resetPassword.newPasswordPlaceholder')}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6a7282] hover:text-[#3A6EA5]"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6a7282] hover:text-[#3A6EA5]">
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
             <div>
-              <Label
-                htmlFor="confirmPassword"
-                className="text-[#1a1a1a] mb-2 block"
-              >
-                Confirm New Password
+              <Label htmlFor="confirmPassword" className="text-[#1a1a1a] mb-2 block">
+                {t('resetPassword.confirmPasswordLabel')}
               </Label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -229,27 +182,14 @@ export function ResetPasswordPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      confirmPassword: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   required
                   disabled={loading}
                   className="pl-12 pr-12 py-6 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
-                  placeholder="Confirm your new password"
+                  placeholder={t('resetPassword.confirmPasswordPlaceholder')}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6a7282] hover:text-[#3A6EA5]"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                <button type="button" onClick={() => setShowConfirmPassword((prev) => !prev)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6a7282] hover:text-[#3A6EA5]">
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -260,7 +200,7 @@ export function ResetPasswordPage() {
               disabled={loading}
               className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30 disabled:opacity-50"
             >
-              {loading ? 'Resetting Password...' : 'Reset Password'}
+              {loading ? t('resetPassword.resetting') : t('resetPassword.resetPassword')}
             </Button>
           </form>
         </motion.div>

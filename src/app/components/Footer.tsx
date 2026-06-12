@@ -8,8 +8,11 @@ import {
   Instagram,
   Linkedin,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export function Footer() {
+  const { t } = useTranslation('navigation')
+
   return (
     <footer className="bg-[#1a1a1a] border-t border-[#3A6EA5]/20 mt-20">
       <div className="max-w-[1440px] mx-auto px-8 py-12">
@@ -22,10 +25,7 @@ export function Footer() {
               </div>
               <span className="text-2xl font-bold text-white">MARN</span>
             </div>
-            <p className="text-[#99a1af] mb-4">
-              Your trusted platform for finding the perfect rental property and
-              roommates.
-            </p>
+            <p className="text-[#99a1af] mb-4">{t('footer.tagline')}</p>
             <div className="flex gap-3">
               <a
                 href="#"
@@ -56,46 +56,31 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Quick Links</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2">
               <li>
-                <Link
-                  to="/search"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  Search Properties
+                <Link to="/search" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.searchProperties')}
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/owner-dashboard"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  List Your Property
+                <Link to="/owner-dashboard" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.listYourProperty')}
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/about"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  About Us
+                <Link to="/about" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.aboutUs')}
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/how-it-works"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  How It Works
+                <Link to="/how-it-works" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.howItWorks')}
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/pricing"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  Pricing
+                <Link to="/pricing" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.pricing')}
                 </Link>
               </li>
             </ul>
@@ -103,38 +88,26 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Support</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.support')}</h4>
             <ul className="space-y-2">
               <li>
-                <Link
-                  to="/faq"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  FAQ
+                <Link to="/faq" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.faq')}
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/contact"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  Contact Us
+                <Link to="/contact" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.contactUs')}
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/terms"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  Terms of Service
+                <Link to="/terms" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.termsOfService')}
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/privacy"
-                  className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
-                >
-                  Privacy Policy
+                <Link to="/privacy" className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors">
+                  {t('footer.privacyPolicy')}
                 </Link>
               </li>
             </ul>
@@ -142,7 +115,7 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Contact Us</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.contactUs')}</h4>
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-[#99a1af]">
                 <Mail className="w-4 h-4 flex-shrink-0 text-[#3A6EA5]" />
@@ -165,9 +138,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-[#3A6EA5]/20 pt-8">
-          <p className="text-center text-[#99a1af]">
-            © 2026 MARN. All rights reserved.
-          </p>
+          <p className="text-center text-[#99a1af]">{t('footer.copyright')}</p>
         </div>
       </div>
     </footer>

@@ -19,6 +19,7 @@ import { Link } from 'react-router'
 import { useAuth } from '@/hooks/useAuth'
 import { useRenterDashboard } from '@/hooks/useRenterDashboard'
 import { useProperties } from '@/hooks/useProperties'
+import { useTranslation } from 'react-i18next'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-EG', {
@@ -38,6 +39,7 @@ function timeAgo(iso: string) {
 }
 
 export function TenantDashboard() {
+  const { t } = useTranslation('dashboard')
   const { user } = useAuth()
   const { data: dashboardRes, isLoading: dashboardLoading } =
     useRenterDashboard()
@@ -55,9 +57,9 @@ export function TenantDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h1 className="text-4xl font-bold text-[#1a1a1a]">My Dashboard</h1>
+            <h1 className="text-4xl font-bold text-[#1a1a1a]">{t('tenant.title')}</h1>
             <p className="text-[#4a5565] mt-2">
-              Welcome back, {user?.firstName ?? 'there'}!
+              {t('tenant.welcome', { name: user?.firstName ?? 'there' })}
             </p>
             {dashboard?.accountStatus && (
               <Badge
@@ -81,7 +83,7 @@ export function TenantDashboard() {
             className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             asChild
           >
-            <Link to="/search">Find Properties</Link>
+            <Link to="/search">{t('tenant.findProperties')}</Link>
           </Button>
         </div>
 
@@ -94,8 +96,8 @@ export function TenantDashboard() {
                 <div>
                   <p className="text-white/80 mb-1">
                     {dashboard?.nextPayment
-                      ? 'Next Payment Due'
-                      : 'Current Rent'}
+                      ? t('tenant.cards.nextPaymentDue')
+                      : t('tenant.cards.currentRent')}
                   </p>
                   {dashboardLoading ? (
                     <Skeleton className="h-8 w-28 bg-white/30" />
@@ -106,11 +108,11 @@ export function TenantDashboard() {
                           ? formatDate(dashboard.nextPayment)
                           : activeRental
                             ? `${activeRental.monthlyRent.toLocaleString()} EGP`
-                            : 'No active rental'}
+                            : t('tenant.cards.noActiveRental')}
                       </p>
                       {dashboard?.nextPayment && activeRental && (
                         <p className="text-sm text-white/70 mt-1">
-                          {activeRental.monthlyRent.toLocaleString()} EGP / mo
+                          {activeRental.monthlyRent.toLocaleString()} EGP {t('tenant.cards.perMonth')}
                         </p>
                       )}
                     </>
@@ -126,7 +128,7 @@ export function TenantDashboard() {
             <CardContent className="p-6">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <Home className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-base">Active Rentals</span>
+                <span className="text-base">{t('tenant.cards.activeRentals')}</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
                 {dashboardLoading ? '…' : (dashboard?.activeRentalsCount ?? 0)}
@@ -139,7 +141,7 @@ export function TenantDashboard() {
             <CardContent className="p-6">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <Heart className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-base">Saved Properties</span>
+                <span className="text-base">{t('tenant.cards.savedProperties')}</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
                 {dashboardLoading
@@ -154,7 +156,7 @@ export function TenantDashboard() {
             <CardContent className="p-6">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <Bell className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-base">Notifications</span>
+                <span className="text-base">{t('tenant.cards.notifications')}</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
                 {dashboardLoading
@@ -172,7 +174,7 @@ export function TenantDashboard() {
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Active Rentals
+                  {t('tenant.activeRentals.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -180,12 +182,9 @@ export function TenantDashboard() {
                   <Skeleton className="h-36 w-full rounded-2xl" />
                 ) : !activeRental ? (
                   <div className="text-center py-8 text-[#4a5565]">
-                    No active rentals.{' '}
-                    <Link
-                      to="/search"
-                      className="text-[#3A6EA5] hover:underline"
-                    >
-                      Find a property.
+                    {t('tenant.activeRentals.none')}{' '}
+                    <Link to="/search" className="text-[#3A6EA5] hover:underline">
+                      {t('tenant.activeRentals.findProperty')}
                     </Link>
                   </div>
                 ) : (
@@ -207,7 +206,7 @@ export function TenantDashboard() {
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div>
                             <p className="text-xs text-[#6a7282] mb-1">
-                              Start Date
+                              {t('tenant.activeRentals.startDate')}
                             </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {formatDate(rental.startDate)}
@@ -215,7 +214,7 @@ export function TenantDashboard() {
                           </div>
                           <div>
                             <p className="text-xs text-[#6a7282] mb-1">
-                              End Date
+                              {t('tenant.activeRentals.endDate')}
                             </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {formatDate(rental.expiryDate)}
@@ -226,7 +225,7 @@ export function TenantDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-xs text-[#6a7282] mb-1">
-                              Monthly Rent
+                              {t('tenant.activeRentals.monthlyRent')}
                             </p>
                             <p className="text-xl font-bold text-[#3A6EA5]">
                               {rental.monthlyRent.toLocaleString()} EGP
@@ -238,7 +237,7 @@ export function TenantDashboard() {
                               size="sm"
                               className="rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                             >
-                              Pay Rent
+                              {t('tenant.activeRentals.payRent')}
                             </Button>
                             <Button
                               variant="outline"
@@ -265,7 +264,7 @@ export function TenantDashboard() {
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Pending Requests
+                    {t('tenant.pendingRequests.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -307,7 +306,7 @@ export function TenantDashboard() {
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Recommended for You
+                  {t('tenant.recommended.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -318,7 +317,7 @@ export function TenantDashboard() {
                   </div>
                 ) : recommendedProperties.length === 0 ? (
                   <p className="text-[#4a5565] text-center py-8">
-                    No recommendations available.
+                    {t('tenant.recommended.none')}
                   </p>
                 ) : (
                   <div className="grid gap-6">
@@ -350,7 +349,7 @@ export function TenantDashboard() {
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a]">
-                  Recent Notifications
+                  {t('tenant.recentNotifications.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -361,7 +360,7 @@ export function TenantDashboard() {
                   </div>
                 ) : !dashboard?.notifications?.length ? (
                   <p className="text-sm text-[#6a7282] text-center py-6">
-                    No notifications yet.
+                    {t('tenant.recentNotifications.none')}
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -403,7 +402,7 @@ export function TenantDashboard() {
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl text-[#1a1a1a]">
-                    Contracts
+                    {t('tenant.contracts.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -443,7 +442,7 @@ export function TenantDashboard() {
                               className="inline-flex items-center gap-1 text-xs text-[#3A6EA5] hover:underline mt-2"
                             >
                               <FileText className="w-3 h-3" />
-                              View Document
+                              {t('tenant.contracts.viewDocument')}
                             </a>
                           )}
                         </div>
@@ -460,12 +459,12 @@ export function TenantDashboard() {
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl text-[#1a1a1a] flex items-center justify-between">
-                    <span>Saved Properties</span>
+                    <span>{t('tenant.savedPropertiesCard.title')}</span>
                     <Link
                       to="/saved"
                       className="text-sm font-normal text-[#3A6EA5] hover:underline"
                     >
-                      View all
+                      {t('tenant.savedPropertiesCard.viewAll')}
                     </Link>
                   </CardTitle>
                 </CardHeader>
@@ -514,7 +513,7 @@ export function TenantDashboard() {
               <Card className="rounded-3xl shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-xl text-[#1a1a1a]">
-                    Payment History
+                    {t('tenant.paymentHistory.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -554,7 +553,7 @@ export function TenantDashboard() {
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a]">
-                  Quick Actions
+                  {t('tenant.quickActions.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -562,17 +561,17 @@ export function TenantDashboard() {
                   className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
                   asChild
                 >
-                  <Link to="/payment">Pay Rent</Link>
+                  <Link to="/payment">{t('tenant.quickActions.payRent')}</Link>
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                   asChild
                 >
-                  <Link to="/maintenance">Request Maintenance</Link>
+                  <Link to="/maintenance">{t('tenant.quickActions.requestMaintenance')}</Link>
                 </Button>
                 <Button variant="outline" className="w-full rounded-xl" asChild>
-                  <Link to="/messages">Contact Landlord</Link>
+                  <Link to="/messages">{t('tenant.quickActions.contactLandlord')}</Link>
                 </Button>
               </CardContent>
             </Card>

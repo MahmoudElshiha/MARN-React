@@ -9,8 +9,10 @@ import { useState } from 'react'
 import { useRegister } from '@/hooks/useRegister'
 import { GoogleAuthButton } from '../components/figma/GoogleAuthButton'
 import { HttpError } from '@/services/httpErrors'
+import { useTranslation } from 'react-i18next'
 
 export function SignUpPage() {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -48,7 +50,7 @@ export function SignUpPage() {
             (Object.keys(fieldValidationErrors).length ? '' : error.message),
         )
       } else {
-        setErrorMessage('Something went wrong. Please try again.')
+        setErrorMessage(t('signup.somethingWentWrong'))
       }
     },
   })
@@ -69,6 +71,13 @@ export function SignUpPage() {
     })
   }
 
+  const features = [
+    t('signup.features.verifiedProperties'),
+    t('signup.features.roommateMatching'),
+    t('signup.features.securePayments'),
+    t('signup.features.propertyTools'),
+  ]
+
   return (
     <div className="min-h-screen bg-[#F2F4F6] flex items-center justify-center px-4 py-20">
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center">
@@ -85,20 +94,10 @@ export function SignUpPage() {
             </div>
             <span className="text-4xl font-bold text-[#1a1a1a]">MARN</span>
           </div>
-          <h1 className="text-5xl font-bold text-[#1a1a1a] mb-6">
-            Join MARN Today
-          </h1>
-          <p className="text-xl text-[#4a5565] mb-8">
-            Create your account to start your rental journey. Whether you're
-            looking for a home or listing a property, we've got you covered.
-          </p>
+          <h1 className="text-5xl font-bold text-[#1a1a1a] mb-6">{t('signup.heading')}</h1>
+          <p className="text-xl text-[#4a5565] mb-8">{t('signup.subtitle')}</p>
           <div className="space-y-4">
-            {[
-              'Access 10,000+ verified properties',
-              'Smart roommate matching',
-              'Secure payment processing',
-              'Professional property management tools',
-            ].map((feature, index) => (
+            {features.map((feature, index) => (
               <motion.div
                 key={feature}
                 initial={{ opacity: 0, x: -20 }}
@@ -121,16 +120,11 @@ export function SignUpPage() {
         >
           <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl shadow-black/10">
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2">
-                Create Account
-              </h2>
+              <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2">{t('signup.title')}</h2>
               <p className="text-[#4a5565]">
-                Already have an account?{' '}
-                <Link
-                  to="/login"
-                  className="text-[#3A6EA5] hover:underline font-semibold"
-                >
-                  Sign in
+                {t('signup.alreadyHaveAccount')}{' '}
+                <Link to="/login" className="text-[#3A6EA5] hover:underline font-semibold">
+                  {t('signup.signIn')}
                 </Link>
               </p>
             </div>
@@ -138,11 +132,8 @@ export function SignUpPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* First Name */}
               <div>
-                <Label
-                  htmlFor="firstName"
-                  className="text-[#1a1a1a] mb-2 block"
-                >
-                  First Name
+                <Label htmlFor="firstName" className="text-[#1a1a1a] mb-2 block">
+                  {t('signup.firstNameLabel')}
                 </Label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -151,24 +142,20 @@ export function SignUpPage() {
                     type="text"
                     required
                     value={formData.firstName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstName: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('FirstName').length ? 'border-red-400 focus:border-red-400' : ''}`}
-                    placeholder="John"
+                    placeholder={t('signup.firstNamePlaceholder')}
                   />
                 </div>
                 {fe('FirstName').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-1">
-                    {msg}
-                  </p>
+                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
                 ))}
               </div>
 
               {/* Last Name */}
               <div>
                 <Label htmlFor="lastName" className="text-[#1a1a1a] mb-2 block">
-                  Last Name
+                  {t('signup.lastNameLabel')}
                 </Label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -177,24 +164,20 @@ export function SignUpPage() {
                     type="text"
                     required
                     value={formData.lastName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastName: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('LastName').length ? 'border-red-400 focus:border-red-400' : ''}`}
-                    placeholder="Doe"
+                    placeholder={t('signup.lastNamePlaceholder')}
                   />
                 </div>
                 {fe('LastName').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-1">
-                    {msg}
-                  </p>
+                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
                 ))}
               </div>
 
               {/* Email */}
               <div>
                 <Label htmlFor="email" className="text-[#1a1a1a] mb-2 block">
-                  Email Address
+                  {t('signup.emailLabel')}
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -203,24 +186,20 @@ export function SignUpPage() {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('Email').length ? 'border-red-400 focus:border-red-400' : ''}`}
-                    placeholder="you@example.com"
+                    placeholder={t('signup.emailPlaceholder')}
                   />
                 </div>
                 {fe('Email').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-1">
-                    {msg}
-                  </p>
+                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
                 ))}
               </div>
 
               {/* Password */}
               <div>
                 <Label htmlFor="password" className="text-[#1a1a1a] mb-2 block">
-                  Password
+                  {t('signup.passwordLabel')}
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -229,45 +208,31 @@ export function SignUpPage() {
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className={`pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('Password').length ? 'border-red-400 focus:border-red-400' : ''}`}
-                    placeholder="Create a strong password"
+                    placeholder={t('signup.passwordPlaceholder')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6a7282] hover:text-[#3A6EA5]"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {fe('Password').length ? (
                   fe('Password').map((msg) => (
-                    <p key={msg} className="text-xs text-red-500 mt-1">
-                      {msg}
-                    </p>
+                    <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
                   ))
                 ) : (
-                  <p className="text-xs text-[#6a7282] mt-2">
-                    Must be at least 8 characters with a mix of letters and
-                    numbers
-                  </p>
+                  <p className="text-xs text-[#6a7282] mt-2">{t('signup.passwordHint')}</p>
                 )}
               </div>
 
               {/* Confirm Password */}
               <div>
-                <Label
-                  htmlFor="confirmPassword"
-                  className="text-[#1a1a1a] mb-2 block"
-                >
-                  Confirm Password
+                <Label htmlFor="confirmPassword" className="text-[#1a1a1a] mb-2 block">
+                  {t('signup.confirmPasswordLabel')}
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -276,43 +241,30 @@ export function SignUpPage() {
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
                     value={formData.confirmPassword}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        confirmPassword: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     className={`pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('ConfirmPassword').length ? 'border-red-400 focus:border-red-400' : ''}`}
-                    placeholder="Confirm your password"
+                    placeholder={t('signup.confirmPasswordPlaceholder')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6a7282] hover:text-[#3A6EA5]"
                   >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {fe('ConfirmPassword').length ? (
                   fe('ConfirmPassword').map((msg) => (
-                    <p key={msg} className="text-xs text-red-500 mt-1">
-                      {msg}
-                    </p>
+                    <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
                   ))
                 ) : (
-                  <p className="text-xs text-[#6a7282] mt-2">
-                    Must match the password
-                  </p>
+                  <p className="text-xs text-[#6a7282] mt-2">{t('signup.confirmPasswordHint')}</p>
                 )}
               </div>
 
               {/* Gender */}
               <div>
-                <Label className="text-[#1a1a1a] mb-3 block">Gender</Label>
+                <Label className="text-[#1a1a1a] mb-3 block">{t('signup.genderLabel')}</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
@@ -327,14 +279,12 @@ export function SignUpPage() {
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Users className="w-6 h-6" />
-                      <span className="font-semibold">Male</span>
+                      <span className="font-semibold">{t('signup.male')}</span>
                     </div>
                   </button>
                   <button
                     type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, gender: 'Female' })
-                    }
+                    onClick={() => setFormData({ ...formData, gender: 'Female' })}
                     className={`p-6 rounded-2xl border-2 transition-all ${
                       formData.gender === 'Female'
                         ? 'bg-[#3A6EA5] border-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
@@ -345,24 +295,19 @@ export function SignUpPage() {
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Users className="w-6 h-6" />
-                      <span className="font-semibold">Female</span>
+                      <span className="font-semibold">{t('signup.female')}</span>
                     </div>
                   </button>
                 </div>
                 {fe('Gender').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-2">
-                    {msg}
-                  </p>
+                  <p key={msg} className="text-xs text-red-500 mt-2">{msg}</p>
                 ))}
               </div>
 
               {/* Birthdate */}
               <div>
-                <Label
-                  htmlFor="birthdate"
-                  className="text-[#1a1a1a] mb-2 block"
-                >
-                  Birthdate
+                <Label htmlFor="birthdate" className="text-[#1a1a1a] mb-2 block">
+                  {t('signup.birthdateLabel')}
                 </Label>
                 <div className="relative">
                   <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -371,16 +316,12 @@ export function SignUpPage() {
                     type="date"
                     required
                     value={formData.birthdate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, birthdate: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
                     className={`pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${fe('DateOfBirth').length ? 'border-red-400 focus:border-red-400' : ''}`}
                   />
                 </div>
                 {fe('DateOfBirth').map((msg) => (
-                  <p key={msg} className="text-xs text-red-500 mt-1">
-                    {msg}
-                  </p>
+                  <p key={msg} className="text-xs text-red-500 mt-1">{msg}</p>
                 ))}
               </div>
 
@@ -391,27 +332,18 @@ export function SignUpPage() {
                   required
                   checked={formData.agreeToTerms}
                   onCheckedChange={(checked) =>
-                    setFormData({
-                      ...formData,
-                      agreeToTerms: checked as boolean,
-                    })
+                    setFormData({ ...formData, agreeToTerms: checked as boolean })
                   }
                   className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5] mt-1"
                 />
-                <label
-                  htmlFor="terms"
-                  className="text-sm text-[#4a5565] cursor-pointer"
-                >
-                  I agree to the{' '}
+                <label htmlFor="terms" className="text-sm text-[#4a5565] cursor-pointer">
+                  {t('signup.termsAgree')}{' '}
                   <Link to="/terms" className="text-[#3A6EA5] hover:underline">
-                    Terms of Service
+                    {t('signup.termsOfService')}
                   </Link>{' '}
-                  and{' '}
-                  <Link
-                    to="/privacy"
-                    className="text-[#3A6EA5] hover:underline"
-                  >
-                    Privacy Policy
+                  {t('signup.and')}{' '}
+                  <Link to="/privacy" className="text-[#3A6EA5] hover:underline">
+                    {t('signup.privacyPolicy')}
                   </Link>
                 </label>
               </div>
@@ -428,30 +360,25 @@ export function SignUpPage() {
                 </p>
               )}
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 size="lg"
                 disabled={isPending}
                 className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30 disabled:opacity-60"
               >
-                {isPending ? 'Creating Account...' : 'Create Account'}
+                {isPending ? t('signup.creatingAccount') : t('signup.createAccount')}
               </Button>
             </form>
 
-            {/* Divider */}
             <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#3A6EA5]/20"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-[#6a7282]">
-                  Or sign up with
-                </span>
+                <span className="px-4 bg-white text-[#6a7282]">{t('signup.orSignUpWith')}</span>
               </div>
             </div>
 
-            {/* Social Signup */}
             <div className="flex justify-center">
               <GoogleAuthButton text="signup_with" />
             </div>

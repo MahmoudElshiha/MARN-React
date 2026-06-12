@@ -21,27 +21,42 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/useAuth'
 import { propertyService } from '@/services/propertyService'
 import { decodeUserFromToken } from '@/utils/tokenUtils'
+import { useTranslation } from 'react-i18next'
+import i18n from '@/i18n/config'
 
-const ROLE_DASHBOARDS: Record<string, { label: string; path: string }[]> = {
-  owner: [
-    { label: 'Owner Dashboard', path: '/owner-dashboard' },
-    { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
-  ],
-  admin: [{ label: 'Admin Dashboard', path: '/admin-dashboard' }],
-  tenant: [{ label: 'Tenant Dashboard', path: '/tenant-dashboard' }],
+function LanguageSwitcher() {
+  const currentLang = i18n.language?.startsWith('ar') ? 'ar' : 'en'
+  const toggle = () => i18n.changeLanguage(currentLang === 'ar' ? 'en' : 'ar')
+  return (
+    <button
+      onClick={toggle}
+      className="text-sm font-semibold text-[#3A6EA5] border border-[#3A6EA5]/30 rounded-lg px-3 py-1 hover:bg-[#3A6EA5]/10 transition-colors"
+    >
+      {currentLang === 'ar' ? 'EN' : 'AR'}
+    </button>
+  )
 }
 
 function DashboardButton() {
   const { user } = useAuth()
+  const { t } = useTranslation('navigation')
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
+  const ROLE_DASHBOARDS: Record<string, { label: string; path: string }[]> = {
+    owner: [
+      { label: t('dashboards.ownerDashboard'), path: '/owner-dashboard' },
+      { label: t('dashboards.tenantDashboard'), path: '/tenant-dashboard' },
+    ],
+    admin: [{ label: t('dashboards.adminDashboard'), path: '/admin-dashboard' }],
+    tenant: [{ label: t('dashboards.tenantDashboard'), path: '/tenant-dashboard' }],
+  }
+
   const dashboards = (user?.role && ROLE_DASHBOARDS[user.role]) ?? [
-    { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
+    { label: t('dashboards.tenantDashboard'), path: '/tenant-dashboard' },
   ]
 
-  // Close when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -116,6 +131,7 @@ export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isAuthenticated, login, logout, user } = useAuth()
   const [isBecomeHostLoading, setIsBecomeHostLoading] = useState(false)
+  const { t } = useTranslation('navigation')
 
   async function handleBecomeHost() {
     if (!isAuthenticated) {
@@ -144,12 +160,12 @@ export function Navigation() {
   }
 
   const menuItems = [
-    { icon: Home, label: 'Home', path: '/' },
-    { icon: Building, label: 'Explore Properties', path: '/search' },
-    { icon: MessageCircle, label: 'Chat Support', path: '/chatbot' },
-    { icon: HelpCircle, label: 'FAQ', path: '/faq' },
-    { icon: Phone, label: 'Contact', path: '/contact' },
-    { icon: Settings, label: 'Settings', path: '/profile-settings' },
+    { icon: Home, label: t('menu.home'), path: '/' },
+    { icon: Building, label: t('menu.exploreProperties'), path: '/search' },
+    { icon: MessageCircle, label: t('menu.chatSupport'), path: '/chatbot' },
+    { icon: HelpCircle, label: t('menu.faq'), path: '/faq' },
+    { icon: Phone, label: t('menu.contact'), path: '/contact' },
+    { icon: Settings, label: t('menu.settings'), path: '/profile-settings' },
   ]
 
   return (
@@ -171,7 +187,7 @@ export function Navigation() {
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
                   <Input
-                    placeholder="Search by location, property type..."
+                    placeholder={t('searchPlaceholder')}
                     className="pl-12 pr-4 py-6 bg-white rounded-2xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] transition-all"
                   />
                 </div>
@@ -184,7 +200,7 @@ export function Navigation() {
                 to="/search"
                 className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] rounded-xl transition-colors"
               >
-                Explore
+                {t('explore')}
               </Link>
 
               {user?.role === 'tenant' && (
@@ -193,11 +209,12 @@ export function Navigation() {
                   disabled={isBecomeHostLoading}
                   onClick={handleBecomeHost}
                 >
-                  {isBecomeHostLoading ? 'Please wait…' : 'Become a Host'}
+                  {isBecomeHostLoading ? t('pleaseWait') : t('becomeHost')}
                 </Button>
               )}
 
               <div className="flex items-center gap-2">
+                <LanguageSwitcher />
                 <DashboardButton />
                 <Button
                   variant="ghost"
@@ -251,9 +268,7 @@ export function Navigation() {
                     <X className="w-5 h-5 text-white" />
                   </button>
                 </div>
-                <p className="text-white/90 text-sm">
-                  Your Modern Rental Network
-                </p>
+                <p className="text-white/90 text-sm">{t('drawer.tagline')}</p>
               </div>
 
               {/* Menu Items */}
@@ -303,7 +318,7 @@ export function Navigation() {
                         className="flex w-full items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
                       >
                         <LogOut className="w-5 h-5" />
-                        <span className="font-medium">Logout</span>
+                        <span className="font-medium">{t('menu.logout')}</span>
                       </button>
                     ) : (
                       <Link
@@ -312,7 +327,7 @@ export function Navigation() {
                         className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
                       >
                         <User className="w-5 h-5" />
-                        <span className="font-medium">Login / Sign Up</span>
+                        <span className="font-medium">{t('menu.loginSignUp')}</span>
                       </Link>
                     )}
                   </motion.div>
@@ -321,10 +336,10 @@ export function Navigation() {
                 {/* Footer */}
                 <div className="mt-8 p-4 bg-[#f5f7fa] rounded-2xl border border-[#3A6EA5]/10">
                   <p className="text-sm text-[#1a1a1a] mb-2 font-semibold">
-                    Need Help?
+                    {t('drawer.needHelp')}
                   </p>
                   <p className="text-xs text-[#6a7282] mb-3">
-                    Our support team is available 24/7
+                    {t('drawer.supportAvailable')}
                   </p>
                   <Button
                     size="sm"
@@ -332,7 +347,7 @@ export function Navigation() {
                     asChild
                   >
                     <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
-                      Contact Support
+                      {t('drawer.contactSupport')}
                     </Link>
                   </Button>
                 </div>

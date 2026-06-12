@@ -1,0 +1,471 @@
+{
+  "about": {
+    "title": "About MARN",
+    "subtitle": "We're revolutionizing the rental experience by connecting people with their perfect homes and compatible roommates.",
+    "mission": {
+      "title": "Our Mission",
+      "body": "At MARN, we believe everyone deserves a place they can call home. Our mission is to make the rental process transparent, efficient, and enjoyable for both tenants and property owners.",
+      "body2": "Founded in 2020, we've grown from a small startup to a trusted platform serving over 50,000 happy tenants across 100+ cities. We combine cutting-edge technology with a human touch to create meaningful connections."
+    },
+    "story": {
+      "title": "Our Story",
+      "body": "Founded in 2020, we've grown from a small startup to a trusted platform serving thousands of users across Egypt."
+    },
+    "values": {
+      "title": "Our Values",
+      "subtitle": "The principles that guide everything we do",
+      "trust": "Trust & Safety",
+      "trustDesc": "Every property and user is verified to ensure a secure experience for all our community members.",
+      "customer": "Customer First",
+      "customerDesc": "We prioritize your needs and provide 24/7 support to make your rental journey seamless.",
+      "innovation": "Innovation",
+      "innovationDesc": "Leveraging the latest technology to provide the best rental and roommate matching experience.",
+      "excellence": "Excellence",
+      "excellenceDesc": "Committed to delivering exceptional quality in every property listing and user interaction."
+    },
+    "stats": {
+      "tenants": "50K+ Happy Tenants",
+      "properties": "10K+ Properties",
+      "cities": "100+ Cities",
+      "happyTenants": "Happy Tenants"
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "subtitle": "Passionate people dedicated to transforming the rental experience"
+    },
+    "cta": {
+      "title": "Join Our Growing Community",
+      "subtitle": "Whether you're looking for a home or listing a property, we're here to help you succeed.",
+      "findHome": "Find a Home",
+      "listProperty": "List Your Property"
+    }
+  },
+  "howItWorks": {
+    "title": "How MARN Works",
+    "subtitle": "Your complete guide to finding the perfect rental or listing your property",
+    "forTenants": {
+      "title": "For Tenants",
+      "subtitle": "Find your perfect home in four simple steps",
+      "startSearching": "Start Searching",
+      "steps": {
+        "search": "Search & Filter",
+        "searchDesc": "Browse thousands of verified listings with advanced filters for location, price, amenities, and roommate preferences.",
+        "tours": "Schedule Tours",
+        "toursDesc": "Book virtual or in-person property tours at your convenience. View detailed photos and 3D walkthroughs.",
+        "connect": "Connect & Chat",
+        "connectDesc": "Message property owners and potential roommates directly. Get answers to all your questions instantly.",
+        "book": "Book & Move In",
+        "bookDesc": "Complete your application online, sign the lease digitally, and pay securely. Move into your new home!"
+      }
+    },
+    "forOwners": {
+      "title": "For Property Owners",
+      "subtitle": "List and manage your properties with ease",
+      "listProperty": "List Your Property",
+      "steps": {
+        "list": "List Your Property",
+        "listDesc": "Create a detailed listing with photos, descriptions, and amenities. Set your price and availability.",
+        "screen": "Screen Tenants",
+        "screenDesc": "Review verified tenant profiles, background checks, and references. Choose the best match for your property.",
+        "communicate": "Communicate",
+        "communicateDesc": "Chat with interested tenants, schedule tours, and answer questions through our secure messaging platform.",
+        "manage": "Manage & Earn",
+        "manageDesc": "Accept payments, handle maintenance requests, and track your earnings all from one dashboard."
+      }
+    },
+    "whyChoose": {
+      "title": "Why Choose MARN?",
+      "subtitle": "Features that make your rental experience seamless"
+    },
+    "features": {
+      "verifiedListings": "Verified Listings",
+      "verifiedListingsDesc": "All properties are verified for authenticity and accuracy.",
+      "securePayments": "Secure Payments",
+      "securePaymentsDesc": "End-to-end encrypted payment processing for your safety.",
+      "compatibility": "Compatibility Matching",
+      "compatibilityDesc": "Smart algorithm matches you with compatible roommates.",
+      "insights": "Market Insights",
+      "insightsDesc": "Access real-time market data and pricing analytics."
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Join thousands of happy users who found their perfect rental match",
+      "createAccount": "Create Account",
+      "contactUs": "Contact Us"
+    },
+    "learnMore": "Learn More"
+  },
+  "contact": {
+    "title": "Get in Touch",
+    "subtitle": "Have questions? We'd love to hear from you.",
+    "email": "Email Us",
+    "phone": "Call Us",
+    "visit": "Visit Us",
+    "hours": "Business Hours",
+    "form": {
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Ahmed Hassan",
+      "emailAddress": "Email Address",
+      "emailPlaceholder": "ahmed@example.com",
+      "phoneNumber": "Phone Number",
+      "phonePlaceholder": "+20 10 1234 5678",
+      "subject": "Subject",
+      "message": "Message",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "send": "Send Message",
+      "subjects": {
+        "general": "General Inquiry",
+        "tenantSupport": "Tenant Support",
+        "ownerSupport": "Property Owner Support",
+        "technical": "Technical Issue",
+        "billing": "Billing Question",
+        "feedback": "Feedback"
+      }
+    },
+    "sendMessage": "Send us a Message",
+    "selectSubjectPlaceholder": "Select a subject",
+    "sendButton": "Send Message",
+    "faqNote": {
+      "title": "Looking for Quick Answers?",
+      "subtitle": "Check out our FAQ page",
+      "visitFaq": "Visit FAQ Page",
+      "fullSubtitle": "Check out our FAQ page for answers to commonly asked questions"
+    },
+    "location": {
+      "title": "Our Location",
+      "address1": "123 Tahrir Square",
+      "address2": "Cairo, Egypt",
+      "mapNote": "Interactive map would be displayed here"
+    },
+    "methods": {
+      "emailDetails": "support@marn.com",
+      "emailDesc": "We'll respond within 24 hours",
+      "phoneDetails": "+20 10 1234 5678",
+      "phoneDesc": "Mon-Fri from 8am to 6pm EGY",
+      "visitDetails": "123 Tahrir Square, Cairo",
+      "visitDesc": "Cairo, Egypt 11511",
+      "hoursDetails": "Monday - Friday: 8am - 6pm",
+      "hoursDesc": "Saturday - Sunday: Closed"
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to common questions about using MARN",
+    "searchPlaceholder": "Search for answers...",
+    "categories": {
+      "tenants": "For Tenants",
+      "owners": "For Property Owners",
+      "safety": "Safety & Security",
+      "payments": "Payments & Billing"
+    },
+    "noResults": "No results found for",
+    "clearSearch": "Clear Search",
+    "stillHaveQuestions": {
+      "title": "Still Have Questions?",
+      "subtitle": "Our support team is here to help you 24/7",
+      "contactSupport": "Contact Support",
+      "liveChat": "Live Chat"
+    },
+    "questions": {
+      "q1": {
+        "question": "How do I search for properties?",
+        "answer": "Use our advanced search feature to filter properties by location, price range, number of bedrooms, amenities, and more. You can also save your searches for quick access later."
+      },
+      "q2": {
+        "question": "Is there a fee to use MARN as a tenant?",
+        "answer": "No, MARN is completely free for tenants. You can search, browse, and message property owners at no cost."
+      },
+      "q3": {
+        "question": "How do I schedule a property tour?",
+        "answer": "Click the \"Schedule Tour\" button on any property listing, select your preferred date and time, and the property owner will confirm your appointment."
+      },
+      "q4": {
+        "question": "What is the roommate matching feature?",
+        "answer": "Our smart algorithm matches you with potential roommates based on lifestyle preferences, work schedules, cleanliness habits, and more. You can filter and chat with matches before making a decision."
+      },
+      "q5": {
+        "question": "How do I apply for a property?",
+        "answer": "Once you find a property you like, click \"Apply Now\" and complete the online application form. You'll need to provide personal information, employment details, and references."
+      },
+      "q6": {
+        "question": "How much does it cost to list a property?",
+        "answer": "We offer flexible pricing plans starting from $29/month for basic listings. Premium plans include featured placement, professional photography, and advanced analytics."
+      },
+      "q7": {
+        "question": "How do I create a property listing?",
+        "answer": "Click \"Become a Host\" in the navigation menu, fill out the property details form, upload photos, set your pricing and availability, and publish. Your listing will go live within 24 hours after verification."
+      },
+      "q8": {
+        "question": "How are tenants verified?",
+        "answer": "All tenants go through identity verification, employment verification, and background checks. You can review their full profiles before accepting applications."
+      },
+      "q9": {
+        "question": "Can I manage multiple properties?",
+        "answer": "Yes! Our owner dashboard allows you to manage unlimited properties, track all bookings, handle maintenance requests, and view analytics for each property separately."
+      },
+      "q10": {
+        "question": "How do I receive rent payments?",
+        "answer": "Tenants pay through our secure platform, and funds are automatically deposited to your bank account on your chosen schedule (weekly, bi-weekly, or monthly)."
+      },
+      "q11": {
+        "question": "How does MARN verify property listings?",
+        "answer": "Our team manually reviews each listing, verifies ownership documents, and may conduct property inspections. All listings display a \"Verified\" badge once approved."
+      },
+      "q12": {
+        "question": "Is my payment information secure?",
+        "answer": "Yes, we use bank-level 256-bit SSL encryption for all transactions. We never store your full payment details on our servers and comply with PCI DSS standards."
+      },
+      "q13": {
+        "question": "What if I encounter a scam or fraud?",
+        "answer": "Report suspicious activity immediately through our platform. We have a dedicated trust and safety team that investigates all reports within 24 hours and takes appropriate action."
+      },
+      "q14": {
+        "question": "Are background checks mandatory?",
+        "answer": "For tenants, background checks are optional but highly recommended and increase your chances of approval. Property owners can require them as part of their application process."
+      },
+      "q15": {
+        "question": "What payment methods do you accept?",
+        "answer": "We accept credit cards, debit cards, bank transfers (ACH), and digital wallets including PayPal and Apple Pay."
+      },
+      "q16": {
+        "question": "When is rent due?",
+        "answer": "Rent due dates are set by individual property owners, typically on the 1st of each month. You'll receive reminders 5 days before the due date."
+      },
+      "q17": {
+        "question": "Is there a security deposit?",
+        "answer": "Security deposit amounts vary by property and are determined by the property owner. Deposits are held securely and returned within 30 days of move-out, minus any deductions for damages."
+      },
+      "q18": {
+        "question": "What are the cancellation policies?",
+        "answer": "Cancellation policies vary by property. Most require 30-60 days notice. Check the specific policy on each property listing before booking."
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last Updated: February 12, 2026",
+    "intro": "Please read these terms carefully before using our platform",
+    "importantNotice": {
+      "title": "Important Notice",
+      "body": "These Terms of Service contain important information about your legal rights, remedies, and obligations. By using MARN, you agree to be bound by these terms."
+    },
+    "cta": {
+      "title": "Questions About Our Terms?",
+      "subtitle": "Our legal team is here to help clarify any questions you may have",
+      "contactLegal": "Contact Legal Team"
+    },
+    "sections": {
+      "s1": {
+        "title": "1. Acceptance of Terms",
+        "content": "By accessing and using MARN's services, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our platform. We reserve the right to modify these terms at any time, and your continued use of the service constitutes acceptance of those changes."
+      },
+      "s2": {
+        "title": "2. User Accounts",
+        "content": "You must create an account to access certain features of our platform. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You must be at least 18 years old to create an account. You agree to provide accurate, current, and complete information during registration and to update such information to keep it accurate, current, and complete."
+      },
+      "s3": {
+        "title": "3. Property Listings",
+        "content": "Property owners must ensure that all listing information is accurate, complete, and up-to-date. You must have legal authority to list and rent the property. Photos and descriptions must accurately represent the property. You are responsible for setting pricing, availability, and rental terms. MARN reserves the right to remove listings that violate our policies or applicable laws."
+      },
+      "s4": {
+        "title": "4. Tenant Responsibilities",
+        "content": "Tenants agree to provide truthful information in rental applications. You are responsible for paying rent on time as agreed with the property owner. You must maintain the property in good condition and report any damages or maintenance issues promptly. You agree to comply with all lease terms and local laws and regulations."
+      },
+      "s5": {
+        "title": "5. Payments and Fees",
+        "content": "All payments are processed securely through our platform. Property owners agree to pay applicable listing fees and service charges. Tenants may be required to pay application fees, security deposits, and rent through the platform. All fees are non-refundable except as explicitly stated in our refund policy. MARN is not responsible for any disputes regarding payments between property owners and tenants."
+      },
+      "s6": {
+        "title": "6. Cancellation and Refunds",
+        "content": "Cancellation policies are set by individual property owners and must be clearly stated in the listing. Tenants should review cancellation policies before booking. Refunds, if applicable, will be processed according to the property's specific policy. MARN reserves the right to cancel bookings in cases of fraud, violation of terms, or safety concerns."
+      },
+      "s7": {
+        "title": "7. Prohibited Conduct",
+        "content": "Users must not engage in fraudulent activities, provide false information, or misrepresent themselves. Harassment, discrimination, or abusive behavior toward other users is strictly prohibited. You may not use the platform for any illegal purposes or to violate any laws. Attempting to circumvent platform fees or conduct transactions outside the platform is forbidden. Posting misleading listings, spam, or unauthorized commercial content is not allowed."
+      },
+      "s8": {
+        "title": "8. Verification and Background Checks",
+        "content": "MARN may conduct identity verification and background checks on users. By using our services, you authorize us to obtain such information. While we strive to verify users, MARN does not guarantee the accuracy or completeness of verification information and is not responsible for any issues arising from user interactions."
+      },
+      "s9": {
+        "title": "9. Intellectual Property",
+        "content": "All content on the MARN platform, including logos, text, graphics, and software, is the property of MARN or its licensors. You may not copy, reproduce, distribute, or create derivative works from our content without explicit written permission. User-generated content (listings, reviews, photos) remains the property of the user but grants MARN a license to use such content for platform operations."
+      },
+      "s10": {
+        "title": "10. Limitation of Liability",
+        "content": "MARN acts as a platform connecting property owners and tenants and is not a party to rental agreements. We are not responsible for the accuracy of listings, the conduct of users, or the condition of properties. MARN is not liable for any direct, indirect, incidental, consequential, or punitive damages arising from your use of the platform. Our total liability shall not exceed the amount paid by you to MARN in the twelve months preceding the claim."
+      },
+      "s11": {
+        "title": "11. Indemnification",
+        "content": "You agree to indemnify and hold harmless MARN, its affiliates, and their respective officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses arising out of your use of the platform, violation of these terms, or infringement of any third-party rights."
+      },
+      "s12": {
+        "title": "12. Dispute Resolution",
+        "content": "Any disputes arising from these terms or use of the platform shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association. The arbitration shall take place in San Francisco, California. You waive your right to participate in class action lawsuits or class-wide arbitration."
+      },
+      "s13": {
+        "title": "13. Governing Law",
+        "content": "These Terms of Service are governed by the laws of the State of California, without regard to its conflict of law provisions. Any legal action or proceeding shall be brought exclusively in the courts located in San Francisco, California."
+      },
+      "s14": {
+        "title": "14. Contact Information",
+        "content": "If you have questions about these Terms of Service, please contact us at: Email: legal@marn.com, Phone: +1 (555) 123-4567, Address: 123 Real Estate Ave, Suite 100, San Francisco, CA 94105"
+      }
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last Updated: February 12, 2026",
+    "intro": "Your privacy is important to us. This policy explains how we collect, use, and protect your information.",
+    "importantNotice": {
+      "title": "Your Privacy Matters",
+      "body": "We are committed to protecting your personal information and being transparent about our data practices. This policy describes how MARN collects, uses, shares, and protects your information."
+    },
+    "cta": {
+      "title": "Questions About Your Privacy?",
+      "subtitle": "Our privacy team is here to address your concerns",
+      "emailPrivacy": "Email Privacy Team",
+      "contactUs": "Contact Us"
+    },
+    "sections": {
+      "s1": {
+        "title": "1. Information We Collect",
+        "content": "We collect information you provide directly to us when you create an account, list a property, or use our services. This includes:\n\n• Personal Information: Name, email address, phone number, profile photo\n• Identity Verification: Government-issued ID, social security number (encrypted)\n• Financial Information: Bank account details, payment card information\n• Property Information: Addresses, photos, descriptions, rental terms\n• Usage Data: How you interact with our platform, search queries, page views\n• Device Information: IP address, browser type, operating system, device identifiers\n• Location Data: GPS coordinates, city, region (with your permission)\n• Communications: Messages sent through our platform, support inquiries"
+      },
+      "s2": {
+        "title": "2. How We Use Your Information",
+        "content": "We use the information we collect to:\n\n• Provide, maintain, and improve our services\n• Process transactions and send related information\n• Verify your identity and prevent fraud\n• Send you technical notices, updates, and support messages\n• Respond to your comments, questions, and customer service requests\n• Communicate with you about products, services, and events\n• Monitor and analyze trends, usage, and activities\n• Personalize and improve your experience\n• Facilitate connections between property owners and tenants\n• Comply with legal obligations and enforce our policies"
+      },
+      "s3": {
+        "title": "3. Information Sharing and Disclosure",
+        "content": "We may share your information in the following circumstances:\n\n• With Other Users: Profile information is visible to other users when you list a property or apply for a rental\n• Service Providers: Third-party vendors who perform services on our behalf (payment processing, identity verification, analytics)\n• Business Transfers: In connection with any merger, sale, or acquisition of all or a portion of our business\n• Legal Requirements: When required by law or to protect our rights and safety\n• With Your Consent: When you explicitly authorize us to share your information\n\nWe do NOT sell your personal information to third parties for their marketing purposes."
+      },
+      "s4": {
+        "title": "4. Data Security",
+        "content": "We take reasonable measures to protect your information from unauthorized access, use, or disclosure:\n\n• 256-bit SSL encryption for data transmission\n• Encrypted storage of sensitive information\n• Regular security audits and penetration testing\n• Restricted access to personal information on a need-to-know basis\n• Multi-factor authentication for account access\n• Compliance with PCI DSS standards for payment processing\n\nHowever, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security."
+      },
+      "s5": {
+        "title": "5. Your Privacy Rights",
+        "content": "You have the following rights regarding your personal information:\n\n• Access: Request a copy of the personal information we hold about you\n• Correction: Update or correct inaccurate information\n• Deletion: Request deletion of your personal information (subject to legal obligations)\n• Portability: Receive your data in a structured, machine-readable format\n• Opt-Out: Unsubscribe from marketing communications at any time\n• Do Not Sell: California residents can opt-out of the sale of personal information (we don't sell data)\n\nTo exercise these rights, contact us at privacy@marn.com or through your account settings."
+      },
+      "s6": {
+        "title": "6. Cookies and Tracking Technologies",
+        "content": "We use cookies and similar tracking technologies to:\n\n• Remember your preferences and settings\n• Understand how you use our platform\n• Deliver targeted advertising\n• Analyze site traffic and trends\n\nYou can control cookies through your browser settings. However, disabling cookies may limit your ability to use certain features of our platform."
+      },
+      "s7": {
+        "title": "7. Third-Party Services",
+        "content": "Our platform may contain links to third-party websites and services. We are not responsible for the privacy practices of these third parties. We encourage you to read their privacy policies before providing any information.\n\nWe use the following third-party services:\n• Google Analytics for usage analytics\n• Stripe for payment processing\n• AWS for cloud hosting\n• Twilio for SMS notifications"
+      },
+      "s8": {
+        "title": "8. Children's Privacy",
+        "content": "MARN is not intended for use by children under the age of 18. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us immediately, and we will take steps to delete such information."
+      },
+      "s9": {
+        "title": "9. International Data Transfers",
+        "content": "Your information may be transferred to and processed in countries other than your country of residence. These countries may have different data protection laws. By using our services, you consent to the transfer of your information to the United States and other countries where we operate."
+      },
+      "s10": {
+        "title": "10. Data Retention",
+        "content": "We retain your personal information for as long as necessary to:\n\n• Provide our services to you\n• Comply with legal obligations\n• Resolve disputes and enforce our agreements\n• Maintain business records\n\nWhen you delete your account, we will delete or anonymize your personal information within 30 days, except where we are required to retain it for legal purposes."
+      },
+      "s11": {
+        "title": "11. California Privacy Rights",
+        "content": "California residents have additional rights under the California Consumer Privacy Act (CCPA):\n\n• Right to know what personal information is collected\n• Right to know if personal information is sold or disclosed\n• Right to opt-out of the sale of personal information\n• Right to deletion of personal information\n• Right to non-discrimination for exercising CCPA rights\n\nTo exercise these rights, email privacy@marn.com or call 1-555-PRIVACY."
+      },
+      "s12": {
+        "title": "12. Changes to This Privacy Policy",
+        "content": "We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the \"Last Updated\" date. Your continued use of our services after changes constitutes acceptance of the updated policy."
+      },
+      "s13": {
+        "title": "13. Contact Us",
+        "content": "If you have questions or concerns about this Privacy Policy, please contact us:\n\nEmail: privacy@marn.com\nPhone: +1 (555) 123-4567\nAddress: 123 Real Estate Ave, Suite 100, San Francisco, CA 94105\n\nData Protection Officer: dpo@marn.com"
+      }
+    }
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Page Not Found",
+    "subtitle": "Oops! The page you're looking for seems to have moved out. Let's help you find a new place.",
+    "goHome": "Go Home",
+    "searchProperties": "Search Properties",
+    "popularPages": "Popular Pages",
+    "goBack": "Go back to previous page",
+    "links": {
+      "search": "Search",
+      "aboutUs": "About Us",
+      "howItWorks": "How It Works",
+      "contact": "Contact"
+    }
+  },
+  "viewOwnerProfile": {
+    "verified": "Verified",
+    "verifiedOwner": "Verified Owner",
+    "propertyOwner": "Property Owner",
+    "properties": "Properties",
+    "rating": "Rating",
+    "reviews": "Reviews",
+    "responseTime": "Response Time",
+    "joinDate": "Member since",
+    "about": "About",
+    "ownerStatistics": "Owner Statistics",
+    "totalProperties": "Total Properties",
+    "averageRating": "Average Rating",
+    "chatWithOwner": "Chat with Owner",
+    "reportOwner": "Report Owner",
+    "back": "Back",
+    "reportDialogDesc": "Please provide details about why you're reporting this owner. Our team will review your report.",
+    "reasonForReporting": "Reason for Reporting",
+    "report": {
+      "button": "Report",
+      "title": "Report User",
+      "reasonPlaceholder": "Enter reason for report...",
+      "submit": "Submit Report",
+      "cancel": "Cancel"
+    },
+    "toasts": {
+      "reportSubmitted": "Report submitted successfully. We will review it shortly.",
+      "reportReasonRequired": "Please provide a reason for reporting",
+      "openingChat": "Opening chat with owner..."
+    }
+  },
+  "viewUserProfile": {
+    "verifiedUser": "Verified User",
+    "lifestyle": "Lifestyle Preferences",
+    "education": "Education",
+    "about": "About",
+    "roommateStatus": "Roommate Status",
+    "acceptsRoommates": "Accepts Roommates",
+    "acceptsRoommatesDesc": "This user is open to sharing accommodation",
+    "doesNotAcceptRoommates": "Does Not Accept Roommates",
+    "doesNotAcceptRoommatesDesc": "This user prefers to live alone",
+    "back": "Back",
+    "reportUser": "Report User",
+    "reportDialogDesc": "Please provide details about why you're reporting this user. Our team will review your report.",
+    "reasonForReporting": "Reason for Reporting",
+    "memberSince": "Member since",
+    "lifestyle_fields": {
+      "smoking": "Smoking",
+      "pets": "Pets",
+      "sleepSchedule": "Sleep Schedule",
+      "noiseTolerance": "Noise Tolerance",
+      "guestsFrequency": "Guests Frequency",
+      "workSchedule": "Work Schedule",
+      "sharingLevel": "Sharing Level"
+    },
+    "education_fields": {
+      "educationLevel": "Education Level",
+      "fieldOfStudy": "Field of Study"
+    },
+    "report": {
+      "button": "Report",
+      "title": "Report User",
+      "reasonPlaceholder": "Enter reason for report...",
+      "submit": "Submit Report",
+      "cancel": "Cancel"
+    },
+    "toasts": {
+      "reportSubmitted": "Report submitted successfully. We will review it shortly.",
+      "reportReasonRequired": "Please provide a reason for reporting"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { SlidersHorizontal, Search, X, ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/app/components/ui/badge'
 import { Label } from '@/app/components/ui/label'
 import { Input } from '@/app/components/ui/input'
@@ -26,49 +27,49 @@ interface FilterSidebarProps {
   keyword: string
   onKeywordChange: (v: string) => void
   onKeywordCommit: (v: string) => void
-  
+
   city: string
   onCityChange: (v: string) => void
   cityOptions: { id: string | number; name: string; displayName?: string }[]
   citiesLoading: boolean
-  
+
   governorate: string
   onGovernorateChange: (v: string) => void
   governorateOptions: { id: string | number; name: string; displayName?: string }[]
   governoratesLoading: boolean
-  
+
   propertyType: PropertyType | ''
   onPropertyTypeChange: (v: PropertyType | '') => void
-  
+
   rentalUnit: RentalUnit | ''
   onRentalUnitChange: (v: RentalUnit | '') => void
-  
+
   isShared: string
   onIsSharedChange: (v: string) => void
-  
+
   priceRange: number[]
   onPriceRangeChange: (v: number[]) => void
-  
+
   selectedBeds: string
   onBedsChange: (v: string) => void
-  
+
   selectedBaths: string
   onBathsChange: (v: string) => void
-  
+
   minArea: string
   onMinAreaChange: (v: string) => void
   maxArea: string
   onMaxAreaChange: (v: string) => void
-  
+
   minRating: string
   onMinRatingChange: (v: string) => void
-  
+
   selectedAmenities: string[]
   onToggleAmenity: (v: string) => void
   amenitiesExpanded: boolean
   onAmenitiesExpandedChange: (v: boolean) => void
   visibleAmenities: readonly string[]
-  
+
   activeFilterCount: number
   onResetFilters: () => void
 }
@@ -111,6 +112,8 @@ export function FilterSidebar({
   activeFilterCount,
   onResetFilters,
 }: FilterSidebarProps) {
+  const { t } = useTranslation('properties')
+
   const filteredCityOptions = governorate
     ? cityOptions.filter((c) => CITY_TO_GOVERNORATE[c.name] === governorate)
     : cityOptions
@@ -122,7 +125,7 @@ export function FilterSidebar({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="w-5 h-5 text-[#3A6EA5]" />
-            <h2 className="text-xl font-semibold text-[#1a1a1a]">Filters</h2>
+            <h2 className="text-xl font-semibold text-[#1a1a1a]">{t('search.filters')}</h2>
             {activeFilterCount > 0 && (
               <Badge className="bg-[#3A6EA5] text-white text-xs px-2 py-0.5 rounded-full">
                 {activeFilterCount}
@@ -134,17 +137,17 @@ export function FilterSidebar({
               onClick={onResetFilters}
               className="text-xs text-[#3A6EA5] hover:underline flex items-center gap-1"
             >
-              <X className="w-3 h-3" /> Clear all
+              <X className="w-3 h-3" /> {t('search.clearAll')}
             </button>
           )}
         </div>
 
         {/* ── Keyword search ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Keyword</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.keyword')}</Label>
           <div className="relative">
             <Input
-              placeholder="e.g. studio near campus…"
+              placeholder={t('search.keywordPlaceholder')}
               value={keyword}
               onChange={(e) => onKeywordChange(e.target.value)}
               onKeyDown={(e) => {
@@ -165,18 +168,18 @@ export function FilterSidebar({
 
         {/* ── Governorate ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Governorate</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.governorate')}</Label>
           <Select
             value={governorate}
             onValueChange={(v) => onGovernorateChange(v === '__all' ? '' : v)}
           >
             <SelectTrigger className="rounded-xl bg-[#f5f7fa] border-[#3A6EA5]/20">
               <SelectValue
-                placeholder={governoratesLoading ? 'Loading…' : 'Any governorate'}
+                placeholder={governoratesLoading ? t('search.loading') : t('search.anyGovernorate')}
               />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all">Any governorate</SelectItem>
+              <SelectItem value="__all">{t('search.anyGovernorate')}</SelectItem>
               {governorateOptions.map((o) => (
                 <SelectItem key={o.id} value={o.name}>
                   {o.displayName || o.name}
@@ -188,16 +191,16 @@ export function FilterSidebar({
 
         {/* ── City ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">City</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.city')}</Label>
           <Select
             value={city}
             onValueChange={(v) => onCityChange(v === '__all' ? '' : v)}
           >
             <SelectTrigger className="rounded-xl bg-[#f5f7fa] border-[#3A6EA5]/20">
-              <SelectValue placeholder={citiesLoading ? 'Loading…' : 'Any city'} />
+              <SelectValue placeholder={citiesLoading ? t('search.loading') : t('search.anyCity')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all">Any city</SelectItem>
+              <SelectItem value="__all">{t('search.anyCity')}</SelectItem>
               {filteredCityOptions.map((o) => (
                 <SelectItem key={o.id} value={o.name}>
                   {o.displayName || o.name}
@@ -209,19 +212,19 @@ export function FilterSidebar({
 
         {/* ── Property Type ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Property Type</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.propertyType')}</Label>
           <div className="flex flex-wrap gap-2">
-            {PROPERTY_TYPES.map((t) => (
+            {PROPERTY_TYPES.map((tp) => (
               <button
-                key={t}
-                onClick={() => onPropertyTypeChange(propertyType === t ? '' : t)}
+                key={tp}
+                onClick={() => onPropertyTypeChange(propertyType === tp ? '' : tp)}
                 className={`px-3 py-1.5 rounded-xl text-sm transition-colors ${
-                  propertyType === t
+                  propertyType === tp
                     ? 'bg-[#3A6EA5] text-white'
                     : 'bg-[#f5f7fa] text-[#1a1a1a] hover:bg-[#3A6EA5]/10'
                 }`}
               >
-                {t === 'SharedRoom' ? 'Shared Room' : t}
+                {tp === 'SharedRoom' ? t('search.sharedRoom') : tp}
               </button>
             ))}
           </div>
@@ -229,7 +232,7 @@ export function FilterSidebar({
 
         {/* ── Rental Unit ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Rental Duration</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.rentalDuration')}</Label>
           <Select
             value={rentalUnit}
             onValueChange={(v) =>
@@ -237,10 +240,10 @@ export function FilterSidebar({
             }
           >
             <SelectTrigger className="rounded-xl bg-[#f5f7fa] border-[#3A6EA5]/20">
-              <SelectValue placeholder="Any duration" />
+              <SelectValue placeholder={t('search.anyDuration')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all">Any duration</SelectItem>
+              <SelectItem value="__all">{t('search.anyDuration')}</SelectItem>
               {RENTAL_UNITS.map((u) => (
                 <SelectItem key={u.value} value={u.value}>
                   {u.label}
@@ -252,7 +255,7 @@ export function FilterSidebar({
 
         {/* ── Shared / Private ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Sharing</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.sharing')}</Label>
           <div className="flex gap-2">
             {SHARED_OPTIONS.map((opt) => (
               <button
@@ -273,7 +276,9 @@ export function FilterSidebar({
         {/* ── Price Range ── */}
         <div>
           <Label className="text-[#1a1a1a] mb-2 block">
-            Price Range{rentalUnit ? ` (${rentalUnit})` : ''}
+            {rentalUnit
+              ? t('search.priceRangeWithUnit', { unit: rentalUnit })
+              : t('search.priceRange')}
           </Label>
           <Slider
             min={500}
@@ -291,7 +296,7 @@ export function FilterSidebar({
 
         {/* ── Bedrooms ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Min Bedrooms</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.minBedrooms')}</Label>
           <div className="flex gap-2">
             {BED_OPTIONS.map((bed) => (
               <button
@@ -311,7 +316,7 @@ export function FilterSidebar({
 
         {/* ── Bathrooms ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Min Bathrooms</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.minBathrooms')}</Label>
           <div className="flex gap-2">
             {BATH_OPTIONS.map((bath) => (
               <button
@@ -331,7 +336,7 @@ export function FilterSidebar({
 
         {/* ── Area ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Area (m²)</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.area')}</Label>
           <div className="flex gap-2">
             <Input
               type="number"
@@ -352,7 +357,7 @@ export function FilterSidebar({
 
         {/* ── Min Rating ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Min Rating</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.minRating')}</Label>
           <div className="flex gap-2">
             {['Any', '3', '4', '4.5'].map((r) => (
               <button
@@ -364,7 +369,7 @@ export function FilterSidebar({
                     : 'bg-[#f5f7fa] text-[#1a1a1a] hover:bg-[#3A6EA5]/10'
                 }`}
               >
-                {r === 'Any' ? 'Any' : `${r}★`}
+                {r === 'Any' ? t('search.any') : `${r}★`}
               </button>
             ))}
           </div>
@@ -372,7 +377,7 @@ export function FilterSidebar({
 
         {/* ── Amenities ── */}
         <div>
-          <Label className="text-[#1a1a1a] mb-2 block">Amenities</Label>
+          <Label className="text-[#1a1a1a] mb-2 block">{t('search.amenities')}</Label>
           <div className="space-y-2">
             {visibleAmenities.map((amenity) => (
               <div key={amenity} className="flex items-center">
@@ -401,7 +406,9 @@ export function FilterSidebar({
                   amenitiesExpanded ? 'rotate-180' : ''
                 }`}
               />
-              {amenitiesExpanded ? 'Show less' : `Show all ${AMENITY_OPTIONS.length}`}
+              {amenitiesExpanded
+                ? t('search.showLess')
+                : t('search.showAll', { count: AMENITY_OPTIONS.length })}
             </button>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { Send, Paperclip, MoreVertical, ChevronLeft } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
@@ -14,6 +15,7 @@ import {
 import type { Conversation } from '@/types/message'
 
 export function MessagesPage() {
+  const { t } = useTranslation('messages')
   const navigate = useNavigate()
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null)
@@ -53,10 +55,8 @@ export function MessagesPage() {
     <div className="min-h-screen">
       <div className="max-w-[1440px] mx-auto px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Messages</h1>
-          <p className="text-[#4a5565]">
-            Communicate with property owners and tenants
-          </p>
+          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">{t('title')}</h1>
+          <p className="text-[#4a5565]">{t('subtitle')}</p>
         </div>
 
         <Card className="bg-[#f5f7fa] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 overflow-hidden">
@@ -81,7 +81,7 @@ export function MessagesPage() {
                   ))
                 ) : conversations.length === 0 ? (
                   <div className="p-8 text-center text-[#4a5565]">
-                    No conversations yet.
+                    {t('noConversations')}
                   </div>
                 ) : (
                   conversations.map((conversation) => (
@@ -136,7 +136,7 @@ export function MessagesPage() {
             >
               {!effectiveConversation ? (
                 <div className="flex-1 flex items-center justify-center text-[#4a5565]">
-                  Select a conversation to start chatting.
+                  {t('selectConversation')}
                 </div>
               ) : (
                 <>
@@ -201,7 +201,7 @@ export function MessagesPage() {
                                 )
                               }
                             >
-                              View Property
+                              {t('viewProperty')}
                             </Button>
                           )}
                         </div>
@@ -222,7 +222,7 @@ export function MessagesPage() {
                       ))
                     ) : messages.length === 0 ? (
                       <div className="flex items-center justify-center h-full text-[#4a5565]">
-                        No messages yet. Say hello!
+                        {t('noMessages')}
                       </div>
                     ) : (
                       messages.map((message) => (
@@ -278,7 +278,7 @@ export function MessagesPage() {
                               handleSendMessage()
                             }
                           }}
-                          placeholder="Type a message..."
+                          placeholder={t('typeMessage')}
                           className="rounded-2xl bg-white border-[#3A6EA5]/20 pr-12"
                           disabled={sendMessage.isPending}
                         />

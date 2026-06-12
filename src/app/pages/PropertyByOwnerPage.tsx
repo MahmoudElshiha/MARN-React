@@ -10,6 +10,7 @@ import {
   Share2,
   CheckCircle,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
@@ -19,6 +20,7 @@ import { useProperty } from '@/hooks/useProperty'
 import { useBookingRequests } from '@/hooks/useBookingRequests'
 
 export function PropertyByOwnerPage() {
+  const { t } = useTranslation('properties')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -72,7 +74,7 @@ export function PropertyByOwnerPage() {
   if (!property) {
     return (
       <div className="min-h-screen py-20 flex items-center justify-center text-[#4a5565]">
-        Property not found.
+        {t('ownerView.notFound')}
       </div>
     )
   }
@@ -91,7 +93,7 @@ export function PropertyByOwnerPage() {
               />
             ) : (
               <div className="w-full h-full bg-[#E5EBF0] flex items-center justify-center text-[#6B7280]">
-                No image
+                {t('ownerView.noImage')}
               </div>
             )}
             <div className="absolute top-4 right-4 flex gap-2">
@@ -134,7 +136,7 @@ export function PropertyByOwnerPage() {
                       {property.rating}
                     </span>
                     <span className="text-[#6B7280]">
-                      ({property.reviews} reviews)
+                      ({property.reviews} {t('details.reviews').toLowerCase()})
                     </span>
                   </div>
                 )}
@@ -149,12 +151,12 @@ export function PropertyByOwnerPage() {
             <div className="flex gap-6">
               <div className="flex items-center gap-2">
                 <Bed className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-[#1a1a1a]">{property.beds} Bedrooms</span>
+                <span className="text-[#1a1a1a]">{property.beds} {t('details.bedrooms')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Bath className="w-5 h-5 text-[#3A6EA5]" />
                 <span className="text-[#1a1a1a]">
-                  {property.baths} Bathrooms
+                  {property.baths} {t('details.bathrooms')}
                 </span>
               </div>
               {property.area && (
@@ -169,7 +171,7 @@ export function PropertyByOwnerPage() {
             {property.description && (
               <div>
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-3">
-                  Description
+                  {t('details.description')}
                 </h2>
                 <p className="text-[#1a1a1a] leading-relaxed">
                   {property.description}
@@ -181,7 +183,7 @@ export function PropertyByOwnerPage() {
             {property.amenities.length > 0 && (
               <div>
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
-                  Amenities
+                  {t('details.amenities')}
                 </h2>
                 <div className="grid grid-cols-2 gap-3">
                   {property.amenities.map((amenity) => (
@@ -200,7 +202,9 @@ export function PropertyByOwnerPage() {
             {/* Rental Requests Section */}
             <div>
               <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
-                Rental Requests ({requestsLoading ? '…' : requests.length})
+                {requestsLoading
+                  ? t('ownerView.rentalRequestsLoading')
+                  : t('ownerView.rentalRequests', { count: requests.length })}
               </h2>
               {requestsLoading ? (
                 <div className="space-y-4">
@@ -208,7 +212,7 @@ export function PropertyByOwnerPage() {
                   <Skeleton className="h-40 w-full rounded-3xl" />
                 </div>
               ) : requests.length === 0 ? (
-                <p className="text-[#4a5565]">No rental requests yet.</p>
+                <p className="text-[#4a5565]">{t('ownerView.noRequests')}</p>
               ) : (
                 <div className="space-y-4">
                   {requests.map((request) => (
@@ -234,7 +238,7 @@ export function PropertyByOwnerPage() {
                               </h3>
                               {request.createdAt && (
                                 <p className="text-sm text-[#6B7280]">
-                                  Submitted:{' '}
+                                  {t('ownerView.submitted')}{' '}
                                   {new Date(
                                     request.createdAt,
                                   ).toLocaleDateString()}
@@ -252,7 +256,7 @@ export function PropertyByOwnerPage() {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                           <div className="p-3 bg-white rounded-xl">
                             <p className="text-xs text-[#6B7280] mb-1">
-                              Move-in
+                              {t('ownerView.moveIn')}
                             </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {new Date(request.moveIn).toLocaleDateString(
@@ -267,7 +271,7 @@ export function PropertyByOwnerPage() {
                           </div>
                           <div className="p-3 bg-white rounded-xl">
                             <p className="text-xs text-[#6B7280] mb-1">
-                              Duration
+                              {t('ownerView.duration')}
                             </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {request.requestedDates}
@@ -275,7 +279,7 @@ export function PropertyByOwnerPage() {
                           </div>
                           <div className="p-3 bg-white rounded-xl">
                             <p className="text-xs text-[#6B7280] mb-1">
-                              Monthly Rent
+                              {t('ownerView.monthlyRent')}
                             </p>
                             <p className="text-sm font-bold text-[#3A6EA5]">
                               EGP {request.monthlyRent.toLocaleString()}
@@ -298,7 +302,7 @@ export function PropertyByOwnerPage() {
                                 disabled={accept.isPending}
                                 onClick={() => accept.mutate(request.id)}
                               >
-                                Accept
+                                {t('ownerView.accept')}
                               </Button>
                               <Button
                                 size="sm"
@@ -307,7 +311,7 @@ export function PropertyByOwnerPage() {
                                 disabled={reject.isPending}
                                 onClick={() => reject.mutate(request.id)}
                               >
-                                Reject
+                                {t('ownerView.reject')}
                               </Button>
                             </>
                           )}
@@ -318,7 +322,7 @@ export function PropertyByOwnerPage() {
                             }
                             className="flex-1 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
                           >
-                            View Chat
+                            {t('ownerView.viewChat')}
                           </Button>
                         </div>
                       </CardContent>
@@ -335,7 +339,7 @@ export function PropertyByOwnerPage() {
               <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
                 <CardContent className="p-6 space-y-4">
                   <div className="p-4 bg-white rounded-2xl text-center">
-                    <p className="text-sm text-[#6B7280] mb-1">Monthly Rent</p>
+                    <p className="text-sm text-[#6B7280] mb-1">{t('ownerView.monthlyRentLabel')}</p>
                     <p className="text-4xl font-bold text-[#3A6EA5]">
                       EGP {property.price.toLocaleString()}
                     </p>
@@ -345,7 +349,7 @@ export function PropertyByOwnerPage() {
                     className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
                     onClick={() => navigate(`/edit-property/${id}`)}
                   >
-                    Edit Property
+                    {t('ownerView.editProperty')}
                   </Button>
 
                   <Button
@@ -353,22 +357,22 @@ export function PropertyByOwnerPage() {
                     className="w-full rounded-xl border-[#3A6EA5]/20"
                     onClick={() => navigate('/owner-dashboard')}
                   >
-                    Back to Dashboard
+                    {t('ownerView.backToDashboard')}
                   </Button>
 
                   <div className="pt-4 border-t border-[#3A6EA5]/20">
                     <h3 className="font-semibold text-[#1a1a1a] mb-3">
-                      Quick Stats
+                      {t('ownerView.quickStats')}
                     </h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#6B7280]">Total Requests</span>
+                        <span className="text-[#6B7280]">{t('ownerView.totalRequests')}</span>
                         <span className="font-semibold text-[#1a1a1a]">
                           {requests.length}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#6B7280]">Pending</span>
+                        <span className="text-[#6B7280]">{t('ownerView.pending')}</span>
                         <span className="font-semibold text-yellow-600">
                           {
                             requests.filter((r) => r.status === 'pending')
@@ -377,7 +381,7 @@ export function PropertyByOwnerPage() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#6B7280]">Accepted</span>
+                        <span className="text-[#6B7280]">{t('ownerView.accepted')}</span>
                         <span className="font-semibold text-green-600">
                           {
                             requests.filter((r) => r.status === 'accepted')

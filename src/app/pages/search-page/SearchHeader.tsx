@@ -1,4 +1,5 @@
 import { MapIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/app/components/ui/button'
 import {
   Select,
@@ -26,14 +27,18 @@ export function SearchHeader({
   showMap,
   onToggleMap,
 }: SearchHeaderProps) {
+  const { t } = useTranslation('properties')
+
   return (
     <div className="flex items-center justify-between mb-8">
       <div>
         <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-          Find Your Perfect Property
+          {t('search.title')}
         </h1>
         <p className="text-[#4a5565]">
-          {isLoading ? 'Searching…' : `${total.toLocaleString()} properties found`}
+          {isLoading
+            ? t('search.searching')
+            : t('search.propertiesFound', { count: total.toLocaleString() })}
         </p>
       </div>
 
@@ -44,7 +49,7 @@ export function SearchHeader({
           onValueChange={(v) => onSortChange(Number(v))}
         >
           <SelectTrigger className="w-[220px] rounded-xl bg-white border-[#3A6EA5]/20">
-            <SelectValue placeholder="Sort by" />
+            <SelectValue placeholder={t('search.sortBy')} />
           </SelectTrigger>
           <SelectContent>
             {SORT_OPTIONS.map((opt, i) => (
@@ -65,7 +70,7 @@ export function SearchHeader({
           onClick={onToggleMap}
         >
           <MapIcon className="w-4 h-4 mr-2" />
-          {showMap ? 'Hide Map' : 'Show Map'}
+          {showMap ? t('search.hideMap') : t('search.showMap')}
         </Button>
       </div>
     </div>

@@ -34,6 +34,7 @@ import { toast } from 'sonner'
 import { useState } from 'react'
 import { useOwnerDashboard } from '@/hooks/useOwnerDashboard'
 import { useBookingMutations } from '@/hooks/useBookingRequests'
+import { useTranslation } from 'react-i18next'
 
 const getContractStatusBadge = (status: string) => {
   const styles: Record<string, string> = {
@@ -52,6 +53,7 @@ const formatDate = (iso: string) =>
   })
 
 export function OwnerDashboard() {
+  const { t } = useTranslation('dashboard')
   const [view, setView] = useState<'monthly' | 'yearly'>('monthly')
 
   const { data: dashboardResponse, isLoading } = useOwnerDashboard()
@@ -67,8 +69,8 @@ export function OwnerDashboard() {
   const vacantCount = dashboard?.vacantPlaces ?? 0
 
   const occupancyData = [
-    { name: 'Occupied', value: occupiedCount, color: '#3A6EA5' },
-    { name: 'Vacant', value: vacantCount, color: '#9CBBDC' },
+    { name: t('owner.occupancy.occupied'), value: occupiedCount, color: '#3A6EA5' },
+    { name: t('owner.occupancy.vacant'), value: vacantCount, color: '#9CBBDC' },
   ]
 
   // Map API earning entries → chart-friendly shape.
@@ -101,20 +103,20 @@ export function OwnerDashboard() {
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAcceptRequest = (id: string) => {
     accept.mutate(id, {
-      onSuccess: () => toast.success('Booking request accepted'),
-      onError: () => toast.error('Failed to accept request'),
+      onSuccess: () => toast.success(t('owner.toasts.bookingAccepted')),
+      onError: () => toast.error(t('owner.toasts.acceptFailed')),
     })
   }
 
   const handleDeclineRequest = (id: string) => {
     reject.mutate(id, {
-      onSuccess: () => toast.error('Booking request declined'),
-      onError: () => toast.error('Failed to decline request'),
+      onSuccess: () => toast.error(t('owner.toasts.bookingDeclined')),
+      onError: () => toast.error(t('owner.toasts.declineFailed')),
     })
   }
 
   const handleDownloadContract = (contractId: string) => {
-    toast.success(`Downloading contract ${contractId}`)
+    toast.success(t('owner.toasts.downloadingContract', { id: contractId }))
   }
 
   return (
@@ -124,11 +126,9 @@ export function OwnerDashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-              Owner Dashboard
+              {t('owner.title')}
             </h1>
-            <p className="text-[#4a5565]">
-              Manage your properties and track performance
-            </p>
+            <p className="text-[#4a5565]">{t('owner.subtitle')}</p>
           </div>
           <Button
             size="lg"
@@ -137,7 +137,7 @@ export function OwnerDashboard() {
           >
             <Link to="/add-property">
               <Plus className="w-5 h-5 mr-2" />
-              Add New Property
+              {t('owner.addNewProperty')}
             </Link>
           </Button>
         </div>
@@ -149,7 +149,7 @@ export function OwnerDashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-white/90">
                 <Home className="w-5 h-5" />
-                Total Properties
+                {t('owner.cards.totalProperties')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -161,7 +161,7 @@ export function OwnerDashboard() {
                     {totalProperties}
                   </div>
                   <p className="text-white/80 text-sm">
-                    {occupiedCount} occupied • {vacantCount} vacant
+                    {t('owner.cards.occupiedVacant', { occupied: occupiedCount, vacant: vacantCount })}
                   </p>
                 </>
               )}
@@ -173,7 +173,7 @@ export function OwnerDashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <DollarSign className="w-5 h-5 text-[#3A6EA5]" />
-                Monthly Revenue
+                {t('owner.cards.monthlyRevenue')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -189,7 +189,7 @@ export function OwnerDashboard() {
                     EGP
                   </div>
                   <p className="text-[#4a5565] text-sm">
-                    {dashboard?.totalViews ?? 0} total views
+                    {t('owner.cards.totalViews', { count: dashboard?.totalViews ?? 0 })}
                   </p>
                 </>
               )}
@@ -201,7 +201,7 @@ export function OwnerDashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <DollarSign className="w-5 h-5 text-[#3A6EA5]" />
-                Withdrawable Earnings
+                {t('owner.cards.withdrawableEarnings')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -214,7 +214,7 @@ export function OwnerDashboard() {
                     EGP
                   </div>
                   <p className="text-[#4a5565] text-sm mb-1">
-                    On hold:{' '}
+                    {t('owner.cards.onHold')}{' '}
                     <span className="font-medium text-[#1a1a1a]">
                       {(dashboard?.onHoldEarnings ?? 0).toLocaleString()} EGP
                     </span>
@@ -222,9 +222,9 @@ export function OwnerDashboard() {
                   <Button
                     size="sm"
                     className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
-                    onClick={() => toast.success('Transfer initiated')}
+                    onClick={() => toast.success(t('owner.toasts.transferInitiated'))}
                   >
-                    Transfer Money
+                    {t('owner.cards.transferMoney')}
                   </Button>
                 </>
               )}
@@ -236,7 +236,7 @@ export function OwnerDashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <Users className="w-5 h-5 text-[#3A6EA5]" />
-                Pending Requests
+                {t('owner.cards.pendingRequests')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -248,7 +248,7 @@ export function OwnerDashboard() {
                     {dashboard?.pendingBookingRequestsCount ?? 0}
                   </div>
                   <p className="text-[#4a5565] text-sm">
-                    Awaiting your response
+                    {t('owner.cards.awaitingResponse')}
                   </p>
                 </>
               )}
@@ -263,7 +263,7 @@ export function OwnerDashboard() {
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Earnings Overview
+                  {t('owner.chart.earningsOverview')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -271,7 +271,7 @@ export function OwnerDashboard() {
                   <Skeleton className="h-[300px] w-full rounded-2xl" />
                 ) : chartData.length === 0 ? (
                   <p className="text-[#4a5565] text-center py-16">
-                    No earning data available yet.
+                    {t('owner.chart.noData')}
                   </p>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
@@ -313,7 +313,7 @@ export function OwnerDashboard() {
                       }`}
                       onClick={() => setView(v)}
                     >
-                      {v.charAt(0).toUpperCase() + v.slice(1)}
+                      {t(`owner.chart.${v}`)}
                     </Button>
                   ))}
                 </div>
@@ -325,7 +325,7 @@ export function OwnerDashboard() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Booking Requests
+                    {t('owner.pendingRequests.bookingRequests')}
                   </CardTitle>
                   {(dashboard?.pendingBookingRequestsCount ?? 0) > 0 && (
                     <Badge className="bg-[#3A6EA5] text-white hover:bg-[#3A6EA5]">
@@ -341,7 +341,7 @@ export function OwnerDashboard() {
                   ))
                 ) : pendingRequests.length === 0 ? (
                   <p className="text-[#4a5565] text-center py-8">
-                    No pending booking requests.
+                    {t('owner.pendingRequests.noPending')}
                   </p>
                 ) : (
                   pendingRequests.map((request, index) => (
@@ -361,10 +361,10 @@ export function OwnerDashboard() {
                           </Avatar>
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
-                              {request.tenant ?? request.tenantName ?? 'Unknown Tenant'}
+                              {request.tenant ?? request.tenantName ?? t('owner.pendingRequests.unknownTenant')}
                             </h3>
                             <p className="text-sm text-[#4a5565] mb-2">
-                              {request.property ?? request.propertyName ?? request.propertyTitle ?? 'Unknown Property'}
+                              {request.property ?? request.propertyName ?? request.propertyTitle ?? t('owner.pendingRequests.unknownProperty')}
                             </p>
                             <div className="flex items-center gap-4 text-sm">
                               <div className="flex items-center gap-1 text-[#6a7282]">
@@ -385,7 +385,7 @@ export function OwnerDashboard() {
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
-                            Accept
+                            {t('owner.pendingRequests.accept')}
                           </Button>
                           <Button
                             variant="outline"
@@ -397,7 +397,7 @@ export function OwnerDashboard() {
                             className="flex-1 rounded-xl border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
                           >
                             <XCircle className="w-4 h-4 mr-1" />
-                            Decline
+                            {t('owner.pendingRequests.decline')}
                           </Button>
                           <Button
                             variant="outline"
@@ -407,7 +407,7 @@ export function OwnerDashboard() {
                           >
                             <Link to="/messages">
                               <MessageSquare className="w-4 h-4 mr-1" />
-                              Message
+                              {t('owner.pendingRequests.message')}
                             </Link>
                           </Button>
                         </div>
@@ -422,7 +422,7 @@ export function OwnerDashboard() {
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Contracts History
+                  {t('owner.contracts.history')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -434,22 +434,22 @@ export function OwnerDashboard() {
                       <thead>
                         <tr className="border-b border-[#3A6EA5]/20">
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Contract ID
+                            {t('owner.contracts.contractId')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Property
+                            {t('owner.contracts.property')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Tenant
+                            {t('owner.contracts.tenant')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Status
+                            {t('owner.contracts.status')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Expiry
+                            {t('owner.contracts.expiry')}
                           </th>
                           <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Actions
+                            {t('owner.contracts.actions')}
                           </th>
                         </tr>
                       </thead>
@@ -460,7 +460,7 @@ export function OwnerDashboard() {
                               colSpan={6}
                               className="text-center py-8 text-[#4a5565]"
                             >
-                              No contracts found.
+                              {t('owner.contracts.noContracts')}
                             </td>
                           </tr>
                         ) : (
@@ -500,7 +500,7 @@ export function OwnerDashboard() {
                                   className="rounded-xl border-[#3A6EA5]/20"
                                 >
                                   <Download className="w-4 h-4 mr-1" />
-                                  Download
+                                  {t('owner.contracts.download')}
                                 </Button>
                               </td>
                             </tr>
@@ -517,7 +517,7 @@ export function OwnerDashboard() {
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  My Properties
+                  {t('owner.properties.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -529,12 +529,9 @@ export function OwnerDashboard() {
                   </div>
                 ) : myProperties.length === 0 ? (
                   <p className="text-[#4a5565] text-center py-8">
-                    No properties yet.{' '}
-                    <Link
-                      to="/add-property"
-                      className="text-[#3A6EA5] hover:underline"
-                    >
-                      Add your first one.
+                    {t('owner.properties.noPropertiesAdd')}{' '}
+                    <Link to="/add-property" className="text-[#3A6EA5] hover:underline">
+                      {t('owner.properties.addFirst')}
                     </Link>
                   </p>
                 ) : (
@@ -574,14 +571,14 @@ export function OwnerDashboard() {
                                 }
                               >
                                 {property.status === 'rented'
-                                  ? 'Occupied'
-                                  : 'Vacant'}
+                                  ? t('owner.properties.occupied')
+                                  : t('owner.properties.vacant')}
                               </Badge>
                             </div>
                             <div className="grid grid-cols-2 gap-4 mb-4">
                               <div>
                                 <p className="text-xs text-[#6a7282] mb-1">
-                                  Monthly Rent
+                                  {t('owner.properties.monthlyRent')}
                                 </p>
                                 <p className="font-semibold text-[#3A6EA5]">
                                   {property.price.toLocaleString()} EGP
@@ -589,7 +586,7 @@ export function OwnerDashboard() {
                               </div>
                               <div>
                                 <p className="text-xs text-[#6a7282] mb-1">
-                                  Rating
+                                  {t('owner.properties.rating')}
                                 </p>
                                 <p className="text-sm text-[#1a1a1a] flex items-center gap-1">
                                   <Star className="w-4 h-4 fill-[#3A6EA5] text-[#3A6EA5]" />
@@ -605,7 +602,7 @@ export function OwnerDashboard() {
                                 asChild
                               >
                                 <Link to={`/edit-property/${property.id}`}>
-                                  Edit
+                                  {t('owner.properties.edit')}
                                 </Link>
                               </Button>
                               <Button
@@ -615,7 +612,7 @@ export function OwnerDashboard() {
                                 asChild
                               >
                                 <Link to={`/property/${property.id}`}>
-                                  View Details
+                                  {t('owner.properties.viewDetails')}
                                 </Link>
                               </Button>
                               <Button
@@ -642,7 +639,7 @@ export function OwnerDashboard() {
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a]">
-                  Quick Actions
+                  {t('owner.quickActions.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -653,7 +650,7 @@ export function OwnerDashboard() {
                 >
                   <Link to="/messages">
                     <MessageSquare className="w-5 h-5 mr-2 text-[#3A6EA5]" />
-                    Messages
+                    {t('owner.quickActions.messages')}
                   </Link>
                 </Button>
                 <Button
@@ -663,7 +660,7 @@ export function OwnerDashboard() {
                 >
                   <Link to="/add-property">
                     <Plus className="w-5 h-5 mr-2 text-[#3A6EA5]" />
-                    Add Property
+                    {t('owner.quickActions.addProperty')}
                   </Link>
                 </Button>
               </CardContent>
@@ -674,11 +671,11 @@ export function OwnerDashboard() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl text-[#1a1a1a]">
-                    Notifications
+                    {t('owner.notifications.title')}
                   </CardTitle>
                   {(dashboard?.unreadNotificationsCount ?? 0) > 0 && (
                     <Badge className="bg-[#3A6EA5] text-white hover:bg-[#3A6EA5]">
-                      {dashboard?.unreadNotificationsCount} unread
+                      {t('owner.notifications.unread', { count: dashboard?.unreadNotificationsCount })}
                     </Badge>
                   )}
                 </div>
@@ -690,7 +687,7 @@ export function OwnerDashboard() {
                   ))
                 ) : notifications.length === 0 ? (
                   <p className="text-[#4a5565] text-center py-4 text-sm">
-                    No notifications.
+                    {t('owner.notifications.none')}
                   </p>
                 ) : (
                   notifications.map((notification) => (
@@ -718,7 +715,7 @@ export function OwnerDashboard() {
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a]">
-                  Occupancy Rate
+                  {t('owner.occupancy.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -776,13 +773,13 @@ export function OwnerDashboard() {
             <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a]">
-                  Quick Stats
+                  {t('owner.quickStats.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
                   <p className="text-sm text-[#6a7282] mb-1">
-                    Total Properties
+                    {t('owner.quickStats.totalProperties')}
                   </p>
                   <div className="text-2xl font-bold text-[#3A6EA5]">
                     {isLoading ? (
@@ -794,7 +791,7 @@ export function OwnerDashboard() {
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
                   <p className="text-sm text-[#6a7282] mb-1">
-                    Pending Requests
+                    {t('owner.quickStats.pendingRequests')}
                   </p>
                   <div className="text-2xl font-bold text-[#3A6EA5]">
                     {isLoading ? (
@@ -806,7 +803,7 @@ export function OwnerDashboard() {
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
                   <p className="text-sm text-[#6a7282] mb-1">
-                    Active Contracts
+                    {t('owner.quickStats.activeContracts')}
                   </p>
                   <div className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
                     {isLoading ? (
@@ -820,7 +817,7 @@ export function OwnerDashboard() {
                   </div>
                 </div>
                 <div className="bg-[#f5f7fa] rounded-2xl p-4">
-                  <p className="text-sm text-[#6a7282] mb-1">Average Rating</p>
+                  <p className="text-sm text-[#6a7282] mb-1">{t('owner.quickStats.averageRating')}</p>
                   <div className="text-2xl font-bold text-[#3A6EA5] flex items-center gap-2">
                     {isLoading ? (
                       <Skeleton className="h-8 w-12 inline-block" />
@@ -832,7 +829,7 @@ export function OwnerDashboard() {
                     )}
                   </div>
                   <p className="text-xs text-[#6a7282] mt-1">
-                    {dashboard?.ratingsCount ?? 0} reviews
+                    {t('owner.quickStats.reviews', { count: dashboard?.ratingsCount ?? 0 })}
                   </p>
                 </div>
               </CardContent>

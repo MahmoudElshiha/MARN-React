@@ -1,0 +1,208 @@
+{
+  "title": "Admin Dashboard",
+  "tabs": {
+    "overview": "Overview",
+    "users": "Users",
+    "verifications": "Verifications",
+    "properties": "Properties",
+    "reports": "Reports"
+  },
+  "stats": {
+    "totalUsers": "Total Users",
+    "totalProperties": "Total Properties",
+    "pendingVerifications": "Pending Verifications",
+    "monthlyRevenue": "Monthly Revenue"
+  },
+  "users": {
+    "title": "User Management",
+    "search": "Search users...",
+    "noUsers": "No users found.",
+    "actions": {
+      "ban": "Ban",
+      "unban": "Unban",
+      "restore": "Restore",
+      "editRoles": "Edit Roles"
+    }
+  },
+  "verifications": {
+    "title": "Identity Verifications",
+    "pending": "Pending",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectReason": "Rejection Reason",
+    "rejectReasonPlaceholder": "Enter reason for rejection...",
+    "noVerifications": "No pending verifications."
+  },
+  "propertyVerifications": {
+    "title": "Property Verifications",
+    "approve": "Approve",
+    "decline": "Decline",
+    "declineReason": "Decline Reason",
+    "noPending": "No pending property verifications."
+  },
+  "reports": {
+    "title": "Analytics Reports",
+    "scope": "Report Scope",
+    "format": "Format",
+    "period": "Period",
+    "from": "From",
+    "to": "To",
+    "generate": "Generate Report",
+    "download": "Download Report"
+  },
+  "roles": {
+    "title": "Edit User Roles",
+    "save": "Save Roles"
+  },
+  "modals": {
+    "confirmAction": "Confirm Action",
+    "areYouSure": "Are you sure you want to {{action}} this user?",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "header": {
+    "title": "Admin Dashboard",
+    "subtitle": "Manage users, verify documents, and monitor platform activity"
+  },
+  "revenue": {
+    "title": "Revenue & Sales Data",
+    "totalRevenue": "Total Revenue",
+    "fromLastPeriod": "from last period",
+    "activeContracts": "Active Contracts",
+    "newUsersThisMonth": "New Users (This Month)",
+    "monthlyRevenueGraph": "Monthly Revenue Graph"
+  },
+  "stats": {
+    "totalUsers": "Total Users",
+    "totalListings": "Total Listings",
+    "pendingVerifications": "Pending Verifications",
+    "activeContracts": "Active Contracts",
+    "totalProperties": "Total Properties",
+    "monthlyRevenue": "Monthly Revenue"
+  },
+  "table": {
+    "fullName": "Full Name",
+    "email": "Email",
+    "nationalId": "National ID",
+    "submitted": "Submitted",
+    "status": "Status",
+    "actions": "Actions",
+    "name": "Name",
+    "roles": "Roles",
+    "joinDate": "Join Date",
+    "property": "Property",
+    "owner": "Owner",
+    "type": "Type",
+    "governorate": "Governorate",
+    "view": "View",
+    "approve": "Approve",
+    "reject": "Reject",
+    "decline": "Decline",
+    "restore": "Restore",
+    "unban": "Unban",
+    "ban": "Ban",
+    "close": "Close"
+  },
+  "verificationModal": {
+    "nationalId": "National ID",
+    "arabicAddress": "Arabic Address",
+    "phone": "Phone",
+    "submitted": "Submitted",
+    "frontId": "Front ID",
+    "backId": "Back ID",
+    "noImage": "No image"
+  },
+  "propertyModal": {
+    "owner": "Owner",
+    "type": "Type",
+    "status": "Status",
+    "submitted": "Submitted",
+    "description": "Description",
+    "ownershipDocument": "Ownership Document",
+    "propertyImages": "Property Images",
+    "noDocument": "No document uploaded"
+  },
+  "userModal": {
+    "joined": "Joined",
+    "userId": "User ID",
+    "deleted": "Deleted"
+  },
+  "rejectModal": {
+    "title": "Reject Verification",
+    "subtitle": "Please provide a reason for rejecting this verification request.",
+    "placeholder": "Enter rejection reason…",
+    "confirmReject": "Confirm Reject",
+    "rejecting": "Rejecting…",
+    "cancel": "Cancel"
+  },
+  "declineModal": {
+    "title": "Decline Property Verification",
+    "subtitle": "Please provide a reason for declining this property verification request.",
+    "placeholder": "Enter decline reason…",
+    "confirmDecline": "Confirm Decline",
+    "declining": "Declining…",
+    "cancel": "Cancel"
+  },
+  "rolesModal": {
+    "title": "Update User Roles",
+    "subtitle": "Select the assignable roles for this user. Protected roles (Owner, Renter) are preserved automatically.",
+    "saving": "Saving…",
+    "cancel": "Cancel"
+  },
+  "confirmModal": {
+    "title": "Confirm Action",
+    "message": "Are you sure you want to {{action}} this user? This action can be reversed later.",
+    "processing": "Processing…",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "generateReport": {
+    "title": "Generate New Report",
+    "scope": "Scope",
+    "format": "Format",
+    "period": "Period",
+    "from": "From",
+    "to": "To",
+    "generating": "Generating…",
+    "generate": "Generate Report",
+    "generatedReports": "Generated Reports",
+    "noReports": "No reports generated yet.",
+    "scopeOptions": {
+      "overview": "Overview",
+      "users": "Users",
+      "properties": "Properties",
+      "contracts": "Contracts",
+      "revenue": "Revenue",
+      "full": "Full"
+    },
+    "formatOptions": {
+      "pdf": "PDF",
+      "csv": "CSV"
+    },
+    "periodOptions": {
+      "thisMonth": "This Month",
+      "thisYear": "This Year",
+      "allTime": "All Time",
+      "custom": "Custom Range"
+    }
+  },
+  "pending": "pending",
+  "noReportsYet": "No reports generated yet.",
+  "toasts": {
+    "verificationApproved": "Verification approved",
+    "approveFailed": "Failed to approve",
+    "verificationRejected": "Verification rejected",
+    "rejectFailed": "Failed to reject",
+    "propertyApproved": "Property verification approved",
+    "propertyApproveFailed": "Failed to approve property",
+    "propertyDeclined": "Property verification declined",
+    "propertyDeclineFailed": "Failed to decline property",
+    "userActionSuccess": "User {{action}} successfully",
+    "actionFailed": "Action failed",
+    "reportDownloadFailed": "Failed to download report",
+    "reportGenerated": "Report generated successfully",
+    "reportFailed": "Failed to generate report",
+    "rolesUpdated": "Roles updated successfully",
+    "rolesFailed": "Failed to update roles"
+  }
+}

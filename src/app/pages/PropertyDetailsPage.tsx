@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Thermometer,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
 import { Calendar as CalendarComponent } from '../components/ui/calendar'
@@ -62,6 +63,7 @@ const AMENITY_ICONS: Record<string, React.ElementType> = {
 }
 
 export function PropertyDetailsPage() {
+  const { t } = useTranslation('properties')
   const { id } = useParams<{ id: string }>()
   const { data, isLoading, isError } = useProperty(id)
 
@@ -95,9 +97,9 @@ export function PropertyDetailsPage() {
   if (isError) {
     return (
       <div className="min-h-screen flex items-center justify-center text-[#4a5565]">
-        Property not found.{' '}
+        {t('details.notFound')}{' '}
         <Link to="/search" className="text-[#3A6EA5] hover:underline ml-1">
-          Back to search
+          {t('details.backToSearch')}
         </Link>
       </div>
     )
@@ -113,7 +115,7 @@ export function PropertyDetailsPage() {
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
-            Back to Search
+            {t('details.backToSearchFull')}
           </Link>
           <div className="flex gap-3">
             <Button
@@ -150,7 +152,7 @@ export function PropertyDetailsPage() {
                 />
               ) : (
                 <div className="w-full h-full bg-[#9CBBDC]/20 flex items-center justify-center text-[#4a5565]">
-                  No images available
+                  {t('details.noImages')}
                 </div>
               )}
 
@@ -224,7 +226,7 @@ export function PropertyDetailsPage() {
                           </span>
                           {property.reviews !== undefined && (
                             <span className="text-[#4a5565]">
-                              ({property.reviews} reviews)
+                              ({t('details.review_other', { count: property.reviews })})
                             </span>
                           )}
                         </div>
@@ -236,8 +238,10 @@ export function PropertyDetailsPage() {
                     </span>
                     <span className="text-[#4a5565]">•</span>
                     <span className="text-[#1a1a1a]">
-                      {(property as any)?.bedrooms ?? property?.beds} {((property as any)?.bedrooms ?? property?.beds) === 1 ? 'bed' : 'beds'} • {(property as any)?.bathrooms ?? property?.baths} {((property as any)?.bathrooms ?? property?.baths) === 1 ? 'bath' : 'baths'}
-                      {property?.area ? ` • ${property.area} sq ft` : ''}
+                      {t('details.bed_other', { count: (property as any)?.bedrooms ?? property?.beds })}
+                      {' • '}
+                      {t('details.bath_other', { count: (property as any)?.bathrooms ?? property?.baths })}
+                      {property?.area ? ` • ${property.area} ${t('details.sqft')}` : ''}
                     </span>
                   </div>
                 </>
@@ -255,7 +259,7 @@ export function PropertyDetailsPage() {
             ) : property?.description ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
-                  About This Property
+                  {t('details.aboutProperty')}
                 </h2>
                 <p className="text-[#1a1a1a] leading-relaxed">
                   {property.description}
@@ -267,7 +271,7 @@ export function PropertyDetailsPage() {
             {!isLoading && property?.amenities?.length ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Amenities
+                  {t('details.amenities')}
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {property.amenities.map((amenityItem: any) => {
@@ -302,7 +306,7 @@ export function PropertyDetailsPage() {
             {!isLoading && property?.ownerName && (
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Hosted By
+                  {t('details.hostedBy')}
                 </h2>
                 <div className="flex items-center gap-4 mb-4">
                   <Avatar className="w-16 h-16">
@@ -325,7 +329,7 @@ export function PropertyDetailsPage() {
                   >
                     <Link to="/messages">
                       <MessageSquare className="w-4 h-4 mr-2" />
-                      Message
+                      {t('details.message')}
                     </Link>
                   </Button>
                 </div>
@@ -351,7 +355,7 @@ export function PropertyDetailsPage() {
                         <span className="text-4xl font-bold text-[#3A6EA5]">
                           {property?.price?.toLocaleString()} EGP
                         </span>
-                        <span className="text-[#4a5565]">/ month</span>
+                        <span className="text-[#4a5565]">{t('details.perMonth')}</span>
                       </div>
                       {property?.rating !== undefined && (
                         <div className="flex items-center gap-1 text-sm">
@@ -359,7 +363,7 @@ export function PropertyDetailsPage() {
                           <span className="text-[#1a1a1a]">
                             {property.rating}{' '}
                             {property.reviews !== undefined &&
-                              `(${property.reviews} reviews)`}
+                              `(${t('details.review_other', { count: property.reviews })})`}
                           </span>
                         </div>
                       )}
@@ -369,7 +373,7 @@ export function PropertyDetailsPage() {
                     <div className="space-y-4 mb-6">
                       <div>
                         <label className="text-sm text-[#1a1a1a] mb-2 block">
-                          Move-in Date
+                          {t('details.moveInDate')}
                         </label>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -378,7 +382,7 @@ export function PropertyDetailsPage() {
                               className="w-full justify-start text-left rounded-xl border-[#3A6EA5]/20 hover:bg-white"
                             >
                               <Calendar className="mr-2 h-4 w-4 text-[#3A6EA5]" />
-                              {checkIn ? format(checkIn, 'PPP') : 'Select date'}
+                              {checkIn ? format(checkIn, 'PPP') : t('details.selectDate')}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -394,7 +398,7 @@ export function PropertyDetailsPage() {
 
                       <div>
                         <label className="text-sm text-[#1a1a1a] mb-2 block">
-                          Move-out Date
+                          {t('details.moveOutDate')}
                         </label>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -405,7 +409,7 @@ export function PropertyDetailsPage() {
                               <Calendar className="mr-2 h-4 w-4 text-[#3A6EA5]" />
                               {checkOut
                                 ? format(checkOut, 'PPP')
-                                : 'Select date'}
+                                : t('details.selectDate')}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -423,15 +427,15 @@ export function PropertyDetailsPage() {
                     {/* Price Summary */}
                     <div className="space-y-3 mb-6 p-4 bg-white rounded-2xl">
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Monthly rent</span>
+                        <span>{t('details.monthlyRent')}</span>
                         <span>{property?.price?.toLocaleString()} EGP</span>
                       </div>
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Security deposit</span>
+                        <span>{t('details.securityDeposit')}</span>
                         <span>{property?.price?.toLocaleString()} EGP</span>
                       </div>
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Service fee</span>
+                        <span>{t('details.serviceFee')}</span>
                         <span>
                           {Math.round(
                             (property?.price ?? 0) * 0.05,
@@ -440,7 +444,7 @@ export function PropertyDetailsPage() {
                         </span>
                       </div>
                       <div className="border-t border-[#3A6EA5]/20 pt-3 flex justify-between font-semibold text-[#1a1a1a]">
-                        <span>Total (First Month)</span>
+                        <span>{t('details.totalFirstMonth')}</span>
                         <span className="text-[#3A6EA5]">
                           {Math.round(
                             (property?.price ?? 0) * 2.05,
@@ -454,7 +458,7 @@ export function PropertyDetailsPage() {
                       size="lg"
                       className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30 mb-3"
                     >
-                      Book Now
+                      {t('details.bookNow')}
                     </Button>
 
                     <Button
@@ -462,11 +466,11 @@ export function PropertyDetailsPage() {
                       size="lg"
                       className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                     >
-                      Schedule Tour
+                      {t('details.scheduleTour')}
                     </Button>
 
                     <p className="text-xs text-center text-[#4a5565] mt-4">
-                      You won't be charged yet
+                      {t('details.notChargedYet')}
                     </p>
                   </>
                 )}
@@ -478,11 +482,10 @@ export function PropertyDetailsPage() {
                   <Users className="w-5 h-5 text-[#3A6EA5] flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-semibold text-[#1a1a1a] mb-1">
-                      Looking for Roommates?
+                      {t('details.lookingForRoommates')}
                     </h4>
                     <p className="text-sm text-[#4a5565]">
-                      Use our roommate matching feature to find compatible
-                      housemates
+                      {t('details.roommateMatchingDesc')}
                     </p>
                   </div>
                 </div>

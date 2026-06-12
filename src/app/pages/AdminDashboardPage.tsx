@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import {
   Users,
   Building,
@@ -62,6 +63,8 @@ function buildImageUrl(path: string | null) {
 }
 
 export function AdminDashboardPage() {
+  const { t } = useTranslation('admin')
+
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [actionType, setActionType] = useState<
     'ban' | 'unban' | 'restore' | null
@@ -142,7 +145,7 @@ export function AdminDashboardPage() {
   const stats = [
     {
       icon: Users,
-      label: 'Total Users',
+      label: t('stats.totalUsers'),
       value: statsLoading
         ? '…'
         : (apiStats?.totalUsers?.value ?? 0).toLocaleString(),
@@ -153,7 +156,7 @@ export function AdminDashboardPage() {
     },
     {
       icon: Building,
-      label: 'Total Listings',
+      label: t('stats.totalListings'),
       value: statsLoading
         ? '…'
         : (apiStats?.totalProperties?.value ?? 0).toLocaleString(),
@@ -164,7 +167,7 @@ export function AdminDashboardPage() {
     },
     {
       icon: Clock,
-      label: 'Pending Verifications',
+      label: t('stats.pendingVerifications'),
       value: statsLoading
         ? '…'
         : (apiStats?.pendingVerifications?.value ?? 0).toLocaleString(),
@@ -175,7 +178,7 @@ export function AdminDashboardPage() {
     },
     {
       icon: FileText,
-      label: 'Active Contracts',
+      label: t('stats.activeContracts'),
       value: statsLoading
         ? '…'
         : (apiStats?.revenueSummary?.activeContracts ?? 0).toLocaleString(),
@@ -189,39 +192,39 @@ export function AdminDashboardPage() {
   const approveVerification = useMutation({
     mutationFn: (userId: string) => adminService.approveVerification(userId),
     onSuccess: () => {
-      toast.success('Verification approved')
+      toast.success(t('toasts.verificationApproved'))
       queryClient.invalidateQueries({ queryKey: ['adminVerifications'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
     },
-    onError: () => toast.error('Failed to approve'),
+    onError: () => toast.error(t('toasts.approveFailed')),
   })
 
   const rejectVerification = useMutation({
     mutationFn: ({ userId, reason }: { userId: string; reason: string }) =>
       adminService.rejectVerification(userId, reason),
     onSuccess: () => {
-      toast.success('Verification rejected')
+      toast.success(t('toasts.verificationRejected'))
       queryClient.invalidateQueries({ queryKey: ['adminVerifications'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
       setShowRejectModal(false)
       setPendingRejectUserId(null)
       setRejectReason('')
     },
-    onError: () => toast.error('Failed to reject'),
+    onError: () => toast.error(t('toasts.rejectFailed')),
   })
 
   const approvePropertyVerification = useMutation({
     mutationFn: (propertyId: number) =>
       adminService.approvePropertyVerification(propertyId),
     onSuccess: () => {
-      toast.success('Property verification approved')
+      toast.success(t('toasts.propertyApproved'))
       queryClient.invalidateQueries({
         queryKey: ['adminPropertyVerifications'],
       })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
       setSelectedPropertyId(null)
     },
-    onError: () => toast.error('Failed to approve property'),
+    onError: () => toast.error(t('toasts.propertyApproveFailed')),
   })
 
   const declinePropertyVerification = useMutation({
@@ -233,7 +236,7 @@ export function AdminDashboardPage() {
       reason: string
     }) => adminService.declinePropertyVerification(propertyId, reason),
     onSuccess: () => {
-      toast.success('Property verification declined')
+      toast.success(t('toasts.propertyDeclined'))
       queryClient.invalidateQueries({
         queryKey: ['adminPropertyVerifications'],
       })
@@ -243,7 +246,7 @@ export function AdminDashboardPage() {
       setPropertyRejectReason('')
       setSelectedPropertyId(null)
     },
-    onError: () => toast.error('Failed to decline property'),
+    onError: () => toast.error(t('toasts.propertyDeclineFailed')),
   })
 
   const userAction = useMutation({
@@ -264,14 +267,14 @@ export function AdminDashboardPage() {
         unban: 'unbanned',
         restore: 'restored',
       }
-      toast.success(`User ${labels[actionType!] ?? actionType} successfully`)
+      toast.success(t('toasts.userActionSuccess', { action: labels[actionType!] ?? actionType }))
       queryClient.invalidateQueries({ queryKey: ['adminRoleUsers'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
       setShowConfirmModal(false)
       setPendingUserId(null)
       setSelectedUser(null)
     },
-    onError: () => toast.error('Action failed'),
+    onError: () => toast.error(t('toasts.actionFailed')),
   })
 
   const ASSIGNABLE_ROLES = ['Admin', 'Moderator']
@@ -308,7 +311,7 @@ export function AdminDashboardPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch {
-      toast.error('Failed to download report')
+      toast.error(t('toasts.reportDownloadFailed'))
     }
   }
 
@@ -388,10 +391,10 @@ export function AdminDashboardPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-              Admin Dashboard
+              {t('header.title')}
             </h1>
             <p className="text-lg text-[#4a5565]">
-              Manage users, verify documents, and monitor platform activity
+              {t('header.subtitle')}
             </p>
           </div>
 
@@ -441,12 +444,12 @@ export function AdminDashboardPage() {
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a] flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-[#3A6EA5]" />
-                  Revenue & Sales Data
+                  {t('revenue.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-white rounded-2xl p-4">
-                  <p className="text-sm text-[#4a5565] mb-1">Total Revenue</p>
+                  <p className="text-sm text-[#4a5565] mb-1">{t('revenue.totalRevenue')}</p>
                   <p className="text-3xl font-bold text-[#3A6EA5]">
                     {statsLoading
                       ? '…'
@@ -465,13 +468,13 @@ export function AdminDashboardPage() {
                         {formatTrend(
                           apiStats.revenueSummary.revenueTrendPercentage,
                         )}{' '}
-                        from last period
+                        {t('revenue.fromLastPeriod')}
                       </p>
                     )}
                 </div>
                 <div className="bg-white rounded-2xl p-4">
                   <p className="text-sm text-[#4a5565] mb-1">
-                    Active Contracts
+                    {t('revenue.activeContracts')}
                   </p>
                   <p className="text-2xl font-bold text-[#1a1a1a]">
                     {statsLoading
@@ -483,7 +486,7 @@ export function AdminDashboardPage() {
                 </div>
                 <div className="bg-white rounded-2xl p-4">
                   <p className="text-sm text-[#4a5565] mb-1">
-                    New Users (This Month)
+                    {t('revenue.newUsersThisMonth')}
                   </p>
                   <p className="text-2xl font-bold text-[#1a1a1a]">
                     {statsLoading
@@ -499,7 +502,7 @@ export function AdminDashboardPage() {
             <Card className="lg:col-span-2 bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a]">
-                  Monthly Revenue Graph
+                  {t('revenue.monthlyRevenueGraph')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -544,25 +547,25 @@ export function AdminDashboardPage() {
                 value="verifications"
                 className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
-                Identity Verifications
+                {t('verifications.title')}
               </TabsTrigger>
               <TabsTrigger
                 value="property-verifications"
                 className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
-                Property Verifications
+                {t('propertyVerifications.title')}
               </TabsTrigger>
               <TabsTrigger
                 value="users"
                 className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
-                User Management
+                {t('users.title')}
               </TabsTrigger>
               <TabsTrigger
                 value="reports"
                 className="flex-1 rounded-xl py-2.5 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm"
               >
-                Reports
+                {t('reports.title')}
               </TabsTrigger>
             </TabsList>
 
@@ -572,10 +575,10 @@ export function AdminDashboardPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-2xl text-[#1a1a1a]">
-                      Pending Verifications
+                      {t('verifications.title')}
                     </CardTitle>
                     <span className="text-sm text-[#4a5565]">
-                      {pendingVerifications.length} pending
+                      {pendingVerifications.length} {t('pending')}
                     </span>
                   </div>
                 </CardHeader>
@@ -585,22 +588,22 @@ export function AdminDashboardPage() {
                       <thead>
                         <tr className="border-b border-[#3A6EA5]/20">
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Full Name
+                            {t('table.fullName')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Email
+                            {t('table.email')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            National ID
+                            {t('table.nationalId')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Submitted
+                            {t('table.submitted')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Status
+                            {t('table.status')}
                           </th>
                           <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Actions
+                            {t('table.actions')}
                           </th>
                         </tr>
                       </thead>
@@ -624,7 +627,7 @@ export function AdminDashboardPage() {
                               colSpan={6}
                               className="py-10 text-center text-[#4a5565]"
                             >
-                              No pending verifications.
+                              {t('verifications.noVerifications')}
                             </td>
                           </tr>
                         ) : (
@@ -669,7 +672,7 @@ export function AdminDashboardPage() {
                                     }
                                   >
                                     <Eye className="w-4 h-4 mr-1" />
-                                    View
+                                    {t('table.view')}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -678,7 +681,7 @@ export function AdminDashboardPage() {
                                     onClick={() => handleApprove(item.userId)}
                                   >
                                     <CheckCircle className="w-4 h-4 mr-1" />
-                                    Approve
+                                    {t('verifications.approve')}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -688,7 +691,7 @@ export function AdminDashboardPage() {
                                     onClick={() => handleReject(item.userId)}
                                   >
                                     <XCircle className="w-4 h-4 mr-1" />
-                                    Reject
+                                    {t('verifications.reject')}
                                   </Button>
                                 </div>
                               </td>
@@ -708,10 +711,10 @@ export function AdminDashboardPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-2xl text-[#1a1a1a]">
-                      User Management
+                      {t('users.title')}
                     </CardTitle>
                     <Input
-                      placeholder="Search users..."
+                      placeholder={t('users.search')}
                       className="w-64 bg-white rounded-xl border-[#3A6EA5]/20"
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
@@ -724,22 +727,22 @@ export function AdminDashboardPage() {
                       <thead>
                         <tr className="border-b border-[#3A6EA5]/20">
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Name
+                            {t('table.name')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Email
+                            {t('table.email')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Roles
+                            {t('table.roles')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Status
+                            {t('table.status')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Join Date
+                            {t('table.joinDate')}
                           </th>
                           <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Actions
+                            {t('table.actions')}
                           </th>
                         </tr>
                       </thead>
@@ -763,7 +766,7 @@ export function AdminDashboardPage() {
                               colSpan={6}
                               className="py-10 text-center text-[#4a5565]"
                             >
-                              No users found.
+                              {t('users.noUsers')}
                             </td>
                           </tr>
                         ) : (
@@ -824,7 +827,7 @@ export function AdminDashboardPage() {
                                       }
                                     >
                                       <UserCheck className="w-4 h-4 mr-1" />
-                                      Restore
+                                      {t('table.restore')}
                                     </Button>
                                   ) : user.accountStatus === 'Banned' ? (
                                     <Button
@@ -835,7 +838,7 @@ export function AdminDashboardPage() {
                                       }
                                     >
                                       <UserCheck className="w-4 h-4 mr-1" />
-                                      Unban
+                                      {t('table.unban')}
                                     </Button>
                                   ) : !user.roles.includes('Admin') ? (
                                     <Button
@@ -866,19 +869,19 @@ export function AdminDashboardPage() {
               <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
                 <CardHeader>
                   <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Analytics Reports
+                    {t('reports.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Generate Action */}
                   <div className="bg-white rounded-2xl p-6 space-y-4">
                     <h3 className="font-semibold text-[#1a1a1a]">
-                      Generate New Report
+                      {t('generateReport.title')}
                     </h3>
                     <div className="grid sm:grid-cols-3 gap-3">
                       <div className="space-y-1">
                         <p className="text-xs text-[#4a5565] font-medium">
-                          Scope
+                          {t('generateReport.scope')}
                         </p>
                         <Select
                           value={reportScope}
@@ -888,20 +891,20 @@ export function AdminDashboardPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Overview">Overview</SelectItem>
-                            <SelectItem value="Users">Users</SelectItem>
+                            <SelectItem value="Overview">{t('generateReport.scopeOptions.overview')}</SelectItem>
+                            <SelectItem value="Users">{t('generateReport.scopeOptions.users')}</SelectItem>
                             <SelectItem value="Properties">
-                              Properties
+                              {t('generateReport.scopeOptions.properties')}
                             </SelectItem>
-                            <SelectItem value="Contracts">Contracts</SelectItem>
-                            <SelectItem value="Revenue">Revenue</SelectItem>
-                            <SelectItem value="Full">Full</SelectItem>
+                            <SelectItem value="Contracts">{t('generateReport.scopeOptions.contracts')}</SelectItem>
+                            <SelectItem value="Revenue">{t('generateReport.scopeOptions.revenue')}</SelectItem>
+                            <SelectItem value="Full">{t('generateReport.scopeOptions.full')}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs text-[#4a5565] font-medium">
-                          Format
+                          {t('generateReport.format')}
                         </p>
                         <Select
                           value={reportFormat}
@@ -911,14 +914,14 @@ export function AdminDashboardPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Pdf">PDF</SelectItem>
-                            <SelectItem value="Csv">CSV</SelectItem>
+                            <SelectItem value="Pdf">{t('generateReport.formatOptions.pdf')}</SelectItem>
+                            <SelectItem value="Csv">{t('generateReport.formatOptions.csv')}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs text-[#4a5565] font-medium">
-                          Period
+                          {t('generateReport.period')}
                         </p>
                         <Select
                           value={reportPeriod}
@@ -929,11 +932,11 @@ export function AdminDashboardPage() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="ThisMonth">
-                              This Month
+                              {t('generateReport.periodOptions.thisMonth')}
                             </SelectItem>
-                            <SelectItem value="ThisYear">This Year</SelectItem>
-                            <SelectItem value="AllTime">All Time</SelectItem>
-                            <SelectItem value="Custom">Custom Range</SelectItem>
+                            <SelectItem value="ThisYear">{t('generateReport.periodOptions.thisYear')}</SelectItem>
+                            <SelectItem value="AllTime">{t('generateReport.periodOptions.allTime')}</SelectItem>
+                            <SelectItem value="Custom">{t('generateReport.periodOptions.custom')}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -942,7 +945,7 @@ export function AdminDashboardPage() {
                       <div className="grid sm:grid-cols-2 gap-3">
                         <div className="space-y-1">
                           <p className="text-xs text-[#4a5565] font-medium">
-                            From
+                            {t('generateReport.from')}
                           </p>
                           <Input
                             type="date"
@@ -953,7 +956,7 @@ export function AdminDashboardPage() {
                         </div>
                         <div className="space-y-1">
                           <p className="text-xs text-[#4a5565] font-medium">
-                            To
+                            {t('generateReport.to')}
                           </p>
                           <Input
                             type="date"
@@ -1000,15 +1003,15 @@ export function AdminDashboardPage() {
                     >
                       <TrendingUp className="w-5 h-5 mr-2" />
                       {generateReport.isPending
-                        ? 'Generating…'
-                        : 'Generate Report'}
+                        ? t('generateReport.generating')
+                        : t('generateReport.generate')}
                     </Button>
                   </div>
 
                   {/* Generated Reports List */}
                   <div className="bg-white rounded-2xl p-6">
                     <h3 className="font-semibold text-[#1a1a1a] mb-4">
-                      Generated Reports
+                      {t('generateReport.generatedReports')}
                     </h3>
                     {analyticsReportsLoading ? (
                       <div className="space-y-3">
@@ -1021,7 +1024,7 @@ export function AdminDashboardPage() {
                       </div>
                     ) : analyticsReports.length === 0 ? (
                       <p className="text-center text-[#4a5565] py-6">
-                        No reports generated yet.
+                        {t('generateReport.noReports')}
                       </p>
                     ) : (
                       <div className="space-y-3">
@@ -1085,10 +1088,10 @@ export function AdminDashboardPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-2xl text-[#1a1a1a]">
-                      Pending Property Verifications
+                      {t('propertyVerifications.title')}
                     </CardTitle>
                     <span className="text-sm text-[#4a5565]">
-                      {pendingPropertyVerifications.length} pending
+                      {pendingPropertyVerifications.length} {t('pending')}
                     </span>
                   </div>
                 </CardHeader>
@@ -1098,25 +1101,25 @@ export function AdminDashboardPage() {
                       <thead>
                         <tr className="border-b border-[#3A6EA5]/20">
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Property
+                            {t('table.property')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Owner
+                            {t('table.owner')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Type
+                            {t('table.type')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Governorate
+                            {t('table.governorate')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Submitted
+                            {t('table.submitted')}
                           </th>
                           <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Status
+                            {t('table.status')}
                           </th>
                           <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
-                            Actions
+                            {t('table.actions')}
                           </th>
                         </tr>
                       </thead>
@@ -1140,7 +1143,7 @@ export function AdminDashboardPage() {
                               colSpan={7}
                               className="py-10 text-center text-[#4a5565]"
                             >
-                              No pending property verifications.
+                              {t('propertyVerifications.noPending')}
                             </td>
                           </tr>
                         ) : (
@@ -1205,7 +1208,7 @@ export function AdminDashboardPage() {
                                     }
                                   >
                                     <Eye className="w-4 h-4 mr-1" />
-                                    View
+                                    {t('table.view')}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -1218,7 +1221,7 @@ export function AdminDashboardPage() {
                                     }
                                   >
                                     <CheckCircle className="w-4 h-4 mr-1" />
-                                    Approve
+                                    {t('propertyVerifications.approve')}
                                   </Button>
                                   <Button
                                     size="sm"
@@ -1232,7 +1235,7 @@ export function AdminDashboardPage() {
                                     }
                                   >
                                     <XCircle className="w-4 h-4 mr-1" />
-                                    Decline
+                                    {t('propertyVerifications.decline')}
                                   </Button>
                                 </div>
                               </td>
@@ -1304,7 +1307,7 @@ export function AdminDashboardPage() {
               ) : (
                 <>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Owner</p>
+                    <p className="text-[#4a5565] mb-1">{t('propertyModal.owner')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {propertyVerificationDetail?.ownerFullName}
                     </p>
@@ -1313,13 +1316,13 @@ export function AdminDashboardPage() {
                     </p>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Type</p>
+                    <p className="text-[#4a5565] mb-1">{t('propertyModal.type')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {propertyVerificationDetail?.typeDisplayName}
                     </p>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Status</p>
+                    <p className="text-[#4a5565] mb-1">{t('propertyModal.status')}</p>
                     <div className="mt-1">
                       {getStatusBadge(
                         propertyVerificationDetail?.statusDisplayName ?? '',
@@ -1327,7 +1330,7 @@ export function AdminDashboardPage() {
                     </div>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Submitted</p>
+                    <p className="text-[#4a5565] mb-1">{t('propertyModal.submitted')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {propertyVerificationDetail?.submittedAt
                         ? new Date(
@@ -1338,7 +1341,7 @@ export function AdminDashboardPage() {
                   </div>
                   {propertyVerificationDetail?.description && (
                     <div className="bg-[#F2F4F6] rounded-2xl p-4 col-span-2">
-                      <p className="text-[#4a5565] mb-1">Description</p>
+                      <p className="text-[#4a5565] mb-1">{t('propertyModal.description')}</p>
                       <p className="text-sm text-[#1a1a1a]">
                         {propertyVerificationDetail.description}
                       </p>
@@ -1351,7 +1354,7 @@ export function AdminDashboardPage() {
             {/* Ownership Document */}
             <div className="mb-6">
               <p className="text-sm text-[#4a5565] mb-2 font-medium">
-                Ownership Document
+                {t('propertyModal.ownershipDocument')}
               </p>
               {propertyVerificationDetailLoading ? (
                 <Skeleton className="h-40 w-full rounded-2xl" />
@@ -1365,7 +1368,7 @@ export function AdminDashboardPage() {
                 />
               ) : (
                 <div className="w-full rounded-2xl border border-dashed border-[#3A6EA5]/30 bg-[#F2F4F6] flex items-center justify-center h-32 text-[#4a5565] text-sm">
-                  No document uploaded
+                  {t('propertyModal.noDocument')}
                 </div>
               )}
             </div>
@@ -1375,7 +1378,7 @@ export function AdminDashboardPage() {
               (propertyVerificationDetail?.images?.length ?? 0) > 0 && (
                 <div className="mb-6">
                   <p className="text-sm text-[#4a5565] mb-2 font-medium">
-                    Property Images
+                    {t('propertyModal.propertyImages')}
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     {propertyVerificationDetail!.images.map((img, i) => (
@@ -1400,7 +1403,7 @@ export function AdminDashboardPage() {
                 onClick={() => handleApproveProperty(selectedPropertyId)}
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Approve
+                {t('propertyVerifications.approve')}
               </Button>
               <Button
                 variant="outline"
@@ -1415,7 +1418,7 @@ export function AdminDashboardPage() {
                 }}
               >
                 <XCircle className="w-4 h-4 mr-2" />
-                Decline
+                {t('propertyVerifications.decline')}
               </Button>
             </div>
           </motion.div>
@@ -1431,16 +1434,15 @@ export function AdminDashboardPage() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-              Decline Property Verification
+              {t('declineModal.title')}
             </h3>
             <p className="text-[#4a5565] mb-5">
-              Please provide a reason for declining this property verification
-              request.
+              {t('declineModal.subtitle')}
             </p>
             <textarea
               className="w-full rounded-xl border border-[#3A6EA5]/30 bg-[#F2F4F6] p-3 text-sm text-[#1a1a1a] resize-none focus:outline-none focus:ring-2 focus:ring-[#3A6EA5]/40"
               rows={4}
-              placeholder="Enter decline reason…"
+              placeholder={t('declineModal.placeholder')}
               value={propertyRejectReason}
               onChange={(e) => setPropertyRejectReason(e.target.value)}
             />
@@ -1454,7 +1456,7 @@ export function AdminDashboardPage() {
                   setPropertyRejectReason('')
                 }}
               >
-                Cancel
+                {t('declineModal.cancel')}
               </Button>
               <Button
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl"
@@ -1465,8 +1467,8 @@ export function AdminDashboardPage() {
                 onClick={confirmPropertyDecline}
               >
                 {declinePropertyVerification.isPending
-                  ? 'Declining…'
-                  : 'Confirm Decline'}
+                  ? t('declineModal.declining')
+                  : t('declineModal.confirmDecline')}
               </Button>
             </div>
           </motion.div>
@@ -1535,25 +1537,25 @@ export function AdminDashboardPage() {
               ) : (
                 <>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">National ID</p>
+                    <p className="text-[#4a5565] mb-1">{t('verificationModal.nationalId')}</p>
                     <p className="font-mono font-semibold text-[#1a1a1a]">
                       {verificationDetail?.nationalIDNumber ?? '—'}
                     </p>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Arabic Address</p>
+                    <p className="text-[#4a5565] mb-1">{t('verificationModal.arabicAddress')}</p>
                     <p className="font-semibold text-[#1a1a1a]" dir="rtl">
                       {verificationDetail?.arabicAddress ?? '—'}
                     </p>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Phone</p>
+                    <p className="text-[#4a5565] mb-1">{t('verificationModal.phone')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {verificationDetail?.phoneNumber ?? '—'}
                     </p>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Submitted</p>
+                    <p className="text-[#4a5565] mb-1">{t('verificationModal.submitted')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {verificationDetail?.createdAt
                         ? new Date(
@@ -1577,13 +1579,13 @@ export function AdminDashboardPage() {
                   ))
                 : [
                     {
-                      label: 'Front ID',
+                      label: t('verificationModal.frontId'),
                       src: buildImageUrl(
                         verificationDetail?.frontIdPhoto ?? null,
                       ),
                     },
                     {
-                      label: 'Back ID',
+                      label: t('verificationModal.backId'),
                       src: buildImageUrl(
                         verificationDetail?.backIdPhoto ?? null,
                       ),
@@ -1601,7 +1603,7 @@ export function AdminDashboardPage() {
                         />
                       ) : (
                         <div className="w-full rounded-2xl border border-dashed border-[#3A6EA5]/30 bg-[#F2F4F6] flex items-center justify-center h-32 text-[#4a5565] text-sm">
-                          No image
+                          {t('verificationModal.noImage')}
                         </div>
                       )}
                     </div>
@@ -1621,7 +1623,7 @@ export function AdminDashboardPage() {
                 }}
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
-                Approve
+                {t('verifications.approve')}
               </Button>
               <Button
                 variant="outline"
@@ -1635,7 +1637,7 @@ export function AdminDashboardPage() {
                 }}
               >
                 <XCircle className="w-4 h-4 mr-2" />
-                Reject
+                {t('verifications.reject')}
               </Button>
             </div>
           </motion.div>
@@ -1676,7 +1678,7 @@ export function AdminDashboardPage() {
                     )}
                     {selectedUser.isDeleted && (
                       <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-600">
-                        Deleted
+                        {t('userModal.deleted')}
                       </span>
                     )}
                   </div>
@@ -1695,13 +1697,13 @@ export function AdminDashboardPage() {
             {/* Info row */}
             <div className="grid grid-cols-2 gap-3 mb-6 text-sm">
               <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-[#4a5565] mb-1">Joined</p>
+                <p className="text-[#4a5565] mb-1">{t('userModal.joined')}</p>
                 <p className="font-semibold text-[#1a1a1a]">
                   {new Date(selectedUser.createdAt).toLocaleDateString('en-GB')}
                 </p>
               </div>
               <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-[#4a5565] mb-1">User ID</p>
+                <p className="text-[#4a5565] mb-1">{t('userModal.userId')}</p>
                 <p className="font-mono text-xs font-semibold text-[#1a1a1a] break-all">
                   {selectedUser.userId}
                 </p>
@@ -1719,7 +1721,7 @@ export function AdminDashboardPage() {
                   }
                 >
                   <UserCheck className="w-4 h-4 mr-2" />
-                  Restore
+                  {t('table.restore')}
                 </Button>
               ) : selectedUser.accountStatus === 'Banned' ? (
                 <Button
@@ -1728,7 +1730,7 @@ export function AdminDashboardPage() {
                   onClick={() => handleUserAction(selectedUser.userId, 'unban')}
                 >
                   <UserCheck className="w-4 h-4 mr-2" />
-                  Unban
+                  {t('table.unban')}
                 </Button>
               ) : !selectedUser.roles.includes('Admin') ? (
                 <Button
@@ -1738,7 +1740,7 @@ export function AdminDashboardPage() {
                   onClick={() => handleUserAction(selectedUser.userId, 'ban')}
                 >
                   <Ban className="w-4 h-4 mr-2" />
-                  Ban
+                  {t('table.ban')}
                 </Button>
               ) : null}
               <Button
@@ -1746,7 +1748,7 @@ export function AdminDashboardPage() {
                 className="rounded-xl border-[#3A6EA5]/20"
                 onClick={() => setSelectedUser(null)}
               >
-                Close
+                {t('table.close')}
               </Button>
             </div>
           </motion.div>
@@ -1762,15 +1764,15 @@ export function AdminDashboardPage() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-              Reject Verification
+              {t('rejectModal.title')}
             </h3>
             <p className="text-[#4a5565] mb-5">
-              Please provide a reason for rejecting this verification request.
+              {t('rejectModal.subtitle')}
             </p>
             <textarea
               className="w-full rounded-xl border border-[#3A6EA5]/30 bg-[#F2F4F6] p-3 text-sm text-[#1a1a1a] resize-none focus:outline-none focus:ring-2 focus:ring-[#3A6EA5]/40"
               rows={4}
-              placeholder="Enter rejection reason…"
+              placeholder={t('rejectModal.placeholder')}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
             />
@@ -1784,14 +1786,16 @@ export function AdminDashboardPage() {
                   setRejectReason('')
                 }}
               >
-                Cancel
+                {t('rejectModal.cancel')}
               </Button>
               <Button
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl"
                 disabled={rejectVerification.isPending || !rejectReason.trim()}
                 onClick={confirmReject}
               >
-                {rejectVerification.isPending ? 'Rejecting…' : 'Confirm Reject'}
+                {rejectVerification.isPending
+                  ? t('rejectModal.rejecting')
+                  : t('rejectModal.confirmReject')}
               </Button>
             </div>
           </motion.div>
@@ -1807,11 +1811,10 @@ export function AdminDashboardPage() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-              Update User Roles
+              {t('rolesModal.title')}
             </h3>
             <p className="text-[#4a5565] mb-6 text-sm">
-              Select the assignable roles for this user. Protected roles (Owner,
-              Renter) are preserved automatically.
+              {t('rolesModal.subtitle')}
             </p>
             <div className="space-y-3 mb-6">
               {ASSIGNABLE_ROLES.map((role) => (
@@ -1843,14 +1846,14 @@ export function AdminDashboardPage() {
                   setSelectedRoles([])
                 }}
               >
-                Cancel
+                {t('rolesModal.cancel')}
               </Button>
               <Button
                 className="flex-1 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white rounded-xl"
                 disabled={updateUserRoles.isPending}
                 onClick={confirmRoleUpdate}
               >
-                {updateUserRoles.isPending ? 'Saving…' : 'Save Roles'}
+                {updateUserRoles.isPending ? t('rolesModal.saving') : t('roles.save')}
               </Button>
             </div>
           </motion.div>
@@ -1866,11 +1869,10 @@ export function AdminDashboardPage() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-              Confirm Action
+              {t('confirmModal.title')}
             </h3>
             <p className="text-[#4a5565] mb-6">
-              Are you sure you want to {actionType} this user? This action can
-              be reversed later.
+              {t('confirmModal.message', { action: actionType })}
             </p>
             <div className="flex gap-4">
               <Button
@@ -1878,14 +1880,16 @@ export function AdminDashboardPage() {
                 className="flex-1 rounded-xl border-[#3A6EA5]/20"
                 onClick={() => setShowConfirmModal(false)}
               >
-                Cancel
+                {t('confirmModal.cancel')}
               </Button>
               <Button
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl"
                 disabled={userAction.isPending}
                 onClick={confirmUserAction}
               >
-                {userAction.isPending ? 'Processing…' : 'Confirm'}
+                {userAction.isPending
+                  ? t('confirmModal.processing')
+                  : t('confirmModal.confirm')}
               </Button>
             </div>
           </motion.div>

@@ -2,8 +2,18 @@ import { motion } from 'motion/react'
 import { Home, Search, ArrowLeft } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 
 export function NotFoundPage() {
+  const { t } = useTranslation('pages')
+
+  const popularLinks = [
+    { key: 'links.search', path: '/search' },
+    { key: 'links.aboutUs', path: '/about' },
+    { key: 'links.howItWorks', path: '/how-it-works' },
+    { key: 'links.contact', path: '/contact' },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F2F4F6] via-[#9CBBDC]/30 to-[#9CBBDC]/50 flex items-center justify-center px-4">
       <div className="max-w-2xl mx-auto text-center">
@@ -20,7 +30,7 @@ export function NotFoundPage() {
               transition={{ duration: 0.5, type: 'spring', bounce: 0.5 }}
               className="text-[180px] md:text-[240px] font-bold bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent leading-none"
             >
-              404
+              {t('notFound.code')}
             </motion.h1>
           </div>
 
@@ -30,11 +40,10 @@ export function NotFoundPage() {
             transition={{ delay: 0.3, duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-4">
-              Page Not Found
+              {t('notFound.title')}
             </h2>
             <p className="text-xl text-[#4a5565] mb-8 max-w-md mx-auto">
-              Oops! The page you're looking for seems to have moved out. Let's
-              help you find a new place.
+              {t('notFound.subtitle')}
             </p>
           </motion.div>
 
@@ -52,7 +61,7 @@ export function NotFoundPage() {
             >
               <Link to="/">
                 <Home className="w-5 h-5 mr-2" />
-                Go Home
+                {t('notFound.goHome')}
               </Link>
             </Button>
             <Button
@@ -63,7 +72,7 @@ export function NotFoundPage() {
             >
               <Link to="/search">
                 <Search className="w-5 h-5 mr-2" />
-                Search Properties
+                {t('notFound.searchProperties')}
               </Link>
             </Button>
           </motion.div>
@@ -76,21 +85,16 @@ export function NotFoundPage() {
             className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-lg shadow-[#3A6EA5]/10"
           >
             <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">
-              Popular Pages
+              {t('notFound.popularPages')}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { name: 'Search', path: '/search' },
-                { name: 'About Us', path: '/about' },
-                { name: 'How It Works', path: '/how-it-works' },
-                { name: 'Contact', path: '/contact' },
-              ].map((link) => (
+              {popularLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
                   className="text-[#4a5565] hover:text-[#3A6EA5] transition-colors font-medium"
                 >
-                  {link.name}
+                  {t(`notFound.${link.key}`)}
                 </Link>
               ))}
             </div>
@@ -108,7 +112,7 @@ export function NotFoundPage() {
               className="inline-flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Go back to previous page</span>
+              <span>{t('notFound.goBack')}</span>
             </button>
           </motion.div>
         </motion.div>

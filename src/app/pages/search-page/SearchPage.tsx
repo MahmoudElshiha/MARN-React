@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react'
 import { MapIcon, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/app/components/ui/button'
 import { Skeleton } from '@/app/components/ui/skeleton'
 import { PropertyCard } from '@/app/components/PropertyCard'
@@ -18,6 +19,7 @@ const PropertyMap = lazy(() =>
 )
 
 export function SearchPage() {
+  const { t } = useTranslation('properties')
   const search = useSearchFilters()
   const { options: cityOptions, loading: citiesLoading } = useEnumOptions('cities')
   const { options: governorateOptions, loading: governoratesLoading } = useEnumOptions('governorates')
@@ -87,7 +89,7 @@ export function SearchPage() {
                   <div className="mb-8 bg-[#f5f7fa] rounded-3xl overflow-hidden shadow-lg shadow-black/5 h-[450px] flex items-center justify-center border border-[#3A6EA5]/10">
                     <div className="text-center text-[#4a5565]">
                       <Loader2 className="w-10 h-10 mx-auto mb-3 text-[#3A6EA5] animate-spin" />
-                      <p className="text-sm font-medium">Loading map…</p>
+                      <p className="text-sm font-medium">{t('search.loadingMap')}</p>
                     </div>
                   </div>
                 }
@@ -112,15 +114,15 @@ export function SearchPage() {
             ) : properties.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-[#4a5565]">
                 <MapIcon className="w-16 h-16 mb-4 text-[#9CBBDC]" />
-                <p className="text-lg font-semibold">No properties found</p>
-                <p className="text-sm">Try adjusting your filters</p>
+                <p className="text-lg font-semibold">{t('search.noResults')}</p>
+                <p className="text-sm">{t('search.noResultsSubtitle')}</p>
                 {search.activeFilterCount > 0 && (
                   <Button
                     variant="outline"
                     className="mt-6 rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                     onClick={search.resetFilters}
                   >
-                    Clear Filters
+                    {t('search.clearFilters')}
                   </Button>
                 )}
               </div>

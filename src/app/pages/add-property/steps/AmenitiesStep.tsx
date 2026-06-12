@@ -2,6 +2,7 @@ import { Label } from '../../../components/ui/label'
 import { Checkbox } from '../../../components/ui/checkbox'
 import { PROPERTY_AMENITIES as AMENITIES } from '@/constants/property'
 import { PropertyFormData } from '../types'
+import { useTranslation } from 'react-i18next'
 
 interface AmenitiesStepProps {
   formData: PropertyFormData
@@ -9,6 +10,7 @@ interface AmenitiesStepProps {
 }
 
 export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) {
+  const { t } = useTranslation('properties')
   const toggleAmenity = (amenity: string) => {
     const isSelected = formData.selectedAmenities.includes(amenity)
     const newAmenities = isSelected
@@ -28,10 +30,21 @@ export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) 
     updateFormData({ additionalAmenities: newAmenities })
   }
 
+  const additionalItems = [
+    'Dishwasher',
+    'Microwave',
+    'Refrigerator',
+    'Balcony/Patio',
+    'Hardwood Floors',
+    'Storage Space',
+    'Security System',
+    'Elevator',
+  ] as const
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-        Select Amenities
+        {t('addProperty.amenitiesStep.title')}
       </h2>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -58,19 +71,10 @@ export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) 
 
       <div className="bg-white rounded-2xl p-6">
         <Label className="text-[#1a1a1a] mb-3 block">
-          Additional Amenities
+          {t('addProperty.amenitiesStep.additionalAmenities')}
         </Label>
         <div className="space-y-3">
-          {[
-            'Dishwasher',
-            'Microwave',
-            'Refrigerator',
-            'Balcony/Patio',
-            'Hardwood Floors',
-            'Storage Space',
-            'Security System',
-            'Elevator',
-          ].map((amenity) => (
+          {additionalItems.map((amenity) => (
             <div key={amenity} className="flex items-center">
               <Checkbox
                 id={amenity}
@@ -82,7 +86,7 @@ export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) 
                 htmlFor={amenity}
                 className="ml-3 text-[#1a1a1a] cursor-pointer"
               >
-                {amenity}
+                {t(`addProperty.amenitiesStep.items.${amenity}`)}
               </label>
             </div>
           ))}

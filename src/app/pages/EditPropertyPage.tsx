@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { ChevronLeft, ChevronRight, MapPin, Users, X, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin, Users, X, Plus, Upload, CheckCircle, DollarSign } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
@@ -19,8 +19,31 @@ import {
   PROPERTY_STEPS as STEPS,
   PROPERTY_AMENITIES as AMENITIES,
 } from '@/constants/property'
+import { useTranslation } from 'react-i18next'
+
+const defaultPreferences = [
+  'Students Welcome',
+  'Professionals Only',
+  'Families Welcome',
+  'No Smoking',
+  'Pets Allowed',
+] as const
+
+const additionalItems = [
+  'Dishwasher',
+  'Microwave',
+  'Refrigerator',
+  'Balcony/Patio',
+  'Hardwood Floors',
+  'Storage Space',
+  'Security System',
+  'Elevator',
+] as const
+
+const utilities = ['Water', 'Electricity', 'Gas', 'Internet', 'Trash', 'Parking'] as const
 
 export function EditPropertyPage() {
+  const { t } = useTranslation('properties')
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([
@@ -72,7 +95,7 @@ export function EditPropertyPage() {
     if (newPreference.trim()) {
       setCustomPreferences([...customPreferences, newPreference.trim()])
       setNewPreference('')
-      toast.success('Preference added')
+      toast.success(t('editProperty.toasts.preferenceAdded'))
     }
   }
 
@@ -93,9 +116,15 @@ export function EditPropertyPage() {
   }
 
   const handleUpdate = () => {
-    toast.success('Property updated successfully')
+    toast.success(t('editProperty.toasts.updated'))
     navigate('/owner-dashboard')
   }
+
+  const leaseDurationOptions = [
+    { labelKey: 'editProperty.dayBased', value: 'day' },
+    { labelKey: 'editProperty.monthBased', value: 'month' },
+    { labelKey: 'editProperty.yearBased', value: 'year' },
+  ]
 
   return (
     <div className="min-h-screen pb-20">
@@ -107,12 +136,12 @@ export function EditPropertyPage() {
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors mb-4"
           >
             <ChevronLeft className="w-5 h-5" />
-            Back to Dashboard
+            {t('editProperty.backToDashboard')}
           </button>
           <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-            Edit Property
+            {t('editProperty.title')}
           </h1>
-          <p className="text-[#4a5565]">Update your property details</p>
+          <p className="text-[#4a5565]">{t('editProperty.subtitle')}</p>
         </div>
 
         {/* Progress Steps */}
@@ -168,7 +197,7 @@ export function EditPropertyPage() {
             {currentStep === 1 && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Property Details
+                  {t('addProperty.detailsStep.title')}
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,7 +206,7 @@ export function EditPropertyPage() {
                       htmlFor="title"
                       className="text-[#1a1a1a] mb-2 block"
                     >
-                      Property Title
+                      {t('addProperty.detailsStep.propertyTitle')}
                     </Label>
                     <Input
                       id="title"
@@ -194,7 +223,7 @@ export function EditPropertyPage() {
 
                   <div>
                     <Label htmlFor="type" className="text-[#1a1a1a] mb-2 block">
-                      Property Type
+                      {t('addProperty.detailsStep.propertyType')}
                     </Label>
                     <Select
                       value={propertyData.type}
@@ -206,10 +235,10 @@ export function EditPropertyPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="bed">Bed</SelectItem>
-                        <SelectItem value="room">Room</SelectItem>
-                        <SelectItem value="apartment">Apartment</SelectItem>
-                        <SelectItem value="house">House</SelectItem>
+                        <SelectItem value="bed">{t('addProperty.detailsStep.types.bed')}</SelectItem>
+                        <SelectItem value="room">{t('addProperty.detailsStep.types.room')}</SelectItem>
+                        <SelectItem value="apartment">{t('addProperty.detailsStep.types.apartment')}</SelectItem>
+                        <SelectItem value="house">{t('addProperty.detailsStep.types.house')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -220,7 +249,7 @@ export function EditPropertyPage() {
                     htmlFor="address"
                     className="text-[#1a1a1a] mb-2 block"
                   >
-                    Street Address
+                    {t('addProperty.detailsStep.streetAddress')}
                   </Label>
                   <Input
                     id="address"
@@ -238,7 +267,7 @@ export function EditPropertyPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <Label htmlFor="city" className="text-[#1a1a1a] mb-2 block">
-                      City
+                      {t('addProperty.detailsStep.city')}
                     </Label>
                     <Input
                       id="city"
@@ -257,7 +286,7 @@ export function EditPropertyPage() {
                       htmlFor="state"
                       className="text-[#1a1a1a] mb-2 block"
                     >
-                      Governorate
+                      {t('addProperty.detailsStep.governorate')}
                     </Label>
                     <Input
                       id="state"
@@ -273,7 +302,7 @@ export function EditPropertyPage() {
                   </div>
                   <div>
                     <Label htmlFor="zip" className="text-[#1a1a1a] mb-2 block">
-                      Postal Code
+                      {t('editProperty.postalCode')}
                     </Label>
                     <Input
                       id="zip"
@@ -293,14 +322,14 @@ export function EditPropertyPage() {
                 <div className="bg-white rounded-2xl p-6">
                   <Label className="text-[#1a1a1a] mb-3 block">
                     <MapPin className="w-5 h-5 inline-block mr-2" />
-                    Property Location on Map
+                    {t('addProperty.detailsStep.propertyLocationOnMap')}
                   </Label>
                   <div className="w-full h-64 bg-gradient-to-br from-[#9CBBDC]/30 to-[#f5f7fa] rounded-xl flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gNDAgMCBMIDAgMCAwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9IiM5Q0JCREMiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC4zIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
                     <div className="relative z-10 text-center">
                       <MapPin className="w-12 h-12 mx-auto mb-3 text-[#3A6EA5]" />
                       <p className="text-[#1a1a1a] font-semibold mb-2">
-                        Click to select exact location
+                        {t('editProperty.clickToSelectLocation')}
                       </p>
                       <p className="text-sm text-[#4a5565]">
                         Latitude: {mapLocation.lat.toFixed(4)}, Longitude:{' '}
@@ -309,25 +338,22 @@ export function EditPropertyPage() {
                       <Button
                         className="mt-4 bg-white text-[#3A6EA5] hover:bg-[#f5f7fa] rounded-xl"
                         onClick={() =>
-                          toast.info(
-                            'Map selection feature - Integration pending',
-                          )
+                          toast.info(t('editProperty.mapIntegrationPending'))
                         }
                       >
-                        Select on Map
+                        {t('editProperty.selectOnMap')}
                       </Button>
                     </div>
                   </div>
                   <p className="text-xs text-[#4a5565] mt-3">
-                    Drag the marker to set the exact location of your property
-                    for better visibility
+                    {t('addProperty.detailsStep.dragMarkerOrClick')}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <Label htmlFor="beds" className="text-[#1a1a1a] mb-2 block">
-                      Bedrooms
+                      {t('addProperty.detailsStep.bedrooms')}
                     </Label>
                     <Select
                       value={propertyData.bedrooms}
@@ -352,7 +378,7 @@ export function EditPropertyPage() {
                       htmlFor="baths"
                       className="text-[#1a1a1a] mb-2 block"
                     >
-                      Bathrooms
+                      {t('addProperty.detailsStep.bathrooms')}
                     </Label>
                     <Select
                       value={propertyData.bathrooms}
@@ -374,7 +400,7 @@ export function EditPropertyPage() {
                   </div>
                   <div>
                     <Label htmlFor="sqm" className="text-[#1a1a1a] mb-2 block">
-                      Square Meters
+                      {t('addProperty.detailsStep.squareMeters')}
                     </Label>
                     <Input
                       id="sqm"
@@ -396,7 +422,7 @@ export function EditPropertyPage() {
                     htmlFor="description"
                     className="text-[#1a1a1a] mb-2 block"
                   >
-                    Description
+                    {t('addProperty.detailsStep.description')}
                   </Label>
                   <Textarea
                     id="description"
@@ -417,7 +443,7 @@ export function EditPropertyPage() {
                   <div className="flex items-center gap-2 mb-2">
                     <Users className="w-5 h-5 text-[#3A6EA5]" />
                     <h3 className="font-semibold text-[#1a1a1a]">
-                      Occupancy Details
+                      {t('addProperty.detailsStep.occupancyDetails')}
                     </h3>
                   </div>
 
@@ -426,7 +452,7 @@ export function EditPropertyPage() {
                       htmlFor="num-people"
                       className="text-[#1a1a1a] mb-2 block"
                     >
-                      Number of People
+                      {t('editProperty.numberOfPeople')}
                     </Label>
                     <Select
                       value={propertyData.numberOfPeople}
@@ -446,7 +472,7 @@ export function EditPropertyPage() {
                       <SelectContent>
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                           <SelectItem key={num} value={num.toString()}>
-                            {num} {num === 1 ? 'Person' : 'People'}
+                            {num} {num === 1 ? t('addProperty.detailsStep.person') : t('addProperty.detailsStep.people')}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -458,10 +484,10 @@ export function EditPropertyPage() {
                       htmlFor="occupancy-preference"
                       className="text-[#1a1a1a] mb-3 block"
                     >
-                      Occupancy Preference
+                      {t('addProperty.detailsStep.occupancyPreferenceLabel')}
                     </Label>
                     <p className="text-sm text-[#4a5565] mb-3">
-                      How would you like this property to be occupied?
+                      {t('addProperty.detailsStep.howWouldYouLike')}
                     </p>
                     <Select
                       value={propertyData.occupancyPreference}
@@ -480,13 +506,13 @@ export function EditPropertyPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="shared">
-                          Shared - Different users per bed/room
+                          {t('addProperty.detailsStep.sharedOption')}
                         </SelectItem>
                         <SelectItem value="single">
-                          Single User - Entire property for one user
+                          {t('addProperty.detailsStep.singleOption')}
                         </SelectItem>
                         <SelectItem value="either">
-                          Either - Open to both options
+                          {t('editProperty.eitherOption')}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -496,16 +522,13 @@ export function EditPropertyPage() {
                     <CheckCircle className="w-5 h-5 text-[#3A6EA5] flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm text-[#1a1a1a]">
-                        <strong>Shared:</strong> Each bed/room can be rented to
-                        different users. Ideal for roommate situations.
+                        {t('addProperty.detailsStep.sharedDesc')}
                       </p>
                       <p className="text-sm text-[#1a1a1a] mt-2">
-                        <strong>Single User:</strong> The entire property will
-                        be rented to one person or family.
+                        {t('addProperty.detailsStep.singleDesc')}
                       </p>
                       <p className="text-sm text-[#1a1a1a] mt-2">
-                        <strong>Either:</strong> You're flexible and open to
-                        both shared and single-user arrangements.
+                        {t('editProperty.eitherDesc')}
                       </p>
                     </div>
                   </div>
@@ -517,7 +540,7 @@ export function EditPropertyPage() {
             {currentStep === 2 && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Select Amenities
+                  {t('addProperty.amenitiesStep.title')}
                 </h2>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -544,19 +567,10 @@ export function EditPropertyPage() {
 
                 <div className="bg-white rounded-2xl p-6">
                   <Label className="text-[#1a1a1a] mb-3 block">
-                    Additional Amenities
+                    {t('addProperty.amenitiesStep.additionalAmenities')}
                   </Label>
                   <div className="space-y-3">
-                    {[
-                      'Dishwasher',
-                      'Microwave',
-                      'Refrigerator',
-                      'Balcony/Patio',
-                      'Hardwood Floors',
-                      'Storage Space',
-                      'Security System',
-                      'Elevator',
-                    ].map((amenity) => (
+                    {additionalItems.map((amenity) => (
                       <div key={amenity} className="flex items-center">
                         <Checkbox
                           id={amenity}
@@ -567,7 +581,7 @@ export function EditPropertyPage() {
                           htmlFor={amenity}
                           className="ml-3 text-[#1a1a1a] cursor-pointer"
                         >
-                          {amenity}
+                          {t(`addProperty.amenitiesStep.items.${amenity}`)}
                         </label>
                       </div>
                     ))}
@@ -580,20 +594,20 @@ export function EditPropertyPage() {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Upload Photos
+                  {t('addProperty.photosStep.title')}
                 </h2>
 
                 <div className="bg-white rounded-2xl p-8">
                   <div className="border-2 border-dashed border-[#3A6EA5]/30 rounded-2xl p-12 text-center hover:border-[#3A6EA5] transition-colors cursor-pointer">
                     <Upload className="w-16 h-16 mx-auto mb-4 text-[#3A6EA5]" />
                     <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">
-                      Drag & drop photos here
+                      {t('addProperty.photosStep.dragDropPhotos')}
                     </h3>
                     <p className="text-[#4a5565] mb-4">
-                      or click to browse from your computer
+                      {t('addProperty.photosStep.orClickToBrowse')}
                     </p>
                     <Button className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-xl">
-                      Choose Files
+                      {t('addProperty.photosStep.chooseFiles')}
                     </Button>
                   </div>
                 </div>
@@ -611,9 +625,7 @@ export function EditPropertyPage() {
 
                 <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
                   <p className="text-sm text-[#1a1a1a]">
-                    <strong>Tip:</strong> Properties with 5+ high-quality photos
-                    get 40% more views. Include photos of living areas,
-                    bedrooms, kitchen, bathroom, and exterior.
+                    {t('addProperty.photosStep.tip')}
                   </p>
                 </div>
               </div>
@@ -623,12 +635,12 @@ export function EditPropertyPage() {
             {currentStep === 4 && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Pricing Configuration
+                  {t('addProperty.pricingStep.title')}
                 </h2>
 
                 <div className="bg-white rounded-2xl p-6 space-y-6">
                   <h3 className="font-semibold text-[#1a1a1a] mb-4">
-                    Rental Pricing (EGP)
+                    {t('editProperty.rentalPricingEGP')}
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -637,7 +649,7 @@ export function EditPropertyPage() {
                         htmlFor="day-rent"
                         className="text-[#1a1a1a] mb-2 block"
                       >
-                        Day-based Rent
+                        {t('editProperty.dayBasedRent')}
                       </Label>
                       <div className="relative">
                         <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
@@ -654,7 +666,7 @@ export function EditPropertyPage() {
                           className="pl-12 rounded-xl border-[#3A6EA5]/20"
                         />
                       </div>
-                      <p className="text-xs text-[#4a5565] mt-1">Per day</p>
+                      <p className="text-xs text-[#4a5565] mt-1">{t('editProperty.perDay')}</p>
                     </div>
 
                     <div>
@@ -662,7 +674,7 @@ export function EditPropertyPage() {
                         htmlFor="month-rent"
                         className="text-[#1a1a1a] mb-2 block"
                       >
-                        Month-based Rent
+                        {t('editProperty.monthBasedRent')}
                       </Label>
                       <div className="relative">
                         <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
@@ -679,7 +691,7 @@ export function EditPropertyPage() {
                           className="pl-12 rounded-xl border-[#3A6EA5]/20"
                         />
                       </div>
-                      <p className="text-xs text-[#4a5565] mt-1">Per month</p>
+                      <p className="text-xs text-[#4a5565] mt-1">{t('editProperty.perMonth')}</p>
                     </div>
 
                     <div>
@@ -687,7 +699,7 @@ export function EditPropertyPage() {
                         htmlFor="year-rent"
                         className="text-[#1a1a1a] mb-2 block"
                       >
-                        Year-based Rent
+                        {t('editProperty.yearBasedRent')}
                       </Label>
                       <div className="relative">
                         <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
@@ -704,7 +716,7 @@ export function EditPropertyPage() {
                           className="pl-12 rounded-xl border-[#3A6EA5]/20"
                         />
                       </div>
-                      <p className="text-xs text-[#4a5565] mt-1">Per year</p>
+                      <p className="text-xs text-[#4a5565] mt-1">{t('editProperty.perYear')}</p>
                     </div>
                   </div>
                 </div>
@@ -715,7 +727,7 @@ export function EditPropertyPage() {
                       htmlFor="deposit"
                       className="text-[#1a1a1a] mb-2 block"
                     >
-                      Security Deposit
+                      {t('addProperty.pricingStep.securityDeposit')}
                     </Label>
                     <div className="relative">
                       <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
@@ -737,17 +749,10 @@ export function EditPropertyPage() {
 
                 <div className="bg-white rounded-2xl p-6">
                   <h3 className="font-semibold text-[#1a1a1a] mb-4">
-                    Utilities Included
+                    {t('addProperty.pricingStep.utilitiesIncluded')}
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
-                    {[
-                      'Water',
-                      'Electricity',
-                      'Gas',
-                      'Internet',
-                      'Trash',
-                      'Parking',
-                    ].map((utility) => (
+                    {utilities.map((utility) => (
                       <div key={utility} className="flex items-center">
                         <Checkbox
                           id={utility}
@@ -758,7 +763,7 @@ export function EditPropertyPage() {
                           htmlFor={utility}
                           className="ml-3 text-[#1a1a1a] cursor-pointer"
                         >
-                          {utility}
+                          {t(`addProperty.pricingStep.utilities.${utility}`)}
                         </label>
                       </div>
                     ))}
@@ -771,7 +776,7 @@ export function EditPropertyPage() {
             {currentStep === 5 && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Availability Settings
+                  {t('addProperty.availabilityStep.title')}
                 </h2>
 
                 <div>
@@ -779,7 +784,7 @@ export function EditPropertyPage() {
                     htmlFor="available-from"
                     className="text-[#1a1a1a] mb-2 block"
                   >
-                    Available From
+                    {t('addProperty.availabilityStep.availableFrom')}
                   </Label>
                   <Input
                     id="available-from"
@@ -797,14 +802,10 @@ export function EditPropertyPage() {
 
                 <div className="bg-white rounded-2xl p-6">
                   <Label className="text-[#1a1a1a] mb-3 block">
-                    Lease Duration
+                    {t('addProperty.availabilityStep.leaseDuration')}
                   </Label>
                   <div className="space-y-3">
-                    {[
-                      { label: 'Day-based', value: 'day' },
-                      { label: 'Month-based', value: 'month' },
-                      { label: 'Year-based', value: 'year' },
-                    ].map((option) => (
+                    {leaseDurationOptions.map((option) => (
                       <div key={option.value} className="flex items-center">
                         <Checkbox
                           id={option.value}
@@ -815,7 +816,7 @@ export function EditPropertyPage() {
                           htmlFor={option.value}
                           className="ml-3 text-[#1a1a1a] cursor-pointer"
                         >
-                          {option.label}
+                          {t(option.labelKey)}
                         </label>
                       </div>
                     ))}
@@ -824,7 +825,7 @@ export function EditPropertyPage() {
 
                 <div className="bg-white rounded-2xl p-6">
                   <Label className="text-[#1a1a1a] mb-3 block">
-                    Tenant Preferences
+                    {t('addProperty.availabilityStep.tenantPreferences')}
                   </Label>
 
                   {/* Input to add new preference */}
@@ -835,7 +836,7 @@ export function EditPropertyPage() {
                       onKeyPress={(e) =>
                         e.key === 'Enter' && addCustomPreference()
                       }
-                      placeholder="Enter new preference and press Enter"
+                      placeholder={t('addProperty.availabilityStep.enterPreferencePlaceholder')}
                       className="rounded-xl border-[#3A6EA5]/20"
                     />
                     <Button
@@ -849,13 +850,7 @@ export function EditPropertyPage() {
 
                   {/* Default preferences */}
                   <div className="space-y-3">
-                    {[
-                      'Students Welcome',
-                      'Professionals Only',
-                      'Families Welcome',
-                      'No Smoking',
-                      'Pets Allowed',
-                    ].map((preference) => (
+                    {defaultPreferences.map((preference) => (
                       <div key={preference} className="flex items-center">
                         <Checkbox
                           id={preference}
@@ -866,7 +861,7 @@ export function EditPropertyPage() {
                           htmlFor={preference}
                           className="ml-3 text-[#1a1a1a] cursor-pointer"
                         >
-                          {preference}
+                          {t(`addProperty.availabilityStep.preferences.${preference}`)}
                         </label>
                       </div>
                     ))}
@@ -901,8 +896,7 @@ export function EditPropertyPage() {
                   </div>
 
                   <p className="text-xs text-[#4a5565] mt-4">
-                    Add custom preferences to attract the right tenants for your
-                    property
+                    {t('addProperty.availabilityStep.addPreferenceTip')}
                   </p>
                 </div>
               </div>
@@ -912,20 +906,20 @@ export function EditPropertyPage() {
             {currentStep === 6 && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Legal Documents
+                  {t('addProperty.legalDocsStep.title')}
                 </h2>
 
                 <div className="bg-white rounded-2xl p-8">
                   <div className="border-2 border-dashed border-[#3A6EA5]/30 rounded-2xl p-12 text-center hover:border-[#3A6EA5] transition-colors cursor-pointer">
                     <Upload className="w-16 h-16 mx-auto mb-4 text-[#3A6EA5]" />
                     <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">
-                      Drag & drop documents here
+                      {t('addProperty.legalDocsStep.dragDropDocs')}
                     </h3>
                     <p className="text-[#4a5565] mb-4">
-                      or click to browse from your computer
+                      {t('addProperty.legalDocsStep.orClickToBrowse')}
                     </p>
                     <Button className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-xl">
-                      Choose Files
+                      {t('addProperty.legalDocsStep.chooseFiles')}
                     </Button>
                   </div>
                 </div>
@@ -943,9 +937,7 @@ export function EditPropertyPage() {
 
                 <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
                   <p className="text-sm text-[#1a1a1a]">
-                    <strong>Tip:</strong> Uploading legal documents ensures
-                    compliance and trustworthiness. Include lease agreements,
-                    property deeds, and any other relevant documents.
+                    {t('addProperty.legalDocsStep.tip')}
                   </p>
                 </div>
 
@@ -954,12 +946,10 @@ export function EditPropertyPage() {
                     <CheckCircle className="w-6 h-6 text-[#3A6EA5] flex-shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold text-[#1a1a1a] mb-2">
-                        Review Before Publishing
+                        {t('addProperty.availabilityStep.reviewBeforePublishing')}
                       </h3>
                       <p className="text-sm text-[#4a5565]">
-                        Your updated listing will be reviewed by our team within
-                        24 hours. Once approved, the changes will be visible to
-                        potential tenants.
+                        {t('editProperty.reviewDescription')}
                       </p>
                     </div>
                   </div>
@@ -976,7 +966,7 @@ export function EditPropertyPage() {
                 className="rounded-xl border-[#3A6EA5]/20 disabled:opacity-50"
               >
                 <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
+                {t('addProperty.steps.previous')}
               </Button>
 
               {currentStep < STEPS.length ? (
@@ -984,7 +974,7 @@ export function EditPropertyPage() {
                   onClick={handleNext}
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
                 >
-                  Next
+                  {t('addProperty.steps.next')}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
@@ -993,7 +983,7 @@ export function EditPropertyPage() {
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Update Property
+                  {t('editProperty.updateProperty')}
                 </Button>
               )}
             </div>

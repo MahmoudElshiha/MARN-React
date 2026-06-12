@@ -2,6 +2,7 @@ import { Heart, MapPin, Star } from 'lucide-react'
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { ImageWithFallback } from './figma/ImageWithFallback'
 
 interface PropertyCardProps {
@@ -31,6 +32,7 @@ export function PropertyCard({
   baths,
   guests,
 }: PropertyCardProps) {
+  const { t } = useTranslation('properties')
   const [isFavorite, setIsFavorite] = useState(false)
 
   return (
@@ -96,13 +98,13 @@ export function PropertyCard({
 
             {beds && baths && (
               <div className="flex items-center gap-4 mb-3 text-sm text-[#4a5565]">
-                <span>{beds} beds</span>
+                <span>{t('card.beds', { count: beds })}</span>
                 <span>•</span>
-                <span>{baths} baths</span>
+                <span>{t('card.baths', { count: baths })}</span>
                 {guests && (
                   <>
                     <span>•</span>
-                    <span>{guests} guests</span>
+                    <span>{t('card.guests', { count: guests })}</span>
                   </>
                 )}
               </div>
@@ -112,7 +114,7 @@ export function PropertyCard({
               <span className="text-2xl font-bold text-[#3A6EA5]">
                 {price.toLocaleString()} EGP
               </span>
-              <span className="text-[#6a7282]">/ month</span>
+              <span className="text-[#6a7282]">{t('card.perMonth')}</span>
             </div>
           </div>
         </div>

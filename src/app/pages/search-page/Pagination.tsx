@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 interface PaginationProps {
   page: number
   totalPages: number
@@ -5,6 +7,8 @@ interface PaginationProps {
 }
 
 export function Pagination({ page, totalPages, onPageChange }: PaginationProps) {
+  const { t } = useTranslation('properties')
+
   if (totalPages <= 1) return null
 
   return (
@@ -12,6 +16,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
       <button
         onClick={() => onPageChange(Math.max(1, page - 1))}
         disabled={page === 1}
+        aria-label={t('search.pagination.previous')}
         className="w-12 h-12 rounded-xl bg-[#f5f7fa] text-[#1a1a1a] hover:bg-[#9CBBDC] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
       >
         ‹
@@ -45,6 +50,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
       <button
         onClick={() => onPageChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
+        aria-label={t('search.pagination.next')}
         className="w-12 h-12 rounded-xl bg-[#f5f7fa] text-[#1a1a1a] hover:bg-[#9CBBDC] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
       >
         ›

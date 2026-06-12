@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useGoogleAuth } from '@/hooks/useGoogleLogin'
 import { decodeUserFromToken } from '@/utils/tokenUtils'
 import type { UserRole } from '@/types/user'
+import { useTranslation } from 'react-i18next'
 
 function roleDestination(role: UserRole): string {
   if (role === 'admin') return '/admin-dashboard'
@@ -29,6 +30,7 @@ export function GoogleAuthButton({
 }: GoogleAuthButtonProps) {
   const navigate = useNavigate()
   const googleAuth = useGoogleAuth({ remember })
+  const { t } = useTranslation('auth')
 
   return (
     <GoogleLogin
@@ -38,7 +40,7 @@ export function GoogleAuthButton({
       onSuccess={(credentialResponse) => {
         const idToken = credentialResponse.credential
         if (!idToken) {
-          toast.error('Could not read Google credentials. Please try again.')
+          toast.error(t('google.credentialsError'))
           return
         }
 
@@ -62,12 +64,12 @@ export function GoogleAuthButton({
             const msg =
               err instanceof Error
                 ? err.message
-                : 'Google sign-in failed. Please try again.'
+                : t('google.signInFailed')
             toast.error(msg)
           },
         })
       }}
-      onError={() => toast.error('Google sign-in was cancelled or failed.')}
+      onError={() => toast.error(t('google.cancelledOrFailed'))}
     />
   )
 }

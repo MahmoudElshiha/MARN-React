@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
 import { Navigation } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
+import { useTranslation } from 'react-i18next'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
@@ -42,6 +43,7 @@ function LocationMarker({ location, onChange }: MapInputProps) {
 }
 
 export function MapInput({ location, onChange }: MapInputProps) {
+  const { t } = useTranslation('properties')
   const [map, setMap] = useState<L.Map | null>(null)
 
   const handleLocateMe = () => {
@@ -85,7 +87,7 @@ export function MapInput({ location, onChange }: MapInputProps) {
         size="icon"
         className="absolute bottom-4 right-4 z-[400] shadow-md bg-white hover:bg-gray-100 text-[#3A6EA5]"
         onClick={handleLocateMe}
-        title="Go to my location"
+        title={t('mapInput.goToMyLocation')}
       >
         <Navigation className="w-4 h-4" />
       </Button>
