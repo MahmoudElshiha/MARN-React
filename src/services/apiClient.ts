@@ -1,4 +1,5 @@
 import axios from 'axios'
+import i18n from '@/i18n/config'
 import { HttpError, TimeoutError } from './httpErrors'
 
 // In dev with no VITE_API_BASE_URL set, use '' so requests go to localhost
@@ -10,7 +11,6 @@ export const axiosInstance = axios.create({
   timeout: 15_000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept-Language': 'en',
   },
 })
 
@@ -22,6 +22,8 @@ axiosInstance.interceptors.request.use((config) => {
   if (isFormData) {
     delete (config.headers as Record<string, string>)['Content-Type']
   }
+
+  config.headers['Accept-Language'] = i18n.language || 'en'
 
   const token = localStorage.getItem('token') ?? sessionStorage.getItem('token')
   if (token) {
