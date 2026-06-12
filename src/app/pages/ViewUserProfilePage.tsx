@@ -15,8 +15,12 @@ import {
   CheckCircle,
   XCircle,
 } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { useState } from 'react'
+import { useUserProfile } from '@/hooks/useProfile'
+import { useSubmitReport } from '@/hooks/useConversations'
+import { Skeleton } from '../components/ui/skeleton'
+import { Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -28,44 +32,57 @@ import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
 import { toast } from 'sonner'
 
-const USER_PROFILE = {
-  name: 'Layla Hassan',
-  avatar: 'https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?w=400',
-  email: 'layla.hassan@example.com',
-  phone: '+20 1234 567 890',
-  location: 'Alexandria, Egypt',
-  joinDate: 'January 2024',
-  bio: 'Friendly and respectful tenant looking for a comfortable living space. I work remotely as a software engineer and enjoy a quiet environment. Non-smoker, no pets, and very clean.',
-  acceptsRoommates: true,
-  verified: true,
-  lifestyle: {
-    smoking: false,
-    pets: false,
-    sleepSchedule: 'Night owl',
-    noiseTolerance: 'Medium',
-    guestsFrequency: 'Occasionally',
-    workSchedule: 'Remote',
-    sharingLevel: 'Okay with Sharing',
-  },
-  education: {
-    level: "Bachelor's",
-    field: 'Computer Science',
-  },
-}
-
 export function ViewUserProfilePage() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const { data: profileData, isLoading, isError } = useUserProfile(id)
+  const profile = profileData?.data
+
   const [showReportDialog, setShowReportDialog] = useState(false)
   const [reportReason, setReportReason] = useState('')
 
+  const submitReport = useSubmitReport()
+
   const handleReport = () => {
-    if (reportReason.trim()) {
-      toast.success('Report submitted successfully. We will review it shortly.')
-      setShowReportDialog(false)
-      setReportReason('')
-    } else {
+    if (!id || !reportReason.trim()) {
       toast.error('Please provide a reason for reporting')
+      return
     }
+
+    submitReport.mutate(
+      {
+        reportableType: 'User',
+        reportableTargetId: id,
+        reason: `${reportReason.trim()} REPORTMETAUSER ${id}`,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Report submitted successfully. We will review it shortly.')
+          setShowReportDialog(false)
+          setReportReason('')
+        },
+        onError: () => {
+          toast.error('Failed to submit report. Please try again.')
+        }
+      }
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-20 flex items-center justify-center">
+        <Skeleton className="w-16 h-16 rounded-full" />
+      </div>
+    )
+  }
+
+  if (isError || !profile) {
+    return (
+      <div className="min-h-screen py-20 flex flex-col items-center justify-center text-[#1a1a1a]">
+        <h2 className="text-2xl font-bold mb-4">User not found</h2>
+        <Button onClick={() => navigate(-1)} variant="outline">Go Back</Button>
+      </div>
+    )
   }
 
   return (
@@ -86,46 +103,31 @@ export function ViewUserProfilePage() {
               <CardContent className="pt-6 text-center">
                 <div className="relative w-40 h-40 mx-auto mb-6">
                   <Avatar className="w-full h-full">
-                    <AvatarImage src={USER_PROFILE.avatar} />
+                    {profile.profileImage && <AvatarImage src={profile.profileImage} />}
                     <AvatarFallback className="text-4xl">
-                      {USER_PROFILE.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
+                      {profile.fullName?.split(' ').map((n) => n[0]).join('') || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  {USER_PROFILE.verified && (
+                  {profile.accountStatus === 'Active' && (
                     <div className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
                       <CheckCircle className="w-6 h-6 text-white" />
                     </div>
                   )}
                 </div>
                 <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-                  {USER_PROFILE.name}
+                  {profile.fullName}
                 </h2>
-                {USER_PROFILE.verified && (
+                {profile.accountStatus === 'Active' && (
                   <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 rounded-full text-green-700 text-sm font-medium mb-4">
                     <CheckCircle className="w-4 h-4" />
-                    Verified User
+                    Active User
                   </div>
                 )}
 
                 <div className="space-y-3 mt-6 text-left">
                   <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
                     <Mail className="w-4 h-4 text-[#3A6EA5]" />
-                    <span>{USER_PROFILE.email}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
-                    <Phone className="w-4 h-4 text-[#3A6EA5]" />
-                    <span>{USER_PROFILE.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
-                    <MapPin className="w-4 h-4 text-[#3A6EA5]" />
-                    <span>{USER_PROFILE.location}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
-                    <Calendar className="w-4 h-4 text-[#3A6EA5]" />
-                    <span>Member since {USER_PROFILE.joinDate}</span>
+                    <span>{profile.email}</span>
                   </div>
                 </div>
 
@@ -152,7 +154,7 @@ export function ViewUserProfilePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-[#1a1a1a] leading-relaxed">
-                  {USER_PROFILE.bio}
+                  {profile.bio || 'No bio provided.'}
                 </p>
               </CardContent>
             </Card>
@@ -169,7 +171,7 @@ export function ViewUserProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3 p-4 bg-white rounded-2xl">
-                  {USER_PROFILE.acceptsRoommates ? (
+                  {profile.roommatePreferencesEnabled ? (
                     <>
                       <CheckCircle className="w-6 h-6 text-green-500" />
                       <div>
@@ -213,13 +215,13 @@ export function ViewUserProfilePage() {
                   <div className="p-4 bg-white rounded-2xl">
                     <p className="text-sm text-[#6B7280] mb-1">Smoking</p>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.lifestyle.smoking ? 'Yes' : 'No'}
+                      {profile.smoking === null ? 'Unspecified' : (profile.smoking ? 'Yes' : 'No')}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
                     <p className="text-sm text-[#6B7280] mb-1">Pets</p>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.lifestyle.pets ? 'Yes' : 'No'}
+                      {profile.pets === null ? 'Unspecified' : (profile.pets ? 'Yes' : 'No')}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
@@ -227,7 +229,7 @@ export function ViewUserProfilePage() {
                       Sleep Schedule
                     </p>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.lifestyle.sleepSchedule}
+                      {profile.sleepSchedule || 'Unspecified'}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
@@ -236,7 +238,7 @@ export function ViewUserProfilePage() {
                       <p className="text-sm text-[#6B7280]">Noise Tolerance</p>
                     </div>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.lifestyle.noiseTolerance}
+                      {profile.noiseTolerance !== null ? profile.noiseTolerance + '/5' : 'Unspecified'}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
@@ -244,7 +246,7 @@ export function ViewUserProfilePage() {
                       Guests Frequency
                     </p>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.lifestyle.guestsFrequency}
+                      {profile.guestsFrequency || 'Unspecified'}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
@@ -253,13 +255,13 @@ export function ViewUserProfilePage() {
                       <p className="text-sm text-[#6B7280]">Work Schedule</p>
                     </div>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.lifestyle.workSchedule}
+                      {profile.workSchedule || 'Unspecified'}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl md:col-span-2">
                     <p className="text-sm text-[#6B7280] mb-1">Sharing Level</p>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.lifestyle.sharingLevel}
+                      {profile.sharingLevel || 'Unspecified'}
                     </p>
                   </div>
                 </div>
@@ -283,7 +285,7 @@ export function ViewUserProfilePage() {
                       Education Level
                     </p>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.education.level}
+                      {profile.educationLevel || 'Unspecified'}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
@@ -291,7 +293,7 @@ export function ViewUserProfilePage() {
                       Field of Study
                     </p>
                     <p className="font-semibold text-[#1a1a1a]">
-                      {USER_PROFILE.education.field}
+                      {profile.fieldOfStudy || 'Unspecified'}
                     </p>
                   </div>
                 </div>
@@ -343,8 +345,10 @@ export function ViewUserProfilePage() {
             </Button>
             <Button
               onClick={handleReport}
+              disabled={!reportReason.trim() || submitReport.isPending}
               className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
             >
+              {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Submit Report
             </Button>
           </div>

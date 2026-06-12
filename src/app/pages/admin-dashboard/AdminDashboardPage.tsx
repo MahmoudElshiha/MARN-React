@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Users,
   Building,
@@ -21,12 +22,24 @@ import { useAdminStats } from '@/hooks/useAdminStats'
 import { formatTrend } from './utils'
 import {
   VerificationsTab,
-  PropertyVerificationsTab,
+  PropertyModerationTab,
   UserManagementTab,
   ReportsTab,
+  ModerationReportsTab,
+  ContractsModerationTab,
 } from './tabs'
 
 export function AdminDashboardPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const currentTab = searchParams.get('tab') || 'verifications'
+
+  const handleTabChange = (value: string) => {
+    setSearchParams((prev) => {
+      prev.set('tab', value)
+      return prev
+    })
+  }
+
   const { data: statsData, isLoading: statsLoading } = useAdminStats()
 
   const apiStats = statsData?.data
@@ -240,8 +253,8 @@ export function AdminDashboardPage() {
           </div>
 
           {/* Main Content Tabs */}
-          <Tabs defaultValue="verifications" className="space-y-8">
-            <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-[#F2F4F6] p-2 rounded-[2rem] gap-2 border border-[#3A6EA5]/20 shadow-lg shadow-[#3A6EA5]/15">
+          <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-8">
+            <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 bg-[#F2F4F6] p-2 rounded-[2rem] gap-2 border border-[#3A6EA5]/20 shadow-lg shadow-[#3A6EA5]/15">
               <TabsTrigger
                 value="verifications"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
@@ -249,10 +262,10 @@ export function AdminDashboardPage() {
                 Identity Verifications
               </TabsTrigger>
               <TabsTrigger
-                value="property-verifications"
+                value="property-moderation"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
               >
-                Property Verifications
+                Property Moderation
               </TabsTrigger>
               <TabsTrigger
                 value="users"
@@ -264,7 +277,19 @@ export function AdminDashboardPage() {
                 value="reports"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
               >
-                Reports
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger
+                value="contracts"
+                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
+              >
+                Contracts Moderation
+              </TabsTrigger>
+              <TabsTrigger
+                value="moderation"
+                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
+              >
+                Moderation Reports
               </TabsTrigger>
             </TabsList>
 
@@ -272,8 +297,8 @@ export function AdminDashboardPage() {
               <VerificationsTab />
             </TabsContent>
 
-            <TabsContent value="property-verifications">
-              <PropertyVerificationsTab />
+            <TabsContent value="property-moderation">
+              <PropertyModerationTab />
             </TabsContent>
 
             <TabsContent value="users">
@@ -282,6 +307,14 @@ export function AdminDashboardPage() {
 
             <TabsContent value="reports">
               <ReportsTab />
+            </TabsContent>
+
+            <TabsContent value="moderation">
+              <ModerationReportsTab />
+            </TabsContent>
+
+            <TabsContent value="contracts">
+              <ContractsModerationTab />
             </TabsContent>
           </Tabs>
         </motion.div>

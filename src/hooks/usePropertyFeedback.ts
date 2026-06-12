@@ -48,3 +48,15 @@ export const useAddPropertyFeedback = () => {
     },
   })
 }
+
+export const useUpdatePropertyComment = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ propertyId, commentId, payload }: { propertyId: string; commentId: string; payload: CreatePropertyCommentDto }) =>
+      propertyFeedbackService.updateComment(propertyId, commentId, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['propertyComments', variables.propertyId] })
+    },
+  })
+}
+

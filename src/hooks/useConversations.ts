@@ -2,10 +2,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { messageService } from '@/services/messageService'
 import type { SendMessagePayload } from '@/services/messageService'
 
-export function useConversations() {
+export function useConversations(search?: string) {
   return useQuery({
-    queryKey: ['conversations'],
-    queryFn: () => messageService.getConversations(),
+    queryKey: ['conversations', search],
+    queryFn: () => messageService.getConversations(search),
+  })
+}
+
+export function useGlobalUsersSearch(search?: string) {
+  return useQuery({
+    queryKey: ['globalUsers', search],
+    queryFn: () => messageService.searchUsers(search || ''),
+    enabled: !!search && search.length >= 2,
   })
 }
 
@@ -63,5 +71,14 @@ export function useSendMessage() {
       })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
     },
+  })
+}
+
+import { userService } from '@/services/userService'
+
+export function useSubmitReport() {
+  return useMutation({
+    mutationFn: (payload: { reportableType: string; reportableTargetId: string; reason: string }) =>
+      userService.submitReport(payload),
   })
 }

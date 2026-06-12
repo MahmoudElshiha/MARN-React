@@ -2,7 +2,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { adminService } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { GenerateReportPayload } from '@/services/adminService'
+import type { GenerateReportPayload, ReviewModerationReportPayload } from '@/services/adminService'
 
 export function useAdminStats() {
   return useQuery({
@@ -12,10 +12,10 @@ export function useAdminStats() {
   })
 }
 
-export function useAdminUsers(page = 1, pageSize = 20) {
+export function useAdminUsers(page = 1, pageSize = 20, search?: string, status?: string, includeDeleted?: boolean) {
   return useQuery({
-    queryKey: ['adminUsers', page, pageSize],
-    queryFn: () => adminService.getUsers(page, pageSize),
+    queryKey: ['adminUsers', page, pageSize, search, status, includeDeleted],
+    queryFn: () => adminService.getUsers(page, pageSize, search, status, includeDeleted),
     placeholderData: keepPreviousData,
   })
 }
@@ -102,5 +102,54 @@ export function useUpdateUserRoles() {
       queryClient.invalidateQueries({ queryKey: ['adminRoleUsers'] })
     },
     onError: () => toast.error('Failed to update roles'),
+  })
+}
+
+export function useAdminModerationReports(page = 1, pageSize = 20, search?: string) {
+  return useQuery({
+    queryKey: ['adminModerationReports', page, pageSize, search],
+    queryFn: () => adminService.getModerationReports(page, pageSize, search),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useReviewModerationReport() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ reportId, payload }: { reportId: number; payload: ReviewModerationReportPayload }) =>
+      adminService.reviewModerationReport(reportId, payload),
+    onSuccess: () => {
+      toast.success('Report reviewed successfully')
+      queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
+    },
+    onError: () => toast.error('Failed to review report'),
+  })
+}
+
+export function useAdminProperties(page = 1, pageSize = 20, search?: string, status?: string) {
+  return useQuery({
+    queryKey: ['adminProperties', page, pageSize, search, status],
+    queryFn: () => adminService.getProperties(page, pageSize, search, status),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useAdminContracts(page = 1, pageSize = 20, search?: string, status?: string) {
+  return useQuery({
+    queryKey: ['adminContracts', page, pageSize, search, status],
+    queryFn: () => adminService.getContracts(page, pageSize, search, status),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useCancelContract() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (contractId: number) => adminService.cancelContract(contractId),
+    onSuccess: () => {
+      toast.success('Contract cancelled successfully')
+      queryClient.invalidateQueries({ queryKey: ['adminContracts'] })
+    },
+    onError: () => toast.error('Failed to cancel contract'),
   })
 }

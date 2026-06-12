@@ -102,6 +102,13 @@ export interface Property {
   createdAt?: string
   updatedAt?: string
   isSaved?: boolean
+  maxOccupants?: number
+  currentOccupantsCount?: number
+  tenants?: Array<{
+    id: string
+    fullName: string
+    profileImage?: string
+  }>
 }
 
 /** Lightweight shape returned by GET /api/Property/search */

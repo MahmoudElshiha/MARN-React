@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router'
 import { Navigation } from './components/Navigation'
 import { Footer } from './components/Footer'
+import { ScrollToTop } from './components/ScrollToTop'
 import { ProtectedRoute, GuestRoute } from './components/ProtectedRoute'
 import { LandingPage } from './pages/LandingPage'
 import { SearchPage } from './pages/search-page/SearchPage'
@@ -31,7 +32,7 @@ import { ChatWithRentalRequestPage } from './pages/ChatWithRentalRequestPage'
 import { ViewUserProfilePage } from './pages/ViewUserProfilePage'
 import { ViewOwnerProfilePage } from './pages/ViewOwnerProfilePage'
 import { ContractPage } from './pages/ContractPage'
-import { EditPropertyPage } from './pages/EditPropertyPage'
+import { EditPropertyPage } from './pages/edit-property/EditPropertyPage'
 import { PropertyByOwnerPage } from './pages/PropertyByOwnerPage'
 import { ModalTestPage } from './pages/ModalTestPage'
 import { SavedPropertiesPage } from './pages/SavedPropertiesPage'
@@ -40,6 +41,7 @@ import { Toaster } from './components/ui/sonner'
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen bg-[#F2F4F6]">
         <Navigation />
         <Routes>

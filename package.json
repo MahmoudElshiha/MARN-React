@@ -98,7 +98,9 @@
     "typescript-eslint": "^8.58.2",
     "vite": "6.3.5"
   },
-  "overrides": {
-    "vite": "6.3.5"
+  "pnpm": {
+    "overrides": {
+      "vite": "6.3.5"
+    }
   }
 }

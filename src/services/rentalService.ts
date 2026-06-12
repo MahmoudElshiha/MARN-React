@@ -7,13 +7,14 @@ export const rentalService = {
     apiClient.get<PaginatedResponse<BookingRequest>>('/api/Rentals/requests'),
 
   acceptRequest: (requestId: string) =>
-    apiClient.post<ApiResponse<BookingRequest>>(
-      `/api/Rentals/requests/${requestId}/accept`,
+    apiClient.post<ApiResponse<any>>(
+      `/api/contracts/create/${requestId}`,
+      {}
     ),
 
   rejectRequest: (requestId: string) =>
-    apiClient.post<ApiResponse<BookingRequest>>(
-      `/api/Rentals/requests/${requestId}/reject`,
+    apiClient.delete<ApiResponse<any>>(
+      `/api/BookingRequest/cancel/${requestId}`,
     ),
 
   getContracts: () =>
@@ -21,4 +22,7 @@ export const rentalService = {
 
   getContractById: (id: string) =>
     apiClient.get<ApiResponse<Contract>>(`/api/Rentals/contracts/${id}`),
+
+  addBookingRequest: (payload: any) =>
+    apiClient.post<ApiResponse<any>>('/api/BookingRequest/add', payload),
 }

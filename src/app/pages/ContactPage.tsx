@@ -12,20 +12,37 @@ import {
   SelectValue,
 } from '../components/ui/select'
 import { useState } from 'react'
+import { supportService } from '@/services/supportService'
+import { toast } from 'sonner'
+import { useMutation } from '@tanstack/react-query'
 
 export function ContactPage() {
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
     subject: '',
     message: '',
   })
 
+  const contactMutation = useMutation({
+    mutationFn: () => supportService.contactUs(formData),
+    onSuccess: () => {
+      toast.success('Your message has been sent successfully!')
+      setFormData({
+        fullName: '',
+        email: '',
+        phoneNumber: '',
+        subject: '',
+        message: '',
+      })
+    },
+    onError: () => toast.error('Failed to send message. Please try again later.'),
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
-    // Handle form submission
+    contactMutation.mutate()
   }
 
   const contactMethods = [
@@ -131,12 +148,12 @@ export function ContactPage() {
                     <Input
                       id="name"
                       required
-                      value={formData.name}
+                      value={formData.fullName}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, fullName: e.target.value })
                       }
                       className="bg-white rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
-                      placeholder="Ahmed Hassan"
+                      placeholder="Enter your full name"
                     />
                   </div>
 
@@ -165,14 +182,15 @@ export function ContactPage() {
                       htmlFor="phone"
                       className="text-[#1a1a1a] mb-2 block"
                     >
-                      Phone Number
+                      Phone Number *
                     </Label>
                     <Input
                       id="phone"
                       type="tel"
-                      value={formData.phone}
+                      required
+                      value={formData.phoneNumber}
                       onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
+                        setFormData({ ...formData, phoneNumber: e.target.value })
                       }
                       className="bg-white rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
                       placeholder="+20 10 1234 5678"
@@ -234,10 +252,11 @@ export function ContactPage() {
                   <Button
                     type="submit"
                     size="lg"
+                    disabled={contactMutation.isPending}
                     className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
                   >
                     <Send className="w-5 h-5 mr-2" />
-                    Send Message
+                    {contactMutation.isPending ? 'Sending...' : 'Send Message'}
                   </Button>
                 </form>
               </div>

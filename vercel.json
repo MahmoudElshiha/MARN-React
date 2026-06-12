@@ -1,21 +1,11 @@
 {
-    "outputDirectory": "dist",
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/(.*)",
-            "destination": "https://marn.runasp.net/api/$1"
+            "handle": "filesystem"
         },
         {
-            "source": "/images/(.*)",
-            "destination": "https://marn.runasp.net/images/$1"
-        },
-        {
-            "source": "/hubs/(.*)",
-            "destination": "https://marn.runasp.net/hubs/$1"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "/.*",
+            "dest": "/index.html"
         }
     ]
 }

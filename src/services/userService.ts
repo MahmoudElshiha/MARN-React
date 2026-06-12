@@ -12,54 +12,111 @@ export interface DashboardNotification {
   createdAt: string
 }
 
+export interface DashboardNextPayment {
+  date: string
+  amount: number
+  propertyId: number
+  propertyTitle: string
+}
+
 export interface DashboardActiveRental {
-  id: string
-  propertyId: string
-  propertyName: string
-  monthlyRent: number
+  contractId: number
+  id?: string
+  propertyId?: string
+  propertyTitle: string
+  propertyName?: string
+  contractStatus: string
+  contractStatusDisplayName: string
+  status?: string
   startDate: string
-  expiryDate: string
-  status: string
+  endDate: string
+  expiryDate?: string
+  propertyAddress: string
+  propertyImageUrl: string
+  paymentFrequency: string
+  paymentFrequencyDisplayName: string
+  nextPaymentScheduleDate?: string
+  nextPaymentScheduleId?: number
+  nextPaymentScheduleStatus?: string
+  nextPaymentScheduleStatusDisplayName?: string
+  ownerId?: string
+  monthlyRent?: number
+  rentAmount?: number
+  price?: number
 }
 
 export interface DashboardPendingBooking {
-  id: string
-  propertyId: string
-  propertyName: string
-  requestedDate: string
-  status: string
+  bookingRequestId: number
+  id?: string
+  propertyId: number | string
+  propertyTitle: string
+  propertyName?: string
+  startDate: string
+  endDate: string
+  requestedDate?: string
+  status?: string
+  paymentFrequency?: string
+  paymentFrequencyDisplayName?: string
+  ownerId?: string
+  ownerName?: string
+  ownerProfileImage?: string
 }
 
 export interface DashboardSavedProperty {
-  id: string
+  id: number | string
+  propertyId?: number | string
   title: string
   price: number
-  location: string
+  location?: string
+  address?: string
   imageUrl?: string | null
   imagePath?: string | null
   image?: string | null
   images?: string[]
+  bedrooms?: number
+  bathrooms?: number
+  maxOccupants?: number
+  type?: string
+  typeDisplayName?: string
+  averageRating?: number
+  ratings?: number
+  rentalUnit?: string
+  rentalUnitDisplayName?: string
+  isSaved?: boolean
 }
 
 export interface DashboardContract {
-  id: string
-  propertyName: string
-  startDate: string
+  contractId: number
+  id?: string
+  propertyTitle: string
+  propertyName?: string
+  contractStatus: string
+  contractStatusDisplayName: string
+  status?: string
   expiryDate: string
-  status: string
+  endDate?: string
+  startDate?: string
   documentUrl?: string
+  ownerId?: string
+  ownerName?: string
+  propertyId?: number
 }
 
 export interface DashboardPaidPayment {
-  id: string
-  amount: number
+  contractId: number
+  id?: string
+  transactionId?: string
+  amountPaid: number
+  amount?: number
+  price?: number
   paidAt: string
-  propertyName: string
+  propertyTitle?: string
+  propertyName?: string
 }
 
 export interface RenterDashboard {
   activeRentalsCount: number
-  nextPayment: string | null
+  nextPayment: DashboardNextPayment | null
   savedPropertiesCount: number
   unreadNotificationsCount: number
   accountStatus: string
@@ -116,6 +173,20 @@ export interface Profile {
   budgetImportance: number | null
 }
 
+export interface PublicProfileProperty {
+  id: number
+  title: string
+  address: string
+  imagePath: string | null
+  price: number
+  rentalUnit: string
+  rentalUnitDisplayName: string
+  type: string
+  typeDisplayName: string
+  averageRating: number
+  ratings: number
+}
+
 export interface PublicProfile {
   id: string
   fullName: string
@@ -136,6 +207,18 @@ export interface PublicProfile {
   sharingLevel: string | null
   budgetRangeMin: number | null
   budgetRangeMax: number | null
+  
+  // Basic Info added
+  memberSince?: string
+  dateOfBirth?: string | null
+  gender?: string | null
+  country?: string | null
+
+  // Owner Data
+  averageRating?: number
+  ratingsCount?: number
+  ownedPropertiesCount?: number
+  ownedProperties?: PublicProfileProperty[]
 }
 
 export interface Toggle2FAPayload {
@@ -202,62 +285,65 @@ export interface UpdateProfilePayload {
 // ─── Owner Dashboard ─────────────────────────────────────────────────────────
 
 export interface OwnerDashboardProperty {
-  id: string
+  id: number
+  imagePath: string | null
   title: string
-  location: string
+  address: string
   type: string
-  status: string
+  typeDisplayName: string
+  views: number
+  isSaved: boolean
+  occupiedPlaces: number
+  totalPlaces: number
   price: number
-  rating: number | null
-  /** Lightweight search shape uses `imagePath` (SearchProperty) */
-  imagePath?: string | null
-  /** Full property shape uses `image` (Property) */
-  image?: string | null
-  /** Invented field — kept for compat but server may not send this */
-  imageUrl?: string | null
-  images?: string[]
+  rentalUnit: string
+  rentalUnitDisplayName: string
+  averageRating: number
+  ratings: number
+  isActive: boolean
+  status: string
+  statusDisplayName: string
+  activeContracts: any[]
 }
 
-export interface OwnerDashboardEarningEntry {
-  /** Label: month name (e.g. "Jan") for monthly, year string for yearly */
-  month: string
-  /**
-   * The numeric earnings value. The actual server field name is unknown because
-   * the sample response had empty arrays — common alternatives are also typed
-   * as optional so the component can fall back gracefully.
-   */
-  amount?: number
-  earning?: number
-  value?: number
-  total?: number
+export interface OwnerDashboardMonthlyEarning {
+  year: number
+  month: number
+  total: number
+}
+
+export interface OwnerDashboardYearlyEarning {
+  year: number
+  total: number
 }
 
 export interface OwnerDashboardContract {
-  id: string
-  propertyName: string
-  tenantName: string
-  status: string
-  startDate: string
+  contractId: number
+  contractStatus: string
+  contractStatusDisplayName: string
+  transactionId: string
+  merkleRoot: string
+  anchoringStatus: string
+  anchoringStatusDisplayName: string
+  isAnchoredToBlockChain: boolean
   expiryDate: string
-  documentUrl?: string | null
+  renterId: string
+  renterName: string
+  propertyId: number
+  propertyTitle: string
 }
 
 export interface OwnerDashboardBookingRequest {
-  id: string
-  /** Server field: "tenant" (matches BookingRequest.tenant) */
-  tenant?: string
-  /** Alternative field name the server may use */
-  tenantName?: string
-  tenantAvatarUrl?: string | null
-  /** Server field: "property" (matches BookingRequest.property) */
-  property?: string
-  /** Alternative field names the server may use */
-  propertyName?: string
-  propertyTitle?: string
-  /** Server field: "requestedDates" — a pre-formatted string, not an ISO date */
-  requestedDates: string
-  /** Values: 'pending' | 'accepted' | 'rejected' | 'cancelled' (all lowercase) */
-  status: string
+  bookingRequestId: number
+  startDate: string
+  endDate: string
+  paymentFrequency: string
+  paymentFrequencyDisplayName: string
+  propertyId: number
+  propertyTitle: string
+  renterId: string
+  renterName: string
+  renterProfileImage: string | null
 }
 
 export interface OwnerDashboardNotification {
@@ -270,10 +356,12 @@ export interface OwnerDashboardNotification {
 }
 
 export interface OwnerDashboardPayment {
-  id: string
-  amount: number
+  amountReceived: number
+  contractId: number
   paidAt: string
-  propertyName: string
+  availableAt: string
+  status: string
+  statusDisplayName: string
 }
 
 export interface OwnerDashboardData {
@@ -282,8 +370,8 @@ export interface OwnerDashboardData {
   occupiedPlaces: number
   vacantPlaces: number
   totalViews: number
-  monthlyEarning: OwnerDashboardEarningEntry[]
-  yearlyEarning: OwnerDashboardEarningEntry[]
+  monthlyEarning: OwnerDashboardMonthlyEarning[]
+  yearlyEarning: OwnerDashboardYearlyEarning[]
   withdrawableEarnings: number
   onHoldEarnings: number
   averageRating: number
@@ -305,6 +393,9 @@ export const userService = {
 
   getPublicProfile: () =>
     apiClient.get<ApiResponse<PublicProfile>>('/api/Profile/profile'),
+
+  getUserProfileById: (id: string) =>
+    apiClient.get<ApiResponse<PublicProfile>>(`/api/Profile/profile/${id}`),
 
   getRenterDashboard: () =>
     apiClient.get<ApiResponse<RenterDashboard>>(
@@ -368,4 +459,7 @@ export const userService = {
       form,
     )
   },
+
+  submitReport: (payload: { reportableType: string; reportableTargetId: string; reason: string }) =>
+    apiClient.post<ApiResponse<any>>('/api/Reports', payload),
 }
