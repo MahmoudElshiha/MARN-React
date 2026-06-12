@@ -43,6 +43,11 @@ export interface DashboardActiveRental {
   monthlyRent?: number
   rentAmount?: number
   price?: number
+  isAnchoredToBlockChain?: boolean
+  anchoringStatus?: string
+  anchoringStatusDisplayName?: string
+  transactionId?: string
+  merkleRoot?: string
 }
 
 export interface DashboardPendingBooking {
@@ -100,6 +105,11 @@ export interface DashboardContract {
   ownerId?: string
   ownerName?: string
   propertyId?: number
+  isAnchoredToBlockChain?: boolean
+  anchoringStatus?: string
+  anchoringStatusDisplayName?: string
+  transactionId?: string
+  merkleRoot?: string
 }
 
 export interface DashboardPaidPayment {

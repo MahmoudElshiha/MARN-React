@@ -1,43 +1,32 @@
-import { useState } from 'react'
-import { motion } from 'motion/react'
-import { useSearchParams } from 'react-router-dom'
-import {
-  Eye,
-  Ban,
-  UserCheck,
-  ShieldCheck,
-  Search,
-  XCircle,
-  Loader2,
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { useSearchParams, Link } from 'react-router-dom'
+import { Eye, Ban, UserCheck, Search, XCircle, Loader2 } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Input } from '../../../components/ui/input'
 import { Skeleton } from '../../../components/ui/skeleton'
-import { Checkbox } from '../../../components/ui/checkbox'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '../../../components/ui/tooltip'
-import {
-  useAdminUsers,
-  useUpdateUserRoles,
-} from '@/hooks/useAdminStats'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
+import { useAdminUsers, useAdminUserVerification } from '@/hooks/useAdminStats'
 import { adminService, type AdminUserStatsItem } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { getStatusBadge } from '../utils'
-
-const ASSIGNABLE_ROLES = ['Admin', 'Owner']
+import { getStatusBadge, buildImageUrl, TruncatedTooltip } from '../utils'
+import { RoleManagementView } from './RoleManagementView'
+import { VerificationsTab } from './VerificationsTab'
 
 export function UserManagementTab() {
   const [selectedUser, setSelectedUser] = useState<AdminUserStatsItem | null>(null)
   const [pageSize, setPageSize] = useState(10)
   const [userSearch, setUserSearch] = useState('')
   const [activeUserSearch, setActiveUserSearch] = useState('')
-  
+
   const [searchParams, setSearchParams] = useSearchParams()
   const urlStatus = searchParams.get('userStatus')
   const statusFilter = (urlStatus && urlStatus !== 'Unverified') ? urlStatus : 'Pending'
@@ -45,26 +34,27 @@ export function UserManagementTab() {
     setSearchParams((prev) => {
       prev.set('userStatus', val)
       return prev
-    })
+    }, { preventScrollReset: true })
   }
+  
+  useEffect(() => {
+    setPageSize(10)
+  }, [statusFilter])
 
   const [showConfirmModal, setShowConfirmModal] = useState(false)
-  const [actionType, setActionType] = useState<
-    'ban' | 'unban' | 'restore' | 'delete' | null
-  >(null)
+  const [actionType, setActionType] = useState<'ban' | 'unban' | 'restore' | 'delete' | null>(null)
   const [pendingUserId, setPendingUserId] = useState<string | null>(null)
-
-  const [showRolesModal, setShowRolesModal] = useState(false)
-  const [pendingRoleUserId, setPendingRoleUserId] = useState<string | null>(
-    null,
-  )
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
 
   const queryClient = useQueryClient()
 
+  const { data: verificationDetailData, isLoading: verificationDetailLoading } = useAdminUserVerification(selectedUser?.userId ?? null)
+  const verificationDetail = verificationDetailData?.data
+
+  // Note: the backend handles "Deleted" items implicitly when IncludeDeleted is true, but since there's no native "Deleted" filter, 
+  // we request All + includeDeleted, and then filter locally if statusFilter === "Deleted".
   const apiStatus = statusFilter === 'Deleted' ? 'All' : statusFilter
   const includeDeleted = statusFilter === 'Deleted' || statusFilter === 'All'
-  
+
   const { data: usersData, isLoading: usersLoading, isFetching: usersFetching } = useAdminUsers(
     1,
     pageSize,
@@ -72,23 +62,16 @@ export function UserManagementTab() {
     apiStatus,
     includeDeleted
   )
-  const updateUserRoles = useUpdateUserRoles()
 
   let users = usersData?.data?.items ?? []
   if (statusFilter === 'Deleted') {
     users = users.filter(u => u.isDeleted)
   }
-  
+
   const totalCount = usersData?.data?.totalCount ?? 0
 
   const userAction = useMutation({
-    mutationFn: ({
-      userId,
-      action,
-    }: {
-      userId: string
-      action: 'ban' | 'unban' | 'restore' | 'delete'
-    }) => {
+    mutationFn: ({ userId, action }: { userId: string, action: 'ban' | 'unban' | 'restore' | 'delete' }) => {
       if (action === 'ban') return adminService.banUser(userId)
       if (action === 'unban') return adminService.unbanUser(userId)
       if (action === 'delete') return adminService.deleteUser(userId)
@@ -113,36 +96,7 @@ export function UserManagementTab() {
     onError: () => toast.error('Action failed'),
   })
 
-  const handleOpenRolesModal = (userId: string, currentRoles: string[]) => {
-    setPendingRoleUserId(userId)
-    setSelectedRoles(currentRoles.filter((r) => ASSIGNABLE_ROLES.includes(r)))
-    setShowRolesModal(true)
-  }
-
-  const confirmRoleUpdate = () => {
-    if (!pendingRoleUserId) return
-    const userToUpdate = users.find(u => u.userId === pendingRoleUserId)
-    const protectedRoles = userToUpdate?.roles.filter(r => !ASSIGNABLE_ROLES.includes(r)) || []
-    const finalRoles = [...selectedRoles, ...protectedRoles]
-
-    updateUserRoles.mutate(
-      { userId: pendingRoleUserId, roles: finalRoles },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['adminUsers'] })
-          queryClient.invalidateQueries({ queryKey: ['adminRoleUsers'] })
-          setShowRolesModal(false)
-          setPendingRoleUserId(null)
-          setSelectedRoles([])
-        },
-      },
-    )
-  }
-
-  const handleUserAction = (
-    userId: string,
-    action: 'ban' | 'unban' | 'restore' | 'delete',
-  ) => {
+  const handleUserAction = (userId: string, action: 'ban' | 'unban' | 'restore' | 'delete') => {
     setActionType(action)
     setPendingUserId(userId)
     setShowConfirmModal(true)
@@ -154,282 +108,297 @@ export function UserManagementTab() {
     }
   }
 
-  return (
-    <>
-      <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <CardTitle className="text-2xl text-[#1a1a1a]">
-              User Management
-            </CardTitle>
-            <div className="flex w-full sm:w-auto items-center gap-2">
-              <Input
-                placeholder="Search users..."
-                className="w-full sm:w-64 bg-white rounded-xl border-[#3A6EA5]/20"
-                value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') setActiveUserSearch(userSearch)
-                }}
-              />
-              <Button
-                size="icon"
-                className="bg-[#3A6EA5] hover:bg-[#2A527A] text-white rounded-xl flex-shrink-0"
-                onClick={() => setActiveUserSearch(userSearch)}
-              >
-                <Search className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-4">
-            {['Pending', 'Verified', 'Banned', 'Deleted', 'All'].map((status) => (
-              <Button
-                key={status}
-                variant={statusFilter === status ? 'default' : 'outline'}
-                size="sm"
-                className={statusFilter === status ? 'bg-[#3A6EA5] text-white rounded-xl' : 'rounded-xl border-[#3A6EA5]/20 text-[#4a5565]'}
-                onClick={() => setStatusFilter(status)}
-              >
-                {status}
-              </Button>
-            ))}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto overflow-y-auto max-h-[600px] border-b border-[#3A6EA5]/20">
-            <table className="w-full relative">
-              <thead className="sticky top-0 bg-[#F2F4F6] z-10">
-                <tr className="border-b border-[#3A6EA5]/20">
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Name
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Email
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Roles
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Status
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Join Date
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {usersLoading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr
-                      key={i}
-                      className="border-b border-[#3A6EA5]/10"
-                    >
-                      {Array.from({ length: 6 }).map((_, j) => (
-                        <td key={j} className="py-4 px-4">
-                          <Skeleton className="h-5 w-full rounded" />
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                ) : users.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="py-10 text-center text-[#4a5565]"
-                    >
-                      No users found.
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((user) => (
-                    <tr
-                      key={user.userId}
-                      className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors"
-                    >
-                      <td className="py-4 px-4 text-[#1a1a1a] font-medium">
-                        {user.fullName}
-                      </td>
-                      <td className="py-4 px-4 text-[#4a5565]">
-                        {user.email}
-                      </td>
-                      <td className="py-4 px-4 text-[#4a5565]">
-                        {user.rolesDisplayNames.join(', ') || '—'}
-                      </td>
-                      <td className="py-4 px-4">
-                        {getStatusBadge(user.accountStatusDisplayName)}
-                      </td>
-                      <td className="py-4 px-4 text-[#4a5565]">
-                        {new Date(user.createdAt).toLocaleDateString(
-                          'en-GB',
-                        )}
-                      </td>
-                      <td className="py-4 px-4">
-                        <TooltipProvider delayDuration={200}>
-                          <div className="flex gap-2 justify-start">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="icon"
-                                  variant="outline"
-                                  className="rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0"
-                                  onClick={() => setSelectedUser(user)}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>View Details</p>
-                              </TooltipContent>
-                            </Tooltip>
+  const activeSubTab = searchParams.get('subtab') || 'verifications'
+  const handleSubTabChange = (value: string) => {
+    setSearchParams((prev) => {
+      if (value === 'verifications') {
+        prev.delete('subtab')
+      } else {
+        prev.set('subtab', value)
+      }
+      return prev
+    }, { replace: true, preventScrollReset: true })
+  }
 
-                            {user.accountStatus !== 'Banned' && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    variant="outline"
-                                    className="border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white rounded-xl w-8 h-8 shrink-0"
-                                    disabled={updateUserRoles.isPending}
-                                    onClick={() =>
-                                      handleOpenRolesModal(
-                                        user.userId,
-                                        user.roles,
-                                      )
-                                    }
-                                  >
-                                    <ShieldCheck className="w-4 h-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Manage Roles</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
-                            {user.isDeleted ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    className="bg-green-600 hover:bg-green-700 text-white rounded-xl w-8 h-8 shrink-0"
-                                    onClick={() =>
-                                      handleUserAction(user.userId, 'restore')
-                                    }
-                                  >
-                                    <UserCheck className="w-4 h-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Restore User</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            ) : (
-                              <>
-                                {user.accountStatus === 'Banned' ? (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        size="icon"
-                                        className="bg-green-600 hover:bg-green-700 text-white rounded-xl w-8 h-8 shrink-0"
-                                        onClick={() =>
-                                          handleUserAction(user.userId, 'unban')
-                                        }
-                                      >
-                                        <UserCheck className="w-4 h-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Unban User</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                ) : !user.roles.includes('Admin') ? (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        size="icon"
-                                        variant="outline"
-                                        className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl w-8 h-8 shrink-0"
-                                        onClick={() =>
-                                          handleUserAction(user.userId, 'ban')
-                                        }
-                                      >
-                                        <Ban className="w-4 h-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Ban User</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                ) : null}
+  return (
+    <div className="space-y-6">
+      <Tabs value={activeSubTab} onValueChange={handleSubTabChange} className="w-full">
+        <TabsList className="bg-[#E5E9F0] border-none rounded-xl p-1 mb-6 flex flex-wrap h-auto">
+          <TabsTrigger value="verifications" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+            Identity Verifications
+          </TabsTrigger>
+          <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+            All Users
+          </TabsTrigger>
+          <TabsTrigger value="roles" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+            Role Management
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="users" className="mt-0">
+          <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <CardTitle className="text-2xl text-[#1a1a1a]">
+                  User Management
+                </CardTitle>
+                <div className="flex w-full sm:w-auto items-center gap-2">
+                  <Input
+                    placeholder="Search users..."
+                    className="w-full sm:w-64 bg-white rounded-xl border-[#3A6EA5]/20"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') setActiveUserSearch(userSearch)
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    className="bg-[#3A6EA5] hover:bg-[#2A527A] text-white rounded-xl flex-shrink-0"
+                    onClick={() => setActiveUserSearch(userSearch)}
+                  >
+                    <Search className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {['Pending', 'Verified', 'Banned', 'Deleted', 'All'].map((status) => (
+                  <Button
+                    key={status}
+                    variant={statusFilter === status ? 'default' : 'outline'}
+                    size="sm"
+                    className={statusFilter === status ? 'bg-[#3A6EA5] text-white rounded-xl' : 'rounded-xl border-[#3A6EA5]/20 text-[#4a5565]'}
+                    onClick={() => setStatusFilter(status)}
+                  >
+                    {status}
+                  </Button>
+                ))}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <TooltipProvider delayDuration={1000}>
+              {!usersLoading && users.length === 0 ? (
+                <div className="py-10 text-center text-[#4a5565] border-b border-[#3A6EA5]/20">
+                  No users found.
+                </div>
+              ) : (
+                <div className="overflow-x-auto overflow-y-scroll max-h-[600px] border-b border-[#3A6EA5]/20">
+                  <table className="w-full relative" style={{ tableLayout: 'fixed' }}>
+                    <thead className="sticky top-0 bg-[#F2F4F6] z-10">
+                      <tr className="border-b border-[#3A6EA5]/20">
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '30%' }}>User</th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '25%' }}>Roles</th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '20%' }}>Status</th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>Join Date</th>
+                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usersLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <tr key={i} className="border-b border-[#3A6EA5]/10">
+                            {Array.from({ length: 5 }).map((_, j) => (
+                              <td key={j} className="py-4 px-4">
+                                <Skeleton className="h-5 w-full rounded" />
+                              </td>
+                            ))}
+                          </tr>
+                        ))
+                      ) : (
+                      users.map((user) => (
+                        <tr key={user.userId} className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors">
+                          <td className="py-4 px-4 text-[#1a1a1a] font-medium min-w-0">
+                            <div className="flex flex-col min-w-0">
+                              {user.accountStatusDisplayName === 'Verified' && user.roles.includes('Renter') ? (
+                                <Link to={`/user/${user.userId}`} className="block w-full min-w-0" target="_blank">
+                                  <TruncatedTooltip text={user.fullName ?? ''} className="hover:underline text-[#3A6EA5] font-semibold inline-block max-w-full" />
+                                </Link>
+                              ) : (
+                                <TruncatedTooltip text={user.fullName ?? ''} className="inline-block max-w-full" />
+                              )}
+                              <TruncatedTooltip text={user.email} className="text-xs text-[#4a5565] font-normal max-w-full inline-block" />
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-[#4a5565]">
+                            <div className="flex flex-wrap gap-1">
+                              {user.rolesDisplayNames.map(role => (
+                                <span key={role} className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-lg font-medium">
+                                  {role}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex gap-2">
+                              {getStatusBadge(user.accountStatusDisplayName)}
+                              {user.isDeleted && (
+                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                  Deleted
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-[#4a5565]">
+                            {new Date(user.createdAt).toLocaleDateString('en-GB')}
+                          </td>
+                          <td className="py-4 px-4">
+                            <TooltipProvider delayDuration={700}>
+                              <div className="flex gap-2 justify-start">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button
                                       size="icon"
                                       variant="outline"
-                                      className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl w-8 h-8 shrink-0"
-                                      onClick={() =>
-                                        handleUserAction(user.userId, 'delete')
-                                      }
+                                      className="rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0"
+                                      onClick={() => setSelectedUser(user)}
                                     >
-                                      <XCircle className="w-4 h-4" />
+                                      <Eye className="w-4 h-4" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Delete User</p>
+                                    <p>View Details</p>
                                   </TooltipContent>
                                 </Tooltip>
-                              </>
+                                {user.isDeleted ? (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="icon"
+                                        variant="outline"
+                                        className="border-[#00A650] text-[#00A650] hover:bg-[#00A650] hover:text-white rounded-xl w-8 h-8 shrink-0"
+                                        onClick={() => handleUserAction(user.userId, 'restore')}
+                                      >
+                                        <UserCheck className="w-4 h-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Restore User</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : (
+                                  <>
+                                    {user.accountStatus === 'Banned' ? (
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            size="icon"
+                                            variant="outline"
+                                            className="border-[#00A650] text-[#00A650] hover:bg-[#00A650] hover:text-white rounded-xl w-8 h-8 shrink-0"
+                                            onClick={() => handleUserAction(user.userId, 'unban')}
+                                          >
+                                            <UserCheck className="w-4 h-4" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>Unban User</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    ) : (
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="inline-block">
+                                            <Button
+                                              size="icon"
+                                              variant="outline"
+                                              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl w-8 h-8 shrink-0"
+                                              disabled={user.roles.includes('Admin')}
+                                              onClick={() => handleUserAction(user.userId, 'ban')}
+                                            >
+                                              <Ban className="w-4 h-4" />
+                                            </Button>
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          {user.roles.includes('Admin') ? <p>Admins cannot be banned</p> : <p>Ban User</p>}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-block">
+                                          <Button
+                                            size="icon"
+                                            variant="outline"
+                                            className="border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl w-8 h-8 shrink-0"
+                                            disabled={user.roles.includes('Admin')}
+                                            onClick={() => handleUserAction(user.userId, 'delete')}
+                                          >
+                                            <XCircle className="w-4 h-4" />
+                                          </Button>
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        {user.roles.includes('Admin') ? <p>Admins cannot be deleted</p> : <p>Delete User</p>}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </>
+                                )}
+                              </div>
+                            </TooltipProvider>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                  {totalCount > users.length && (
+                    <tfoot>
+                      <tr>
+                        <td colSpan={5}>
+                          <div className="py-6 flex justify-center items-center min-h-[40px]">
+                            {usersFetching ? (
+                              <Loader2 className="w-6 h-6 animate-spin text-[#3A6EA5]" />
+                            ) : (
+                              <Button
+                                variant="outline"
+                                className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
+                                onClick={() => setPageSize((p) => p + 10)}
+                              >
+                                Show More
+                              </Button>
                             )}
                           </div>
-                        </TooltipProvider>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          {totalCount > users.length && (
-            <div className="mt-4 flex justify-center items-center min-h-[40px]">
-              {usersFetching ? (
-                <Loader2 className="w-6 h-6 animate-spin text-[#3A6EA5]" />
-              ) : (
-                <Button
-                  variant="outline"
-                  className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
-                  onClick={() => setPageSize((p) => p + 20)}
-                >
-                  Show More
-                </Button>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
+                </table>
+              </div>
               )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </TooltipProvider>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="roles" className="mt-0">
+          <RoleManagementView />
+        </TabsContent>
+
+        <TabsContent value="verifications" className="mt-0">
+          <VerificationsTab />
+        </TabsContent>
+      </Tabs>
 
       {/* User Detail Modal */}
       {selectedUser && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedUser(null)}
-        >
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setSelectedUser(null)}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center text-white text-xl font-bold shrink-0">
-                  {selectedUser.fullName.charAt(0).toUpperCase()}
-                </div>
+                {selectedUser.profileImage ? (
+                  <img src={selectedUser.profileImage} alt={selectedUser.fullName || 'User'} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center text-white text-xl font-bold shrink-0">
+                    {(selectedUser.fullName || selectedUser.email || '?').charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div>
                   <h3 className="text-2xl font-bold text-[#1a1a1a]">
-                    {selectedUser.fullName}
+                    {selectedUser.fullName || 'Unknown User'}
                   </h3>
                   <p className="text-sm text-[#4a5565] mt-0.5">
                     {selectedUser.email}
@@ -442,150 +411,137 @@ export function UserManagementTab() {
                       </span>
                     )}
                     {selectedUser.isDeleted && (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-600">
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
                         Deleted
                       </span>
                     )}
                   </div>
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-xl border-[#3A6EA5]/20 shrink-0"
-                onClick={() => setSelectedUser(null)}
-              >
+              <Button size="sm" variant="outline" className="rounded-xl border-[#3A6EA5]/20 shrink-0" onClick={() => setSelectedUser(null)}>
                 <XCircle className="w-4 h-4" />
               </Button>
             </div>
 
-            {/* Info row */}
-            <div className="grid grid-cols-2 gap-3 mb-6 text-sm">
-              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-sm">
+              <div className="bg-[#F2F4F6] rounded-2xl p-4 sm:col-span-2">
                 <p className="text-[#4a5565] mb-1">Joined</p>
-                <p className="font-semibold text-[#1a1a1a]">
-                  {new Date(selectedUser.createdAt).toLocaleDateString('en-GB')}
-                </p>
+                <p className="font-semibold text-[#1a1a1a]">{new Date(selectedUser.createdAt).toLocaleDateString('en-GB')}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4 sm:col-span-2">
+                <p className="text-[#4a5565] mb-1">User ID</p>
+                <p className="font-mono text-xs font-semibold text-[#1a1a1a] break-all">{selectedUser.userId}</p>
               </div>
               <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-[#4a5565] mb-1">User ID</p>
-                <p className="font-mono text-xs font-semibold text-[#1a1a1a] break-all">
-                  {selectedUser.userId}
-                </p>
+                <p className="text-[#4a5565] mb-1">Properties</p>
+                <p className="font-semibold text-[#1a1a1a]">{selectedUser.ownedPropertiesCount}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">Active Contracts</p>
+                <p className="font-semibold text-[#1a1a1a]">{selectedUser.activeContractsCount}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">Total Paid</p>
+                <p className="font-semibold text-[#1a1a1a]">EGP {(selectedUser.totalPaidAmount ?? 0).toLocaleString()}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">Total Received</p>
+                <p className="font-semibold text-[#1a1a1a]">EGP {(selectedUser.totalReceivedAmount ?? 0).toLocaleString()}</p>
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Identity Verification Details */}
+            {(verificationDetailLoading || verificationDetail) && (
+              <>
+                <h4 className="font-semibold text-lg text-[#1a1a1a] mb-4">Identity Verification</h4>
+                <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+                  {verificationDetailLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="bg-[#F2F4F6] rounded-2xl p-4 space-y-2">
+                        <Skeleton className="h-3 w-20 rounded" />
+                        <Skeleton className="h-5 w-32 rounded" />
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                        <p className="text-[#4a5565] mb-1">National ID</p>
+                        <p className="font-mono font-semibold text-[#1a1a1a]">{verificationDetail?.nationalIDNumber ?? '—'}</p>
+                      </div>
+                      <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                        <p className="text-[#4a5565] mb-1">Birth Date</p>
+                        <p className="font-semibold text-[#1a1a1a]">
+                          {verificationDetail?.birthDate ? new Date(verificationDetail.birthDate).toLocaleDateString('en-GB') : '—'}
+                        </p>
+                      </div>
+                      <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                        <p className="text-[#4a5565] mb-1">Gender</p>
+                        <p className="font-semibold text-[#1a1a1a] capitalize">{verificationDetail?.gender?.toLowerCase() ?? '—'}</p>
+                      </div>
+                      <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                        <p className="text-[#4a5565] mb-1">Arabic Address</p>
+                        <p className="font-semibold text-[#1a1a1a]" dir="rtl">{verificationDetail?.arabicAddress ?? '—'}</p>
+                      </div>
+                      <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                        <p className="text-[#4a5565] mb-1">Phone</p>
+                        <p className="font-semibold text-[#1a1a1a]">{verificationDetail?.phoneNumber ?? '—'}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  {verificationDetailLoading ? (
+                    Array.from({ length: 2 }).map((_, i) => (
+                      <div key={i}>
+                        <Skeleton className="h-4 w-16 rounded mb-2" />
+                        <Skeleton className="h-32 w-full rounded-2xl" />
+                      </div>
+                    ))
+                  ) : (
+                    [
+                      { label: 'Front ID', src: buildImageUrl(verificationDetail?.frontIdPhoto ?? null) },
+                      { label: 'Back ID', src: buildImageUrl(verificationDetail?.backIdPhoto ?? null) },
+                    ].map(({ label, src }) => (
+                      <div key={label}>
+                        <p className="text-sm text-[#4a5565] mb-2 font-medium">{label}</p>
+                        {src ? (
+                          <img src={src} alt={label} className="w-full rounded-2xl border border-[#3A6EA5]/20 object-cover max-h-48 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(src, '_blank')} />
+                        ) : (
+                          <div className="w-full rounded-2xl border border-dashed border-[#3A6EA5]/30 bg-[#F2F4F6] flex items-center justify-center h-32 text-[#4a5565] text-sm">No image</div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </>
+            )}
+
             <div className="flex gap-3">
               {selectedUser.isDeleted ? (
-                <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                  disabled={userAction.isPending}
-                  onClick={() =>
-                    handleUserAction(selectedUser.userId, 'restore')
-                  }
-                >
-                  <UserCheck className="w-4 h-4 mr-2" />
-                  Restore
+                <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl" disabled={userAction.isPending} onClick={() => handleUserAction(selectedUser.userId, 'restore')}>
+                  <UserCheck className="w-4 h-4 mr-2" /> Restore
                 </Button>
               ) : (
                 <>
                   {selectedUser.accountStatus === 'Banned' ? (
-                    <Button
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                      disabled={userAction.isPending}
-                      onClick={() => handleUserAction(selectedUser.userId, 'unban')}
-                    >
-                      <UserCheck className="w-4 h-4 mr-2" />
-                      Unban
+                    <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl" disabled={userAction.isPending} onClick={() => handleUserAction(selectedUser.userId, 'unban')}>
+                      <UserCheck className="w-4 h-4 mr-2" /> Unban
                     </Button>
                   ) : !selectedUser.roles.includes('Admin') ? (
-                    <Button
-                      variant="outline"
-                      className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                      disabled={userAction.isPending}
-                      onClick={() => handleUserAction(selectedUser.userId, 'ban')}
-                    >
-                      <Ban className="w-4 h-4 mr-2" />
-                      Ban
+                    <Button variant="outline" className="flex-1 border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl" disabled={userAction.isPending} onClick={() => handleUserAction(selectedUser.userId, 'ban')}>
+                      <Ban className="w-4 h-4 mr-2" /> Ban
                     </Button>
                   ) : null}
-                  <Button
-                    variant="outline"
-                    className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                    disabled={userAction.isPending}
-                    onClick={() => handleUserAction(selectedUser.userId, 'delete')}
-                  >
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
+                  {!selectedUser.roles.includes('Admin') && (
+                    <Button variant="outline" className="flex-1 border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl" disabled={userAction.isPending} onClick={() => handleUserAction(selectedUser.userId, 'delete')}>
+                      <XCircle className="w-4 h-4 mr-2" /> Delete
+                    </Button>
+                  )}
                 </>
               )}
-              <Button
-                variant="outline"
-                className="rounded-xl border-[#3A6EA5]/20"
-                onClick={() => setSelectedUser(null)}
-              >
+              <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20" onClick={() => setSelectedUser(null)}>
                 Close
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Roles Modal */}
-      {showRolesModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
-          >
-            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-              Update User Roles
-            </h3>
-            <p className="text-[#4a5565] mb-6 text-sm">
-              Select the assignable roles for this user. Protected roles (like Renter)
-              are preserved automatically.
-            </p>
-            <div className="space-y-3 mb-6">
-              {ASSIGNABLE_ROLES.map((role) => (
-                <label
-                  key={role}
-                  className="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-[#F2F4F6] transition-colors"
-                >
-                  <Checkbox
-                    checked={selectedRoles.includes(role)}
-                    onCheckedChange={(checked) =>
-                      setSelectedRoles(
-                        checked
-                          ? [...selectedRoles, role]
-                          : selectedRoles.filter((r) => r !== role),
-                      )
-                    }
-                  />
-                  <span className="text-[#1a1a1a] font-medium">{role}</span>
-                </label>
-              ))}
-            </div>
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-xl border-[#3A6EA5]/20"
-                onClick={() => {
-                  setShowRolesModal(false)
-                  setPendingRoleUserId(null)
-                  setSelectedRoles([])
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex-1 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white rounded-xl"
-                disabled={updateUserRoles.isPending}
-                onClick={confirmRoleUpdate}
-              >
-                {updateUserRoles.isPending ? 'Saving…' : 'Save Roles'}
               </Button>
             </div>
           </motion.div>
@@ -595,38 +551,25 @@ export function UserManagementTab() {
       {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
-          >
-            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-              Confirm Action
-            </h3>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">Confirm Action</h3>
             <p className="text-[#4a5565] mb-6">
-              Are you sure you want to {actionType} this user? 
+              Are you sure you want to {actionType} this user?
               {actionType === 'delete' && ' A standard notification will be shown.'}
               {' '}This action can be reversed later.
             </p>
             <div className="flex gap-4">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-xl border-[#3A6EA5]/20"
-                onClick={() => setShowConfirmModal(false)}
-              >
+              <Button variant="outline" className="flex-1 rounded-xl border-[#3A6EA5]/20" onClick={() => setShowConfirmModal(false)}>
                 Cancel
               </Button>
               <Button
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl"
-                disabled={userAction.isPending}
-                onClick={confirmUserAction}
-              >
+                className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl" disabled={userAction.isPending} onClick={confirmUserAction}>
                 {userAction.isPending ? 'Processing…' : 'Confirm'}
               </Button>
             </div>
           </motion.div>
         </div>
       )}
-    </>
+    </div>
   )
 }

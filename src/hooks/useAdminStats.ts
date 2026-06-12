@@ -105,11 +105,19 @@ export function useUpdateUserRoles() {
   })
 }
 
-export function useAdminModerationReports(page = 1, pageSize = 20, search?: string) {
+export function useAdminModerationReports(page = 1, pageSize = 20, search?: string, status?: string) {
   return useQuery({
-    queryKey: ['adminModerationReports', page, pageSize, search],
-    queryFn: () => adminService.getModerationReports(page, pageSize, search),
+    queryKey: ['adminModerationReports', page, pageSize, search, status],
+    queryFn: () => adminService.getModerationReports(page, pageSize, search, status),
     placeholderData: keepPreviousData,
+  })
+}
+
+export function useAdminModerationReport(reportId: number | null) {
+  return useQuery({
+    queryKey: ['adminModerationReport', reportId],
+    queryFn: () => adminService.getModerationReport(reportId!),
+    enabled: reportId != null,
   })
 }
 
@@ -151,5 +159,74 @@ export function useCancelContract() {
       queryClient.invalidateQueries({ queryKey: ['adminContracts'] })
     },
     onError: () => toast.error('Failed to cancel contract'),
+  })
+}
+
+export function useAdminRoles() {
+  return useQuery({
+    queryKey: ['adminRoles'],
+    queryFn: () => adminService.getRoles(),
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useAdminRevenue(page = 1, pageSize = 20, period = 'thisYear', search?: string, status?: string) {
+  return useQuery({
+    queryKey: ['adminRevenue', page, pageSize, period, search, status],
+    queryFn: () => adminService.getRevenueStats(page, pageSize, period, search, status),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useAdminPropertyModerationQueue(page = 1, pageSize = 20, search?: string) {
+  return useQuery({
+    queryKey: ['adminPropertyModerationQueue', page, pageSize, search],
+    queryFn: () => adminService.getPendingPropertyVerifications(page, pageSize, search),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useReviewPropertyModeration() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ propertyId, status, note }: { propertyId: number; status: 'Approved' | 'Rejected' | 'Pending'; note?: string }) => {
+      if (status === 'Approved') {
+        return adminService.approvePropertyVerification(propertyId)
+      } else if (status === 'Rejected' || status === 'Declined') {
+        return adminService.declinePropertyVerification(propertyId, note || 'Declined by admin')
+      }
+      throw new Error('Unsupported status')
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminPropertyModerationQueue'] })
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] })
+    },
+    onError: () => toast.error('Failed to review property'),
+  })
+}
+
+export function useDeleteProperty() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (propertyId: number) => adminService.deleteProperty(propertyId),
+    onSuccess: () => {
+      toast.success('Property deleted successfully')
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] })
+      queryClient.invalidateQueries({ queryKey: ['adminPropertyModerationQueue'] })
+    },
+    onError: () => toast.error('Failed to delete property'),
+  })
+}
+
+export function useRestoreProperty() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (propertyId: number) => adminService.restoreProperty(propertyId),
+    onSuccess: () => {
+      toast.success('Property restored successfully')
+      queryClient.invalidateQueries({ queryKey: ['adminProperties'] })
+      queryClient.invalidateQueries({ queryKey: ['adminPropertyModerationQueue'] })
+    },
+    onError: () => toast.error('Failed to restore property'),
   })
 }

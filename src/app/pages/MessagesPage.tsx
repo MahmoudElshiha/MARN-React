@@ -124,9 +124,7 @@ export function MessagesPage() {
   const handleReportSubmit = () => {
     if (!effectiveConversation?.participant.id || !reportReason.trim()) return
     
-    const finalReason = reportTarget === 'Message' && reportedMessage 
-      ? `${reportReason.trim()} REPORTMETAMESSAGE ${reportedMessage.text} REPORTMETAID ${reportedMessage.id}`
-      : `${reportReason.trim()} REPORTMETAUSER ${effectiveConversation.participant.id}`
+    const finalReason = reportReason.trim()
 
     const targetId = reportTarget === 'Message' && reportedMessage 
       ? reportedMessage.id 

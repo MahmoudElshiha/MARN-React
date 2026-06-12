@@ -121,6 +121,7 @@ export interface AdminUserStatsItem {
   userId: string
   fullName: string
   email: string
+  phoneNumber?: string | null
   profileImage: string | null
   accountStatus: string
   accountStatusDisplayName: string
@@ -195,6 +196,8 @@ export interface PendingUserVerification {
   arabicFullName: string | null
   arabicAddress: string | null
   nationalIDNumber: string | null
+  birthDate?: string | null
+  gender?: string | null
 }
 
 export interface AdminRoleUser {
@@ -245,23 +248,56 @@ export type GenerateReportPayload =
   components['schemas']['AdminAnalyticsReportGenerateRequestDto']
 
 export interface AdminModerationReport {
-  id: number
   reportId: number
   reportableType: string
   reportableTypeDisplayName?: string
-  reportableTargetId: string
-  reason: string
   status: string
   statusDisplayName?: string
+  reason: string
   createdAt: string
-  reporterUserId?: string
-  reporterFullName?: string
-  reporterEmail?: string
-  internalNotes?: string
-  reviewedAt?: string
+  reviewedAt: string | null
+  actionTaken: string | null
+  actionTakenDisplayName: string
+  actionsTaken: string[]
+  actionsTakenDisplayNames: string[]
+  reporterId: string
+  reporterName: string
+  reviewerId: string | null
+  reviewerName: string | null
+  targetLabel: string
 }
 
-export type ReviewModerationReportPayload = components['schemas']['AdminReviewReportDto']
+export interface ModerationReportTarget {
+  exists: boolean
+  isHidden: boolean
+  isDeletedOrInactive: boolean
+  title: string
+  subtitle: string
+  preview: string
+  userId: string | null
+  propertyId: number | null
+  messageId: string | null
+  propertyCommentId: number | null
+}
+
+export interface AdminModerationReportDetail extends AdminModerationReport {
+  reviewerNote: string | null
+  reportableTargetId: string
+  target: ModerationReportTarget
+}
+
+export enum ReportModerationActionType {
+  BanUser = 'BanUser',
+  DeactivateProperty = 'DeactivateProperty',
+  HideMessage = 'HideMessage',
+  HidePropertyComment = 'HidePropertyComment'
+}
+
+export interface ReviewModerationReportPayload {
+  status: 'Resolved' | 'Rejected'
+  note?: string
+  actionTypes?: string[]
+}
 
 // PATCH with no request body — removes Content-Type so ASP.NET doesn't attempt to read an absent body
 const patchNoBody = (url: string) =>
@@ -297,7 +333,54 @@ export interface PendingPropertyVerification {
 export interface PendingPropertyVerificationDetail extends PendingPropertyVerification {
   description: string | null
   proofOfOwnership: string | null
-  images: string[]
+  ownerAccountStatus: string
+  ownerAccountStatusDisplayName: string
+  price: number
+  rentalUnit: string
+  rentalUnitDisplayName: string
+  zipCode: string | null
+  latitude: number | null
+  longitude: number | null
+  isActive: boolean
+}
+
+export interface AdminRoleDefinition {
+  roleName: string
+  normalizedName: string
+  usersCount: number
+  isProtected: boolean
+  isAssignable: boolean
+}
+
+export interface AdminDetailedPaymentListItemDto {
+  paymentId: number
+  contractId: number
+  paymentScheduleId: number
+  status: string
+  statusDisplayName: string
+  amountTotal: number
+  platformFee: number
+  ownerAmount: number
+  paidAt: string | null
+  availableAt: string | null
+  currency: string
+  propertyId: number
+  propertyTitle: string
+  ownerId: string
+  ownerName: string
+  renterId: string
+  renterName: string
+}
+
+export interface AdminStatsRevenueResponse {
+  appliedPeriod: unknown
+  totalPayments: number
+  totalSales: number
+  totalRevenue: number
+  totalOwnerPayouts: number
+  statusBreakdown: unknown[]
+  revenueOverTime: unknown[]
+  payments: SearchPaginatedResponse<AdminDetailedPaymentListItemDto>
 }
 
 export const adminService = {
@@ -306,8 +389,8 @@ export const adminService = {
 
   getUsers: (page = 1, pageSize = 20, search?: string, status?: string, includeDeleted?: boolean) => {
     const params = new URLSearchParams({
-      pageNumber: String(page),
-      pageSize: String(pageSize),
+      PageNumber: String(page),
+      PageSize: String(pageSize),
     })
     if (search) params.append('Search', search)
     if (status && status !== 'All') params.append('AccountStatus', status)
@@ -319,7 +402,7 @@ export const adminService = {
 
   getUserStats: (page = 1, pageSize = 20) =>
     apiClient.get<ApiResponse<AdminUserStats>>(
-      `/api/Admin/stats/users?pageNumber=${page}&pageSize=${pageSize}`,
+      `/api/Admin/stats/users?PageNumber=${page}&PageSize=${pageSize}`,
     ),
 
   getVerifications: (page = 1, pageSize = 20) =>
@@ -356,8 +439,8 @@ export const adminService = {
 
   getRoleUsers: (page = 1, pageSize = 20, search?: string) => {
     const params = new URLSearchParams({
-      pageNumber: String(page),
-      pageSize: String(pageSize),
+      PageNumber: String(page),
+      PageSize: String(pageSize),
     })
     if (search) params.append('Search', search)
     return apiClient.get<ApiResponse<AdminRoleUsersResult>>(
@@ -386,12 +469,16 @@ export const adminService = {
       },
     ),
 
-  getPendingPropertyVerifications: (page = 1, pageSize = 20) =>
-    apiClient.get<
+  getPendingPropertyVerifications: (page = 1, pageSize = 20, search?: string) => {
+    const params = new URLSearchParams({
+      PageNumber: String(page),
+      PageSize: String(pageSize),
+    })
+    if (search) params.append('Search', search)
+    return apiClient.get<
       ApiResponse<SearchPaginatedResponse<PendingPropertyVerification>>
-    >(
-      `/api/Admin/verifications/properties/pending?PageNumber=${page}&PageSize=${pageSize}`,
-    ),
+    >(`/api/Admin/verifications/properties/pending?${params}`)
+  },
 
   getPropertyVerification: (propertyId: number) =>
     apiClient.get<ApiResponse<PendingPropertyVerificationDetail>>(
@@ -407,27 +494,31 @@ export const adminService = {
       { reason },
     ),
 
-  getModerationReports: (page = 1, pageSize = 20, search?: string) => {
+  getModerationReports: (page = 1, pageSize = 20, search?: string, status?: string) => {
     const params = new URLSearchParams({
-      pageNumber: String(page),
-      pageSize: String(pageSize),
+      PageNumber: String(page),
+      PageSize: String(pageSize),
     })
     if (search) params.append('Search', search)
-    return apiClient.get<ApiResponse<SearchPaginatedResponse<AdminModerationReport>>>(
+    if (status && status !== 'All') params.append('Status', status)
+    return apiClient.get<ApiResponse<{ reports: SearchPaginatedResponse<AdminModerationReport>, statusBreakdown: any[], typeBreakdown: any[] }>>(
       `/api/Admin/reports?${params}`,
     )
   },
 
+  getModerationReport: (reportId: number) =>
+    apiClient.get<ApiResponse<AdminModerationReportDetail>>(`/api/Admin/reports/${reportId}`),
+
   reviewModerationReport: (reportId: number, payload: ReviewModerationReportPayload) =>
-    apiClient.patch<ApiResponse<void>>(`/api/Admin/reports/${reportId}/review`, payload),
+    axiosInstance.patch<ApiResponse<void>>(`/api/Admin/reports/${reportId}/review`, payload, { headers: { 'Content-Type': 'application/json' } }).then(r => r.data),
 
   getProperties: (page = 1, pageSize = 20, search?: string, status?: string) => {
     const params = new URLSearchParams({
-      pageNumber: String(page),
-      pageSize: String(pageSize),
+      PageNumber: String(page),
+      PageSize: String(pageSize),
     })
     if (search) params.append('Search', search)
-    if (status) params.append('Status', status)
+    if (status && status !== 'All') params.append('Status', status)
     params.append('IncludeDeleted', 'true')
     return apiClient.get<ApiResponse<AdminStatsPropertiesResponse>>(
       `/api/Admin/stats/properties?${params}`,
@@ -445,8 +536,8 @@ export const adminService = {
 
   getContracts: (page = 1, pageSize = 20, search?: string, status?: string) => {
     const params = new URLSearchParams({
-      pageNumber: String(page),
-      pageSize: String(pageSize),
+      PageNumber: String(page),
+      PageSize: String(pageSize),
     })
     if (search) params.append('Search', search)
     if (status && status !== 'All') params.append('Status', status)
@@ -462,4 +553,19 @@ export const adminService = {
 
   cancelContract: (contractId: number) =>
     patchNoBody(`/api/Admin/stats/contracts/${contractId}/cancel`),
+
+  getRoles: () => apiClient.get<ApiResponse<AdminRoleDefinition[]>>('/api/Admin/roles'),
+
+  getRevenueStats: (page = 1, pageSize = 20, period = 'thisYear', search?: string, status?: string) => {
+    const params = new URLSearchParams({
+      PageNumber: String(page),
+      PageSize: String(pageSize),
+      period: period,
+    })
+    if (search) params.append('Search', search)
+    if (status && status !== 'All') params.append('Status', status)
+    return apiClient.get<ApiResponse<AdminStatsRevenueResponse>>(
+      `/api/Admin/stats/revenue?${params}`
+    )
+  },
 }

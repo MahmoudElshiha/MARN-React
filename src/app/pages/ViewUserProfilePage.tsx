@@ -53,7 +53,7 @@ export function ViewUserProfilePage() {
       {
         reportableType: 'User',
         reportableTargetId: id,
-        reason: `${reportReason.trim()} REPORTMETAUSER ${id}`,
+        reason: reportReason.trim(),
       },
       {
         onSuccess: () => {

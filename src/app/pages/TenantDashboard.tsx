@@ -58,12 +58,8 @@ export function TenantDashboard() {
   const { data: recommendedData, isLoading: recommendedLoading } =
     useProperties({ pageSize: 2 })
   const { data: profileRes, isLoading: profileLoading } = useProfile()
-  const { data: notificationsData, isLoading: notificationsLoading, refetch: refetchNotifications } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => notificationService.getNotifications()
-  })
-
-  const unreadNotifications = notificationsData?.filter((n) => !n.isRead) || []
+  const dashboard = dashboardRes?.data
+  const unreadNotifications = dashboard?.notifications?.filter((n: any) => !n.isRead) || []
 
   const [showAllPayments, setShowAllPayments] = useState(false)
   const [showAllContracts, setShowAllContracts] = useState(false)
@@ -121,14 +117,13 @@ export function TenantDashboard() {
     if (!mapped.isRead) {
       try {
         await notificationService.markAsRead(mapped.id)
-        refetchNotifications()
+        refetchDashboard?.()
       } catch (err) {
         console.error('Failed to mark as read', err)
       }
     }
   }
 
-  const dashboard = dashboardRes?.data
   const recommendedProperties = recommendedData?.data?.items ?? []
 
   const activeRental = dashboard?.activeRentals?.[0] ?? null
@@ -155,8 +150,8 @@ export function TenantDashboard() {
             {dashboard?.accountStatus && !dashboardLoading && (
               <Badge
                 className={`mt-2 ${dashboard.accountStatus === 'Verified'
-                    ? 'bg-green-100 text-green-700 border-green-200'
-                    : 'bg-amber-100 text-amber-700 border-amber-200'
+                  ? 'bg-green-100 text-green-700 border-green-200'
+                  : 'bg-amber-100 text-amber-700 border-amber-200'
                   }`}
                 variant="outline"
               >
@@ -316,34 +311,49 @@ export function TenantDashboard() {
                                   {rental.propertyAddress || 'Cairo, Egypt'}
                                 </p>
                               </div>
-                              <Badge className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-full px-3 py-0.5">
-                                {rental.contractStatusDisplayName || rental.contractStatus || 'Active'}
-                              </Badge>
+                              <div className="flex gap-2">
+                                <Badge className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-full px-3 py-0.5">
+                                  {rental.contractStatusDisplayName || rental.contractStatus || 'Active'}
+                                </Badge>
+                                {rental.isAnchoredToBlockChain && (
+                                  <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 rounded-full px-3 py-0.5">
+                                    {rental.anchoringStatusDisplayName || rental.anchoringStatus || 'Anchored'}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                              <div>
-                                <p className="text-xs text-[#6a7282] mb-1">
-                                  Move In
-                                </p>
-                                <p className="text-sm font-medium text-[#1a1a1a]">
-                                  {formatDate(rental.startDate)}
-                                </p>
+                            <div className="flex flex-wrap md:flex-nowrap justify-between gap-y-4 mt-4 w-full">
+                              <div className="flex gap-x-12">
+                                <div>
+                                  <p className="text-xs text-[#6a7282] mb-1">Move In</p>
+                                  <p className="text-sm font-medium text-[#1a1a1a]">{formatDate(rental.startDate)}</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-[#6a7282] mb-1">Move Out</p>
+                                  <p className="text-sm font-medium text-[#1a1a1a]">{formatDate(rental.endDate || rental.expiryDate)}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-xs text-[#6a7282] mb-1">
-                                  Move Out
-                                </p>
-                                <p className="text-sm font-medium text-[#1a1a1a]">
-                                  {formatDate(rental.endDate || rental.expiryDate)}
-                                </p>
-                              </div>
+                              {rental.nextPaymentScheduleDate && (
+                                <div className="flex gap-x-12">
+                                  <div>
+                                    <p className="text-xs text-[#6a7282] mb-1">Next Payment</p>
+                                    <p className="text-sm font-medium text-[#1a1a1a]">{formatDate(rental.nextPaymentScheduleDate)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-[#6a7282] mb-1">Status</p>
+                                    <p className={`text-sm font-medium ${rental.nextPaymentScheduleStatus === 'Overdue' ? 'text-red-600' : 'text-amber-600'}`}>
+                                      {rental.nextPaymentScheduleStatusDisplayName || rental.nextPaymentScheduleStatus || 'Pending'}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             <div className="flex items-end justify-between mt-4">
                               <div>
                                 <p className="text-xs text-[#6a7282] mb-1">
-                                  Monthly Rent
+                                  {rental.paymentFrequencyDisplayName || rental.paymentFrequency || 'Monthly'} Rent
                                 </p>
                                 <p className="text-xl font-bold text-[#3A6EA5]">
                                   {(rental.rentAmount ?? rental.monthlyRent ?? rental.price ?? 50000).toLocaleString()} EGP
@@ -399,7 +409,15 @@ export function TenantDashboard() {
                             className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between"
                           >
                             <div>
-                              <p className="font-medium text-[#1a1a1a]">
+                              {req.ownerName && (
+                                <div className="flex items-center gap-2 mb-1.5">
+                                  {req.ownerProfileImage && (
+                                    <img src={getImageUrl(req.ownerProfileImage)} alt={req.ownerName} className="w-5 h-5 rounded-full object-cover" />
+                                  )}
+                                  <span className="text-sm font-medium text-[#1a1a1a]">{req.ownerName}</span>
+                                </div>
+                              )}
+                              <p className="font-semibold text-[#1a1a1a]">
                                 {req.propertyTitle || req.propertyName}
                               </p>
                               <p className="text-xs text-[#6a7282] flex items-center gap-1 mt-1">
@@ -410,6 +428,12 @@ export function TenantDashboard() {
                                     ? formatDate(req.requestedDate)
                                     : '—'}
                               </p>
+                              {req.paymentFrequencyDisplayName && (
+                                <p className="text-xs text-[#6a7282] flex items-center gap-1 mt-1">
+                                  <Clock className="w-3 h-3" />
+                                  {req.paymentFrequencyDisplayName}
+                                </p>
+                              )}
                             </div>
                             <Badge
                               variant="outline"
@@ -476,7 +500,7 @@ export function TenantDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {notificationsLoading ? (
+                {dashboardLoading ? (
                   <div className="space-y-3">
                     <Skeleton className="h-16 w-full rounded-2xl" />
                     <Skeleton className="h-16 w-full rounded-2xl" />
@@ -492,8 +516,8 @@ export function TenantDashboard() {
                         key={n.id || i}
                         onClick={() => handleNotificationClick(n)}
                         className={`p-4 rounded-2xl transition-colors cursor-pointer hover:bg-[#e8eef5] ${!n.isRead
-                            ? 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
-                            : 'bg-[#f5f7fa]'
+                          ? 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
+                          : 'bg-[#f5f7fa]'
                           }`}
                       >
                         <div className="flex items-start gap-3">
@@ -550,18 +574,25 @@ export function TenantDashboard() {
                               <p className="text-sm font-medium text-[#1a1a1a]">
                                 {c.propertyTitle || c.propertyName}
                               </p>
-                              <Badge
-                                variant="outline"
-                                className={
-                                  c.contractStatus === 'Active' || c.status === 'Active'
-                                    ? 'text-green-700 border-green-300 bg-green-50'
-                                    : c.contractStatus === 'Pending' || c.status === 'Pending'
-                                      ? 'text-yellow-700 border-yellow-300 bg-yellow-50'
-                                      : 'text-[#6a7282] border-[#d1d5db]'
-                                }
-                              >
-                                {c.contractStatusDisplayName || c.contractStatus || 'Active'}
-                              </Badge>
+                              <div className="flex gap-2">
+                                {c.isAnchoredToBlockChain && (
+                                  <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 text-[10px] px-1.5 py-0 h-5">
+                                    {c.anchoringStatusDisplayName || c.anchoringStatus || 'Anchored'}
+                                  </Badge>
+                                )}
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    c.contractStatus === 'Active' || c.status === 'Active'
+                                      ? 'text-green-700 border-green-300 bg-green-50'
+                                      : c.contractStatus === 'Pending' || c.status === 'Pending'
+                                        ? 'text-yellow-700 border-yellow-300 bg-yellow-50'
+                                        : 'text-[#6a7282] border-[#d1d5db]'
+                                  }
+                                >
+                                  {c.contractStatusDisplayName || c.contractStatus || 'Active'}
+                                </Badge>
+                              </div>
                             </div>
                             <p className="text-xs text-[#6a7282]">
                               Expires: {formatDate(c.expiryDate || c.endDate)}
@@ -775,18 +806,25 @@ export function TenantDashboard() {
                     <p className="text-sm font-medium text-[#1a1a1a]">
                       {c.propertyTitle || c.propertyName}
                     </p>
-                    <Badge
-                      variant="outline"
-                      className={
-                        c.contractStatus === 'Active' || c.status === 'Active'
-                          ? 'text-green-700 border-green-300 bg-green-50'
-                          : c.contractStatus === 'Pending' || c.status === 'Pending'
-                            ? 'text-yellow-700 border-yellow-300 bg-yellow-50'
-                            : 'text-[#6a7282] border-[#d1d5db]'
-                      }
-                    >
-                      {c.contractStatusDisplayName || c.contractStatus || 'Active'}
-                    </Badge>
+                    <div className="flex gap-2">
+                      {c.isAnchoredToBlockChain && (
+                        <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 h-5 text-[10px] px-1.5">
+                          {c.anchoringStatusDisplayName || c.anchoringStatus || 'Anchored'}
+                        </Badge>
+                      )}
+                      <Badge
+                        variant="outline"
+                        className={
+                          c.contractStatus === 'Active' || c.status === 'Active'
+                            ? 'text-green-700 border-green-300 bg-green-50'
+                            : c.contractStatus === 'Pending' || c.status === 'Pending'
+                              ? 'text-yellow-700 border-yellow-300 bg-yellow-50'
+                              : 'text-[#6a7282] border-[#d1d5db]'
+                        }
+                      >
+                        {c.contractStatusDisplayName || c.contractStatus || 'Active'}
+                      </Badge>
+                    </div>
                   </div>
                   <p className="text-xs text-[#6a7282]">
                     Expires: {formatDate(c.expiryDate || c.endDate)}

@@ -21,7 +21,6 @@ import {
 import { useAdminStats } from '@/hooks/useAdminStats'
 import { formatTrend } from './utils'
 import {
-  VerificationsTab,
   PropertyModerationTab,
   UserManagementTab,
   ReportsTab,
@@ -31,13 +30,15 @@ import {
 
 export function AdminDashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const currentTab = searchParams.get('tab') || 'verifications'
+  const currentTab = searchParams.get('tab') || 'users'
 
   const handleTabChange = (value: string) => {
     setSearchParams((prev) => {
       prev.set('tab', value)
+      // Clear sub-tab params when switching main tabs
+      prev.delete('subtab')
       return prev
-    })
+    }, { replace: true, preventScrollReset: true })
   }
 
   const { data: statsData, isLoading: statsLoading } = useAdminStats()
@@ -254,13 +255,7 @@ export function AdminDashboardPage() {
 
           {/* Main Content Tabs */}
           <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 bg-[#F2F4F6] p-2 rounded-[2rem] gap-2 border border-[#3A6EA5]/20 shadow-lg shadow-[#3A6EA5]/15">
-              <TabsTrigger
-                value="verifications"
-                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
-              >
-                Identity Verifications
-              </TabsTrigger>
+            <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 bg-[#F2F4F6] p-2 rounded-[2rem] gap-2 border border-[#3A6EA5]/20 shadow-lg shadow-[#3A6EA5]/15">
               <TabsTrigger
                 value="property-moderation"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
@@ -292,10 +287,6 @@ export function AdminDashboardPage() {
                 Moderation Reports
               </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="verifications">
-              <VerificationsTab />
-            </TabsContent>
 
             <TabsContent value="property-moderation">
               <PropertyModerationTab />

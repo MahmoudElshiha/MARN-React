@@ -190,7 +190,7 @@ export function PropertyDetailsPage() {
       {
         reportableType: 'Property',
         reportableTargetId: id,
-        reason: `${reportReason.trim()} REPORTMETAPROPERTY ${id}`,
+        reason: reportReason.trim(),
       },
       {
         onSuccess: () => {
@@ -215,7 +215,7 @@ export function PropertyDetailsPage() {
       {
         reportableType: 'PropertyComment',
         reportableTargetId: commentTargetId.toString(),
-        reason: `${reviewReportReason.trim()} REPORTMETACOMMENT ${selectedReviewToReport.content} REPORTMETAID ${commentTargetId} REPORTMETAPROPERTY ${id} REPORTMETAUSER ${targetUserId}`,
+        reason: reviewReportReason.trim(),
       },
       {
         onSuccess: () => {
@@ -817,7 +817,7 @@ export function PropertyDetailsPage() {
                     <div key={comment.commentId} className="p-4 bg-white rounded-2xl">
                       <div className="flex items-start gap-4 mb-3">
                         <Avatar className="w-12 h-12">
-                          {comment.userProfileImage && <AvatarImage src={comment.userProfileImage} />}
+                          {comment.userProfileImage && <AvatarImage src={getImageUrl(comment.userProfileImage)} />}
                           <AvatarFallback>
                             {comment.userDisplayName?.slice(0, 2).toUpperCase() || 'U'}
                           </AvatarFallback>
