@@ -66,3 +66,15 @@ export function useBookingMutations() {
 
   return { accept, reject }
 }
+
+export function useAddBookingRequest() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: any) => rentalService.addBookingRequest(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookingRequests'] })
+      queryClient.invalidateQueries({ queryKey: ['renterDashboard'] })
+    },
+  })
+}

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router'
 import { Navigation } from './components/Navigation'
 import { Footer } from './components/Footer'
+import { ScrollToTop } from './components/ScrollToTop'
 import { ProtectedRoute, GuestRoute } from './components/ProtectedRoute'
 import { LandingPage } from './pages/LandingPage'
 import { SearchPage } from './pages/search-page/SearchPage'
@@ -16,12 +17,13 @@ import { ContactPage } from './pages/ContactPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { NotificationsPage } from './pages/NotificationsPage'
 import { LoginPage } from './pages/LoginPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { ProfileSettingsPage } from './pages/ProfileSettingsPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ChatbotPage } from './pages/ChatbotPage'
-import { AdminDashboardPage } from './pages/AdminDashboardPage'
+import { AdminDashboardPage } from './pages/admin-dashboard/AdminDashboardPage'
 import { OTPVerificationPage } from './pages/OTPVerificationPage'
 import { TwoFactorPage } from './pages/TwoFactorPage'
 import { ConfirmEmailPage } from './pages/ConfirmEmailPage'
@@ -30,14 +32,16 @@ import { ChatWithRentalRequestPage } from './pages/ChatWithRentalRequestPage'
 import { ViewUserProfilePage } from './pages/ViewUserProfilePage'
 import { ViewOwnerProfilePage } from './pages/ViewOwnerProfilePage'
 import { ContractPage } from './pages/ContractPage'
-import { EditPropertyPage } from './pages/EditPropertyPage'
+import { EditPropertyPage } from './pages/edit-property/EditPropertyPage'
 import { PropertyByOwnerPage } from './pages/PropertyByOwnerPage'
 import { ModalTestPage } from './pages/ModalTestPage'
+import { SavedPropertiesPage } from './pages/SavedPropertiesPage'
 import { Toaster } from './components/ui/sonner'
 
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen bg-[#F2F4F6]">
         <Navigation />
         <Routes>
@@ -181,6 +185,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ProfileSettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/saved"
+            element={
+              <ProtectedRoute>
+                <SavedPropertiesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             }
           />

@@ -73,12 +73,14 @@ export function AddPropertyPage() {
   const handleNext = () => {
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
   const handlePrev = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -106,8 +108,6 @@ export function AddPropertyPage() {
         if (t === 'house') return 'House'
         if (t === 'room') return 'Room'
         if (t === 'bed') return 'SharedRoom'
-        if (t === 'studio') return 'Studio'
-        if (t === 'villa') return 'Villa'
         return 'Apartment'
       }
 

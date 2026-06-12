@@ -4,8 +4,6 @@ export type PropertyType =
   | 'Apartment'
   | 'House'
   | 'Room'
-  | 'Villa'
-  | 'Studio'
   | 'SharedRoom'
 
 export type RentalUnit = 'Daily' | 'Monthly' | 'Yearly'
@@ -90,6 +88,12 @@ export interface Property {
   ownerId?: string
   ownerName?: string
   ownerAvatarUrl?: string
+  ownerBio?: string
+  hostId?: string
+  hostName?: string
+  hostProfileImage?: string
+  hostBio?: string
+  propertiesCount?: number
   featured?: boolean
   isShared?: boolean
   rentalUnit?: RentalUnit
@@ -97,6 +101,14 @@ export interface Property {
   longitude?: number
   createdAt?: string
   updatedAt?: string
+  isSaved?: boolean
+  maxOccupants?: number
+  currentOccupantsCount?: number
+  tenants?: Array<{
+    id: string
+    fullName: string
+    profileImage?: string
+  }>
 }
 
 /** Lightweight shape returned by GET /api/Property/search */

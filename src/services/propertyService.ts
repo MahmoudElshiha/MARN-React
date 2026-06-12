@@ -81,8 +81,8 @@ export const propertyService = {
         ApiResponse<SearchPaginatedResponse<SearchProperty>>
       >(`/api/Property/search${buildSearchQuery(filters)}`)
       .then((res) => {
-        if (res.data?.data?.items) {
-          res.data.data.items = res.data.data.items.map((p) => ({
+        if (res.data?.items) {
+          res.data.items = res.data.items.map((p: any) => ({
             ...p,
             imagePath: getImageUrl(p.imagePath),
           }))
@@ -99,9 +99,18 @@ export const propertyService = {
   updateProperty: (id: string, data: FormData) =>
     apiClient.put<ApiResponse<Property>>(`/api/Property/${id}`, data),
 
+  getPropertyForEdit: (id: string) =>
+    apiClient.get<ApiResponse<any>>(`/api/Property/edit/${id}`),
+
+  submitPropertyEdit: (id: string, data: FormData) =>
+    apiClient.put<ApiResponse<any>>(`/api/Property/edit/${id}`, data),
+
   deleteProperty: (id: string) =>
     apiClient.delete<ApiResponse<void>>(`/api/Property/${id}`),
 
   becomeOwner: () =>
     apiClient.post<ApiResponse<string>>('/api/Property/become-owner'),
+
+  toggleSaveProperty: (id: string) =>
+    apiClient.post<ApiResponse<void>>(`/api/Property/save/${id}`),
 }

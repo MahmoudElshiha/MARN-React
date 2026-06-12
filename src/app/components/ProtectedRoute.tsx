@@ -26,15 +26,20 @@ export function ProtectedRoute({
     return <Navigate to={redirectTo} state={{ from: location }} replace />
   }
 
-  if (roles && user && !roles.includes(user.role)) {
-    // Redirect to their own dashboard if they hit a page for another role
-    const fallback =
-      user.role === 'admin'
-        ? '/admin-dashboard'
-        : user.role === 'owner'
-          ? '/owner-dashboard'
-          : '/tenant-dashboard'
-    return <Navigate to={fallback} replace />
+  if (roles && user) {
+    const userRoles = user.roles ?? [user.role]
+    const hasAllowedRole = roles.some(r => userRoles.includes(r))
+    
+    if (!hasAllowedRole) {
+      // Redirect to their own dashboard if they hit a page for another role
+      const fallback =
+        userRoles.includes('admin')
+          ? '/admin-dashboard'
+          : userRoles.includes('owner')
+            ? '/owner-dashboard'
+            : '/tenant-dashboard'
+      return <Navigate to={fallback} replace />
+    }
   }
 
   return <>{children}</>
@@ -48,10 +53,11 @@ export function GuestRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuth()
 
   if (isAuthenticated) {
+    const userRoles = user?.roles ?? (user?.role ? [user.role] : [])
     const dashboard =
-      user?.role === 'admin'
+      userRoles.includes('admin')
         ? '/admin-dashboard'
-        : user?.role === 'owner'
+        : userRoles.includes('owner')
           ? '/owner-dashboard'
           : '/tenant-dashboard'
     return <Navigate to={dashboard} replace />
