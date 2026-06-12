@@ -95,54 +95,50 @@ export function VerificationsTab() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto overflow-y-auto max-h-[600px] border-b border-[#3A6EA5]/20">
-            <table className="w-full relative">
-              <thead className="sticky top-0 bg-[#F2F4F6] z-10">
-                <tr className="border-b border-[#3A6EA5]/20">
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Full Name
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Email
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    National ID
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Submitted
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Status
-                  </th>
-                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {verificationsLoading ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <tr
-                      key={i}
-                      className="border-b border-[#3A6EA5]/10"
-                    >
-                      {Array.from({ length: 6 }).map((_, j) => (
-                        <td key={j} className="py-4 px-4">
-                          <Skeleton className="h-5 w-full rounded" />
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                ) : pendingVerifications.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="py-10 text-center text-[#4a5565]"
-                    >
-                      No pending verifications.
-                    </td>
+          {!verificationsLoading && pendingVerifications.length === 0 ? (
+            <div className="py-10 text-center text-[#4a5565] border-b border-[#3A6EA5]/20">
+              No pending verifications.
+            </div>
+          ) : (
+            <div className="overflow-x-auto overflow-y-scroll max-h-[600px] border-b border-[#3A6EA5]/20">
+              <table className="w-full relative">
+                <thead className="sticky top-0 bg-[#F2F4F6] z-10">
+                  <tr className="border-b border-[#3A6EA5]/20">
+                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                      Full Name
+                    </th>
+                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                      Email
+                    </th>
+                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                      National ID
+                    </th>
+                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                      Submitted
+                    </th>
+                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                      Status
+                    </th>
+                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
+                      Actions
+                    </th>
                   </tr>
-                ) : (
+                </thead>
+                <tbody>
+                  {verificationsLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <tr
+                        key={i}
+                        className="border-b border-[#3A6EA5]/10"
+                      >
+                        {Array.from({ length: 6 }).map((_, j) => (
+                          <td key={j} className="py-4 px-4">
+                            <Skeleton className="h-5 w-full rounded" />
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : (
                   pendingVerifications.map((item) => (
                     <tr
                       key={item.userId}
@@ -150,14 +146,6 @@ export function VerificationsTab() {
                     >
                       <td className="py-4 px-4 text-[#1a1a1a] font-medium">
                         <div>{item.fullName}</div>
-                        {item.arabicFullName && (
-                          <div
-                            className="text-xs text-[#4a5565] mt-0.5"
-                            dir="rtl"
-                          >
-                            {item.arabicFullName}
-                          </div>
-                        )}
                       </td>
                       <td className="py-4 px-4 text-[#4a5565]">
                         {item.email}
@@ -195,7 +183,8 @@ export function VerificationsTab() {
                               <TooltipTrigger asChild>
                                 <Button
                                   size="icon"
-                                  className="bg-green-600 hover:bg-green-700 text-white rounded-xl w-8 h-8 shrink-0"
+                                  variant="outline"
+                                  className="border-[#00A650] text-[#00A650] hover:bg-[#00A650] hover:text-white rounded-xl w-8 h-8 shrink-0"
                                   disabled={approveVerification.isPending}
                                   onClick={() => handleApprove(item.userId)}
                                 >
@@ -209,7 +198,7 @@ export function VerificationsTab() {
                                 <Button
                                   size="icon"
                                   variant="outline"
-                                  className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl w-8 h-8 shrink-0"
+                                  className="border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl w-8 h-8 shrink-0"
                                   disabled={rejectVerification.isPending}
                                   onClick={() => handleReject(item.userId)}
                                 >
@@ -227,6 +216,7 @@ export function VerificationsTab() {
               </tbody>
             </table>
           </div>
+          )}
           {totalCount > pendingVerifications.length && (
             <div className="mt-4 flex justify-center items-center min-h-[40px]">
               {verificationsFetching ? (
@@ -271,11 +261,6 @@ export function VerificationsTab() {
                     <h3 className="text-2xl font-bold text-[#1a1a1a]">
                       {verificationDetail?.fullName}
                     </h3>
-                    {verificationDetail?.arabicFullName && (
-                      <p className="text-[#4a5565] mt-0.5" dir="rtl">
-                        {verificationDetail.arabicFullName}
-                      </p>
-                    )}
                     <p className="text-sm text-[#4a5565] mt-1">
                       {verificationDetail?.email}
                     </p>
@@ -366,11 +351,12 @@ export function VerificationsTab() {
                         {label}
                       </p>
                       {src ? (
-                        <img
-                          src={src}
-                          alt={label}
-                          className="w-full rounded-2xl border border-[#3A6EA5]/20 object-cover max-h-48"
-                        />
+                          <img
+                            src={src}
+                            alt={label}
+                            className="w-full rounded-2xl border border-[#3A6EA5]/20 object-cover max-h-48 cursor-pointer hover:opacity-90 transition-opacity"
+                            onClick={() => window.open(src, '_blank')}
+                          />
                       ) : (
                         <div className="w-full rounded-2xl border border-dashed border-[#3A6EA5]/30 bg-[#F2F4F6] flex items-center justify-center h-32 text-[#4a5565] text-sm">
                           No image
@@ -383,7 +369,7 @@ export function VerificationsTab() {
             {/* Actions */}
             <div className="flex gap-3">
               <Button
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
+                className="flex-1 bg-[#00A650] hover:bg-[#008A42] text-white rounded-xl h-12 text-base font-semibold"
                 disabled={
                   approveVerification.isPending || verificationDetailLoading
                 }
@@ -392,12 +378,12 @@ export function VerificationsTab() {
                   setSelectedVerificationId(null)
                 }}
               >
-                <CheckCircle className="w-4 h-4 mr-2" />
+                <CheckCircle className="w-5 h-5 mr-2" />
                 Approve
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
+                className="flex-1 border-[#FF4D4F] text-[#FF4D4F] hover:bg-red-50 hover:text-[#FF4D4F] rounded-xl h-12 text-base font-semibold"
                 disabled={
                   rejectVerification.isPending || verificationDetailLoading
                 }
@@ -406,7 +392,7 @@ export function VerificationsTab() {
                   setSelectedVerificationId(null)
                 }}
               >
-                <XCircle className="w-4 h-4 mr-2" />
+                <XCircle className="w-5 h-5 mr-2" />
                 Reject
               </Button>
             </div>
@@ -448,7 +434,7 @@ export function VerificationsTab() {
                 Cancel
               </Button>
               <Button
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl"
                 disabled={rejectVerification.isPending || !rejectReason.trim()}
                 onClick={confirmReject}
               >

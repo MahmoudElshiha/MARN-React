@@ -250,10 +250,10 @@ export function Navigation() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50"
+              className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 flex flex-col"
             >
               {/* Drawer Header */}
-              <div className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] p-6">
+              <div className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] p-6 shrink-0">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -272,7 +272,7 @@ export function Navigation() {
               </div>
 
               {/* Menu Items */}
-              <nav className="p-4">
+              <nav className="p-4 flex-1 overflow-y-auto">
                 <div className="space-y-2">
                   {menuItems.map((item, index) => {
                     const Icon = item.icon

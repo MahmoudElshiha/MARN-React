@@ -11,7 +11,7 @@ export function ScrollToTop() {
     if (navType !== 'POP') {
       window.scrollTo(0, 0)
     }
-  }, [pathname, navType])
+  }, [pathname])
 
   return null
 }
