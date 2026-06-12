@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Calendar, Download, User } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 
 interface RentalUser {
   id: string
@@ -24,6 +25,8 @@ export function RentalUsersModal({
   users,
   propertyName,
 }: RentalUsersModalProps) {
+  const { t } = useTranslation('dashboard')
+
   const handleDownloadContract = (user: RentalUser) => {
     // Simulate contract download
     console.log(
@@ -45,10 +48,10 @@ export function RentalUsersModal({
       <DialogContent className="bg-white rounded-3xl max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl text-[#1a1a1a]">
-            Current Tenants {propertyName && `- ${propertyName}`}
+            {t('owner.rentalUsersModal.title')} {propertyName && `- ${propertyName}`}
           </DialogTitle>
           <p className="text-sm text-[#4a5565] mt-1">
-            {users.length} active {users.length === 1 ? 'tenant' : 'tenants'}
+            {t('owner.rentalUsersModal.activeTenants', { count: users.length })}
           </p>
         </DialogHeader>
 
@@ -85,7 +88,7 @@ export function RentalUsersModal({
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="w-4 h-4 text-[#4a5565]" />
                       <span className="text-sm text-[#4a5565]">
-                        Ends:{' '}
+                        {t('owner.rentalUsersModal.endsLabel')}{' '}
                         <span className="font-medium">
                           {user.rentalEndDate}
                         </span>
@@ -101,10 +104,10 @@ export function RentalUsersModal({
                       }`}
                     >
                       {daysRemaining > 0
-                        ? `${daysRemaining} days remaining`
+                        ? t('owner.rentalUsersModal.daysRemaining', { count: daysRemaining })
                         : daysRemaining === 0
-                          ? 'Ends today'
-                          : `Expired ${Math.abs(daysRemaining)} days ago`}
+                          ? t('owner.rentalUsersModal.endsToday')
+                          : t('owner.rentalUsersModal.expiredDaysAgo', { count: Math.abs(daysRemaining) })}
                     </div>
                   </div>
 
@@ -115,7 +118,7 @@ export function RentalUsersModal({
                     size="sm"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Contract
+                    {t('owner.rentalUsersModal.contractButton')}
                   </Button>
                 </div>
               </motion.div>
@@ -127,7 +130,7 @@ export function RentalUsersModal({
               <div className="w-20 h-20 rounded-full bg-[#F2F4F6] flex items-center justify-center mx-auto mb-4">
                 <User className="w-10 h-10 text-[#4a5565]" />
               </div>
-              <p className="text-[#4a5565]">No active tenants</p>
+              <p className="text-[#4a5565]">{t('owner.rentalUsersModal.noActiveTenants')}</p>
             </div>
           )}
         </div>

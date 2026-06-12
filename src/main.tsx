@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import App from './app/App.tsx'
 import { AuthProvider } from './context/AuthProvider.tsx'
 import './styles/index.css'
+import './i18n/config'
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -8,6 +8,7 @@ import {
   MapPin,
   Users,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
@@ -43,6 +44,7 @@ const RENTAL_REQUEST = {
 }
 
 export function ChatWithRentalRequestPage() {
+  const { t } = useTranslation('messages')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [newMessage, setNewMessage] = useState('')
@@ -86,10 +88,10 @@ export function ChatWithRentalRequestPage() {
           </Button>
           <div>
             <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-              Rental Request Chat
+              {t('chatWithRental.title')}
             </h1>
             <p className="text-[#6B7280]">
-              Review request and communicate with tenant
+              {t('chatWithRental.subtitle')}
             </p>
           </div>
         </div>
@@ -99,7 +101,7 @@ export function ChatWithRentalRequestPage() {
           <div className="lg:col-span-1">
             <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 p-6">
               <h2 className="text-xl font-semibold text-[#1a1a1a] mb-4">
-                Rental Request Details
+                {t('chatWithRental.requestDetails')}
               </h2>
 
               {/* Apartment Info */}
@@ -126,12 +128,12 @@ export function ChatWithRentalRequestPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <Calendar className="w-5 h-5 text-[#3A6EA5]" />
                   <h4 className="font-semibold text-[#1a1a1a]">
-                    Requested Period
+                    {t('chatWithRental.requestedPeriod')}
                   </h4>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-[#6B7280] mb-1">From</p>
+                    <p className="text-[#6B7280] mb-1">{t('chatWithRental.from')}</p>
                     <p className="font-medium text-[#1a1a1a]">
                       {new Date(
                         RENTAL_REQUEST.requestedPeriod.from,
@@ -143,7 +145,7 @@ export function ChatWithRentalRequestPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-[#6B7280] mb-1">To</p>
+                    <p className="text-[#6B7280] mb-1">{t('chatWithRental.to')}</p>
                     <p className="font-medium text-[#1a1a1a]">
                       {new Date(
                         RENTAL_REQUEST.requestedPeriod.to,
@@ -160,22 +162,22 @@ export function ChatWithRentalRequestPage() {
               {/* Booking Details */}
               <div className="mb-6 p-4 bg-white rounded-2xl">
                 <h4 className="font-semibold text-[#1a1a1a] mb-3">
-                  Booking Details
+                  {t('chatWithRental.bookingDetails')}
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[#6B7280]">Number of People:</span>
+                    <span className="text-[#6B7280]">{t('chatWithRental.numberOfPeople')}</span>
                     <span className="font-medium text-[#1a1a1a] flex items-center gap-1">
                       <Users className="w-4 h-4" />
                       {RENTAL_REQUEST.numberOfPeople}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#6B7280]">Duration:</span>
+                    <span className="text-[#6B7280]">{t('chatWithRental.duration')}</span>
                     <span className="font-medium text-[#1a1a1a]">6 months</span>
                   </div>
                   <div className="border-t border-[#3A6EA5]/20 pt-2 mt-2 flex justify-between">
-                    <span className="font-semibold text-[#1a1a1a]">Total:</span>
+                    <span className="font-semibold text-[#1a1a1a]">{t('chatWithRental.total')}</span>
                     <span className="font-bold text-[#3A6EA5]">
                       EGP {RENTAL_REQUEST.totalPrice.toLocaleString()}
                     </span>
@@ -186,13 +188,13 @@ export function ChatWithRentalRequestPage() {
               {/* Action Buttons */}
               <div className="space-y-3">
                 <Button className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl">
-                  Start Contract
+                  {t('chatWithRental.startContract')}
                 </Button>
                 <Button
                   variant="outline"
                   className="w-full rounded-xl border-red-400 text-red-600 hover:bg-red-50"
                 >
-                  Reject Request
+                  {t('chatWithRental.rejectRequest')}
                 </Button>
               </div>
             </Card>
@@ -215,7 +217,7 @@ export function ChatWithRentalRequestPage() {
                       <h3 className="font-semibold text-[#1a1a1a]">
                         {RENTAL_REQUEST.tenant.name}
                       </h3>
-                      <p className="text-sm text-[#6B7280]">Potential Tenant</p>
+                      <p className="text-sm text-[#6B7280]">{t('chatWithRental.potentialTenant')}</p>
                     </div>
                   </div>
                   <Button
@@ -241,7 +243,7 @@ export function ChatWithRentalRequestPage() {
                   ))
                 ) : messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-[#6B7280]">
-                    No messages yet. Start the conversation!
+                    {t('chatWithRental.noMessagesYet')}
                   </div>
                 ) : (
                   messages.map((message) => (
@@ -282,7 +284,7 @@ export function ChatWithRentalRequestPage() {
                                 <DropdownMenuItem
                                   onClick={() => handleEditMessage(message.id)}
                                 >
-                                  Edit
+                                  {t('chatWithRental.edit')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() =>
@@ -290,7 +292,7 @@ export function ChatWithRentalRequestPage() {
                                   }
                                   className="text-red-600"
                                 >
-                                  Delete
+                                  {t('chatWithRental.delete')}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -332,7 +334,7 @@ export function ChatWithRentalRequestPage() {
                           handleSendMessage()
                         }
                       }}
-                      placeholder="Type a message..."
+                      placeholder={t('typeMessage')}
                       className="rounded-2xl bg-[#E5EBF0] border-[#3A6EA5]/20 pr-12"
                       disabled={sendMessage.isPending}
                     />

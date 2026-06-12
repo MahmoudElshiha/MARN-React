@@ -1,5 +1,6 @@
 import { useState, useEffect, startTransition } from 'react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import {
   Users,
   Bell,
@@ -33,13 +34,15 @@ import { HttpError } from '@/services/httpErrors'
 function ImportanceRating({
   value,
   onChange,
+  label,
 }: {
   value: number
   onChange: (v: number) => void
+  label: string
 }) {
   return (
     <div className="flex items-center gap-1.5 mt-2.5">
-      <span className="text-xs text-[#4a5565] shrink-0 mr-1">Importance:</span>
+      <span className="text-xs text-[#4a5565] shrink-0 mr-1">{label}</span>
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
@@ -91,6 +94,7 @@ type RoommateSettings = typeof DEFAULT_SETTINGS
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function RoommateTab() {
+  const { t } = useTranslation('profile')
   const { data: profileResponse, isLoading, updateRoommate } = useProfile()
   const apiProfile = profileResponse?.data
 
@@ -209,13 +213,13 @@ export function RoommateTab() {
       {
         onSuccess: () => {
           setHasUnsavedChanges(false)
-          toast.success('Preferences saved successfully!')
+          toast.success(t('roommateTab.toasts.saved'))
         },
         onError: (err) => {
           if (err instanceof HttpError) {
-            toast.error(err.message ?? 'Failed to save preferences.')
+            toast.error(err.message ?? t('roommateTab.toasts.failed'))
           } else {
-            toast.error('Failed to save preferences.')
+            toast.error(t('roommateTab.toasts.failed'))
           }
         },
       },
@@ -241,6 +245,8 @@ export function RoommateTab() {
     )
   }
 
+  const importanceLabel = t('roommateTab.fields.importance')
+
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
@@ -249,11 +255,10 @@ export function RoommateTab() {
           <Users className="w-6 h-6 text-[#3A6EA5]" />
           <div>
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Roommate Preferences & Lifestyle
+              {t('roommateTab.title')}
             </CardTitle>
             <p className="text-sm text-[#4a5565] mt-1">
-              Help potential roommates understand your lifestyle and
-              compatibility.
+              {t('roommateTab.subtitle')}
             </p>
           </div>
         </div>
@@ -265,14 +270,14 @@ export function RoommateTab() {
           <div className="flex items-center gap-2 mb-6">
             <MapPin className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              Location & Search
+              {t('roommateTab.sections.locationSearch')}
             </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <EnumSelect
                 id="governorate"
-                label="Governorate"
+                label={t('roommateTab.fields.governorate')}
                 endpoint="governorates"
                 value={settings.governorate}
                 onChange={(v) => patch({ governorate: v })}
@@ -282,11 +287,11 @@ export function RoommateTab() {
             <div>
               <EnumSelect
                 id="search-status"
-                label="Search Status"
+                label={t('roommateTab.fields.searchStatus')}
                 endpoint="roommate-search-statuses"
                 value={settings.searchStatus}
                 onChange={(v) => patch({ searchStatus: v })}
-                placeholder="Are you actively searching?"
+                placeholder={t('roommateTab.fields.searchStatusPlaceholder')}
               />
             </div>
           </div>
@@ -299,16 +304,18 @@ export function RoommateTab() {
           <div className="flex items-center gap-2 mb-6">
             <Coffee className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              Lifestyle & Preferences
+              {t('roommateTab.sections.lifestylePreferences')}
             </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {/* Smoking */}
             <div>
-              <Label className="text-[#1a1a1a] mb-3 block">Smoking</Label>
+              <Label className="text-[#1a1a1a] mb-3 block">
+                {t('roommateTab.fields.smoking')}
+              </Label>
               <div className="flex items-center justify-between p-4 bg-white rounded-2xl">
                 <span className="text-[#1a1a1a]">
-                  {settings.smoking ? 'Yes' : 'No'}
+                  {settings.smoking ? t('roommateTab.fields.yes') : t('roommateTab.fields.no')}
                 </span>
                 <Switch
                   checked={settings.smoking}
@@ -319,15 +326,18 @@ export function RoommateTab() {
               <ImportanceRating
                 value={settings.smokingImportance}
                 onChange={(v) => patch({ smokingImportance: v })}
+                label={importanceLabel}
               />
             </div>
 
             {/* Pets */}
             <div>
-              <Label className="text-[#1a1a1a] mb-3 block">Pets</Label>
+              <Label className="text-[#1a1a1a] mb-3 block">
+                {t('roommateTab.fields.pets')}
+              </Label>
               <div className="flex items-center justify-between p-4 bg-white rounded-2xl">
                 <span className="text-[#1a1a1a]">
-                  {settings.pets ? 'Yes' : 'No'}
+                  {settings.pets ? t('roommateTab.fields.yes') : t('roommateTab.fields.no')}
                 </span>
                 <Switch
                   checked={settings.pets}
@@ -338,6 +348,7 @@ export function RoommateTab() {
               <ImportanceRating
                 value={settings.petsImportance}
                 onChange={(v) => patch({ petsImportance: v })}
+                label={importanceLabel}
               />
             </div>
 
@@ -345,13 +356,13 @@ export function RoommateTab() {
             {settings.pets && (
               <div>
                 <Label htmlFor="pet-type" className="text-[#1a1a1a] mb-2 block">
-                  Type of Pet
+                  {t('roommateTab.fields.petType')}
                 </Label>
                 <Input
                   id="pet-type"
                   value={settings.petType}
                   onChange={(e) => patch({ petType: e.target.value })}
-                  placeholder="e.g., Dog, Cat, Bird"
+                  placeholder={t('roommateTab.fields.petTypePlaceholder')}
                   className="bg-white rounded-xl border-[#3A6EA5]/20"
                 />
               </div>
@@ -361,7 +372,7 @@ export function RoommateTab() {
             <div>
               <EnumSelect
                 id="sleep-schedule"
-                label="Sleep Schedule"
+                label={t('roommateTab.fields.sleepSchedule')}
                 endpoint="sleep-schedules"
                 value={settings.sleepSchedule}
                 onChange={(v) => patch({ sleepSchedule: v })}
@@ -369,6 +380,7 @@ export function RoommateTab() {
               <ImportanceRating
                 value={settings.sleepImportance}
                 onChange={(v) => patch({ sleepImportance: v })}
+                label={importanceLabel}
               />
             </div>
           </div>
@@ -380,13 +392,15 @@ export function RoommateTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <GraduationCap className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">Education</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">
+              {t('roommateTab.sections.education')}
+            </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <EnumSelect
                 id="education-level"
-                label="Education Level"
+                label={t('roommateTab.fields.educationLevel')}
                 endpoint="education-levels"
                 value={settings.educationLevel}
                 onChange={(v) => patch({ educationLevel: v })}
@@ -394,13 +408,14 @@ export function RoommateTab() {
               <ImportanceRating
                 value={settings.educationImportance}
                 onChange={(v) => patch({ educationImportance: v })}
+                label={importanceLabel}
               />
             </div>
 
             <div>
               <EnumSelect
                 id="field-of-study"
-                label="Field of Study (Optional)"
+                label={t('roommateTab.fields.fieldOfStudy')}
                 endpoint="fields-of-study"
                 value={settings.fieldOfStudy}
                 onChange={(v) => patch({ fieldOfStudy: v })}
@@ -408,6 +423,7 @@ export function RoommateTab() {
               <ImportanceRating
                 value={settings.fieldOfStudyImportance}
                 onChange={(v) => patch({ fieldOfStudyImportance: v })}
+                label={importanceLabel}
               />
             </div>
           </div>
@@ -420,20 +436,22 @@ export function RoommateTab() {
           <div className="flex items-center gap-2 mb-6">
             <Briefcase className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              Social & Work
+              {t('roommateTab.sections.socialWork')}
             </h3>
           </div>
           <div className="space-y-6">
             {/* Noise Tolerance */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <Label className="text-[#1a1a1a]">Noise Tolerance</Label>
+                <Label className="text-[#1a1a1a]">
+                  {t('roommateTab.fields.noiseTolerance')}
+                </Label>
                 <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                   <Volume2 className="w-4 h-4" />
                   <span>
-                    {settings.noiseTolerance[0] <= 2 && 'Low'}
-                    {settings.noiseTolerance[0] === 3 && 'Medium'}
-                    {settings.noiseTolerance[0] >= 4 && 'High'} (
+                    {settings.noiseTolerance[0] <= 2 && t('roommateTab.fields.noiseLow')}
+                    {settings.noiseTolerance[0] === 3 && t('roommateTab.fields.noiseMedium')}
+                    {settings.noiseTolerance[0] >= 4 && t('roommateTab.fields.noiseHigh')} (
                     {settings.noiseTolerance[0]}/5)
                   </span>
                 </div>
@@ -447,13 +465,14 @@ export function RoommateTab() {
                 className="w-full"
               />
               <div className="flex justify-between mt-2 text-xs text-[#4a5565]">
-                <span>Low</span>
-                <span>Medium</span>
-                <span>High</span>
+                <span>{t('roommateTab.fields.noiseLow')}</span>
+                <span>{t('roommateTab.fields.noiseMedium')}</span>
+                <span>{t('roommateTab.fields.noiseHigh')}</span>
               </div>
               <ImportanceRating
                 value={settings.noiseToleranceImportance}
                 onChange={(v) => patch({ noiseToleranceImportance: v })}
+                label={importanceLabel}
               />
             </div>
 
@@ -462,15 +481,16 @@ export function RoommateTab() {
               <div>
                 <EnumSelect
                   id="guests-frequency"
-                  label="Guests Frequency"
+                  label={t('roommateTab.fields.guestsFrequency')}
                   endpoint="guests-frequencies"
                   value={settings.guestsFrequency}
                   onChange={(v) => patch({ guestsFrequency: v })}
-                  placeholder="How often do you have guests?"
+                  placeholder={t('roommateTab.fields.guestsFrequencyPlaceholder')}
                 />
                 <ImportanceRating
                   value={settings.guestsFrequencyImportance}
                   onChange={(v) => patch({ guestsFrequencyImportance: v })}
+                  label={importanceLabel}
                 />
               </div>
 
@@ -478,7 +498,7 @@ export function RoommateTab() {
               <div>
                 <EnumSelect
                   id="work-schedule"
-                  label="Work Schedule"
+                  label={t('roommateTab.fields.workSchedule')}
                   endpoint="work-schedules"
                   value={settings.workSchedule}
                   onChange={(v) => patch({ workSchedule: v })}
@@ -486,6 +506,7 @@ export function RoommateTab() {
                 <ImportanceRating
                   value={settings.workScheduleImportance}
                   onChange={(v) => patch({ workScheduleImportance: v })}
+                  label={importanceLabel}
                 />
               </div>
             </div>
@@ -494,7 +515,7 @@ export function RoommateTab() {
             <div>
               <EnumSelect
                 id="sharing-level"
-                label="Sharing Level"
+                label={t('roommateTab.fields.sharingLevel')}
                 endpoint="sharing-levels"
                 value={settings.sharingLevel}
                 onChange={(v) => patch({ sharingLevel: v })}
@@ -502,6 +523,7 @@ export function RoommateTab() {
               <ImportanceRating
                 value={settings.sharingLevelImportance}
                 onChange={(v) => patch({ sharingLevelImportance: v })}
+                label={importanceLabel}
               />
             </div>
           </div>
@@ -514,15 +536,15 @@ export function RoommateTab() {
           <div className="flex items-center gap-2 mb-6">
             <Wallet className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              Budget Range
+              {t('roommateTab.sections.budgetRange')}
             </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="budget-min" className="text-[#1a1a1a] mb-2 block">
-                Minimum{' '}
+                {t('roommateTab.fields.budgetMin')}{' '}
                 <span className="text-[#4a5565] text-sm font-normal">
-                  (per month)
+                  {t('roommateTab.fields.perMonth')}
                 </span>
               </Label>
               <div className="relative">
@@ -543,9 +565,9 @@ export function RoommateTab() {
 
             <div>
               <Label htmlFor="budget-max" className="text-[#1a1a1a] mb-2 block">
-                Maximum{' '}
+                {t('roommateTab.fields.budgetMax')}{' '}
                 <span className="text-[#4a5565] text-sm font-normal">
-                  (per month)
+                  {t('roommateTab.fields.perMonth')}
                 </span>
               </Label>
               <div className="relative">
@@ -567,6 +589,7 @@ export function RoommateTab() {
           <ImportanceRating
             value={settings.budgetImportance}
             onChange={(v) => patch({ budgetImportance: v })}
+            label={importanceLabel}
           />
         </div>
 
@@ -577,19 +600,19 @@ export function RoommateTab() {
           <div className="flex items-center gap-2 mb-6">
             <Shield className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              Visibility Settings
+              {t('roommateTab.sections.visibilitySettings')}
             </h3>
           </div>
           <div className="bg-white rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="font-medium text-[#1a1a1a] mb-1">
-                  Profile Visibility for Roommates
+                  {t('roommateTab.fields.profileVisibility')}
                 </p>
                 <p className="text-sm text-[#4a5565]">
                   {settings.profileVisible
-                    ? 'Visible to users browsing for roommates.'
-                    : 'Only you can see this information.'}
+                    ? t('roommateTab.fields.profileVisibilityOn')
+                    : t('roommateTab.fields.profileVisibilityOff')}
                 </p>
               </div>
               <Switch
@@ -602,8 +625,7 @@ export function RoommateTab() {
               <div className="mt-4 p-4 bg-[#F2F4F6] rounded-xl flex items-start gap-3">
                 <Shield className="w-5 h-5 text-[#3A6EA5] mt-0.5 shrink-0" />
                 <p className="text-sm text-[#1a1a1a]">
-                  Your roommate preferences are stored but hidden from other
-                  users. Enable visibility to help potential roommates find you.
+                  {t('roommateTab.visibility.hiddenNote')}
                 </p>
               </div>
             )}
@@ -619,7 +641,7 @@ export function RoommateTab() {
           >
             <Bell className="w-5 h-5 text-[#3A6EA5]" />
             <p className="text-sm text-[#1a1a1a]">
-              You have unsaved changes. Don't forget to save your preferences!
+              {t('roommateTab.unsavedBanner')}
             </p>
           </motion.div>
         )}
@@ -632,14 +654,14 @@ export function RoommateTab() {
             onClick={handleCancel}
             disabled={updateRoommate.isPending}
           >
-            Cancel
+            {t('roommateTab.cancel')}
           </Button>
           <Button
             disabled={updateRoommate.isPending}
             className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             onClick={handleSave}
           >
-            {updateRoommate.isPending ? 'Saving…' : 'Save Preferences'}
+            {updateRoommate.isPending ? '…' : t('roommateTab.savePreferences')}
           </Button>
         </div>
       </CardContent>

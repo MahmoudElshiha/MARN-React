@@ -11,11 +11,9 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { PropertyCard } from '../components/PropertyCard'
 import { motion } from 'motion/react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { ImageWithFallback } from '../components/figma/ImageWithFallback'
-import { useProperties } from '@/hooks/useProperties'
-import { getImageUrl } from '@/constants/assets'
-import { Skeleton } from '../components/ui/skeleton'
+import { useTranslation } from 'react-i18next'
 
 const FEATURED_PROPERTIES = [
   {
@@ -34,12 +32,12 @@ const FEATURED_PROPERTIES = [
   {
     id: '2',
     image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800',
-    title: 'Cozy Apartment in Zamalek',
+    title: 'Cozy Studio in Zamalek',
     location: 'Cairo, Egypt',
     price: 8500,
     rating: 4.8,
     reviews: 89,
-    type: 'Apartment',
+    type: 'Studio',
     beds: 1,
     baths: 1,
     guests: 2,
@@ -47,7 +45,7 @@ const FEATURED_PROPERTIES = [
   {
     id: '3',
     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
-    title: 'Luxury House in New Cairo',
+    title: 'Luxury Villa in New Cairo',
     location: 'Cairo, Egypt',
     price: 35000,
     rating: 5.0,
@@ -72,64 +70,56 @@ const FEATURED_PROPERTIES = [
   },
 ]
 
-const BENEFITS = [
-  {
-    icon: Shield,
-    title: 'Secure Payments',
-    description:
-      'All transactions are encrypted and protected with industry-leading security.',
-  },
-  {
-    icon: CheckCircle,
-    title: 'Verified Listings',
-    description:
-      'Every property is verified and inspected to ensure quality and authenticity.',
-  },
-  {
-    icon: Users,
-    title: 'Roommate Matching',
-    description:
-      'Find compatible roommates with our AI-powered matching algorithm.',
-  },
-]
-
 const TESTIMONIALS = [
   {
-    name: 'Fatima Hassan',
-    role: 'Tenant',
-    image: 'https://images.unsplash.com/photo-1589571894960-20bbe2828d0a?w=200&fit=crop',
+    name: 'Sarah Johnson',
+    roleKey: 'tenant' as const,
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
     rating: 5,
     text: 'MARN made finding my dream apartment so easy! The process was seamless and the support team was incredibly helpful.',
   },
   {
-    name: 'Ahmed Youssef',
-    role: 'Property Owner',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&fit=crop',
+    name: 'Michael Chen',
+    roleKey: 'propertyOwner' as const,
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
     rating: 5,
     text: 'As a landlord, MARN has been a game-changer. I get quality tenants and the platform handles everything smoothly.',
   },
   {
-    name: 'Laila Mahmoud',
-    role: 'Roommate Seeker',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&fit=crop',
+    name: 'Emily Rodriguez',
+    roleKey: 'roommateSeeker' as const,
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
     rating: 5,
     text: 'The roommate matching feature is brilliant! I found the perfect roommate who shares my lifestyle and interests.',
   },
 ]
 
 export function LandingPage() {
-  const navigate = useNavigate()
-  const { data, isLoading } = useProperties({ pageSize: 8, sortBy: 'Rating' })
-  const rawProperties = data?.data?.items ?? []
-  
-  // Deduplicate properties (fix for backend join bug returning duplicates for saved properties)
-  const propertiesMap = new Map()
-  rawProperties.forEach(p => {
-    if (!propertiesMap.has(p.id) || p.isSaved) {
-      propertiesMap.set(p.id, p)
-    }
-  })
-  const properties = Array.from(propertiesMap.values()).slice(0, 4)
+  const { t } = useTranslation('landing')
+
+  const BENEFITS = [
+    {
+      icon: Shield,
+      titleKey: 'benefits.securePayments.title',
+      descKey: 'benefits.securePayments.description',
+    },
+    {
+      icon: CheckCircle,
+      titleKey: 'benefits.verifiedListings.title',
+      descKey: 'benefits.verifiedListings.description',
+    },
+    {
+      icon: Users,
+      titleKey: 'benefits.roommateMatching.title',
+      descKey: 'benefits.roommateMatching.description',
+    },
+  ]
+
+  const STATS = [
+    { labelKey: 'hero.stats.activeListings', value: '10,000+' },
+    { labelKey: 'hero.stats.happyTenants', value: '50,000+' },
+    { labelKey: 'hero.stats.citiesCovered', value: '100+' },
+  ]
 
   return (
     <div className="min-h-screen">
@@ -143,69 +133,50 @@ export function LandingPage() {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-6xl font-bold text-[#1a1a1a] mb-6">
-              Find Your Perfect
+              {t('hero.title')}
               <span className="block bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">
-                Home & Roommate
+                {t('hero.titleHighlight')}
               </span>
             </h1>
             <p className="text-xl text-[#4a5565] mb-12 max-w-2xl mx-auto">
-              Discover verified rental properties and connect with compatible
-              roommates in your area. Your journey to comfortable living starts
-              here.
+              {t('hero.subtitle')}
             </p>
 
             {/* Search Bar */}
             <div className="bg-white rounded-3xl shadow-2xl shadow-[#3A6EA5]/20 p-3 max-w-3xl mx-auto border border-[#3A6EA5]/10">
-              <form 
-                className="flex flex-col md:flex-row gap-3"
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  const formData = new FormData(e.currentTarget)
-                  const q = formData.get('q')
-                  if (q) {
-                    navigate(`/search?q=${encodeURIComponent(q.toString())}`)
-                  } else {
-                    navigate('/search')
-                  }
-                }}
-              >
+              <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1 relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
                   <Input
-                    name="q"
-                    placeholder="Enter location..."
+                    placeholder={t('hero.locationPlaceholder')}
                     className="pl-12 pr-4 py-6 bg-[#f8f9fb] rounded-2xl border-none focus:bg-white"
                   />
                 </div>
                 <Button
-                  type="submit"
                   size="lg"
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl px-8 py-6 shadow-lg shadow-[#3A6EA5]/30"
+                  asChild
                 >
-                  <Search className="w-5 h-5 mr-2" />
-                  Search Properties
+                  <Link to="/search">
+                    <Search className="w-5 h-5 mr-2" />
+                    {t('hero.searchButton')}
+                  </Link>
                 </Button>
-              </form>
+              </div>
             </div>
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-              {[
-                { label: 'Active Listings', value: '10,000+' },
-                { label: 'Happy Tenants', value: '50,000+' },
-                { label: 'Cities Covered', value: '100+' },
-              ].map((stat, index) => (
+              {STATS.map((stat, index) => (
                 <motion.div
-                  key={stat.label}
+                  key={stat.labelKey}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
                   className="text-center"
                 >
-                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">
-                    {stat.value}
-                  </div>
-                  <div className="text-[#4a5565]">{stat.label}</div>
+                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">{stat.value}</div>
+                  <div className="text-[#4a5565]">{t(stat.labelKey)}</div>
                 </motion.div>
               ))}
             </div>
@@ -216,66 +187,22 @@ export function LandingPage() {
       {/* Featured Properties */}
       <section className="max-w-[1440px] mx-auto px-8 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
-            Featured Properties
-          </h2>
-          <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
-            Handpicked properties that offer the best value and comfort
-          </p>
+          <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">{t('featured.title')}</h2>
+          <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">{t('featured.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {isLoading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-lg shadow-black/10 border border-[#3A6EA5]/10">
-                <Skeleton className="aspect-[4/3] w-full" />
-                <div className="p-5 space-y-3">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-6 w-1/3" />
-                </div>
-              </div>
-            ))
-          ) : properties.length > 0 ? (
-            properties.map((property, index) => (
-              <motion.div
-                key={property.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <PropertyCard
-                  id={String(property.id)}
-                  image={getImageUrl(property.imagePath)}
-                  title={property.title}
-                  location={property.address}
-                  price={property.price}
-                  rating={property.averageRating}
-                  reviews={property.ratings}
-                  type={property.type}
-                  beds={property.bedrooms}
-                  baths={property.bathrooms}
-                  guests={property.maxOccupants}
-                  isSaved={property.isSaved}
-                />
-              </motion.div>
-            ))
-          ) : (
-            FEATURED_PROPERTIES.map((property, index) => (
-              <motion.div
-                key={property.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <div className="pointer-events-none">
-                  <PropertyCard {...property} />
-                </div>
-              </motion.div>
-            ))
-          )}
+          {FEATURED_PROPERTIES.map((property, index) => (
+            <motion.div
+              key={property.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <PropertyCard {...property} />
+            </motion.div>
+          ))}
         </div>
 
         <div className="text-center">
@@ -286,7 +213,7 @@ export function LandingPage() {
             asChild
           >
             <Link to="/search">
-              View All Properties
+              {t('featured.viewAll')}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
@@ -297,12 +224,8 @@ export function LandingPage() {
       <section className="bg-[#f5f7fa] py-20">
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
-              Why Choose MARN?
-            </h2>
-            <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
-              We provide everything you need for a seamless rental experience
-            </p>
+            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">{t('benefits.title')}</h2>
+            <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">{t('benefits.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -310,7 +233,7 @@ export function LandingPage() {
               const Icon = benefit.icon
               return (
                 <motion.div
-                  key={benefit.title}
+                  key={benefit.titleKey}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -320,10 +243,8 @@ export function LandingPage() {
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center mb-6">
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-[#1a1a1a] mb-3">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-[#4a5565]">{benefit.description}</p>
+                  <h3 className="text-2xl font-semibold text-[#1a1a1a] mb-3">{t(benefit.titleKey)}</h3>
+                  <p className="text-[#4a5565]">{t(benefit.descKey)}</p>
                 </motion.div>
               )
             })}
@@ -334,12 +255,8 @@ export function LandingPage() {
       {/* Testimonials */}
       <section className="max-w-[1440px] mx-auto px-8 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
-            What Our Users Say
-          </h2>
-          <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
-            Join thousands of satisfied users who found their perfect home
-          </p>
+          <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">{t('testimonials.title')}</h2>
+          <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">{t('testimonials.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -354,15 +271,10 @@ export function LandingPage() {
             >
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-5 h-5 fill-[#3A6EA5] text-[#3A6EA5]"
-                  />
+                  <Star key={i} className="w-5 h-5 fill-[#3A6EA5] text-[#3A6EA5]" />
                 ))}
               </div>
-              <p className="text-[#364153] mb-6 leading-relaxed">
-                "{testimonial.text}"
-              </p>
+              <p className="text-[#364153] mb-6 leading-relaxed">"{testimonial.text}"</p>
               <div className="flex items-center gap-3">
                 <ImageWithFallback
                   src={testimonial.image}
@@ -370,11 +282,9 @@ export function LandingPage() {
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div>
-                  <div className="font-semibold text-[#1a1a1a]">
-                    {testimonial.name}
-                  </div>
+                  <div className="font-semibold text-[#1a1a1a]">{testimonial.name}</div>
                   <div className="text-sm text-[#3A6EA5]">
-                    {testimonial.role}
+                    {t(`testimonials.roles.${testimonial.roleKey}`)}
                   </div>
                 </div>
               </div>
@@ -392,26 +302,23 @@ export function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl font-bold text-white mb-6">
-              Ready to Find Your Perfect Home?
-            </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Join thousands of happy tenants and property owners on MARN today
-            </p>
+            <h2 className="text-4xl font-bold text-white mb-6">{t('cta.title')}</h2>
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">{t('cta.subtitle')}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
                 className="bg-white text-[#3A6EA5] hover:bg-white/90 rounded-2xl px-8 py-6 shadow-lg"
                 asChild
               >
-                <Link to="/search">Browse Properties</Link>
+                <Link to="/search">{t('cta.browseProperties')}</Link>
               </Button>
               <Button
                 size="lg"
-                className="bg-[#1e3a5f] text-white hover:bg-[#13253c] shadow-lg shadow-[#1e3a5f]/20 rounded-2xl px-8 py-6"
+                variant="outline"
+                className="border-2 border-white text-white hover:bg-white hover:text-[#3A6EA5] rounded-2xl px-8 py-6"
                 asChild
               >
-                <Link to="/owner-dashboard">List Your Property</Link>
+                <Link to="/owner-dashboard">{t('cta.listYourProperty')}</Link>
               </Button>
             </div>
           </motion.div>

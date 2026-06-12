@@ -10,15 +10,16 @@ import { useLogin } from '@/hooks/useLogin'
 import { GoogleAuthButton } from '../components/figma/GoogleAuthButton'
 import { toast } from 'sonner'
 import type { UserRole } from '@/types/user'
+import { useTranslation } from 'react-i18next'
 
 function roleDestination(role: UserRole): string {
-  //TODO: review business logic for role-based redirection after login
   if (role === 'admin') return '/admin-dashboard'
   if (role === 'owner') return '/owner-dashboard'
   return '/tenant-dashboard'
 }
 
 export function LoginPage() {
+  const { t } = useTranslation('auth')
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -27,7 +28,6 @@ export function LoginPage() {
   })
 
   const navigate = useNavigate()
-
   const login = useLogin({ remember: formData.remember })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -37,7 +37,6 @@ export function LoginPage() {
       {
         onSuccess: (result) => {
           if (result.requiresTwoFactor) {
-            // Redirect to 2FA verification; pass context via router state
             navigate('/2fa-verification', {
               state: {
                 email: formData.email,
@@ -51,14 +50,19 @@ export function LoginPage() {
         },
         onError: (err) => {
           const msg =
-            err instanceof Error
-              ? err.message
-              : 'Login failed. Please try again.'
+            err instanceof Error ? err.message : t('login.failed')
           toast.error(msg)
         },
       },
     )
   }
+
+  const features = [
+    t('login.features.manageListings'),
+    t('login.features.trackBookings'),
+    t('login.features.messageTenants'),
+    t('login.features.viewAnalytics'),
+  ]
 
   return (
     <div className="min-h-screen bg-[#F2F4F6] flex items-center justify-center px-4 py-20">
@@ -77,19 +81,11 @@ export function LoginPage() {
             <span className="text-4xl font-bold text-[#1a1a1a]">MARN</span>
           </div>
           <h1 className="text-5xl font-bold text-[#1a1a1a] mb-6">
-            Welcome Back!
+            {t('login.heading')}
           </h1>
-          <p className="text-xl text-[#4a5565] mb-8">
-            Log in to access your dashboard, manage properties, and connect with
-            potential tenants or roommates.
-          </p>
+          <p className="text-xl text-[#4a5565] mb-8">{t('login.subtitle')}</p>
           <div className="space-y-4">
-            {[
-              'Manage your property listings',
-              'Track applications and bookings',
-              'Message with tenants',
-              'View analytics and insights',
-            ].map((feature, index) => (
+            {features.map((feature, index) => (
               <motion.div
                 key={feature}
                 initial={{ opacity: 0, x: -20 }}
@@ -113,24 +109,20 @@ export function LoginPage() {
           <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl shadow-black/10">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2">
-                Sign In
+                {t('login.title')}
               </h2>
               <p className="text-[#4a5565]">
-                Don't have an account?{' '}
-                <Link
-                  to="/signup"
-                  className="text-[#3A6EA5] hover:underline font-semibold"
-                >
-                  Sign up
+                {t('login.noAccount')}{' '}
+                <Link to="/signup" className="text-[#3A6EA5] hover:underline font-semibold">
+                  {t('login.signUp')}
                 </Link>
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email */}
               <div>
                 <Label htmlFor="email" className="text-[#1a1a1a] mb-2 block">
-                  Email Address
+                  {t('login.emailLabel')}
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
@@ -139,26 +131,20 @@ export function LoginPage() {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="pl-12 pr-4 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
-                    placeholder="you@example.com"
+                    placeholder={t('login.emailPlaceholder')}
                   />
                 </div>
               </div>
 
-              {/* Password */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <Label htmlFor="password" className="text-[#1a1a1a]">
-                    Password
+                    {t('login.passwordLabel')}
                   </Label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-[#3A6EA5] hover:underline"
-                  >
-                    Forgot password?
+                  <Link to="/forgot-password" className="text-sm text-[#3A6EA5] hover:underline">
+                    {t('login.forgotPassword')}
                   </Link>
                 </div>
                 <div className="relative">
@@ -168,27 +154,20 @@ export function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="pl-12 pr-12 py-6 bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
-                    placeholder="Enter your password"
+                    placeholder={t('login.passwordPlaceholder')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6a7282] hover:text-[#3A6EA5]"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
 
-              {/* Remember Me */}
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="remember"
@@ -198,38 +177,30 @@ export function LoginPage() {
                   }
                   className="border-[#3A6EA5] data-[state=checked]:bg-[#3A6EA5]"
                 />
-                <label
-                  htmlFor="remember"
-                  className="text-sm text-[#4a5565] cursor-pointer"
-                >
-                  Remember me for 30 days
+                <label htmlFor="remember" className="text-sm text-[#4a5565] cursor-pointer">
+                  {t('login.rememberMe')}
                 </label>
               </div>
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 size="lg"
                 disabled={login.isPending}
                 className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30"
               >
-                {login.isPending ? 'Signing in…' : 'Sign In'}
+                {login.isPending ? t('login.signingIn') : t('login.signIn')}
               </Button>
             </form>
 
-            {/* Divider */}
             <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-[#3A6EA5]/20"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-[#6a7282]">
-                  Or continue with
-                </span>
+                <span className="px-4 bg-white text-[#6a7282]">{t('login.orContinueWith')}</span>
               </div>
             </div>
 
-            {/* Social Login */}
             <div className="flex justify-center">
               <GoogleAuthButton remember={formData.remember} text="signin_with" />
             </div>

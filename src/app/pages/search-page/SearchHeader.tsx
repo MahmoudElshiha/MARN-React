@@ -1,4 +1,5 @@
-import { MapIcon, MapPin } from 'lucide-react'
+import { MapIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/app/components/ui/button'
 import {
   Select,
@@ -16,8 +17,6 @@ interface SearchHeaderProps {
   onSortChange: (index: number) => void
   showMap: boolean
   onToggleMap: () => void
-  locationLabel?: string
-  radiusKm?: number
 }
 
 export function SearchHeader({
@@ -27,23 +26,19 @@ export function SearchHeader({
   onSortChange,
   showMap,
   onToggleMap,
-  locationLabel,
-  radiusKm,
 }: SearchHeaderProps) {
+  const { t } = useTranslation('properties')
+
   return (
     <div className="flex items-center justify-between mb-8">
       <div>
         <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-          Find Your Perfect Property
+          {t('search.title')}
         </h1>
-        <p className="text-[#4a5565] flex items-center gap-2 flex-wrap">
-          {isLoading ? 'Searching…' : `${total.toLocaleString()} properties found`}
-          {locationLabel && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#3A6EA5]/10 rounded-full text-xs font-medium text-[#3A6EA5]">
-              <MapPin className="w-3 h-3" />
-              Near: {locationLabel} • {radiusKm}km
-            </span>
-          )}
+        <p className="text-[#4a5565]">
+          {isLoading
+            ? t('search.searching')
+            : t('search.propertiesFound', { count: total.toLocaleString() })}
         </p>
       </div>
 
@@ -54,7 +49,7 @@ export function SearchHeader({
           onValueChange={(v) => onSortChange(Number(v))}
         >
           <SelectTrigger className="w-[220px] rounded-xl bg-white border-[#3A6EA5]/20">
-            <SelectValue placeholder="Sort by" />
+            <SelectValue placeholder={t('search.sortBy')} />
           </SelectTrigger>
           <SelectContent>
             {SORT_OPTIONS.map((opt, i) => (
@@ -75,7 +70,7 @@ export function SearchHeader({
           onClick={onToggleMap}
         >
           <MapIcon className="w-4 h-4 mr-2" />
-          {showMap ? 'Hide Map' : 'Show Map'}
+          {showMap ? t('search.hideMap') : t('search.showMap')}
         </Button>
       </div>
     </div>

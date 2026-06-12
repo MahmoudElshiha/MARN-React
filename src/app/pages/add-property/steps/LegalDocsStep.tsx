@@ -2,6 +2,7 @@ import { Upload, X, FileText } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
 import { PropertyFormData, FileData, TouchedFields } from '../types'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface LegalDocsStepProps {
   formData: PropertyFormData
@@ -10,6 +11,7 @@ interface LegalDocsStepProps {
 }
 
 export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsStepProps) {
+  const { t } = useTranslation('properties')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,38 +55,38 @@ export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsSt
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-        Upload Legal Documents <span className="text-red-500">*</span>
+        {t('addProperty.legalDocsStep.title')} <span className="text-red-500">*</span>
       </h2>
 
       <div className="bg-white rounded-2xl p-8">
-        <input 
-          type="file" 
-          multiple 
-          accept=".pdf,.doc,.docx" 
-          className="hidden" 
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.doc,.docx"
+          className="hidden"
           ref={fileInputRef}
           onChange={handleFileChange}
         />
-        <div 
+        <div
           onClick={() => fileInputRef.current?.click()}
           className={uploadBoxClass}
         >
           <Upload className="w-16 h-16 mx-auto mb-4 text-[#3A6EA5]" />
           <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">
-            Drag & drop documents here
+            {t('addProperty.legalDocsStep.dragDropDocs')}
           </h3>
           <p className="text-[#4a5565] mb-4">
-            or click to browse from your computer (PDF, DOC)
+            {t('addProperty.legalDocsStep.orClickToBrowse')}
           </p>
-          <Button 
-            type="button" 
+          <Button
+            type="button"
             className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-xl"
             onClick={(e) => {
               e.stopPropagation()
               fileInputRef.current?.click()
             }}
           >
-            Choose Files
+            {t('addProperty.legalDocsStep.chooseFiles')}
           </Button>
         </div>
       </div>
@@ -118,11 +120,7 @@ export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsSt
       )}
 
       <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
-        <p className="text-sm text-[#1a1a1a]">
-          <strong>Tip:</strong> Uploading legal documents ensures
-          compliance and trustworthiness. Include lease agreements,
-          property deeds, and any other relevant documents.
-        </p>
+        <p className="text-sm text-[#1a1a1a]">{t('addProperty.legalDocsStep.tip')}</p>
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { X, MapPin, Navigation } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -11,6 +12,7 @@ interface LocationModalProps {
 }
 
 export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
+  const { t } = useTranslation('properties')
   const [address, setAddress] = useState('')
   const [coordinates, setCoordinates] = useState({
     lat: 37.7749,
@@ -54,7 +56,7 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
               <MapPin className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-[#1a1a1a]">
-              Upload Location
+              {t('locationModal.title')}
             </h2>
           </div>
           <button
@@ -73,7 +75,7 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
             <div className="relative z-10 text-center">
               <MapPin className="w-16 h-16 text-[#3A6EA5] mx-auto mb-4" />
               <p className="text-[#4a5565]">
-                Interactive map would display here
+                {t('locationModal.mapPlaceholder')}
               </p>
               <p className="text-sm text-[#4a5565] mt-2">
                 Lat: {coordinates.lat.toFixed(4)}, Lng:{' '}
@@ -90,23 +92,23 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
             onClick={handleUseCurrentLocation}
           >
             <Navigation className="w-5 h-5 mr-2" />
-            Use Current Location
+            {t('locationModal.useCurrentLocation')}
           </Button>
 
           {/* Manual Address Input */}
           <div>
             <Label htmlFor="address" className="text-[#1a1a1a] mb-2 block">
-              Or Enter Address Manually
+              {t('locationModal.orEnterAddress')}
             </Label>
             <Input
               id="address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="123 Main St, San Francisco, CA 94102"
+              placeholder={t('locationModal.addressPlaceholder')}
               className="bg-[#f5f7fa] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5]"
             />
             <p className="text-sm text-[#4a5565] mt-2">
-              You can also click on the map to drop a pin
+              {t('locationModal.mapTip')}
             </p>
           </div>
 
@@ -118,7 +120,7 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
               className="flex-1 rounded-xl border-[#3A6EA5]/20"
               onClick={onClose}
             >
-              Cancel
+              {t('locationModal.cancel')}
             </Button>
             <Button
               type="button"
@@ -126,7 +128,7 @@ export function LocationModal({ isOpen, onClose, onSave }: LocationModalProps) {
               onClick={handleSave}
               disabled={!address}
             >
-              Save Location
+              {t('locationModal.saveLocation')}
             </Button>
           </div>
         </div>

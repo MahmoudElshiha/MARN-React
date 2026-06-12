@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { Upload, X, FileText, CheckCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from './ui/button'
 
 interface FileUploadProps {
@@ -17,6 +18,7 @@ export function FileUpload({
   accept = '*',
   maxSize = 10,
 }: FileUploadProps) {
+  const { t } = useTranslation('properties')
   const [file, setFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string>('')
@@ -33,7 +35,7 @@ export function FileUpload({
 
   const validateFile = (file: File): boolean => {
     if (maxSize && file.size > maxSize * 1024 * 1024) {
-      setError(`File size must be less than ${maxSize}MB`)
+      setError(t('fileUpload.fileTooLarge', { size: maxSize }))
       return false
     }
     return true
@@ -83,7 +85,7 @@ export function FileUpload({
         {file && (
           <span className="text-sm text-green-600 flex items-center gap-1">
             <CheckCircle className="w-4 h-4" />
-            Uploaded
+            {t('fileUpload.uploaded')}
           </span>
         )}
       </div>
@@ -104,9 +106,9 @@ export function FileUpload({
             className={`w-12 h-12 mx-auto mb-4 ${isDragging ? 'text-[#3A6EA5]' : 'text-[#4a5565]'}`}
           />
           <p className="text-[#1a1a1a] font-medium mb-2">
-            {isDragging ? 'Drop file here' : 'Drag & drop your file here'}
+            {isDragging ? t('fileUpload.dropFileHere') : t('fileUpload.dragDropFile')}
           </p>
-          <p className="text-sm text-[#4a5565] mb-4">or</p>
+          <p className="text-sm text-[#4a5565] mb-4">{t('fileUpload.or')}</p>
           <Button
             type="button"
             variant="outline"
@@ -116,10 +118,10 @@ export function FileUpload({
               handleBrowseClick()
             }}
           >
-            Browse Files
+            {t('fileUpload.browseFiles')}
           </Button>
           <p className="text-xs text-[#4a5565] mt-4">
-            Maximum file size: {maxSize}MB
+            {t('fileUpload.maxFileSize', { size: maxSize })}
           </p>
           <input
             ref={fileInputRef}
@@ -153,7 +155,7 @@ export function FileUpload({
                 className="rounded-xl border-[#3A6EA5]/20"
                 onClick={handleBrowseClick}
               >
-                Replace
+                {t('fileUpload.replace')}
               </Button>
               <Button
                 type="button"

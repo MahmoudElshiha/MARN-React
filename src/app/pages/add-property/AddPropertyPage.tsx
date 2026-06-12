@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 import { toast } from 'sonner'
 import { PROPERTY_STEPS as STEPS } from '@/constants/property'
+import { useTranslation } from 'react-i18next'
 import { PropertyFormData, TouchedFields } from './types'
 import { validateForm } from './validation'
 import { propertyService } from '@/services/propertyService'
@@ -30,6 +31,7 @@ const DEFAULT_FORM_DATA: PropertyFormData = {
 }
 
 export function AddPropertyPage() {
+  const { t } = useTranslation('properties')
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(1)
   const [touched, setTouched] = useState<TouchedFields>({})
@@ -90,7 +92,7 @@ export function AddPropertyPage() {
       errors.forEach(err => {
         // For special fields that map to multiple inputs, we mark a proxy key as touched
         newTouched[err.field as keyof PropertyFormData] = true
-        toast.error(`Step ${err.step} (${err.stepName}): ${err.label} is missing!`)
+        toast.error(t('addProperty.validation.fieldMissing', { step: err.step, stepName: err.stepName, label: err.label }))
       })
       setTouched(newTouched)
       setCurrentStep(errors[0].step)
@@ -206,12 +208,12 @@ export function AddPropertyPage() {
 
       await propertyService.createProperty(apiData)
 
-      toast.success('Property submitted for approval')
-      sessionStorage.removeItem('addPropertyFormData') // Clear session on success
+      toast.success(t('addProperty.toasts.submitted'))
+      sessionStorage.removeItem('addPropertyFormData')
       navigate('/owner-dashboard')
     } catch (error) {
       console.error('Failed to submit property', error)
-      toast.error('Failed to submit property. Please check your data and try again.')
+      toast.error(t('addProperty.toasts.failed'))
     }
   }
 
@@ -225,14 +227,12 @@ export function AddPropertyPage() {
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors mb-4"
           >
             <ChevronLeft className="w-5 h-5" />
-            Back to Dashboard
+            {t('addProperty.backToDashboard')}
           </button>
           <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-            Add New Property
+            {t('addProperty.title')}
           </h1>
-          <p className="text-[#4a5565]">
-            Fill out the details to list your property
-          </p>
+          <p className="text-[#4a5565]">{t('addProperty.subtitle')}</p>
         </div>
 
         {/* Progress Steps */}
@@ -339,7 +339,7 @@ export function AddPropertyPage() {
                 className="rounded-xl border-[#3A6EA5]/20 disabled:opacity-50"
               >
                 <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
+                {t('addProperty.steps.previous', 'Previous')}
               </Button>
 
               {currentStep < STEPS.length ? (
@@ -347,7 +347,7 @@ export function AddPropertyPage() {
                   onClick={handleNext}
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
                 >
-                  Next
+                  {t('addProperty.steps.next', 'Next')}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
@@ -355,7 +355,7 @@ export function AddPropertyPage() {
                   onClick={handleSubmit}
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
                 >
-                  Submit for Approval
+                  {t('addProperty.steps.submitForApproval', 'Submit for Approval')}
                   <CheckCircle className="w-4 h-4 ml-2" />
                 </Button>
               )}

@@ -1,0 +1,208 @@
+{
+  "title": "لوحة الإدارة",
+  "tabs": {
+    "overview": "نظرة عامة",
+    "users": "المستخدمون",
+    "verifications": "التحقق",
+    "properties": "العقارات",
+    "reports": "التقارير"
+  },
+  "stats": {
+    "totalUsers": "إجمالي المستخدمين",
+    "totalProperties": "إجمالي العقارات",
+    "pendingVerifications": "تحقق معلق",
+    "monthlyRevenue": "الإيرادات الشهرية"
+  },
+  "users": {
+    "title": "إدارة المستخدمين",
+    "search": "بحث في المستخدمين...",
+    "noUsers": "لم يتم العثور على مستخدمين.",
+    "actions": {
+      "ban": "حظر",
+      "unban": "رفع الحظر",
+      "restore": "استعادة",
+      "editRoles": "تعديل الأدوار"
+    }
+  },
+  "verifications": {
+    "title": "التحقق من الهوية",
+    "pending": "معلق",
+    "approve": "قبول",
+    "reject": "رفض",
+    "rejectReason": "سبب الرفض",
+    "rejectReasonPlaceholder": "أدخل سبب الرفض...",
+    "noVerifications": "لا توجد طلبات تحقق معلقة."
+  },
+  "propertyVerifications": {
+    "title": "التحقق من العقارات",
+    "approve": "قبول",
+    "decline": "رفض",
+    "declineReason": "سبب الرفض",
+    "noPending": "لا توجد عقارات معلقة للتحقق."
+  },
+  "reports": {
+    "title": "تقارير التحليلات",
+    "scope": "نطاق التقرير",
+    "format": "الصيغة",
+    "period": "الفترة",
+    "from": "من",
+    "to": "إلى",
+    "generate": "إنشاء تقرير",
+    "download": "تحميل التقرير"
+  },
+  "roles": {
+    "title": "تعديل أدوار المستخدم",
+    "save": "حفظ الأدوار"
+  },
+  "modals": {
+    "confirmAction": "تأكيد الإجراء",
+    "areYouSure": "هل أنت متأكد من {{action}} هذا المستخدم؟",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد"
+  },
+  "header": {
+    "title": "لوحة الإدارة",
+    "subtitle": "إدارة المستخدمين والتحقق من الوثائق ومراقبة نشاط المنصة"
+  },
+  "revenue": {
+    "title": "بيانات الإيرادات والمبيعات",
+    "totalRevenue": "إجمالي الإيرادات",
+    "fromLastPeriod": "عن الفترة السابقة",
+    "activeContracts": "العقود النشطة",
+    "newUsersThisMonth": "مستخدمون جدد (هذا الشهر)",
+    "monthlyRevenueGraph": "رسم بياني للإيرادات الشهرية"
+  },
+  "stats": {
+    "totalUsers": "إجمالي المستخدمين",
+    "totalListings": "إجمالي الإعلانات",
+    "pendingVerifications": "تحقق معلق",
+    "activeContracts": "العقود النشطة",
+    "totalProperties": "إجمالي العقارات",
+    "monthlyRevenue": "الإيرادات الشهرية"
+  },
+  "table": {
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "nationalId": "الهوية الوطنية",
+    "submitted": "تاريخ الإرسال",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "name": "الاسم",
+    "roles": "الأدوار",
+    "joinDate": "تاريخ الانضمام",
+    "property": "العقار",
+    "owner": "المالك",
+    "type": "النوع",
+    "governorate": "المحافظة",
+    "view": "عرض",
+    "approve": "قبول",
+    "reject": "رفض",
+    "decline": "رفض",
+    "restore": "استعادة",
+    "unban": "رفع الحظر",
+    "ban": "حظر",
+    "close": "إغلاق"
+  },
+  "verificationModal": {
+    "nationalId": "الهوية الوطنية",
+    "arabicAddress": "العنوان بالعربية",
+    "phone": "الهاتف",
+    "submitted": "تاريخ الإرسال",
+    "frontId": "الوجه الأمامي للهوية",
+    "backId": "الوجه الخلفي للهوية",
+    "noImage": "لا توجد صورة"
+  },
+  "propertyModal": {
+    "owner": "المالك",
+    "type": "النوع",
+    "status": "الحالة",
+    "submitted": "تاريخ الإرسال",
+    "description": "الوصف",
+    "ownershipDocument": "وثيقة الملكية",
+    "propertyImages": "صور العقار",
+    "noDocument": "لم يتم رفع وثيقة"
+  },
+  "userModal": {
+    "joined": "تاريخ الانضمام",
+    "userId": "معرف المستخدم",
+    "deleted": "محذوف"
+  },
+  "rejectModal": {
+    "title": "رفض التحقق",
+    "subtitle": "يرجى تقديم سبب لرفض طلب التحقق هذا.",
+    "placeholder": "أدخل سبب الرفض…",
+    "confirmReject": "تأكيد الرفض",
+    "rejecting": "جارٍ الرفض…",
+    "cancel": "إلغاء"
+  },
+  "declineModal": {
+    "title": "رفض التحقق من العقار",
+    "subtitle": "يرجى تقديم سبب لرفض طلب التحقق من العقار هذا.",
+    "placeholder": "أدخل سبب الرفض…",
+    "confirmDecline": "تأكيد الرفض",
+    "declining": "جارٍ الرفض…",
+    "cancel": "إلغاء"
+  },
+  "rolesModal": {
+    "title": "تحديث أدوار المستخدم",
+    "subtitle": "اختر الأدوار القابلة للتعيين لهذا المستخدم. الأدوار المحمية (المالك، المستأجر) تُحفظ تلقائياً.",
+    "saving": "جارٍ الحفظ…",
+    "cancel": "إلغاء"
+  },
+  "confirmModal": {
+    "title": "تأكيد الإجراء",
+    "message": "هل أنت متأكد من {{action}} هذا المستخدم؟ يمكن التراجع عن هذا الإجراء لاحقاً.",
+    "processing": "جارٍ المعالجة…",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد"
+  },
+  "generateReport": {
+    "title": "إنشاء تقرير جديد",
+    "scope": "النطاق",
+    "format": "الصيغة",
+    "period": "الفترة",
+    "from": "من",
+    "to": "إلى",
+    "generating": "جارٍ الإنشاء…",
+    "generate": "إنشاء تقرير",
+    "generatedReports": "التقارير المُنشأة",
+    "noReports": "لم يتم إنشاء تقارير بعد.",
+    "scopeOptions": {
+      "overview": "نظرة عامة",
+      "users": "المستخدمون",
+      "properties": "العقارات",
+      "contracts": "العقود",
+      "revenue": "الإيرادات",
+      "full": "كامل"
+    },
+    "formatOptions": {
+      "pdf": "PDF",
+      "csv": "CSV"
+    },
+    "periodOptions": {
+      "thisMonth": "هذا الشهر",
+      "thisYear": "هذه السنة",
+      "allTime": "كل الوقت",
+      "custom": "نطاق مخصص"
+    }
+  },
+  "pending": "معلق",
+  "noReportsYet": "لم يتم إنشاء تقارير بعد.",
+  "toasts": {
+    "verificationApproved": "تم قبول التحقق",
+    "approveFailed": "فشل القبول",
+    "verificationRejected": "تم رفض التحقق",
+    "rejectFailed": "فشل الرفض",
+    "propertyApproved": "تم قبول التحقق من العقار",
+    "propertyApproveFailed": "فشل قبول العقار",
+    "propertyDeclined": "تم رفض التحقق من العقار",
+    "propertyDeclineFailed": "فشل رفض العقار",
+    "userActionSuccess": "تم {{action}} المستخدم بنجاح",
+    "actionFailed": "فشل الإجراء",
+    "reportDownloadFailed": "فشل تحميل التقرير",
+    "reportGenerated": "تم إنشاء التقرير بنجاح",
+    "reportFailed": "فشل إنشاء التقرير",
+    "rolesUpdated": "تم تحديث الأدوار بنجاح",
+    "rolesFailed": "فشل تحديث الأدوار"
+  }
+}

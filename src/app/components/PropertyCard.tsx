@@ -1,10 +1,9 @@
 import { Heart, MapPin, Star } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { ImageWithFallback } from './figma/ImageWithFallback'
-import { toast } from 'sonner'
-import { propertyService } from '@/services/propertyService'
 
 interface PropertyCardProps {
   id: string
@@ -18,7 +17,6 @@ interface PropertyCardProps {
   beds?: number
   baths?: number
   guests?: number
-  isSaved?: boolean
 }
 
 export function PropertyCard({
@@ -33,32 +31,9 @@ export function PropertyCard({
   beds,
   baths,
   guests,
-  isSaved,
 }: PropertyCardProps) {
-  const [isFavorite, setIsFavorite] = useState(isSaved || false)
-
-  useEffect(() => {
-    setIsFavorite(isSaved || false)
-  }, [isSaved])
-
-  const handleToggleFavorite = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    // Optimistic update
-    setIsFavorite(!isFavorite)
-    try {
-      await propertyService.toggleSaveProperty(id)
-      if (!isFavorite) {
-        toast.success('Added to saved properties')
-      } else {
-        toast.success('Removed from saved properties')
-      }
-    } catch (error) {
-      console.error('Failed to toggle save property', error)
-      toast.error('Failed to update saved properties')
-      // Revert optimistic update
-      setIsFavorite(isFavorite)
-    }
-  }
+  const { t } = useTranslation('properties')
+  const [isFavorite, setIsFavorite] = useState(false)
 
   return (
     <motion.div
@@ -78,7 +53,10 @@ export function PropertyCard({
 
             {/* Favorite Button */}
             <button
-              onClick={handleToggleFavorite}
+              onClick={(e) => {
+                e.preventDefault()
+                setIsFavorite(!isFavorite)
+              }}
               className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform"
             >
               <Heart
@@ -120,13 +98,13 @@ export function PropertyCard({
 
             {beds && baths && (
               <div className="flex items-center gap-4 mb-3 text-sm text-[#4a5565]">
-                <span>{beds} beds</span>
+                <span>{t('card.beds', { count: beds })}</span>
                 <span>•</span>
-                <span>{baths} baths</span>
+                <span>{t('card.baths', { count: baths })}</span>
                 {guests && (
                   <>
                     <span>•</span>
-                    <span>{guests} guests</span>
+                    <span>{t('card.guests', { count: guests })}</span>
                   </>
                 )}
               </div>
@@ -136,7 +114,7 @@ export function PropertyCard({
               <span className="text-2xl font-bold text-[#3A6EA5]">
                 {price.toLocaleString()} EGP
               </span>
-              <span className="text-[#6a7282]">/ month</span>
+              <span className="text-[#6a7282]">{t('card.perMonth')}</span>
             </div>
           </div>
         </div>

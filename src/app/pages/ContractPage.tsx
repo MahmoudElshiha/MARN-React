@@ -11,12 +11,14 @@ import {
 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Label } from '../components/ui/label'
 import { Skeleton } from '../components/ui/skeleton'
 import { useContract } from '@/hooks/useBookingRequests'
 
 export function ContractPage() {
+  const { t } = useTranslation('contracts')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [uploadedContract, setUploadedContract] = useState<File | null>(null)
@@ -30,7 +32,7 @@ export function ContractPage() {
     if (contract?.documentUrl) {
       window.open(contract.documentUrl, '_blank')
     } else {
-      toast.success('Contract downloaded successfully')
+      toast.success(t('toasts.downloaded'))
     }
   }
 
@@ -39,21 +41,19 @@ export function ContractPage() {
     if (file) {
       if (file.type === 'application/pdf') {
         setUploadedContract(file)
-        toast.success('Signed contract uploaded successfully')
+        toast.success(t('toasts.uploaded'))
       } else {
-        toast.error('Please upload a PDF file')
+        toast.error(t('toasts.pdfOnly'))
       }
     }
   }
 
   const handleSubmit = () => {
     if (uploadedContract) {
-      toast.success(
-        'Contract submitted for review. You will be notified once approved.',
-      )
+      toast.success(t('toasts.submitted'))
       navigate('/tenant-dashboard')
     } else {
-      toast.error('Please upload the signed contract first')
+      toast.error(t('toasts.uploadFirst'))
     }
   }
 
@@ -73,7 +73,7 @@ export function ContractPage() {
   if (!contract) {
     return (
       <div className="min-h-screen py-20 flex items-center justify-center text-[#4a5565]">
-        Contract not found.
+        {t('notFound')}
       </div>
     )
   }
@@ -86,15 +86,15 @@ export function ContractPage() {
           onClick={() => navigate(-1)}
           className="mb-6 rounded-xl hover:bg-[#E5EBF0]/50"
         >
-          ← Back
+          ← {t('back')}
         </Button>
 
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-            Rental Contract
+            {t('title')}
           </h1>
           <p className="text-lg text-[#6B7280]">
-            Download, sign, and upload your rental agreement
+            {t('subtitle')}
           </p>
         </div>
 
@@ -116,13 +116,13 @@ export function ContractPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#1a1a1a]">
-                    Contract Status
+                    {t('contractStatus')}
                   </h3>
                   <p className="text-sm text-[#6B7280]">
-                    {contract.status === 'Pending' && 'Awaiting signatures'}
-                    {contract.status === 'Active' && 'Fully executed'}
-                    {contract.status === 'Expired' && 'Contract expired'}
-                    {contract.status === 'Terminated' && 'Contract terminated'}
+                    {contract.status === 'Pending' && t('statusText.awaitingSignatures')}
+                    {contract.status === 'Active' && t('statusText.fullyExecuted')}
+                    {contract.status === 'Expired' && t('statusText.expired')}
+                    {contract.status === 'Terminated' && t('statusText.terminated')}
                   </p>
                 </div>
               </div>
@@ -143,17 +143,17 @@ export function ContractPage() {
         <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
           <CardHeader>
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Contract Details
+              {t('contractDetails')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-[#6B7280] mb-1">Contract ID</p>
+                <p className="text-sm text-[#6B7280] mb-1">{t('contractId')}</p>
                 <p className="font-semibold text-[#1a1a1a]">{contract.id}</p>
               </div>
               <div>
-                <p className="text-sm text-[#6B7280] mb-1">Monthly Rent</p>
+                <p className="text-sm text-[#6B7280] mb-1">{t('monthlyRent')}</p>
                 <p className="font-semibold text-[#1a1a1a]">
                   EGP {contract.monthlyRent.toLocaleString()}
                 </p>
@@ -164,7 +164,7 @@ export function ContractPage() {
             <div className="p-4 bg-white rounded-2xl">
               <div className="flex items-center gap-2 mb-3">
                 <Home className="w-5 h-5 text-[#3A6EA5]" />
-                <h4 className="font-semibold text-[#1a1a1a]">Property</h4>
+                <h4 className="font-semibold text-[#1a1a1a]">{t('property')}</h4>
               </div>
               <p className="font-medium text-[#1a1a1a] mb-2">
                 {contract.propertyName}
@@ -179,7 +179,7 @@ export function ContractPage() {
               <div className="p-4 bg-white rounded-2xl">
                 <div className="flex items-center gap-2 mb-3">
                   <User className="w-5 h-5 text-[#3A6EA5]" />
-                  <h4 className="font-semibold text-[#1a1a1a]">Tenant</h4>
+                  <h4 className="font-semibold text-[#1a1a1a]">{t('tenant')}</h4>
                 </div>
                 <p className="font-medium text-[#1a1a1a]">
                   {contract.tenantName}
@@ -189,7 +189,7 @@ export function ContractPage() {
                 <div className="p-4 bg-white rounded-2xl">
                   <div className="flex items-center gap-2 mb-3">
                     <User className="w-5 h-5 text-[#3A6EA5]" />
-                    <h4 className="font-semibold text-[#1a1a1a]">Owner</h4>
+                    <h4 className="font-semibold text-[#1a1a1a]">{t('owner')}</h4>
                   </div>
                   <p className="font-medium text-[#1a1a1a]">
                     {contract.ownerName}
@@ -202,11 +202,11 @@ export function ContractPage() {
             <div className="p-4 bg-white rounded-2xl">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-5 h-5 text-[#3A6EA5]" />
-                <h4 className="font-semibold text-[#1a1a1a]">Rental Period</h4>
+                <h4 className="font-semibold text-[#1a1a1a]">{t('rentalPeriod')}</h4>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-[#6B7280] mb-1">Start Date</p>
+                  <p className="text-sm text-[#6B7280] mb-1">{t('startDate')}</p>
                   <p className="font-medium text-[#1a1a1a]">
                     {new Date(contract.startDate).toLocaleDateString('en-US', {
                       month: 'long',
@@ -216,7 +216,7 @@ export function ContractPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-[#6B7280] mb-1">End Date</p>
+                  <p className="text-sm text-[#6B7280] mb-1">{t('endDate')}</p>
                   <p className="font-medium text-[#1a1a1a]">
                     {new Date(contract.expiryDate).toLocaleDateString('en-US', {
                       month: 'long',
@@ -230,7 +230,7 @@ export function ContractPage() {
 
             {/* Monthly Rent highlight */}
             <div className="p-4 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] rounded-2xl text-white">
-              <p className="text-sm mb-1 opacity-90">Monthly Rent</p>
+              <p className="text-sm mb-1 opacity-90">{t('monthlyRent')}</p>
               <p className="text-3xl font-bold">
                 EGP {contract.monthlyRent.toLocaleString()}
               </p>
@@ -242,7 +242,7 @@ export function ContractPage() {
         <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
           <CardHeader>
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Download Contract
+              {t('download')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -253,18 +253,17 @@ export function ContractPage() {
                 </div>
                 <div className="flex-1">
                   <h4 className="font-semibold text-[#1a1a1a] mb-1">
-                    Rental Agreement PDF
+                    {t('rentalAgreementPdf')}
                   </h4>
                   <p className="text-sm text-[#6B7280] mb-4">
-                    Download the rental contract, review all terms carefully,
-                    sign it, and upload the signed copy below.
+                    {t('rentalAgreementDesc')}
                   </p>
                   <Button
                     onClick={handleDownload}
                     className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Download Contract
+                    {t('download')}
                   </Button>
                 </div>
               </div>
@@ -276,14 +275,14 @@ export function ContractPage() {
         <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
           <CardHeader>
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Upload Signed Contract
+              {t('upload')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
                 <Label className="text-[#1a1a1a] mb-2 block">
-                  Upload Signed Document (PDF only)
+                  {t('uploadSignedDoc')}
                 </Label>
                 <div className="relative">
                   <input
@@ -301,10 +300,10 @@ export function ContractPage() {
                     <span className="text-sm text-[#6B7280] mb-1">
                       {uploadedContract
                         ? uploadedContract.name
-                        : 'Click to upload signed contract'}
+                        : t('clickToUpload')}
                     </span>
                     <span className="text-xs text-[#6B7280]">
-                      PDF format only
+                      {t('pdfFormatOnly')}
                     </span>
                   </label>
                 </div>
@@ -315,7 +314,7 @@ export function ContractPage() {
                   <CheckCircle className="w-6 h-6 text-green-600" />
                   <div className="flex-1">
                     <p className="font-medium text-green-900">
-                      Contract uploaded successfully
+                      {t('contractUploadedSuccess')}
                     </p>
                     <p className="text-sm text-green-700">
                       {uploadedContract.name}
@@ -330,14 +329,14 @@ export function ContractPage() {
                   onClick={() => navigate(-1)}
                   className="rounded-xl border-[#3A6EA5]/20"
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button
                   onClick={handleSubmit}
                   disabled={!uploadedContract}
                   className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Submit Contract
+                  {t('submit')}
                 </Button>
               </div>
             </div>
@@ -348,15 +347,15 @@ export function ContractPage() {
         <Card className="bg-yellow-50 border-2 border-yellow-200 rounded-3xl">
           <CardHeader>
             <CardTitle className="text-xl text-yellow-900">
-              Important Notes
+              {t('importantNotes.title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-yellow-800 space-y-2">
-            <p>• Please read the entire contract carefully before signing</p>
-            <p>• Both parties must sign the contract for it to be valid</p>
-            <p>• Keep a copy of the signed contract for your records</p>
-            <p>• Contact support if you have any questions or concerns</p>
-            <p>• The contract becomes effective on the start date specified</p>
+            <p>• {t('importantNotes.readCarefully')}</p>
+            <p>• {t('importantNotes.bothParties')}</p>
+            <p>• {t('importantNotes.keepCopy')}</p>
+            <p>• {t('importantNotes.contactSupport')}</p>
+            <p>• {t('importantNotes.effectiveDate')}</p>
           </CardContent>
         </Card>
       </div>
