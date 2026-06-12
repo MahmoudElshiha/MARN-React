@@ -5,6 +5,7 @@ import {
   User,
   X,
   Home,
+  MessageSquare,
   Building,
   MessageCircle,
   HelpCircle,
@@ -30,22 +31,25 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 
-const ROLE_DASHBOARDS: Record<string, { label: string; path: string }[]> = {
-  owner: [
-    { label: 'Owner Dashboard', path: '/owner-dashboard' },
-    { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
-  ],
-  admin: [{ label: 'Admin Dashboard', path: '/admin-dashboard' }],
-  tenant: [{ label: 'Tenant Dashboard', path: '/tenant-dashboard' }],
-}
+const AVAILABLE_DASHBOARDS = [
+  { role: 'admin', label: 'Admin Dashboard', path: '/admin-dashboard' },
+  { role: 'owner', label: 'Owner Dashboard', path: '/owner-dashboard' },
+  { role: 'tenant', label: 'Tenant Dashboard', path: '/tenant-dashboard' },
+]
 
 function BurgerDashboardItem({ closeMenu }: { closeMenu: () => void }) {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
 
-  const dashboards = (user?.role && ROLE_DASHBOARDS[user.role]) ?? [
-    { label: 'Tenant Dashboard', path: '/tenant-dashboard' },
-  ]
+  const userRoles = user?.roles ?? (user?.role ? [user.role] : ['tenant'])
+  const dashboards = AVAILABLE_DASHBOARDS.filter((d) =>
+    userRoles.includes(d.role as any) ||
+    (d.role === 'tenant' && userRoles.includes('owner'))
+  )
+
+  if (dashboards.length === 0) {
+    dashboards.push({ role: 'tenant', label: 'Tenant Dashboard', path: '/tenant-dashboard' })
+  }
 
   if (dashboards.length === 1) {
     return (
@@ -165,7 +169,7 @@ export function Navigation() {
 
   const menuItems = [
     { icon: Home, label: 'Home', path: '/' },
-    { icon: Building, label: 'Explore Properties', path: '/search' },
+    { icon: MessageSquare, label: 'Chats', path: '/messages' },
     { icon: MessageCircle, label: 'Chat Support', path: '/chatbot' },
     { icon: HelpCircle, label: 'FAQ', path: '/faq' },
     { icon: Phone, label: 'Contact', path: '/contact' },

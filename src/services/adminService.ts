@@ -50,6 +50,73 @@ export interface AdminUser {
   joinDate: string
 }
 
+export interface AdminPropertyStatsItem {
+  propertyId: number
+  title: string
+  ownerName: string
+  ownerId: string
+  status: string
+  statusDisplayName: string
+  type: string
+  typeDisplayName: string
+  city: string
+  cityDisplayName: string
+  governorate: string
+  governorateDisplayName: string
+  price: number
+  averageRating: number
+  commentsCount: number
+  isActive: boolean
+  canDeactivate: boolean
+  canRestore: boolean
+  isDeleted: boolean
+  createdAt: string
+}
+
+export interface AdminStatsPropertiesResponse {
+  appliedPeriod: unknown
+  totalProperties: number
+  deletedProperties: number
+  activeProperties: number
+  inactiveProperties: number
+  statusBreakdown: unknown[]
+  typeBreakdown: unknown[]
+  governorateBreakdown: unknown[]
+  properties: SearchPaginatedResponse<AdminPropertyStatsItem>
+}
+
+export interface AdminContractStatsItem {
+  contractId: number
+  status: string
+  statusDisplayName: string
+  transactionId: string | null
+  merkleRoot: string | null
+  anchoringStatus: string
+  anchoringStatusDisplayName: string
+  isAnchoredToBlockChain: boolean
+  canCancel: boolean
+  createdAt: string
+  leaseStartDate: string
+  leaseEndDate: string
+  totalContractAmount: number
+  paymentFrequency: string
+  paymentFrequencyDisplayName: string
+  propertyId: number
+  propertyTitle: string
+  ownerId: string
+  ownerName: string
+  renterId: string
+  renterName: string
+}
+
+export interface AdminStatsContractsResponse {
+  appliedPeriod: unknown
+  totalContracts: number
+  totalContractValue: number
+  statusBreakdown: unknown[]
+  contracts: SearchPaginatedResponse<AdminContractStatsItem>
+}
+
 export interface AdminUserStatsItem {
   userId: string
   fullName: string
@@ -212,21 +279,24 @@ export interface PendingPropertyVerification {
   propertyId: number
   title: string
   address: string
+  city: string
+  cityDisplayName: string
   governorate: string
+  governorateDisplayName: string
   type: string
   typeDisplayName: string
   status: string
   statusDisplayName: string
   ownerFullName: string
   ownerEmail: string
-  ownerUserId: string
-  submittedAt: string
-  mainImage: string | null
+  ownerId: string
+  createdAt: string
+  primaryImage: string | null
 }
 
 export interface PendingPropertyVerificationDetail extends PendingPropertyVerification {
   description: string | null
-  ownershipDocumentUrl: string | null
+  proofOfOwnership: string | null
   images: string[]
 }
 
@@ -234,10 +304,18 @@ export const adminService = {
   getStats: () =>
     apiClient.get<ApiResponse<AdminStats>>('/api/Admin/dashboard/overview'),
 
-  getUsers: (page = 1, pageSize = 20) =>
-    apiClient.get<ApiResponse<SearchPaginatedResponse<AdminUser>>>(
-      `/api/Admin/users?pageNumber=${page}&pageSize=${pageSize}`,
-    ),
+  getUsers: (page = 1, pageSize = 20, search?: string, status?: string, includeDeleted?: boolean) => {
+    const params = new URLSearchParams({
+      pageNumber: String(page),
+      pageSize: String(pageSize),
+    })
+    if (search) params.append('Search', search)
+    if (status && status !== 'All') params.append('AccountStatus', status)
+    if (includeDeleted) params.append('IncludeDeleted', 'true')
+    return apiClient.get<ApiResponse<SearchPaginatedResponse<AdminUserStatsItem>>>(
+      `/api/Admin/users?${params}`,
+    )
+  },
 
   getUserStats: (page = 1, pageSize = 20) =>
     apiClient.get<ApiResponse<AdminUserStats>>(
@@ -272,6 +350,9 @@ export const adminService = {
 
   restoreUser: (userId: string) =>
     patchNoBody(`/api/Admin/users/${userId}/restore`),
+    
+  deleteUser: (userId: string) => 
+    apiClient.delete<ApiResponse<void>>(`/api/Admin/users/${userId}`),
 
   getRoleUsers: (page = 1, pageSize = 20, search?: string) => {
     const params = new URLSearchParams({
@@ -339,4 +420,46 @@ export const adminService = {
 
   reviewModerationReport: (reportId: number, payload: ReviewModerationReportPayload) =>
     apiClient.patch<ApiResponse<void>>(`/api/Admin/reports/${reportId}/review`, payload),
+
+  getProperties: (page = 1, pageSize = 20, search?: string, status?: string) => {
+    const params = new URLSearchParams({
+      pageNumber: String(page),
+      pageSize: String(pageSize),
+    })
+    if (search) params.append('Search', search)
+    if (status) params.append('Status', status)
+    params.append('IncludeDeleted', 'true')
+    return apiClient.get<ApiResponse<AdminStatsPropertiesResponse>>(
+      `/api/Admin/stats/properties?${params}`,
+    )
+  },
+
+  deleteProperty: (propertyId: number) =>
+    apiClient.delete<ApiResponse<void>>(`/api/Admin/stats/properties/${propertyId}`),
+
+  deleteComment: (propertyId: number, commentId: number) =>
+    apiClient.delete<ApiResponse<void>>(`/api/properties/${propertyId}/comments/${commentId}`),
+
+  restoreProperty: (propertyId: number) =>
+    patchNoBody(`/api/Admin/stats/properties/${propertyId}/restore-deleted`),
+
+  getContracts: (page = 1, pageSize = 20, search?: string, status?: string) => {
+    const params = new URLSearchParams({
+      pageNumber: String(page),
+      pageSize: String(pageSize),
+    })
+    if (search) params.append('Search', search)
+    if (status && status !== 'All') params.append('Status', status)
+    return apiClient.get<ApiResponse<AdminStatsContractsResponse>>(
+      `/api/Admin/stats/contracts?${params}`,
+    )
+  },
+
+  downloadContractPdf: (contractId: number) =>
+    axiosInstance.get<Blob>(`/api/contracts/${contractId}/download`, {
+      responseType: 'blob',
+    }),
+
+  cancelContract: (contractId: number) =>
+    patchNoBody(`/api/Admin/stats/contracts/${contractId}/cancel`),
 }

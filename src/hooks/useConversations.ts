@@ -9,6 +9,14 @@ export function useConversations(search?: string) {
   })
 }
 
+export function useGlobalUsersSearch(search?: string) {
+  return useQuery({
+    queryKey: ['globalUsers', search],
+    queryFn: () => messageService.searchUsers(search || ''),
+    enabled: !!search && search.length >= 2,
+  })
+}
+
 export function useMessages(conversationId: string | undefined) {
   return useQuery({
     queryKey: ['messages', conversationId],

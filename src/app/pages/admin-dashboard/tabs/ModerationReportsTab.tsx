@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   ShieldAlert,
   Loader2,
@@ -13,6 +13,7 @@ import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Input } from '../../../components/ui/input'
 import { Skeleton } from '../../../components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../components/ui/tooltip'
 import {
   Dialog,
   DialogContent,
@@ -39,8 +40,9 @@ import {
   useAdminModerationReports,
   useReviewModerationReport,
 } from '@/hooks/useAdminStats'
-import type { AdminModerationReport } from '@/services/adminService'
+import { adminService, type AdminModerationReport } from '@/services/adminService'
 import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDebounce } from '@/hooks/useDebounce'
 
 export function ModerationReportsTab() {
@@ -50,22 +52,67 @@ export function ModerationReportsTab() {
 
   const { data: reportsData, isLoading, isFetching } = useAdminModerationReports(1, pageSize, debouncedSearch)
   const reviewReport = useReviewModerationReport()
+  const queryClient = useQueryClient()
+
+  const [bannedUserIds, setBannedUserIds] = useState<Set<string>>(new Set())
+
+  const banUserMutation = useMutation({
+    mutationFn: (userId: string) => adminService.banUser(userId),
+    onSuccess: (_, userId) => {
+      toast.success('User banned successfully')
+      setBannedUserIds((prev) => {
+        const newSet = new Set(prev)
+        newSet.add(userId)
+        return newSet
+      })
+      queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
+    },
+    onError: () => toast.error('Failed to ban user')
+  })
+
+  const deletePropertyMutation = useMutation({
+    mutationFn: (propertyId: number) => adminService.deleteProperty(propertyId),
+    onSuccess: () => {
+      toast.success('Property deleted successfully')
+      queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
+    },
+    onError: () => toast.error('Failed to delete property')
+  })
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: ({ propertyId, commentId }: { propertyId: number, commentId: number }) => adminService.deleteComment(propertyId, commentId),
+    onSuccess: () => {
+      toast.success('Comment deleted successfully')
+      queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
+    },
+    onError: () => toast.error('Failed to delete comment')
+  })
 
   const responseData: any = (reportsData?.data as any)?.reports ?? reportsData?.data
   const reports: any[] = responseData?.items ?? responseData?.data ?? (Array.isArray(responseData) ? responseData : [])
   const totalCount = responseData?.totalCount ?? responseData?.total ?? reports.length
 
-  const [filterStatus, setFilterStatus] = useState('InReview')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const filterStatus = searchParams.get('reportStatus') || 'InReview'
+  const setFilterStatus = (val: string) => {
+    setSearchParams((prev) => {
+      prev.set('reportStatus', val)
+      return prev
+    })
+  }
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [appliedReportTypes, setAppliedReportTypes] = useState({
     user: true,
     message: true,
-    property: true
+    property: true,
+    comment: true
   })
   const [stagedReportTypes, setStagedReportTypes] = useState({
     user: true,
     message: true,
-    property: true
+    property: true,
+    comment: true
   })
 
   const handleDropdownOpenChange = (open: boolean) => {
@@ -84,17 +131,20 @@ export function ModerationReportsTab() {
     const type = r.reportableType ? String(r.reportableType).toLowerCase() : ''
     if (type === 'user' && !appliedReportTypes.user) return false
     if (type === 'message' && !appliedReportTypes.message) return false
-    if ((type === 'property' || type === 'propertycomment') && !appliedReportTypes.property) return false
+    if (type === 'property' && !appliedReportTypes.property) return false
+    if (type === 'propertycomment' && !appliedReportTypes.comment) return false
 
     return true
   })
 
   const [selectedReport, setSelectedReport] = useState<AdminModerationReport | null>(null)
   const [reviewStatus, setReviewStatus] = useState<string>('Resolved')
+  const [adminNote, setAdminNote] = useState<string>('')
 
   const openReviewModal = (report: AdminModerationReport) => {
     setSelectedReport(report)
     setReviewStatus(report.status === 'InReview' ? 'Resolved' : report.status)
+    setAdminNote(report.internalNotes || '')
   }
 
   const handleReviewSubmit = () => {
@@ -105,7 +155,7 @@ export function ModerationReportsTab() {
         reportId: selectedReport.reportId,
         payload: {
           status: reviewStatus as any,
-          note: '',
+          note: adminNote,
         },
       },
       {
@@ -119,7 +169,7 @@ export function ModerationReportsTab() {
   const getStatusIcon = (status?: string) => {
     const s = status?.toLowerCase() || ''
     if (s === 'resolved' || s === 'approved') return <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-    if (s === 'dismissed' || s === 'rejected') return <XCircle className="w-5 h-5 text-red-500 shrink-0" />
+    if (s === 'rejected' || s === 'dismissed') return <XCircle className="w-5 h-5 text-red-500 shrink-0" />
     return <ShieldAlert className="w-5 h-5 text-yellow-500 shrink-0" />
   }
 
@@ -161,7 +211,7 @@ export function ModerationReportsTab() {
           <div className="bg-white rounded-2xl p-6">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div className="flex flex-wrap items-center gap-2">
-                {['InReview', 'Resolved', 'Dismissed', 'All'].map((statusOption) => (
+                {['InReview', 'Resolved', 'Rejected', 'All'].map((statusOption) => (
                   <Button
                     key={statusOption}
                     variant={filterStatus === statusOption ? 'default' : 'outline'}
@@ -173,7 +223,7 @@ export function ModerationReportsTab() {
                     }`}
                     onClick={() => setFilterStatus(statusOption)}
                   >
-                    {statusOption === 'InReview' ? 'In Review' : statusOption}
+                    {statusOption === 'InReview' ? 'In Review' : statusOption === 'Rejected' ? 'Dismissed' : statusOption}
                   </Button>
                 ))}
               </div>
@@ -184,7 +234,7 @@ export function ModerationReportsTab() {
                     <Filter className="w-4 h-4 mr-2" />
                     Filter Types
                     <span className="ml-2 bg-[#3A6EA5]/10 text-[#3A6EA5] group-hover:bg-white group-hover:text-[#3A6EA5] px-1.5 py-0.5 rounded-md text-xs font-semibold">
-                      {Object.values(appliedReportTypes).filter(Boolean).length === 3 ? 'All' : Object.values(appliedReportTypes).filter(Boolean).length}
+                      {Object.values(appliedReportTypes).filter(Boolean).length === 4 ? 'All' : Object.values(appliedReportTypes).filter(Boolean).length}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -222,6 +272,17 @@ export function ModerationReportsTab() {
                     />
                     <span>Property Reports</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    onClick={() => setStagedReportTypes(prev => ({ ...prev, comment: !prev.comment }))}
+                    className="flex items-center gap-3 rounded-lg cursor-pointer p-2 focus:bg-[#F2F4F6]"
+                  >
+                    <Checkbox 
+                      checked={stagedReportTypes.comment} 
+                      className="data-[state=checked]:bg-white data-[state=checked]:text-[#3A6EA5] border-gray-300 data-[state=checked]:border-[#3A6EA5]" 
+                    />
+                    <span>Comment Reports</span>
+                  </DropdownMenuItem>
                   <div className="mt-2 pt-2 border-t flex justify-end">
                     <Button 
                       size="sm" 
@@ -252,12 +313,19 @@ export function ModerationReportsTab() {
               <div className="space-y-3 overflow-y-auto max-h-[600px] pr-2">
                 {filteredReports.map((report) => {
                   let listReason = report?.reason ? String(report.reason) : ''
+                  if (listReason.includes('REPORTMETAUSER')) {
+                    listReason = listReason.split('REPORTMETAUSER')[0].trim()
+                  }
+                  if (listReason.includes('REPORTMETAPROPERTY')) {
+                    listReason = listReason.split('REPORTMETAPROPERTY')[0].trim()
+                  }
+                  if (listReason.includes('REPORTMETAID')) {
+                    listReason = listReason.split('REPORTMETAID')[0].trim()
+                  }
                   if (listReason.includes('REPORTMETAMESSAGE')) {
                     listReason = listReason.split('REPORTMETAMESSAGE')[0].trim()
-                  } else if (listReason.includes('REPORTMETAPROPERTY')) {
-                    listReason = listReason.split('REPORTMETAPROPERTY')[0].trim()
-                  } else if (listReason.includes('REPORTMETAUSER')) {
-                    listReason = listReason.split('REPORTMETAUSER')[0].trim()
+                  } else if (listReason.includes('REPORTMETACOMMENT')) {
+                    listReason = listReason.split('REPORTMETACOMMENT')[0].trim()
                   }
 
                   return (
@@ -293,21 +361,27 @@ export function ModerationReportsTab() {
                         </p>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl border-[#3A6EA5]/20 shrink-0 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
-                      onClick={() => openReviewModal(report)}
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Review
-                    </Button>
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="rounded-xl border-[#3A6EA5]/20 shrink-0 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white w-8 h-8"
+                            onClick={() => openReviewModal(report)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Review Report</p></TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 )})}
               </div>
             )}
             
-            {totalCount > reports.length && filterStatus === 'All' && (
+            {totalCount > reports.length && (
               <div className="mt-4 flex justify-center items-center min-h-[40px]">
                 {isFetching ? (
                   <Loader2 className="w-6 h-6 animate-spin text-[#3A6EA5]" />
@@ -332,7 +406,7 @@ export function ModerationReportsTab() {
       </Card>
 
       <Dialog open={!!selectedReport} onOpenChange={(open) => !open && setSelectedReport(null)}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>Review Moderation Report</DialogTitle>
           </DialogHeader>
@@ -341,22 +415,37 @@ export function ModerationReportsTab() {
             let reportedMessageContent = ''
             let extractedPropertyId = ''
             let extractedUserId = ''
+            let reportedCommentContent = ''
+            let extractedMetaId = ''
+
+            if (displayReason.includes('REPORTMETAUSER')) {
+              const parts = displayReason.split('REPORTMETAUSER')
+              extractedUserId = parts[1]?.trim() || ''
+              displayReason = parts[0].trim()
+            }
+            if (displayReason.includes('REPORTMETAPROPERTY')) {
+              const parts = displayReason.split('REPORTMETAPROPERTY')
+              extractedPropertyId = parts[1]?.trim() || ''
+              displayReason = parts[0].trim()
+            }
+            if (displayReason.includes('REPORTMETAID')) {
+              const parts = displayReason.split('REPORTMETAID')
+              extractedMetaId = parts[1]?.trim() || ''
+              displayReason = parts[0].trim()
+            }
 
             if (displayReason.includes('REPORTMETAMESSAGE')) {
               const parts = displayReason.split('REPORTMETAMESSAGE')
               displayReason = parts[0].trim()
               reportedMessageContent = parts[1]?.trim() || ''
-            } else if (displayReason.includes('REPORTMETAPROPERTY')) {
-              const parts = displayReason.split('REPORTMETAPROPERTY')
+            } else if (displayReason.includes('REPORTMETACOMMENT')) {
+              const parts = displayReason.split('REPORTMETACOMMENT')
               displayReason = parts[0].trim()
-              extractedPropertyId = parts[1]?.trim() || ''
-            } else if (displayReason.includes('REPORTMETAUSER')) {
-              const parts = displayReason.split('REPORTMETAUSER')
-              displayReason = parts[0].trim()
-              extractedUserId = parts[1]?.trim() || ''
+              reportedCommentContent = parts[1]?.trim() || ''
             }
 
-            const finalTargetId = selectedReport.reportableTargetId || extractedPropertyId || extractedUserId
+            const backendTargetId = selectedReport.reportableTargetId || (selectedReport as any).targetId || ''
+            const finalTargetId = backendTargetId || extractedPropertyId || extractedUserId
 
             return (
             <div className="space-y-4 py-4">
@@ -373,7 +462,7 @@ export function ModerationReportsTab() {
                       {(selectedReport as any).targetLabel || finalTargetId} (Click to view)
                     </Link>
                   ) : (
-                    <span>{(selectedReport as any).targetLabel || 'Unknown'} (ID missing from backend)</span>
+                    <span>{(selectedReport as any).targetLabel || 'Unknown'}</span>
                   )}
                 </div>
               </div>
@@ -397,6 +486,15 @@ export function ModerationReportsTab() {
                 </div>
               )}
 
+              {reportedCommentContent && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Reported Review Content</p>
+                  <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-sm text-[#1a1a1a]">
+                    {reportedCommentContent}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <p className="text-sm font-medium">Review Status</p>
                 <Select value={reviewStatus} onValueChange={setReviewStatus}>
@@ -406,23 +504,116 @@ export function ModerationReportsTab() {
                   <SelectContent className="rounded-xl">
                     <SelectItem value="InReview">In Review</SelectItem>
                     <SelectItem value="Resolved">Resolved</SelectItem>
-                    <SelectItem value="Dismissed">Dismissed</SelectItem>
+                    <SelectItem value="Rejected">Dismissed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <DialogFooter className="pt-4 border-t border-[#3A6EA5]/10 mt-6">
-                <Button variant="outline" onClick={() => setSelectedReport(null)} className="rounded-xl">
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleReviewSubmit}
-                  disabled={reviewReport.isPending}
-                  className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-xl"
-                >
-                  {reviewReport.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Submit Review
-                </Button>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Internal Notes (Optional)</p>
+                <Textarea 
+                  placeholder="Add an internal note..."
+                  value={adminNote}
+                  onChange={(e) => setAdminNote(e.target.value)}
+                  className="min-h-[80px] bg-white border border-gray-200 resize-none text-[#1a1a1a] shadow-sm rounded-xl" 
+                />
+              </div>
+
+              <DialogFooter className="pt-4 border-t border-[#3A6EA5]/10 mt-6 flex-col sm:flex-col items-stretch space-y-4 sm:space-x-0">
+                {['property', 'user', 'propertycomment', 'message'].includes(selectedReport.reportableType?.toLowerCase() || '') ? (
+                  <div className="flex gap-2 w-full justify-start flex-wrap">
+                    {selectedReport.reportableType?.toLowerCase() === 'property' && (
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button variant="destructive" onClick={() => deletePropertyMutation.mutate(Number(finalTargetId))} disabled={!finalTargetId || deletePropertyMutation.isPending} className="rounded-xl flex-1 sm:flex-none">
+                                {deletePropertyMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                Delete Property
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {!finalTargetId && <TooltipContent><p>Target ID missing for this legacy report</p></TooltipContent>}
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {selectedReport.reportableType?.toLowerCase() === 'user' && (
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button variant="destructive" onClick={() => banUserMutation.mutate(finalTargetId)} disabled={!finalTargetId || bannedUserIds.has(finalTargetId) || banUserMutation.isPending} className="rounded-xl flex-1 sm:flex-none">
+                                {banUserMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                Ban User
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {bannedUserIds.has(finalTargetId) ? <TooltipContent><p>User already banned</p></TooltipContent> : (!finalTargetId && <TooltipContent><p>Target ID missing for this legacy report</p></TooltipContent>)}
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {selectedReport.reportableType?.toLowerCase() === 'message' && (
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button variant="destructive" onClick={() => banUserMutation.mutate(extractedUserId)} disabled={!extractedUserId || bannedUserIds.has(extractedUserId) || banUserMutation.isPending} className="rounded-xl flex-1 sm:flex-none">
+                                {banUserMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                Ban User
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {bannedUserIds.has(extractedUserId) ? <TooltipContent><p>User already banned</p></TooltipContent> : (!extractedUserId && <TooltipContent><p>Cannot extract User ID from legacy report</p></TooltipContent>)}
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {selectedReport.reportableType?.toLowerCase() === 'propertycomment' && (
+                      <>
+                        {extractedUserId && (
+                          <TooltipProvider delayDuration={200}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>
+                                  <Button variant="destructive" onClick={() => banUserMutation.mutate(extractedUserId)} disabled={bannedUserIds.has(extractedUserId) || banUserMutation.isPending} className="rounded-xl flex-1 sm:flex-none">
+                                    {banUserMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                    Ban User
+                                  </Button>
+                                </span>
+                              </TooltipTrigger>
+                              {bannedUserIds.has(extractedUserId) && <TooltipContent><p>User already banned</p></TooltipContent>}
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Button variant="destructive" onClick={() => deleteCommentMutation.mutate({ propertyId: Number(extractedPropertyId), commentId: Number(extractedMetaId) })} disabled={deleteCommentMutation.isPending || !extractedPropertyId || !extractedMetaId} className="rounded-xl flex-1 sm:flex-none">
+                                  {deleteCommentMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                                  Delete Comment
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            {(!extractedPropertyId || !extractedMetaId) && <TooltipContent><p>Missing IDs in legacy report</p></TooltipContent>}
+                          </Tooltip>
+                        </TooltipProvider>
+                      </>
+                    )}
+                  </div>
+                ) : null}
+                <div className="flex gap-2 w-full justify-end">
+                  <Button variant="outline" onClick={() => setSelectedReport(null)} className="rounded-xl">
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleReviewSubmit}
+                    disabled={reviewReport.isPending}
+                    className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-xl"
+                  >
+                    {reviewReport.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Submit Review
+                  </Button>
+                </div>
               </DialogFooter>
             </div>
             )

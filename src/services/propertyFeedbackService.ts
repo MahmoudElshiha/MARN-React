@@ -51,4 +51,26 @@ export const propertyFeedbackService = {
     )
     return response.data
   },
+
+  updateComment: async (
+    propertyId: string,
+    commentId: string,
+    payload: CreatePropertyCommentDto,
+  ): Promise<ApiResponse<PropertyCommentDto>> => {
+    const response = await axiosInstance.put(
+      `/api/properties/${propertyId}/comments/${commentId}`,
+      payload,
+    )
+    return response.data
+  },
+
+  deleteComment: async (
+    propertyId: string,
+    commentId: string,
+  ): Promise<ApiResponse<any>> => {
+    const response = await axiosInstance.delete(
+      `/api/properties/${propertyId}/comments/${commentId}`,
+    )
+    return response.data
+  },
 }

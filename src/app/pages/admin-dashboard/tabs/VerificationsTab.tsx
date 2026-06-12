@@ -9,6 +9,7 @@ import {
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Skeleton } from '../../../components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../components/ui/tooltip'
 import {
   useAdminVerifications,
   useAdminUserVerification,
@@ -113,7 +114,7 @@ export function VerificationsTab() {
                   <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
                     Status
                   </th>
-                  <th className="text-right py-4 px-4 text-[#1a1a1a] font-semibold">
+                  <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
                     Actions
                   </th>
                 </tr>
@@ -173,38 +174,52 @@ export function VerificationsTab() {
                         {getStatusBadge(item.accountStatusDisplayName)}
                       </td>
                       <td className="py-4 px-4">
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="rounded-xl border-[#3A6EA5]/20"
-                            onClick={() =>
-                              setSelectedVerificationId(item.userId)
-                            }
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white rounded-xl"
-                            disabled={approveVerification.isPending}
-                            onClick={() => handleApprove(item.userId)}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl"
-                            disabled={rejectVerification.isPending}
-                            onClick={() => handleReject(item.userId)}
-                          >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Reject
-                          </Button>
-                        </div>
+                        <TooltipProvider delayDuration={200}>
+                          <div className="flex gap-2 justify-start">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0"
+                                  onClick={() =>
+                                    setSelectedVerificationId(item.userId)
+                                  }
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent><p>View Details</p></TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  className="bg-green-600 hover:bg-green-700 text-white rounded-xl w-8 h-8 shrink-0"
+                                  disabled={approveVerification.isPending}
+                                  onClick={() => handleApprove(item.userId)}
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent><p>Approve</p></TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl w-8 h-8 shrink-0"
+                                  disabled={rejectVerification.isPending}
+                                  onClick={() => handleReject(item.userId)}
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent><p>Reject</p></TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TooltipProvider>
                       </td>
                     </tr>
                   ))

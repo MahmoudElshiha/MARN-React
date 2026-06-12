@@ -31,9 +31,10 @@ import {
   Cell,
 } from 'recharts'
 import { toast } from 'sonner'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useOwnerDashboard } from '@/hooks/useOwnerDashboard'
 import { useBookingMutations } from '@/hooks/useBookingRequests'
+import { paymentService } from '@/services/paymentService'
 
 const getContractStatusBadge = (status: string) => {
   const styles: Record<string, string> = {
@@ -54,14 +55,26 @@ const formatDate = (iso: string) =>
 export function OwnerDashboard() {
   const [view, setView] = useState<'monthly' | 'yearly'>('monthly')
 
-  const { data: dashboardResponse, isLoading } = useOwnerDashboard()
+  const { data: dashboardResponse, isLoading, refetch } = useOwnerDashboard()
 
   // Keep booking-request mutations (accept / reject) from the dedicated hook
   const { accept, reject } = useBookingMutations()
 
+  const [isConnectingAccount, setIsConnectingAccount] = useState(false)
+  const [isWithdrawing, setIsWithdrawing] = useState(false)
+
   const dashboard = dashboardResponse?.data
 
   // ── Derived values ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isLoading && window.location.hash) {
+      const id = window.location.hash.replace('#', '')
+      const element = document.getElementById(id)
+      if (element) {
+        setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 100)
+      }
+    }
+  }, [isLoading])
   const totalProperties = dashboard?.propertiesCount ?? 0
   const occupiedCount = dashboard?.occupiedPlaces ?? 0
   const vacantCount = dashboard?.vacantPlaces ?? 0
@@ -71,24 +84,19 @@ export function OwnerDashboard() {
     { name: 'Vacant', value: vacantCount, color: '#9CBBDC' },
   ]
 
-  // Map API earning entries → chart-friendly shape.
-  // The actual server field name for the value is unknown (empty arrays in sample);
-  // fall back through common alternatives until one is defined.
-  const pickEarning = (e: {
-    amount?: number
-    earning?: number
-    value?: number
-    total?: number
-  }) => e.amount ?? e.earning ?? e.value ?? e.total ?? 0
+  const getMonthName = (monthNumber: number) => {
+    const date = new Date(2000, monthNumber - 1, 1)
+    return date.toLocaleString('default', { month: 'short' })
+  }
 
   const monthlyChartData = (dashboard?.monthlyEarning ?? []).map((e) => ({
-    month: e.month,
-    earnings: pickEarning(e),
+    month: getMonthName(e.month),
+    earnings: e.total,
   }))
 
   const yearlyChartData = (dashboard?.yearlyEarning ?? []).map((e) => ({
-    month: e.month,
-    earnings: pickEarning(e),
+    month: e.year.toString(),
+    earnings: e.total,
   }))
 
   const chartData = view === 'monthly' ? monthlyChartData : yearlyChartData
@@ -99,22 +107,52 @@ export function OwnerDashboard() {
   const myProperties = dashboard?.properties ?? []
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleAcceptRequest = (id: string) => {
-    accept.mutate(id, {
+  const handleAcceptRequest = (id: number) => {
+    accept.mutate(id.toString(), {
       onSuccess: () => toast.success('Booking request accepted'),
       onError: () => toast.error('Failed to accept request'),
     })
   }
 
-  const handleDeclineRequest = (id: string) => {
-    reject.mutate(id, {
-      onSuccess: () => toast.error('Booking request declined'),
+  const handleDeclineRequest = (id: number) => {
+    reject.mutate(id.toString(), {
+      onSuccess: () => toast.success('Booking request declined'),
       onError: () => toast.error('Failed to decline request'),
     })
   }
 
   const handleDownloadContract = (contractId: string) => {
     toast.success(`Downloading contract ${contractId}`)
+  }
+
+  const handleConnectAccount = async () => {
+    try {
+      setIsConnectingAccount(true)
+      const res = await paymentService.connectAccount()
+      const url = typeof res.data === 'string' ? res.data : (res.data as any)?.url
+      if (url) {
+        window.location.href = url
+      } else {
+        toast.error('Failed to get onboarding link')
+      }
+    } catch (error) {
+      toast.error('Error connecting Stripe account')
+    } finally {
+      setIsConnectingAccount(false)
+    }
+  }
+
+  const handleWithdraw = async () => {
+    try {
+      setIsWithdrawing(true)
+      await paymentService.withdraw()
+      toast.success('Transfer initiated successfully')
+      refetch()
+    } catch (error) {
+      toast.error('Failed to initiate transfer')
+    } finally {
+      setIsWithdrawing(false)
+    }
   }
 
   return (
@@ -219,13 +257,25 @@ export function OwnerDashboard() {
                       {(dashboard?.onHoldEarnings ?? 0).toLocaleString()} EGP
                     </span>
                   </p>
-                  <Button
-                    size="sm"
-                    className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
-                    onClick={() => toast.success('Transfer initiated')}
-                  >
-                    Transfer Money
-                  </Button>
+                  {!dashboard?.stripeAccountEnabled ? (
+                    <Button
+                      size="sm"
+                      className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl mt-2"
+                      onClick={handleConnectAccount}
+                      disabled={isConnectingAccount}
+                    >
+                      {isConnectingAccount ? 'Connecting...' : 'Connect Stripe Account'}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl mt-2"
+                      onClick={handleWithdraw}
+                      disabled={isWithdrawing || (dashboard?.withdrawableEarnings ?? 0) <= 0}
+                    >
+                      {isWithdrawing ? 'Withdrawing...' : 'Withdraw Earnings'}
+                    </Button>
+                  )}
                 </>
               )}
             </CardContent>
@@ -306,11 +356,10 @@ export function OwnerDashboard() {
                       key={v}
                       size="sm"
                       variant={view === v ? 'default' : 'outline'}
-                      className={`rounded-xl ${
-                        view === v
+                      className={`rounded-xl ${view === v
                           ? 'bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white'
                           : 'bg-[#f5f7fa] hover:bg-[#3A6EA5]/10 text-[#1a1a1a] border border-[#3A6EA5]/20'
-                      }`}
+                        }`}
                       onClick={() => setView(v)}
                     >
                       {v.charAt(0).toUpperCase() + v.slice(1)}
@@ -321,7 +370,7 @@ export function OwnerDashboard() {
             </Card>
 
             {/* Booking Requests */}
-            <Card className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
+            <Card id="pending-requests" className="bg-white border-none rounded-3xl shadow-lg shadow-black/5">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-2xl text-[#1a1a1a]">
@@ -344,33 +393,32 @@ export function OwnerDashboard() {
                     No pending booking requests.
                   </p>
                 ) : (
-                  pendingRequests.map((request, index) => (
+                  pendingRequests.map((request) => (
                     <div
-                      key={request.id ?? index}
+                      key={request.bookingRequestId}
                       className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow border border-[#3A6EA5]/10"
                     >
                       <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-4">
                           <Avatar className="w-14 h-14">
-                            {request.tenantAvatarUrl && (
-                              <AvatarImage src={request.tenantAvatarUrl} />
+                            {request.renterProfileImage && (
+                              <AvatarImage src={request.renterProfileImage} />
                             )}
                             <AvatarFallback>
-                              {(request.tenant ?? request.tenantName ?? '?').charAt(0)}
+                              {request.renterName.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg text-[#1a1a1a] mb-1">
-                              {request.tenant ?? request.tenantName ?? 'Unknown Tenant'}
+                              {request.renterName}
                             </h3>
                             <p className="text-sm text-[#4a5565] mb-2">
-                              {request.property ?? request.propertyName ?? request.propertyTitle ?? 'Unknown Property'}
+                              {request.propertyTitle}
                             </p>
                             <div className="flex items-center gap-4 text-sm">
                               <div className="flex items-center gap-1 text-[#6a7282]">
                                 <Calendar className="w-4 h-4" />
-                                {/* requestedDates is pre-formatted by the server */}
-                                {request.requestedDates}
+                                {formatDate(request.startDate)} - {formatDate(request.endDate)}
                               </div>
                             </div>
                           </div>
@@ -378,10 +426,8 @@ export function OwnerDashboard() {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            disabled={
-                              accept.isPending || request.status !== 'pending'
-                            }
-                            onClick={() => handleAcceptRequest(request.id)}
+                            disabled={accept.isPending}
+                            onClick={() => handleAcceptRequest(request.bookingRequestId)}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl"
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
@@ -390,10 +436,8 @@ export function OwnerDashboard() {
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={
-                              reject.isPending || request.status !== 'pending'
-                            }
-                            onClick={() => handleDeclineRequest(request.id)}
+                            disabled={reject.isPending}
+                            onClick={() => handleDeclineRequest(request.bookingRequestId)}
                             className="flex-1 rounded-xl border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
                           >
                             <XCircle className="w-4 h-4 mr-1" />
@@ -464,27 +508,27 @@ export function OwnerDashboard() {
                             </td>
                           </tr>
                         ) : (
-                          contracts.map((contract, index) => (
+                          contracts.map((contract) => (
                             <tr
-                              key={contract.id ?? index}
+                              key={contract.contractId}
                               className="border-b border-[#3A6EA5]/10 hover:bg-[#f5f7fa] transition-colors"
                             >
                               <td className="py-4 px-4 text-[#1a1a1a] font-medium">
-                                {contract.id}
+                                {contract.contractId}
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
-                                {contract.propertyName}
+                                {contract.propertyTitle}
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
-                                {contract.tenantName}
+                                {contract.renterName}
                               </td>
                               <td className="py-4 px-4">
                                 <Badge
                                   className={getContractStatusBadge(
-                                    contract.status,
+                                    contract.contractStatus,
                                   )}
                                 >
-                                  {contract.status}
+                                  {contract.contractStatusDisplayName}
                                 </Badge>
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
@@ -495,7 +539,7 @@ export function OwnerDashboard() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() =>
-                                    handleDownloadContract(contract.id)
+                                    handleDownloadContract(contract.contractId.toString())
                                   }
                                   className="rounded-xl border-[#3A6EA5]/20"
                                 >
@@ -546,13 +590,7 @@ export function OwnerDashboard() {
                       >
                         <div className="flex gap-4">
                           <img
-                            src={
-                              property.imagePath ??
-                              property.image ??
-                              property.imageUrl ??
-                              property.images?.[0] ??
-                              ''
-                            }
+                            src={property.imagePath ?? ''}
                             alt={property.title}
                             className="w-32 h-32 rounded-xl object-cover"
                           />
@@ -563,25 +601,23 @@ export function OwnerDashboard() {
                                   {property.title}
                                 </h3>
                                 <p className="text-sm text-[#4a5565] mb-2">
-                                  {property.location} • {property.type}
+                                  {property.address} • {property.typeDisplayName}
                                 </p>
                               </div>
                               <Badge
                                 className={
-                                  property.status === 'rented'
+                                  property.occupiedPlaces > 0
                                     ? 'bg-green-100 text-green-700 hover:bg-green-100'
                                     : 'bg-orange-100 text-orange-700 hover:bg-orange-100'
                                 }
                               >
-                                {property.status === 'rented'
-                                  ? 'Occupied'
-                                  : 'Vacant'}
+                                {property.occupiedPlaces > 0 ? 'Occupied' : 'Vacant'}
                               </Badge>
                             </div>
                             <div className="grid grid-cols-2 gap-4 mb-4">
                               <div>
                                 <p className="text-xs text-[#6a7282] mb-1">
-                                  Monthly Rent
+                                  {property.rentalUnitDisplayName} Rent
                                 </p>
                                 <p className="font-semibold text-[#3A6EA5]">
                                   {property.price.toLocaleString()} EGP
@@ -593,7 +629,7 @@ export function OwnerDashboard() {
                                 </p>
                                 <p className="text-sm text-[#1a1a1a] flex items-center gap-1">
                                   <Star className="w-4 h-4 fill-[#3A6EA5] text-[#3A6EA5]" />
-                                  {property.rating ?? 'N/A'}
+                                  {property.averageRating ? property.averageRating.toFixed(1) : 'N/A'}
                                 </p>
                               </div>
                             </div>
@@ -696,11 +732,10 @@ export function OwnerDashboard() {
                   notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-4 rounded-xl transition-colors ${
-                        notification.isRead
+                      className={`p-4 rounded-xl transition-colors ${notification.isRead
                           ? 'bg-[#f5f7fa]'
                           : 'bg-[#3A6EA5]/5 border border-[#3A6EA5]/20'
-                      }`}
+                        }`}
                     >
                       <p className="text-sm text-[#1a1a1a] mb-1">
                         {notification.title}
@@ -813,7 +848,7 @@ export function OwnerDashboard() {
                       <Skeleton className="h-8 w-12 inline-block" />
                     ) : (
                       <>
-                        {contracts.filter((c) => c.status === 'Active').length}
+                        {contracts.filter((c) => c.contractStatus === 'Active').length}
                         <Eye className="w-5 h-5" />
                       </>
                     )}
