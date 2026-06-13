@@ -27,6 +27,7 @@ export function ChatbotPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [optimisticMessages, setOptimisticMessages] = useState<AssistantMessage[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
 
@@ -35,8 +36,16 @@ export function ChatbotPage() {
   const sendMessage = useSendMessage()
   const renameSession = useRenameSession()
 
-  const messages: AssistantMessage[] = messagesData?.data ?? []
+  const serverMessages: AssistantMessage[] = messagesData?.data ?? []
   const sessions: AssistantSession[] = sessionsData?.data ?? []
+
+  const messages = optimisticMessages.length > 0 ? optimisticMessages : serverMessages
+
+  useEffect(() => {
+    if (serverMessages.length > 0) {
+      setOptimisticMessages([])
+    }
+  }, [serverMessages])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -52,6 +61,10 @@ export function ChatbotPage() {
     const text = inputText
     setInputText('')
     setIsTyping(true)
+    setOptimisticMessages([
+      ...serverMessages,
+      { role: 'user', content: text, createdAt: new Date().toISOString() },
+    ])
 
     try {
       const result = await sendMessage.mutateAsync({
