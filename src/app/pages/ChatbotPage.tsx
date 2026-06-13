@@ -1,10 +1,12 @@
 import { motion } from 'motion/react'
-import { ArrowLeft, Send, Paperclip, Bot, User, PanelLeft, Plus, Pencil, Lock } from 'lucide-react'
+import { ArrowLeft, Send, Bot, User, PanelLeft, Plus, Pencil, Lock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Link } from 'react-router'
 import { useState, useRef, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   useGetSessionMessages,
@@ -365,9 +367,15 @@ export function ChatbotPage() {
                           : 'bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] text-white'
                       }`}
                     >
-                      <p className={message.role === 'assistant' ? 'text-[#1a1a1a]' : 'text-white'}>
-                        {message.content}
-                      </p>
+                      {message.role === 'assistant' ? (
+                        <div className="prose prose-sm max-w-none text-[#1a1a1a] prose-headings:text-[#1a1a1a] prose-strong:text-[#1a1a1a] prose-a:text-[#3A6EA5] prose-li:marker:text-[#3A6EA5]">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-white">{message.content}</p>
+                      )}
                     </div>
                     <span className="text-xs text-[#4a5565] mt-1 px-2">
                       {formatTime(message.createdAt)}
@@ -403,9 +411,6 @@ export function ChatbotPage() {
           <div className="bg-white border-t border-[#3A6EA5]/20 px-4 py-4 shadow-lg">
             <div className="max-w-4xl mx-auto">
               <div className="flex gap-3">
-                <button className="w-12 h-12 rounded-xl hover:bg-[#F2F4F6] flex items-center justify-center transition-colors flex-shrink-0">
-                  <Paperclip className="w-5 h-5 text-[#4a5565]" />
-                </button>
                 <Input
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
