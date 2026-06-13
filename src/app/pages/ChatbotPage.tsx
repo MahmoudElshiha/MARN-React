@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { ArrowLeft, Send, Paperclip, Bot, User, PanelLeft, Plus, Pencil } from 'lucide-react'
+import { ArrowLeft, Send, Paperclip, Bot, User, PanelLeft, Plus, Pencil, Lock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -13,9 +13,11 @@ import {
   useRenameSession,
 } from '@/hooks/useAssistant'
 import type { AssistantMessage, AssistantSession } from '@/services/assistantService'
+import { useAuth } from '@/hooks/useAuth'
 
 export function ChatbotPage() {
   const { t } = useTranslation('messages')
+  const { token } = useAuth()
 
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [inputText, setInputText] = useState('')
@@ -110,7 +112,7 @@ export function ChatbotPage() {
   const quickActions = [
     t('chatbot.suggestions.findProperties'),
     t('chatbot.suggestions.whatCanYouDo'),
-    t('chatbot.suggestions.pricingInfo'),
+    t('chatbot.suggestions.gettingStarted'),
   ]
 
   const SessionsPanel = (
@@ -186,6 +188,57 @@ export function ChatbotPage() {
       </div>
     </div>
   )
+
+  if (!token) {
+    return (
+      <div className="h-screen flex flex-col bg-gradient-to-br from-[#F2F4F6] to-[#9CBBDC]">
+        <div className="bg-white border-b border-[#3A6EA5]/20 px-4 py-4 shadow-sm flex-shrink-0">
+          <div className="max-w-full mx-auto flex items-center gap-4">
+            <Link
+              to="/"
+              className="w-10 h-10 rounded-xl hover:bg-[#F2F4F6] flex items-center justify-center transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-[#4a5565]" />
+            </Link>
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center shadow-lg">
+                <Bot className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-[#1a1a1a]">{t('chatbot.title')}</h1>
+                <p className="text-sm text-[#4a5565]">{t('chatbot.alwaysHere')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-sm"
+          >
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Lock className="w-9 h-9 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#1a1a1a] mb-3">
+              {t('chatbot.loginRequired')}
+            </h2>
+            <p className="text-[#4a5565] mb-8">
+              {t('chatbot.loginRequiredDescription')}
+            </p>
+            <Button
+              asChild
+              className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white rounded-2xl px-8 py-3 text-base font-medium shadow-lg"
+            >
+              <Link to="/login">{t('chatbot.loginButton')}</Link>
+            </Button>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-[#F2F4F6] to-[#9CBBDC]">

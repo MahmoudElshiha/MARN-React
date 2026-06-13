@@ -45,8 +45,11 @@
     "suggestions": {
       "findProperties": "البحث عن عقارات",
       "whatCanYouDo": "ماذا يمكنك أن تفعل؟",
-      "pricingInfo": "معلومات الأسعار",
+      "gettingStarted": "كيف أبدأ؟",
       "contactSupport": "تواصل مع الدعم"
-    }
+    },
+    "loginRequired": "يجب تسجيل الدخول",
+    "loginRequiredDescription": "يجب أن تكون مسجلاً للدخول للتحدث مع مساعد MARN.",
+    "loginButton": "تسجيل الدخول للمتابعة"
   }
 }

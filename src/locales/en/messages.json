@@ -45,8 +45,11 @@
     "suggestions": {
       "findProperties": "Find properties",
       "whatCanYouDo": "What can you do?",
-      "pricingInfo": "Pricing info",
+      "gettingStarted": "Getting started",
       "contactSupport": "Contact support"
-    }
+    },
+    "loginRequired": "Login required",
+    "loginRequiredDescription": "You need to be logged in to chat with the MARN Assistant.",
+    "loginButton": "Log in to continue"
   }
 }
