@@ -65,8 +65,8 @@ export function LoginPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#F2F4F6] flex items-center justify-center px-4 py-20">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center">
+    <div className="min-h-screen bg-[#F2F4F6] flex items-center justify-center px-4 py-10 sm:py-16 md:py-20">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-6 md:gap-12 items-center">
         {/* Left Side - Branding */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -80,10 +80,10 @@ export function LoginPage() {
             </div>
             <span className="text-4xl font-bold text-[#1a1a1a]">MARN</span>
           </div>
-          <h1 className="text-5xl font-bold text-[#1a1a1a] mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1a1a1a] mb-6">
             {t('login.heading')}
           </h1>
-          <p className="text-xl text-[#4a5565] mb-8">{t('login.subtitle')}</p>
+          <p className="text-base sm:text-lg md:text-xl text-[#4a5565] mb-8">{t('login.subtitle')}</p>
           <div className="space-y-4">
             {features.map((feature, index) => (
               <motion.div

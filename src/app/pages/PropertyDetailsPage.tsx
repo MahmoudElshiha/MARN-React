@@ -413,7 +413,7 @@ export function PropertyDetailsPage() {
 
   return (
     <div className="min-h-screen pb-20">
-      <div className="max-w-[1440px] mx-auto px-8 py-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
         {/* Header Actions */}
         <div className="flex items-center justify-between mb-6">
           <Link
@@ -549,7 +549,7 @@ export function PropertyDetailsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Title & Rating */}
@@ -564,7 +564,7 @@ export function PropertyDetailsPage() {
                 <>
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a] mb-2">
                         {property?.title}
                       </h1>
                       <div className="flex items-center gap-2 text-[#4a5565]">
@@ -614,7 +614,7 @@ export function PropertyDetailsPage() {
               </div>
             ) : property?.description ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
-                <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
+                <h2 className="text-xl sm:text-2xl font-semibold text-[#1a1a1a] mb-4">
                   {t('details.aboutProperty')}
                 </h2>
                 <p className="text-[#1a1a1a] leading-relaxed">
@@ -626,7 +626,7 @@ export function PropertyDetailsPage() {
             {/* Amenities */}
             {!isLoading && property?.amenities?.length ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
-                <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
+                <h2 className="text-xl sm:text-2xl font-semibold text-[#1a1a1a] mb-6">
                   Amenities
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -662,7 +662,7 @@ export function PropertyDetailsPage() {
             {!isLoading && property?.tenants && property.tenants.length > 0 && (
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold text-[#1a1a1a]">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-[#1a1a1a]">
                     Current Tenants
                   </h2>
                   {isShared && (
@@ -707,7 +707,7 @@ export function PropertyDetailsPage() {
             {/* Owner Profile */}
             {!isLoading && (
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
-                <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
+                <h2 className="text-xl sm:text-2xl font-semibold text-[#1a1a1a] mb-6">
                   {t('details.hostedBy')}
                 </h2>
                 <div className="flex items-center gap-4 mb-4">
@@ -757,7 +757,7 @@ export function PropertyDetailsPage() {
             {/* Reviews Section */}
             <div className="p-6 bg-[#f5f7fa] rounded-3xl mt-8 mb-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold text-[#1a1a1a]">
+                <h2 className="text-xl sm:text-2xl font-semibold text-[#1a1a1a]">
                   Reviews ({ratingSummary?.ratingsCount || property?.reviews || 0})
                 </h2>
                 <div className="flex items-center gap-2">
@@ -915,7 +915,7 @@ export function PropertyDetailsPage() {
 
           {/* Booking Widget */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24">
+            <div className="lg:sticky lg:top-24">
               <div className="bg-[#f5f7fa] rounded-3xl p-6 shadow-2xl shadow-[#3A6EA5]/20">
                 {isLoading ? (
                   <div className="space-y-4">
@@ -928,7 +928,7 @@ export function PropertyDetailsPage() {
                   <>
                     <div className="mb-6">
                       <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-4xl font-bold text-[#3A6EA5]">
+                        <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#3A6EA5]">
                           {property?.price?.toLocaleString()} EGP
                         </span>
                         <span className="text-[#4a5565]">{t('details.perMonth')}</span>

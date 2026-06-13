@@ -119,8 +119,8 @@ export function FilterSidebar({
     : cityOptions
 
   return (
-    <aside className="w-80 flex-shrink-0">
-      <div className="sticky top-24 bg-white rounded-3xl p-6 shadow-lg shadow-black/5 border border-[#3A6EA5]/10 space-y-7 max-h-[calc(100vh-7rem)] overflow-y-auto">
+    <aside className="w-full">
+      <div className="bg-white rounded-3xl p-6 shadow-lg shadow-black/5 border border-[#3A6EA5]/10 space-y-7 overflow-y-auto md:sticky md:top-24 md:max-h-[calc(100vh-7rem)]">
         {/* Sidebar header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -416,3 +416,4 @@ export function FilterSidebar({
     </aside>
   )
 }
+

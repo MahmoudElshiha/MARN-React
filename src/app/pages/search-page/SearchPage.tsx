@@ -1,9 +1,10 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { MapIcon, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/app/components/ui/button'
 import { Skeleton } from '@/app/components/ui/skeleton'
 import { PropertyCard } from '@/app/components/PropertyCard'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/app/components/ui/sheet'
 import { useProperties } from '@/hooks/useProperties'
 import { useEnumOptions } from '@/hooks/useEnumOptions'
 import { getImageUrl } from '@/constants/assets'
@@ -20,6 +21,7 @@ const PropertyMap = lazy(() =>
 
 export function SearchPage() {
   const { t } = useTranslation('properties')
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const search = useSearchFilters()
   const { options: cityOptions, loading: citiesLoading } = useEnumOptions('cities')
   const { options: governorateOptions, loading: governoratesLoading } = useEnumOptions('governorates')
@@ -30,9 +32,48 @@ export function SearchPage() {
   const total = paginated?.totalCount ?? 0
   const totalPages = paginated?.totalPages ?? Math.max(1, Math.ceil(total / PAGE_SIZE))
 
+  const filterSidebarProps = {
+    keyword: search.keyword,
+    onKeywordChange: search.setKeyword,
+    onKeywordCommit: search.commitKeyword,
+    city: search.city,
+    onCityChange: search.setCity,
+    cityOptions,
+    citiesLoading,
+    governorate: search.governorate,
+    onGovernorateChange: search.setGovernorate,
+    governorateOptions,
+    governoratesLoading,
+    propertyType: search.propertyType,
+    onPropertyTypeChange: search.setPropertyType,
+    rentalUnit: '' as const,
+    onRentalUnitChange: () => {},
+    isShared: search.isShared,
+    onIsSharedChange: search.setIsShared,
+    priceRange: search.priceRange,
+    onPriceRangeChange: search.setPriceRange,
+    selectedBeds: search.selectedBeds,
+    onBedsChange: search.setSelectedBeds,
+    selectedBaths: search.selectedBaths,
+    onBathsChange: search.setSelectedBaths,
+    minArea: search.minArea,
+    onMinAreaChange: search.setMinArea,
+    maxArea: search.maxArea,
+    onMaxAreaChange: search.setMaxArea,
+    minRating: search.minRating,
+    onMinRatingChange: search.setMinRating,
+    selectedAmenities: search.selectedAmenities,
+    onToggleAmenity: search.toggleAmenity,
+    amenitiesExpanded: search.amenitiesExpanded,
+    onAmenitiesExpandedChange: search.setAmenitiesExpanded,
+    visibleAmenities: search.visibleAmenities,
+    activeFilterCount: search.activeFilterCount,
+    onResetFilters: search.resetFilters,
+  }
+
   return (
     <div className="min-h-screen">
-      <div className="max-w-[1440px] mx-auto px-8 py-8">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
         <SearchHeader
           total={total}
           isLoading={isLoading}
@@ -40,49 +81,31 @@ export function SearchPage() {
           onSortChange={search.setSortIndex}
           showMap={search.showMap}
           onToggleMap={() => search.setShowMap(!search.showMap)}
+          activeFilterCount={search.activeFilterCount}
+          onOpenMobileFilters={() => setMobileFiltersOpen(true)}
         />
 
-        <div className="flex gap-8">
-          <FilterSidebar
-            keyword={search.keyword}
-            onKeywordChange={search.setKeyword}
-            onKeywordCommit={search.commitKeyword}
-            city={search.city}
-            onCityChange={search.setCity}
-            cityOptions={cityOptions}
-            citiesLoading={citiesLoading}
-            governorate={search.governorate}
-            onGovernorateChange={search.setGovernorate}
-            governorateOptions={governorateOptions}
-            governoratesLoading={governoratesLoading}
-            propertyType={search.propertyType}
-            onPropertyTypeChange={search.setPropertyType}
-            rentalUnit={search.rentalUnit}
-            onRentalUnitChange={search.setRentalUnit}
-            isShared={search.isShared}
-            onIsSharedChange={search.setIsShared}
-            priceRange={search.priceRange}
-            onPriceRangeChange={search.setPriceRange}
-            selectedBeds={search.selectedBeds}
-            onBedsChange={search.setSelectedBeds}
-            selectedBaths={search.selectedBaths}
-            onBathsChange={search.setSelectedBaths}
-            minArea={search.minArea}
-            onMinAreaChange={search.setMinArea}
-            maxArea={search.maxArea}
-            onMaxAreaChange={search.setMaxArea}
-            minRating={search.minRating}
-            onMinRatingChange={search.setMinRating}
-            selectedAmenities={search.selectedAmenities}
-            onToggleAmenity={search.toggleAmenity}
-            amenitiesExpanded={search.amenitiesExpanded}
-            onAmenitiesExpandedChange={search.setAmenitiesExpanded}
-            visibleAmenities={search.visibleAmenities}
-            activeFilterCount={search.activeFilterCount}
-            onResetFilters={search.resetFilters}
-          />
+        {/* Mobile filter Sheet */}
+        <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+          <SheetContent side="left" className="w-[85vw] max-w-sm p-0 overflow-y-auto">
+            <SheetHeader className="px-6 pt-6 pb-2">
+              <SheetTitle className="text-lg font-semibold text-[#1a1a1a]">
+                {t('search.filters')}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="px-4 pb-6">
+              <FilterSidebar {...filterSidebarProps} />
+            </div>
+          </SheetContent>
+        </Sheet>
 
-          <main className="flex-1">
+        <div className="flex gap-4 md:gap-8">
+          {/* Desktop sidebar */}
+          <div className="hidden md:block w-72 lg:w-80 flex-shrink-0">
+            <FilterSidebar {...filterSidebarProps} />
+          </div>
+
+          <main className="flex-1 min-w-0">
             {search.showMap && (
               <Suspense
                 fallback={
@@ -99,7 +122,7 @@ export function SearchPage() {
             )}
 
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                   <div key={i} className="bg-white rounded-3xl overflow-hidden">
                     <Skeleton className="aspect-[4/3] w-full" />
@@ -127,7 +150,7 @@ export function SearchPage() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {properties.map((property) => (
                   <PropertyCard
                     key={property.id}

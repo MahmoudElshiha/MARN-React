@@ -125,20 +125,20 @@ export function LandingPage() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-[#F2F4F6]">
-        <div className="relative max-w-[1440px] mx-auto px-8 py-24">
+        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <h1 className="text-6xl font-bold text-[#1a1a1a] mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#1a1a1a] mb-4 md:mb-6">
               {t('hero.title')}
-              <span className="block bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent p-3 ">
                 {t('hero.titleHighlight')}
               </span>
             </h1>
-            <p className="text-xl text-[#4a5565] mb-12 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-[#4a5565] mb-8 md:mb-12 max-w-2xl mx-auto">
               {t('hero.subtitle')}
             </p>
 
@@ -166,7 +166,7 @@ export function LandingPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12 md:mt-16">
               {STATS.map((stat, index) => (
                 <motion.div
                   key={stat.labelKey}
@@ -175,7 +175,7 @@ export function LandingPage() {
                   transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
                   className="text-center"
                 >
-                  <div className="text-4xl font-bold text-[#3A6EA5] mb-2">{stat.value}</div>
+                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#3A6EA5] mb-2">{stat.value}</div>
                   <div className="text-[#4a5565]">{t(stat.labelKey)}</div>
                 </motion.div>
               ))}
@@ -185,10 +185,10 @@ export function LandingPage() {
       </section>
 
       {/* Featured Properties */}
-      <section className="max-w-[1440px] mx-auto px-8 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">{t('featured.title')}</h2>
-          <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">{t('featured.subtitle')}</p>
+      <section className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 py-10 sm:py-14 md:py-20">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a] mb-4">{t('featured.title')}</h2>
+          <p className="text-base sm:text-lg text-[#4a5565] max-w-2xl mx-auto">{t('featured.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -221,11 +221,11 @@ export function LandingPage() {
       </section>
 
       {/* Platform Benefits */}
-      <section className="bg-[#f5f7fa] py-20">
-        <div className="max-w-[1440px] mx-auto px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">{t('benefits.title')}</h2>
-            <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">{t('benefits.subtitle')}</p>
+      <section className="bg-[#f5f7fa] py-10 sm:py-14 md:py-20">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a] mb-4">{t('benefits.title')}</h2>
+            <p className="text-base sm:text-lg text-[#4a5565] max-w-2xl mx-auto">{t('benefits.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -253,10 +253,10 @@ export function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="max-w-[1440px] mx-auto px-8 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">{t('testimonials.title')}</h2>
-          <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">{t('testimonials.subtitle')}</p>
+      <section className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 py-10 sm:py-14 md:py-20">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a] mb-4">{t('testimonials.title')}</h2>
+          <p className="text-base sm:text-lg text-[#4a5565] max-w-2xl mx-auto">{t('testimonials.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -294,16 +294,16 @@ export function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] py-20">
-        <div className="max-w-[1440px] mx-auto px-8 text-center">
+      <section className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] py-10 sm:py-14 md:py-20">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl font-bold text-white mb-6">{t('cta.title')}</h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">{t('cta.subtitle')}</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 md:mb-6">{t('cta.title')}</h2>
+            <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 md:mb-8 max-w-2xl mx-auto">{t('cta.subtitle')}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
@@ -314,8 +314,7 @@ export function LandingPage() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-[#3A6EA5] rounded-2xl px-8 py-6"
+                className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-[#3A6EA5] rounded-2xl px-8 py-6"
                 asChild
               >
                 <Link to="/owner-dashboard">{t('cta.listYourProperty')}</Link>

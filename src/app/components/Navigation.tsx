@@ -171,19 +171,19 @@ export function Navigation() {
   return (
     <>
       <nav className="sticky top-0 z-50 bg-white border-b border-[#3A6EA5]/20 shadow-sm">
-        <div className="max-w-[1440px] mx-auto px-8 py-4">
-          <div className="flex items-center justify-between gap-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 py-4">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-8">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center">
                 <span className="text-white font-bold text-xl">M</span>
               </div>
-              <span className="text-2xl font-bold text-[#1a1a1a]">MARN</span>
+              <span className="text-xl sm:text-2xl font-bold text-[#1a1a1a]">MARN</span>
             </Link>
 
             {/* Search Bar - Hidden on Home */}
             {!isHome && (
-              <div className="flex-1 max-w-2xl">
+              <div className="flex-1 max-w-xs sm:max-w-md md:max-w-2xl">
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
                   <Input
@@ -195,17 +195,17 @@ export function Navigation() {
             )}
 
             {/* Navigation Links */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Link
                 to="/search"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] rounded-xl transition-colors"
+                className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-[#1a1a1a] hover:bg-[#9CBBDC]/20 hover:text-[#3A6EA5] rounded-xl transition-colors"
               >
                 {t('explore')}
               </Link>
 
               {user?.role === 'tenant' && (
                 <Button
-                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
+                  className="hidden md:inline-flex bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl px-6 shadow-lg shadow-[#3A6EA5]/20"
                   disabled={isBecomeHostLoading}
                   onClick={handleBecomeHost}
                 >
@@ -250,7 +250,7 @@ export function Navigation() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50 flex flex-col"
+              className="fixed top-0 right-0 h-full w-[85vw] max-w-sm bg-white shadow-2xl z-50 flex flex-col"
             >
               {/* Drawer Header */}
               <div className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] p-6 shrink-0">
