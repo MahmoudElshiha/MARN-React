@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router'
 import { Navigation } from './components/Navigation'
 import { Footer } from './components/Footer'
 import { ScrollToTop } from './components/ScrollToTop'
@@ -38,12 +38,30 @@ import { ModalTestPage } from './pages/ModalTestPage'
 import { SavedPropertiesPage } from './pages/SavedPropertiesPage'
 import { Toaster } from './components/ui/sonner'
 
+const FULLSCREEN_ROUTES = ['/chatbot']
+
+function AppShell({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  const isFullscreen = FULLSCREEN_ROUTES.includes(location.pathname)
+
+  if (isFullscreen) {
+    return <>{children}</>
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F2F4F6]">
+      <Navigation />
+      {children}
+      <Footer />
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-[#F2F4F6]">
-        <Navigation />
+      <AppShell>
         <Routes>
           {/* Public pages */}
           <Route path="/" element={<LandingPage />} />
@@ -222,9 +240,8 @@ export default function App() {
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-        <Footer />
-        <Toaster richColors position="top-right" />
-      </div>
+      </AppShell>
+      <Toaster richColors position="top-right" />
     </Router>
   )
 }

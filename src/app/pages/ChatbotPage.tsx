@@ -115,7 +115,7 @@ export function ChatbotPage() {
   ]
 
   const SessionsPanel = (
-    <div className="w-72 flex-shrink-0 bg-white border-r border-[#3A6EA5]/20 flex flex-col h-full">
+    <div className="w-72 max-w-[85vw] flex-shrink-0 bg-white border-r border-[#3A6EA5]/20 flex flex-col h-full">
       <div className="p-4 border-b border-[#3A6EA5]/10">
         <button
           onClick={handleNewChat}
@@ -224,24 +224,28 @@ export function ChatbotPage() {
       </div>
 
       {/* Body: sidebar + chat */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Desktop sidebar — always visible */}
         <div className="hidden md:flex">
           {SessionsPanel}
         </div>
 
-        {/* Mobile sidebar — overlay */}
+        {/* Mobile backdrop */}
         {sidebarOpen && (
-          <>
-            <div
-              className="fixed inset-0 bg-black/30 z-20 md:hidden"
-              onClick={() => setSidebarOpen(false)}
-            />
-            <div className="fixed left-0 top-0 bottom-0 z-30 md:hidden flex flex-col">
-              {SessionsPanel}
-            </div>
-          </>
+          <div
+            className="absolute inset-0 bg-black/30 z-20 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
         )}
+
+        {/* Mobile sidebar — slides in from left, stays below header */}
+        <div
+          className={`absolute left-0 top-0 bottom-0 z-30 md:hidden transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          {SessionsPanel}
+        </div>
 
         {/* Chat area */}
         <div className="flex-1 flex flex-col overflow-hidden">
