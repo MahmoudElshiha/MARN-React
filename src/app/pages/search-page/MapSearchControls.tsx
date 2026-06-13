@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/components/ui/tooltip'
+import { useTranslation } from 'react-i18next'
 
 const RADIUS_OPTIONS = [5, 10, 25, 50] as const
 
@@ -19,6 +21,8 @@ interface MapSearchControlsProps {
   locationLabel: string
   onSetLocation: (lat: number, lng: number, label: string) => void
   onClearLocation: () => void
+  isSelectMode?: boolean
+  onToggleSelectMode?: () => void
 }
 
 export function MapSearchControls({
@@ -28,7 +32,10 @@ export function MapSearchControls({
   locationLabel,
   onSetLocation,
   onClearLocation,
+  isSelectMode,
+  onToggleSelectMode,
 }: MapSearchControlsProps) {
+  const { t } = useTranslation('properties')
   const [postalCode, setPostalCode] = useState('')
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
@@ -54,13 +61,13 @@ export function MapSearchControls({
       if (data.length > 0) {
         const lat = parseFloat(data[0].lat)
         const lng = parseFloat(data[0].lon)
-        onSetLocation(lat, lng, `Postal code ${code}`)
+        onSetLocation(lat, lng, t('mapInput.postalCodePrefix', { code }))
         setPostalCode('')
       } else {
-        setError('Postal code not found. Try another one.')
+        setError(t('mapInput.errors.postalCodeNotFound'))
       }
     } catch {
-      setError('Geocoding failed. Check your connection.')
+      setError(t('mapInput.errors.geocodingFailed'))
     } finally {
       setIsGeocoding(false)
     }
@@ -69,7 +76,7 @@ export function MapSearchControls({
   /* ── Browser geolocation ────────────────────────────────────────── */
   const handleMyLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser.')
+      setError(t('mapInput.errors.geolocationNotSupported'))
       return
     }
 
@@ -81,7 +88,7 @@ export function MapSearchControls({
         onSetLocation(
           position.coords.latitude,
           position.coords.longitude,
-          'My Location',
+          t('mapInput.myLocation'),
         )
         setIsLocating(false)
       },
@@ -89,16 +96,16 @@ export function MapSearchControls({
         setIsLocating(false)
         switch (err.code) {
           case err.PERMISSION_DENIED:
-            setError('Location access denied. Please enable it in your browser settings.')
+            setError(t('mapInput.errors.locationDenied'))
             break
           case err.POSITION_UNAVAILABLE:
-            setError('Location unavailable. Try again later.')
+            setError(t('mapInput.errors.locationUnavailable'))
             break
           case err.TIMEOUT:
-            setError('Location request timed out. Try again.')
+            setError(t('mapInput.errors.locationTimeout'))
             break
           default:
-            setError('Unable to get your location.')
+            setError(t('mapInput.errors.locationError'))
         }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
@@ -113,7 +120,7 @@ export function MapSearchControls({
           <div className="relative flex-1">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3A6EA5]" />
             <Input
-              placeholder="Search by postal code…"
+              placeholder={t('mapInput.searchByPostalCode')}
               value={postalCode}
               onChange={(e) => {
                 setPostalCode(e.target.value)
@@ -143,28 +150,57 @@ export function MapSearchControls({
         {/* ── Divider ─────────────────────────────────────────── */}
         <div className="w-px h-8 bg-[#3A6EA5]/15 hidden sm:block" />
 
-        {/* ── My Location button ──────────────────────────────── */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleMyLocation}
-          disabled={isLocating}
-          className="rounded-xl border-[#3A6EA5]/20 hover:bg-[#3A6EA5]/10 text-[#3A6EA5] h-10 px-4 shrink-0"
-        >
-          {isLocating ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Navigation className="w-4 h-4 mr-2" />
-          )}
-          My Location
-        </Button>
+        {/* ── My Location & Select Map buttons ────────────────── */}
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleMyLocation}
+                disabled={isLocating}
+                className="rounded-xl border-[#3A6EA5]/20 hover:bg-[#3A6EA5]/10 text-[#3A6EA5] h-10 w-10 shrink-0"
+              >
+                {isLocating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Navigation className="w-4 h-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={6} className="bg-[#1a1a1a] text-white text-xs border-none rounded-lg px-2 py-1.5 shadow-xl">
+              {t('mapInput.goToMyLocation')}
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={isSelectMode ? "default" : "outline"}
+                size="icon"
+                onClick={onToggleSelectMode}
+                className={`rounded-xl h-10 w-10 shrink-0 ${isSelectMode ? 'bg-[#3A6EA5] text-white hover:bg-[#2a5a8a]' : 'border-[#3A6EA5]/20 hover:bg-[#3A6EA5]/10 text-[#3A6EA5]'}`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 16l-3-3 3-3" />
+                  <path d="M19 16l3-3-3-3" />
+                  <path d="M12 2v20" />
+                  <path d="M2 12h20" />
+                </svg>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={6} className="bg-[#1a1a1a] text-white text-xs border-none rounded-lg px-2 py-1.5 shadow-xl">
+              {t('mapInput.selectOnMap', { defaultValue: 'Select on Map' })}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         {/* ── Radius selector (only shown when location is set) ── */}
         {hasLocation && (
           <>
             <div className="w-px h-8 bg-[#3A6EA5]/15 hidden sm:block" />
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-[#4a5565] font-medium mr-1">Radius:</span>
+              <span className="text-xs text-[#4a5565] font-medium mr-1">{t('mapInput.radius')}</span>
               {RADIUS_OPTIONS.map((r) => (
                 <button
                   key={r}

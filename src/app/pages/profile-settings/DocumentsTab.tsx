@@ -14,8 +14,10 @@ import { toast } from 'sonner'
 import { useProfile } from '@/hooks/useProfile'
 import { HttpError } from '@/services/httpErrors'
 import { getImageUrl } from '@/constants/assets'
+import { useTranslation } from 'react-i18next'
 
 export function DocumentsTab() {
+  const { t } = useTranslation('profile')
   const { data: profileResponse, updateLegal } = useProfile()
   const apiProfile = profileResponse?.data
 
@@ -88,7 +90,7 @@ export function DocumentsTab() {
       {
         onSuccess: () => {
           setFieldErrors({})
-          toast.success('Identity documents submitted for review')
+          toast.success(t('documentsTab.documentsSubmitted'))
         },
         onError: (err) => {
           if (err instanceof HttpError && err.validationErrors) {
@@ -101,7 +103,7 @@ export function DocumentsTab() {
             toast.error(
               err instanceof HttpError
                 ? err.message
-                : 'Failed to submit documents.',
+                : t('documentsTab.submitFailed'),
             )
           }
         },
@@ -116,10 +118,10 @@ export function DocumentsTab() {
           <IdCard className="w-6 h-6 text-[#3A6EA5]" />
           <div>
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Identity Verification
+              {t('documentsTab.title')}
             </CardTitle>
             <p className="text-sm text-[#4a5565] mt-1">
-              Upload your identification documents for account verification
+              {t('documentsTab.subtitle')}
             </p>
           </div>
         </div>
@@ -128,7 +130,7 @@ export function DocumentsTab() {
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <Label className="text-[#1a1a1a] mb-2 block">
-              Front Side of ID Card
+              {t('documentsTab.frontId')}
             </Label>
             <FileUpload
               id="frontIdCard"
@@ -155,7 +157,7 @@ export function DocumentsTab() {
 
           <div>
             <Label className="text-[#1a1a1a] mb-2 block">
-              Back Side of ID Card
+              {t('documentsTab.backId')}
             </Label>
             <FileUpload
               id="backIdCard"
@@ -182,7 +184,7 @@ export function DocumentsTab() {
 
           <div>
             <Label htmlFor="nameArabic" className="text-[#1a1a1a] mb-2 block">
-              Name in Arabic
+              {t('documentsTab.nameArabic')}
             </Label>
             <Input
               id="nameArabic"
@@ -195,7 +197,7 @@ export function DocumentsTab() {
                 clearFieldError('ArabicFullName')
               }}
               className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ArabicFullName ? 'border-red-400' : ''}`}
-              placeholder="أدخل اسمك بالعربية"
+              placeholder={t('documentsTab.nameArabicPlaceholder')}
               dir="rtl"
             />
             {fieldErrors.ArabicFullName && (
@@ -210,7 +212,7 @@ export function DocumentsTab() {
               htmlFor="addressArabic"
               className="text-[#1a1a1a] mb-2 block"
             >
-              Address in Arabic
+              {t('documentsTab.addressArabic')}
             </Label>
             <Input
               id="addressArabic"
@@ -223,7 +225,7 @@ export function DocumentsTab() {
                 clearFieldError('ArabicAddress')
               }}
               className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ArabicAddress ? 'border-red-400' : ''}`}
-              placeholder="أدخل عنوانك بالعربية"
+              placeholder={t('documentsTab.addressArabicPlaceholder')}
               dir="rtl"
             />
             {fieldErrors.ArabicAddress && (
@@ -238,7 +240,7 @@ export function DocumentsTab() {
               htmlFor="nationalIdNumber"
               className="text-[#1a1a1a] mb-2 block"
             >
-              National ID Number
+              {t('documentsTab.nationalId')}
             </Label>
             <Input
               id="nationalIdNumber"
@@ -251,7 +253,7 @@ export function DocumentsTab() {
                 clearFieldError('NationalIDNumber')
               }}
               className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.NationalIDNumber ? 'border-red-400' : ''}`}
-              placeholder="Enter your national ID number"
+              placeholder={t('documentsTab.nationalIdPlaceholder')}
             />
             {fieldErrors.NationalIDNumber && (
               <p className="text-xs text-red-500 mt-1">
@@ -263,14 +265,14 @@ export function DocumentsTab() {
 
         <div className="flex gap-4 justify-end pt-4">
           <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20">
-            Cancel
+            {t('documentsTab.cancel')}
           </Button>
           <Button
             disabled={updateLegal.isPending}
             onClick={handleSubmit}
             className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
           >
-            {updateLegal.isPending ? 'Submitting…' : 'Submit for Verification'}
+            {updateLegal.isPending ? t('documentsTab.submitting') : t('documentsTab.submit')}
           </Button>
         </div>
       </CardContent>

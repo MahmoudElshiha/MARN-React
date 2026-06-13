@@ -13,6 +13,7 @@ import {
 } from '../../../components/ui/select'
 import { Button } from '../../../components/ui/button'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { PropertyFormData, TouchedFields } from '../types'
 
 interface PropertyDetailsStepProps {
@@ -23,6 +24,7 @@ interface PropertyDetailsStepProps {
 }
 
 export function PropertyDetailsStep({ formData, updateFormData, touched, updateTouched }: PropertyDetailsStepProps) {
+  const { t } = useTranslation('properties')
   const [localTitle, setLocalTitle] = useState(formData.title)
   const [localAddress, setLocalAddress] = useState(formData.address)
   const [localCity, setLocalCity] = useState(formData.city)
@@ -43,13 +45,13 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
 
   const getFieldError = (field: keyof PropertyFormData, value: string) => {
     if (!touched[field]) return null
-    if (!value?.trim()) return 'This field is required'
+    if (!value?.trim()) return t('addProperty.validation.thisFieldRequired')
 
     if (field === 'title' && (value.length < 10 || value.length > 100)) {
-      return 'Title must be between 10 and 100 characters.'
+      return t('addProperty.validation.titleLength')
     }
     if (field === 'description' && (value.length < 20 || value.length > 2000)) {
-      return 'Description must be between 20 and 2000 characters.'
+      return t('addProperty.validation.descriptionLength')
     }
     return null
   }
@@ -62,20 +64,20 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-2">
-        Property Details
+        {t('addProperty.detailsStep.title')}
       </h2>
       <p className="text-sm text-[#8c94a3] mb-6">
-        Fields marked with <span className="text-red-500">*</span> are mandatory.
+        {t('addProperty.detailsStep.mandatoryNote')}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <Label htmlFor="title" className="text-[#1a1a1a] mb-2 block">
-            Property Title <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.propertyTitle')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="title"
-            placeholder="e.g., Modern Downtown Apartment"
+            placeholder={t('addProperty.detailsStep.propertyTitlePlaceholder')}
             className={getInputClass('title', formData.title)}
             value={localTitle}
             onChange={(e) => setLocalTitle(e.target.value)}
@@ -91,7 +93,7 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
 
         <div>
           <Label htmlFor="type" className="text-[#1a1a1a] mb-2 block">
-            Property Type <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.propertyType')} <span className="text-red-500">*</span>
           </Label>
           <Select
             value={formData.type}
@@ -101,13 +103,13 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             }}
           >
             <SelectTrigger className={getInputClass('type', formData.type)} onBlur={() => updateTouched('type')}>
-              <SelectValue placeholder="Select type" />
+              <SelectValue placeholder={t('addProperty.detailsStep.selectType')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="bed">Bed</SelectItem>
-              <SelectItem value="room">Room</SelectItem>
-              <SelectItem value="apartment">Apartment</SelectItem>
-              <SelectItem value="house">House</SelectItem>
+              <SelectItem value="bed">{t('addProperty.detailsStep.types.bed')}</SelectItem>
+              <SelectItem value="room">{t('addProperty.detailsStep.types.room')}</SelectItem>
+              <SelectItem value="apartment">{t('addProperty.detailsStep.types.apartment')}</SelectItem>
+              <SelectItem value="house">{t('addProperty.detailsStep.types.house')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -115,11 +117,11 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
 
       <div>
         <Label htmlFor="address" className="text-[#1a1a1a] mb-2 block">
-          Street Address <span className="text-red-500">*</span>
+          {t('addProperty.detailsStep.streetAddress')} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="address"
-          placeholder="123 Main Street"
+          placeholder={t('addProperty.detailsStep.streetAddressPlaceholder')}
           className={getInputClass('address', formData.address)}
           value={localAddress}
           onChange={(e) => setLocalAddress(e.target.value)}
@@ -133,11 +135,11 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <Label htmlFor="city" className="text-[#1a1a1a] mb-2 block">
-            City <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.city')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="city"
-            placeholder="San Francisco"
+            placeholder={t('addProperty.detailsStep.cityPlaceholder')}
             className={getInputClass('city', formData.city)}
             value={localCity}
             onChange={(e) => setLocalCity(e.target.value)}
@@ -149,11 +151,11 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
         </div>
         <div>
           <Label htmlFor="governorate" className="text-[#1a1a1a] mb-2 block">
-            Governorate <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.governorate')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="governorate"
-            placeholder="e.g., Riyadh"
+            placeholder={t('addProperty.detailsStep.governoratePlaceholder')}
             className={getInputClass('governorate', formData.governorate)}
             value={localGovernorate}
             onChange={(e) => setLocalGovernorate(e.target.value)}
@@ -165,11 +167,11 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
         </div>
         <div>
           <Label htmlFor="zip" className="text-[#1a1a1a] mb-2 block">
-            Postal Code <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.zipCode')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="zip"
-            placeholder="11564"
+            placeholder={t('addProperty.detailsStep.zipCodePlaceholder')}
             className={getInputClass('zip', formData.zip)}
             value={localZip}
             onChange={(e) => setLocalZip(e.target.value)}
@@ -185,12 +187,12 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
       <div className="bg-white rounded-2xl p-6">
         <Label className="text-[#1a1a1a] mb-3 block">
           <MapPin className="w-5 h-5 inline-block mr-2" />
-          Property Location on Map <span className="text-red-500">*</span>
+          {t('addProperty.detailsStep.propertyLocationOnMap')} <span className="text-red-500">*</span>
         </Label>
         <MapInput location={formData.mapLocation} onChange={(loc) => updateFormData({ mapLocation: loc })} />
         <div className="mt-3 flex items-center justify-between">
           <p className="text-xs text-[#4a5565]">
-            Drag the marker or click on the map to set the exact location of your property
+            {t('addProperty.detailsStep.dragMarkerOrClick')}
           </p>
           <p className="text-xs text-[#4a5565] font-mono bg-[#f5f7fa] px-2 py-1 rounded">
             {formData.mapLocation.lat.toFixed(4)}, {formData.mapLocation.lng.toFixed(4)}
@@ -201,7 +203,7 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div>
           <Label htmlFor="bedrooms" className="text-[#1a1a1a] mb-2 block">
-            Bedrooms <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.bedrooms')} <span className="text-red-500">*</span>
           </Label>
           <Select
             value={formData.bedrooms}
@@ -211,7 +213,7 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             }}
           >
             <SelectTrigger className={getInputClass('bedrooms', formData.bedrooms)} onBlur={() => updateTouched('bedrooms')}>
-              <SelectValue placeholder="Select" />
+              <SelectValue placeholder={t('addProperty.detailsStep.select')} />
             </SelectTrigger>
             <SelectContent>
               {[1, 2, 3, 4, 5, 6].map((num) => (
@@ -224,7 +226,7 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
         </div>
         <div>
           <Label htmlFor="beds" className="text-[#1a1a1a] mb-2 block">
-            Beds <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.beds')} <span className="text-red-500">*</span>
           </Label>
           <Select
             value={formData.beds}
@@ -234,7 +236,7 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             }}
           >
             <SelectTrigger className={getInputClass('beds', formData.beds)} onBlur={() => updateTouched('beds')}>
-              <SelectValue placeholder="Select" />
+              <SelectValue placeholder={t('addProperty.detailsStep.select')} />
             </SelectTrigger>
             <SelectContent>
               {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
@@ -247,7 +249,7 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
         </div>
         <div>
           <Label htmlFor="baths" className="text-[#1a1a1a] mb-2 block">
-            Bathrooms <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.bathrooms')} <span className="text-red-500">*</span>
           </Label>
           <Select
             value={formData.baths}
@@ -257,7 +259,7 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             }}
           >
             <SelectTrigger className={getInputClass('baths', formData.baths)} onBlur={() => updateTouched('baths')}>
-              <SelectValue placeholder="Select" />
+              <SelectValue placeholder={t('addProperty.detailsStep.select')} />
             </SelectTrigger>
             <SelectContent>
               {[1, 1.5, 2, 2.5, 3, 3.5, 4].map((num) => (
@@ -270,12 +272,12 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
         </div>
         <div>
           <Label htmlFor="sqm" className="text-[#1a1a1a] mb-2 block">
-            Square Meters <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.squareMeters')} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="sqm"
             type="number"
-            placeholder="120"
+            placeholder={t('addProperty.detailsStep.sqmPlaceholder')}
             className={getInputClass('sqm', formData.sqm)}
             value={localSqm}
             onChange={(e) => setLocalSqm(e.target.value)}
@@ -289,11 +291,11 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
 
       <div>
         <Label htmlFor="description" className="text-[#1a1a1a] mb-2 block">
-          Description <span className="text-red-500">*</span>
+          {t('addProperty.detailsStep.description')} <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="description"
-          placeholder="Describe your property..."
+          placeholder={t('addProperty.detailsStep.descriptionPlaceholder')}
           rows={6}
           className={getInputClass('description', formData.description)}
           value={localDescription}
@@ -312,12 +314,12 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
       <div className="bg-white rounded-2xl p-6 space-y-6">
         <div className="flex items-center gap-2 mb-2">
           <Users className="w-5 h-5 text-[#3A6EA5]" />
-          <h3 className="font-semibold text-[#1a1a1a]">Occupancy Details</h3>
+          <h3 className="font-semibold text-[#1a1a1a]">{t('addProperty.detailsStep.occupancyDetails')}</h3>
         </div>
 
         <div>
           <Label htmlFor="num-people" className="text-[#1a1a1a] mb-2 block">
-            Max Occupants (Number of People) <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.maxOccupants')} <span className="text-red-500">*</span>
           </Label>
           <Select
             value={formData.numPeople}
@@ -327,12 +329,12 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             }}
           >
             <SelectTrigger id="num-people" className={getInputClass('numPeople', formData.numPeople)} onBlur={() => updateTouched('numPeople')}>
-              <SelectValue placeholder="Select max occupants" />
+              <SelectValue placeholder={t('addProperty.detailsStep.selectMaxOccupants')} />
             </SelectTrigger>
             <SelectContent>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
-                  {num} {num === 1 ? 'Person' : 'People'}
+                  {num} {num === 1 ? t('addProperty.detailsStep.person') : t('addProperty.detailsStep.people')}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -341,10 +343,10 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
 
         <div>
           <Label htmlFor="occupancy-preference" className="text-[#1a1a1a] mb-3 block">
-            Occupancy Preference (Is Shared) <span className="text-red-500">*</span>
+            {t('addProperty.detailsStep.occupancyPreferenceLabel')} <span className="text-red-500">*</span>
           </Label>
           <p className="text-sm text-[#4a5565] mb-3">
-            How would you like this property to be occupied?
+            {t('addProperty.detailsStep.howWouldYouLike')}
           </p>
           <Select
             value={formData.occupancyPreference}
@@ -354,19 +356,19 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             }}
           >
             <SelectTrigger id="occupancy-preference" className={getInputClass('occupancyPreference', formData.occupancyPreference)} onBlur={() => updateTouched('occupancyPreference')}>
-              <SelectValue placeholder="Select occupancy preference" />
+              <SelectValue placeholder={t('addProperty.detailsStep.selectOccupancyPreference')} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="shared">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  <span>Shared - Different users per bed/room</span>
+                  <span>{t('addProperty.detailsStep.sharedOption')}</span>
                 </div>
               </SelectItem>
               <SelectItem value="single">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
-                  <span>Single User - Entire property for one user</span>
+                  <span>{t('addProperty.detailsStep.singleOption')}</span>
                 </div>
               </SelectItem>
             </SelectContent>
@@ -376,12 +378,10 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
         <div className="bg-[#9CBBDC]/20 rounded-xl p-4 flex items-start gap-3">
           <div>
             <p className="text-sm text-[#1a1a1a]">
-              <strong>Shared:</strong> Each bed/room can be rented to different
-              users. Ideal for roommate situations.
+              {t('addProperty.detailsStep.sharedDesc')}
             </p>
             <p className="text-sm text-[#1a1a1a] mt-2">
-              <strong>Single User:</strong> The entire property will be rented to
-              one person or family.
+              {t('addProperty.detailsStep.singleDesc')}
             </p>
           </div>
         </div>

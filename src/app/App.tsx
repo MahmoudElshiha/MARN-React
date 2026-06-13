@@ -36,6 +36,7 @@ import { EditPropertyPage } from './pages/edit-property/EditPropertyPage'
 import { PropertyByOwnerPage } from './pages/PropertyByOwnerPage'
 import { ModalTestPage } from './pages/ModalTestPage'
 import { SavedPropertiesPage } from './pages/SavedPropertiesPage'
+import EmailTestPage from './pages/EmailTestPage'
 import { Toaster } from './components/ui/sonner'
 
 export default function App() {
@@ -218,6 +219,7 @@ export default function App() {
           {/* Misc */}
           <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/modal-test" element={<ModalTestPage />} />
+          <Route path="/emailTest" element={<EmailTestPage />} />
 
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />

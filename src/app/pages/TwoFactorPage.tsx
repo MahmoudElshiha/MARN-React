@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useVerify2fa } from '@/hooks/useVerify2fa'
 import { toast } from 'sonner'
 import type { UserRole } from '@/types/user'
+import { useTranslation } from 'react-i18next'
 
 interface TwoFactorLocationState {
   email: string
@@ -22,6 +23,7 @@ function roleDestination(role: UserRole): string {
 }
 
 export function TwoFactorPage() {
+  const { t, i18n } = useTranslation('auth')
   const navigate = useNavigate()
   const location = useLocation()
   const state = location.state as TwoFactorLocationState | null
@@ -87,14 +89,14 @@ export function TwoFactorPage() {
       { email: state.email, code, rememberMe: state.remember },
       {
         onSuccess: ({ user }) => {
-          toast.success('Two-factor authentication verified!')
+          toast.success(t('twoFactor.verified'))
           navigate(roleDestination(user.role))
         },
         onError: (err) => {
           const msg =
             err instanceof Error
               ? err.message
-              : 'Invalid code. Please try again.'
+              : t('twoFactor.invalidCode')
           toast.error(msg)
           // Clear OTP inputs on error so the user can re-enter
           setOtp(['', '', '', '', '', ''])
@@ -120,8 +122,8 @@ export function TwoFactorPage() {
               to="/login"
               className="inline-flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] mb-6 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to login
+              <ArrowLeft className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
+              {t('twoFactor.backToLogin')}
             </Link>
 
             {/* Icon & Title */}
@@ -130,10 +132,10 @@ export function TwoFactorPage() {
                 <ShieldCheck className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2 text-center">
-                Two-Factor Authentication
+                {t('twoFactor.title')}
               </h2>
               <p className="text-[#4a5565] text-center">
-                A verification code was sent to
+                {t('twoFactor.subtitle')}
               </p>
               <p className="text-sm text-[#3A6EA5] font-semibold mt-1">
                 {state.email}
@@ -144,7 +146,7 @@ export function TwoFactorPage() {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div>
                 <label className="text-[#1a1a1a] text-sm font-medium mb-3 block text-center">
-                  Enter 6-digit code
+                  {t('twoFactor.enterCode')}
                 </label>
                 <div
                   className="flex gap-2 justify-center"
@@ -172,19 +174,19 @@ export function TwoFactorPage() {
                 disabled={otp.join('').length !== 6 || verify.isPending}
                 className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {verify.isPending ? 'Verifying…' : 'Verify & Sign In'}
+                {verify.isPending ? t('twoFactor.verifying') : t('twoFactor.verifyAndSignIn')}
               </Button>
             </form>
 
             {/* Help text */}
             <div className="mt-8 text-center">
               <p className="text-sm text-[#4a5565]">
-                Didn't receive the code?{' '}
+                {t('twoFactor.didntReceive')} {' '}
                 <Link
                   to="/contact"
                   className="text-[#3A6EA5] hover:underline font-semibold"
                 >
-                  Contact support
+                  {t('twoFactor.contactSupport')}
                 </Link>
               </p>
             </div>

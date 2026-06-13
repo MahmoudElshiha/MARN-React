@@ -35,13 +35,14 @@ import {
 } from '../components/ui/tabs'
 import { toast } from 'sonner'
 import { useDebounce } from '@/hooks/useDebounce'
-import type { Conversation, Message } from '@/types/message'
 import { messageService } from '@/services/messageService'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
 export function MessagesPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { t, i18n } = useTranslation('messages')
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null)
   const [tempConversation, setTempConversation] = useState<Conversation | null>(
@@ -124,9 +125,7 @@ export function MessagesPage() {
   const handleReportSubmit = () => {
     if (!effectiveConversation?.participant.id || !reportReason.trim()) return
     
-    const finalReason = reportTarget === 'Message' && reportedMessage 
-      ? `${reportReason.trim()} REPORTMETAMESSAGE ${reportedMessage.text} REPORTMETAID ${reportedMessage.id}`
-      : `${reportReason.trim()} REPORTMETAUSER ${effectiveConversation.participant.id}`
+    const finalReason = reportReason.trim()
 
     const targetId = reportTarget === 'Message' && reportedMessage 
       ? reportedMessage.id 
@@ -140,13 +139,13 @@ export function MessagesPage() {
       },
       {
         onSuccess: () => {
-          toast.success('Report submitted successfully')
+          toast.success(t('reportSubmitted'))
           setIsReportModalOpen(false)
           setReportReason('')
           setReportedMessage(null)
         },
         onError: () => {
-          toast.error('Failed to submit report. Please try again.')
+          toast.error(t('reportFailed'))
         }
       }
     )
@@ -284,9 +283,9 @@ export function MessagesPage() {
     <div className="min-h-screen">
       <div className="max-w-[1440px] mx-auto px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">Messages</h1>
+          <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">{t('title')}</h1>
           <p className="text-[#4a5565]">
-            Communicate with property owners and tenants
+            {t('subtitle')}
           </p>
         </div>
 
@@ -299,17 +298,17 @@ export function MessagesPage() {
               <div className="p-4 border-b border-[#3A6EA5]/10">
                 <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as 'recent' | 'global')} className="w-full mb-4">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="recent">Recent</TabsTrigger>
-                    <TabsTrigger value="global">Global</TabsTrigger>
+                    <TabsTrigger value="recent">{t('recent')}</TabsTrigger>
+                    <TabsTrigger value="global">{t('global')}</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a5565]" />
+                  <Search className={`absolute ${i18n.language === 'ar' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-[#4a5565]`} />
                   <Input
-                    placeholder={activeTab === 'recent' ? "Search conversations..." : "Search all users..."}
+                    placeholder={activeTab === 'recent' ? t('searchConversations') : t('searchUsers')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-white border-[#3A6EA5]/20 rounded-xl"
+                    className={`${i18n.language === 'ar' ? 'pr-9 pl-3' : 'pl-9 pr-3'} bg-white border-[#3A6EA5]/20 rounded-xl`}
                   />
                 </div>
               </div>
@@ -330,7 +329,7 @@ export function MessagesPage() {
                     ))
                   ) : displayConversations.length === 0 ? (
                     <div className="p-8 text-center text-[#4a5565]">
-                      No conversations yet.
+                      {t('noConversations')}
                     </div>
                   ) : (
                     displayConversations.map((conversation) => (
@@ -390,11 +389,11 @@ export function MessagesPage() {
                     ))
                   ) : debouncedSearchQuery.length < 2 ? (
                     <div className="p-8 text-center text-[#4a5565]">
-                      Type at least 2 characters to search users globally.
+                      {t('typeToSearch')}
                     </div>
                   ) : globalUsers.length === 0 ? (
                     <div className="p-8 text-center text-[#4a5565]">
-                      No users found for "{debouncedSearchQuery}".
+                      {t('noUsersFound', { query: debouncedSearchQuery })}
                     </div>
                   ) : (
                     globalUsers.map((user) => (
@@ -464,7 +463,7 @@ export function MessagesPage() {
                 </div>
               ) : !effectiveConversation ? (
                 <div className="flex-1 flex items-center justify-center text-[#4a5565]">
-                  Select a conversation to start chatting.
+                  {t('selectConversation')}
                 </div>
               ) : (
                 <>
@@ -476,7 +475,7 @@ export function MessagesPage() {
                           onClick={() => setIsMobileView(false)}
                           className="lg:hidden"
                         >
-                          <ChevronLeft className="w-6 h-6 text-[#1a1a1a]" />
+                          <ChevronLeft className={`w-6 h-6 text-[#1a1a1a] ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                         </button>
                         <Avatar className="w-10 h-10">
                           <AvatarImage
@@ -508,7 +507,7 @@ export function MessagesPage() {
                             onClick={() => openReportModal('User')}
                           >
                             <ShieldAlert className="w-4 h-4 mr-2" />
-                            Report User
+                            {t('reportUser')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -539,7 +538,7 @@ export function MessagesPage() {
                                 )
                               }
                             >
-                              View Property
+                              {t('viewProperty')}
                             </Button>
                           )}
                         </div>
@@ -560,7 +559,7 @@ export function MessagesPage() {
                       ))
                     ) : messages.length === 0 ? (
                       <div className="flex items-center justify-center h-full text-[#4a5565]">
-                        No messages yet. Say hello!
+                        {t('noMessagesSayHello')}
                       </div>
                     ) : (
                       messages.map((message) => (
@@ -603,7 +602,7 @@ export function MessagesPage() {
                                           onClick={() => openReportModal('Message', message)}
                                         >
                                           <ShieldAlert className="w-4 h-4 mr-2" />
-                                          Report Message
+                                          {t('reportMessage')}
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
@@ -628,11 +627,11 @@ export function MessagesPage() {
                             </div>
                             {message.status === 'error' && (
                               <div className="text-[#e53e3e] text-[11px] flex items-center gap-1 mt-1 pr-1">
-                                <span>Not received. Please try again.</span>
+                                <span>{t('notReceived')}</span>
                                 <button
                                   onClick={() => handleResend(message)}
                                   className="hover:bg-[#e53e3e]/10 p-1 rounded-full transition-colors"
-                                  title="Resend"
+                                  title={t('resend')}
                                 >
                                   <RefreshCw className="w-3 h-3" />
                                 </button>
@@ -681,7 +680,7 @@ export function MessagesPage() {
                               handleSendMessage()
                             }
                           }}
-                          placeholder="Type a message..."
+                          placeholder={t('typeMessage')}
                           className="min-h-[44px] max-h-[120px] rounded-2xl bg-white border-[#3A6EA5]/20 resize-none py-3"
                           disabled={sendMessage.isPending}
                         />
@@ -691,7 +690,7 @@ export function MessagesPage() {
                         disabled={!newMessage.trim() || sendMessage.isPending}
                         className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30 flex-shrink-0"
                       >
-                        <Send className="w-5 h-5" />
+                        <Send className={`w-5 h-5 ${i18n.language === 'ar' ? 'scale-x-[-1]' : ''}`} />
                       </Button>
                     </div>
                   </div>
@@ -711,14 +710,14 @@ export function MessagesPage() {
       }}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>{reportTarget === 'Message' ? 'Report Message' : 'Report User'}</DialogTitle>
+            <DialogTitle>{reportTarget === 'Message' ? t('reportMessage') : t('reportUser')}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-[#4a5565] mb-4">
-              Please provide a reason for reporting this {reportTarget.toLowerCase()}. Our moderation team will review this report shortly.
+              {t('reportDesc')}
             </p>
             <Textarea
-              placeholder="Reason for report..."
+              placeholder={t('reasonForReport')}
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
               className="min-h-[100px] rounded-xl resize-none"
@@ -726,14 +725,14 @@ export function MessagesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsReportModalOpen(false)} className="rounded-xl">
-              Cancel
+              {t('cancel')}
             </Button>
             <Button 
               onClick={handleReportSubmit} 
               disabled={!reportReason.trim() || submitReport.isPending}
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
-              {submitReport.isPending ? 'Submitting...' : 'Submit Report'}
+              {submitReport.isPending ? t('submitting') : t('submitReport')}
             </Button>
           </DialogFooter>
         </DialogContent>

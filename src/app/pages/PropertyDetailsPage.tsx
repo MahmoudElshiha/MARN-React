@@ -75,6 +75,7 @@ import { getImageUrl } from '@/constants/assets'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { propertyService } from '@/services/propertyService'
+import { useTranslation } from 'react-i18next'
 
 const AMENITY_ICONS: Record<string, React.ElementType> = {
   WiFi: Wifi,
@@ -103,6 +104,7 @@ export function PropertyDetailsPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data, isLoading, isError } = useProperty(id)
+  const { t, i18n } = useTranslation('properties')
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
@@ -190,7 +192,7 @@ export function PropertyDetailsPage() {
       {
         reportableType: 'Property',
         reportableTargetId: id,
-        reason: `${reportReason.trim()} REPORTMETAPROPERTY ${id}`,
+        reason: reportReason.trim(),
       },
       {
         onSuccess: () => {
@@ -215,7 +217,7 @@ export function PropertyDetailsPage() {
       {
         reportableType: 'PropertyComment',
         reportableTargetId: commentTargetId.toString(),
-        reason: `${reviewReportReason.trim()} REPORTMETACOMMENT ${selectedReviewToReport.content} REPORTMETAID ${commentTargetId} REPORTMETAPROPERTY ${id} REPORTMETAUSER ${targetUserId}`,
+        reason: reviewReportReason.trim(),
       },
       {
         onSuccess: () => {
@@ -235,12 +237,12 @@ export function PropertyDetailsPage() {
   const maxOccupants = property?.maxOccupants || property?.guests || 1
   const currentOccupantsCount = property?.currentOccupantsCount || property?.tenants?.length || 0
   const hasSpace = currentOccupantsCount < maxOccupants
-  const isAvailable = property?.status === 'available' || property?.availability === true
-  const isInactive = property?.status === 'inactive' || property?.isActive === false
+  const isAvailable = property?.status === 'available' || (property as any)?.availability === true
+  const isInactive = property?.status === 'inactive' || (property as any)?.isActive === false
   const canBook = isAvailable || (isShared && hasSpace && !isInactive)
 
   let unavailableText = 'Property Unavailable'
-  const isOccupied = property?.status === 'rented' || property?.status === 'Occupied' || property?.status === 'occupied' || (isShared && !hasSpace) || property?.availability === false
+  const isOccupied = property?.status === 'rented' || (property?.status as any) === 'Occupied' || (property?.status as any) === 'occupied' || (isShared && !hasSpace) || (property as any)?.availability === false
   if (isOccupied) {
     if (currentOccupantsCount > 0 && maxOccupants > 1) {
       unavailableText = `Occupied ${currentOccupantsCount}/${maxOccupants}`
@@ -283,7 +285,7 @@ export function PropertyDetailsPage() {
     
     let paymentFrequency = 'Monthly';
     if (property?.rentalUnit === 'Daily') paymentFrequency = 'OneTime';
-    if (property?.rentalUnit === 'Quarterly') paymentFrequency = 'Quarterly';
+    if ((property?.rentalUnit as any) === 'Quarterly') paymentFrequency = 'Quarterly';
     if (property?.rentalUnit === 'Yearly') paymentFrequency = 'Yearly';
 
     bookMutation.mutate({
@@ -401,9 +403,9 @@ export function PropertyDetailsPage() {
   if (isError) {
     return (
       <div className="min-h-screen flex items-center justify-center text-[#4a5565]">
-        Property not found.{' '}
+        {t('details.propertyNotFound')}{' '}
         <Link to="/search" className="text-[#3A6EA5] hover:underline ml-1">
-          Back to search
+          {t('details.backToSearch')}
         </Link>
       </div>
     )
@@ -419,7 +421,7 @@ export function PropertyDetailsPage() {
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
-            Back to Search
+            {t('details.backToSearch')}
           </Link>
           <div className="flex gap-3">
             <Button
@@ -456,7 +458,7 @@ export function PropertyDetailsPage() {
                   onClick={() => setIsReportModalOpen(true)}
                 >
                   <ShieldAlert className="w-4 h-4 mr-2" />
-                  Report Property
+                  {t('details.reportProperty')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -594,8 +596,8 @@ export function PropertyDetailsPage() {
                     </span>
                     <span className="text-[#4a5565]">•</span>
                     <span className="text-[#1a1a1a]">
-                      {(property as any)?.bedrooms ?? property?.beds} {((property as any)?.bedrooms ?? property?.beds) === 1 ? 'bed' : 'beds'} • {(property as any)?.bathrooms ?? property?.baths} {((property as any)?.bathrooms ?? property?.baths) === 1 ? 'bath' : 'baths'}
-                      {property?.area ? ` • ${property.area} sq ft` : ''}
+                      {(property as any)?.bedrooms ?? property?.beds} {((property as any)?.bedrooms ?? property?.beds) === 1 ? t('addProperty.detailsStep.bed') : t('addProperty.detailsStep.beds')} • {(property as any)?.bathrooms ?? property?.baths} {((property as any)?.bathrooms ?? property?.baths) === 1 ? t('addProperty.detailsStep.bath') : t('addProperty.detailsStep.baths')}
+                      {property?.area ? ` • ${property.area} ${t('details.sqm')}` : ''}
                     </span>
                   </div>
                 </>
@@ -613,7 +615,7 @@ export function PropertyDetailsPage() {
             ) : property?.description ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
-                  About This Property
+                  {t('details.aboutThisProperty')}
                 </h2>
                 <p className="text-[#1a1a1a] leading-relaxed">
                   {property.description}
@@ -625,7 +627,7 @@ export function PropertyDetailsPage() {
             {!isLoading && property?.amenities?.length ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Amenities
+                  {t('details.amenities')}
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {property.amenities.map((amenityItem: any) => {
@@ -647,7 +649,7 @@ export function PropertyDetailsPage() {
                           )}
                         </div>
                         <span className="text-sm text-[#1a1a1a] text-center">
-                          {name}
+                          {t(`addProperty.detailsStep.amenitiesList.${name.replace(/[^a-zA-Z]/g, '')}`, { defaultValue: name })}
                         </span>
                       </div>
                     )
@@ -661,7 +663,7 @@ export function PropertyDetailsPage() {
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-semibold text-[#1a1a1a]">
-                    Current Tenants
+                    {t('details.currentTenants')}
                   </h2>
                   {isShared && (
                     <span className="px-3 py-1 bg-[#3A6EA5]/10 text-[#3A6EA5] rounded-full text-sm font-medium">
@@ -706,7 +708,7 @@ export function PropertyDetailsPage() {
             {!isLoading && (
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Hosted By
+                  {t('details.hostedBy')}
                 </h2>
                 <div className="flex items-center gap-4 mb-4">
                   <Avatar className="w-16 h-16">
@@ -743,7 +745,7 @@ export function PropertyDetailsPage() {
                     }}
                   >
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    Message
+                    {t('details.message')}
                   </Button>
                 </div>
                 <p className="text-[#1a1a1a] mt-4">
@@ -756,7 +758,7 @@ export function PropertyDetailsPage() {
             <div className="p-6 bg-[#f5f7fa] rounded-3xl mt-8 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a]">
-                  Reviews ({ratingSummary?.ratingsCount || property?.reviews || 0})
+                  {t('details.reviews')} ({ratingSummary?.ratingsCount || property?.reviews || 0})
                 </h2>
                 <div className="flex items-center gap-2">
                   <Star className="w-6 h-6 fill-[#FFB800] text-[#FFB800]" />
@@ -769,7 +771,7 @@ export function PropertyDetailsPage() {
               {/* Add Review Form */}
               {isAuthenticated ? (
                 <div className="p-4 bg-white rounded-2xl mb-6">
-                  <h4 className="font-semibold text-[#1a1a1a] mb-3">Leave a Review</h4>
+                  <h4 className="font-semibold text-[#1a1a1a] mb-3">{t('details.leaveReview')}</h4>
                   <div className="flex items-center gap-2 mb-3">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -799,14 +801,14 @@ export function PropertyDetailsPage() {
                     disabled={isSubmittingComment || !newCommentText.trim()}
                     className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white"
                   >
-                    {isSubmittingComment ? 'Submitting...' : 'Post Review'}
+                    {isSubmittingComment ? t('details.submitting') : t('details.postReview')}
                   </Button>
                 </div>
               ) : (
                 <div className="p-4 bg-white rounded-2xl mb-6 flex flex-col items-center justify-center text-center">
-                  <p className="text-[#4a5565] mb-4">Please log in to leave a review.</p>
+                  <p className="text-[#4a5565] mb-4">{t('details.loginToReview')}</p>
                   <Button onClick={() => navigate('/login')} className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">
-                    Login
+                    {t('details.login')}
                   </Button>
                 </div>
               )}
@@ -817,7 +819,7 @@ export function PropertyDetailsPage() {
                     <div key={comment.commentId} className="p-4 bg-white rounded-2xl">
                       <div className="flex items-start gap-4 mb-3">
                         <Avatar className="w-12 h-12">
-                          {comment.userProfileImage && <AvatarImage src={comment.userProfileImage} />}
+                          {comment.userProfileImage && <AvatarImage src={getImageUrl(comment.userProfileImage)} />}
                           <AvatarFallback>
                             {comment.userDisplayName?.slice(0, 2).toUpperCase() || 'U'}
                           </AvatarFallback>
@@ -848,7 +850,7 @@ export function PropertyDetailsPage() {
                                         }}
                                       >
                                         <Edit className="w-4 h-4 mr-2" />
-                                        Edit Review
+                                        {t('details.editReview')}
                                       </DropdownMenuItem>
                                     )}
                                     <DropdownMenuItem 
@@ -859,7 +861,7 @@ export function PropertyDetailsPage() {
                                       }}
                                     >
                                       <ShieldAlert className="w-4 h-4 mr-2" />
-                                      Report Review
+                                      {t('details.reportReview')}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -925,9 +927,11 @@ export function PropertyDetailsPage() {
                 ) : (
                   <>
                     <div className="mb-6">
-                      <div className="flex items-baseline gap-2 mb-1">
+                      <div className="flex items-baseline gap-2 mb-1" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
                         <span className="text-4xl font-bold text-[#3A6EA5]">
-                          {property?.price?.toLocaleString()} EGP
+                          {i18n.language === 'ar' 
+                            ? `${property?.price?.toLocaleString()} ${t('currency', { ns: 'common' })}` 
+                            : `${t('currency', { ns: 'common' })} ${property?.price?.toLocaleString()}`}
                         </span>
                         <span className="text-[#4a5565]">/ month</span>
                       </div>
@@ -947,7 +951,7 @@ export function PropertyDetailsPage() {
                     <div className="space-y-4 mb-6">
                       <div>
                         <label className="text-sm text-[#1a1a1a] mb-2 block">
-                          Move-in Date
+                          {t('details.moveInDate')}
                         </label>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -956,7 +960,7 @@ export function PropertyDetailsPage() {
                               className="w-full justify-start text-left rounded-xl border-[#3A6EA5]/20 hover:bg-white"
                             >
                               <Calendar className="mr-2 h-4 w-4 text-[#3A6EA5]" />
-                              {checkIn ? format(checkIn, 'PPP') : 'Select date'}
+                              {checkIn ? format(checkIn, 'PPP') : t('details.selectDate')}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -971,11 +975,11 @@ export function PropertyDetailsPage() {
                       </div>
                       <div>
                         <label className="text-sm text-[#1a1a1a] mb-2 block">
-                          Duration
+                          {t('details.duration')}
                         </label>
                         <Select value={duration} onValueChange={setDuration}>
                           <SelectTrigger className="w-full rounded-xl border-[#3A6EA5]/20 bg-white">
-                            <SelectValue placeholder="Select duration" />
+                            <SelectValue placeholder={t('details.selectDuration')} />
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from(
@@ -997,30 +1001,36 @@ export function PropertyDetailsPage() {
 
                     {/* Price Summary */}
                     <div className="space-y-3 mb-6 p-4 bg-white rounded-2xl">
-                      <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Monthly rent</span>
-                        <span>{property?.price?.toLocaleString()} EGP</span>
-                      </div>
-                      <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Security deposit</span>
-                        <span>{property?.price?.toLocaleString()} EGP</span>
-                      </div>
-                      <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Service fee</span>
+                      <div className="flex justify-between text-[#1a1a1a]" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                        <span>{t('details.monthlyRent')}</span>
                         <span>
-                          {Math.round(
-                            (property?.price ?? 0) * 0.05,
-                          ).toLocaleString()}{' '}
-                          EGP
+                          {i18n.language === 'ar' 
+                            ? `${property?.price?.toLocaleString()} ${t('currency', { ns: 'common' })}` 
+                            : `${t('currency', { ns: 'common' })} ${property?.price?.toLocaleString()}`}
                         </span>
                       </div>
-                      <div className="border-t border-[#3A6EA5]/20 pt-3 flex justify-between font-semibold text-[#1a1a1a]">
-                        <span>Total (First Month)</span>
+                      <div className="flex justify-between text-[#1a1a1a]" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                        <span>{t('details.securityDeposit')}</span>
+                        <span>
+                          {i18n.language === 'ar' 
+                            ? `${property?.price?.toLocaleString()} ${t('currency', { ns: 'common' })}` 
+                            : `${t('currency', { ns: 'common' })} ${property?.price?.toLocaleString()}`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-[#1a1a1a]" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                        <span>{t('details.serviceFee')}</span>
+                        <span>
+                          {i18n.language === 'ar' 
+                            ? `${Math.round((property?.price ?? 0) * 0.05).toLocaleString()} ${t('currency', { ns: 'common' })}` 
+                            : `${t('currency', { ns: 'common' })} ${Math.round((property?.price ?? 0) * 0.05).toLocaleString()}`}
+                        </span>
+                      </div>
+                      <div className="border-t border-[#3A6EA5]/20 pt-3 flex justify-between font-semibold text-[#1a1a1a]" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                        <span>{t('details.totalFirstMonth')}</span>
                         <span className="text-[#3A6EA5]">
-                          {Math.round(
-                            (property?.price ?? 0) * 2.05,
-                          ).toLocaleString()}{' '}
-                          EGP
+                          {i18n.language === 'ar' 
+                            ? `${Math.round((property?.price ?? 0) * 2.05).toLocaleString()} ${t('currency', { ns: 'common' })}` 
+                            : `${t('currency', { ns: 'common' })} ${Math.round((property?.price ?? 0) * 2.05).toLocaleString()}`}
                         </span>
                       </div>
                     </div>
@@ -1034,12 +1044,12 @@ export function PropertyDetailsPage() {
                       {bookMutation.isPending ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Sending Request...
+                          {t('details.sendingRequest')}
                         </>
                       ) : !canBook ? (
                         unavailableText
                       ) : (
-                        'Book Now'
+                        t('details.bookNow')
                       )}
                     </Button>
 
@@ -1049,11 +1059,11 @@ export function PropertyDetailsPage() {
                       className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                       onClick={handleScheduleTour}
                     >
-                      Schedule Tour
+                      {t('details.scheduleTour')}
                     </Button>
 
                     <p className="text-xs text-center text-[#4a5565] mt-4">
-                      You won't be charged yet
+                      {t('details.wontBeChargedYet')}
                     </p>
                   </>
                 )}
@@ -1065,11 +1075,10 @@ export function PropertyDetailsPage() {
                   <Users className="w-5 h-5 text-[#3A6EA5] flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-semibold text-[#1a1a1a] mb-1">
-                      Looking for Roommates?
+                      {t('details.lookingForRoommates')}
                     </h4>
                     <p className="text-sm text-[#4a5565]">
-                      Use our roommate matching feature to find compatible
-                      housemates
+                      {t('details.roommateMatchingDesc')}
                     </p>
                   </div>
                 </div>
@@ -1085,14 +1094,14 @@ export function PropertyDetailsPage() {
       }}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Report Property</DialogTitle>
+            <DialogTitle>{t('details.reportProperty')}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-[#4a5565] mb-4">
-              Please provide a reason for reporting this property. Our moderation team will review this report shortly.
+              {t('details.reportPropertyDesc')}
             </p>
             <Textarea
-              placeholder="Reason for report..."
+              placeholder={t('details.reasonForReport')}
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
               className="min-h-[100px] rounded-xl resize-none"
@@ -1100,7 +1109,7 @@ export function PropertyDetailsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsReportModalOpen(false)} className="rounded-xl">
-              Cancel
+              {t('details.cancel')}
             </Button>
             <Button 
               onClick={handleReportSubmit} 
@@ -1108,7 +1117,7 @@ export function PropertyDetailsPage() {
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Submit Report
+              {t('details.submitReport')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1123,14 +1132,14 @@ export function PropertyDetailsPage() {
       }}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Report Review</DialogTitle>
+            <DialogTitle>{t('details.reportReview')}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-[#4a5565] mb-4">
-              Please provide a reason for reporting this review. Our moderation team will review this report shortly.
+              {t('details.reportReviewDesc')}
             </p>
             <Textarea
-              placeholder="Reason for report..."
+              placeholder={t('details.reasonForReport')}
               value={reviewReportReason}
               onChange={(e) => setReviewReportReason(e.target.value)}
               className="min-h-[100px] rounded-xl resize-none"
@@ -1138,7 +1147,7 @@ export function PropertyDetailsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsReviewReportModalOpen(false)} className="rounded-xl">
-              Cancel
+              {t('details.cancel')}
             </Button>
             <Button 
               onClick={handleReviewReportSubmit} 
@@ -1146,7 +1155,7 @@ export function PropertyDetailsPage() {
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Submit Report
+              {t('details.submitReport')}
             </Button>
           </DialogFooter>
         </DialogContent>

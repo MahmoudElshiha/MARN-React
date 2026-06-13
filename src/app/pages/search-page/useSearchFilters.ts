@@ -5,7 +5,7 @@ import { AMENITY_OPTIONS } from '@/types/property'
 import { SORT_OPTIONS, PAGE_SIZE } from './constants'
 
 export function useSearchFilters() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const initialKeyword = searchParams.get('q') || ''
 
   // ── search & geo ───────────────────────────────────────────────────────────
@@ -30,6 +30,7 @@ export function useSearchFilters() {
 
   // ── property filters ───────────────────────────────────────────────────────
   const [propertyType, setPropertyType] = useState<PropertyType | ''>('')
+  const [rentalUnit, setRentalUnit] = useState<RentalUnit | ''>('')
   const [isShared, setIsShared] = useState<string>('')
 
   // ── price ──────────────────────────────────────────────────────────────────
@@ -51,7 +52,8 @@ export function useSearchFilters() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
 
   // ── sorting ────────────────────────────────────────────────────────────────
-  const [sortIndex, setSortIndex] = useState(0)
+  const [sortBy, setSortBy] = useState<SortBy>('Newest')
+  const [sortAscending, setSortAscending] = useState<boolean>(false)
 
   // ── pagination & UI ────────────────────────────────────────────────────────
   const [page, setPage] = useState(1)
@@ -65,13 +67,13 @@ export function useSearchFilters() {
   const [locationLabel, setLocationLabel] = useState('')
 
   // ── build filters ──────────────────────────────────────────────────────────
-  const sortOpt = SORT_OPTIONS[sortIndex]
 
   const filters: PropertyFilters = {
     keyword: committedKw || undefined,
     city: city || undefined,
     governorate: governorate || undefined,
     type: (propertyType as PropertyType) || undefined,
+    rentalUnit: (rentalUnit as RentalUnit) || undefined,
     isShared: isShared === '' ? undefined : isShared === 'true',
     minPrice: committedPriceRange[0],
     maxPrice: committedPriceRange[1],
@@ -87,8 +89,8 @@ export function useSearchFilters() {
     maxSquareMeters: maxArea ? parseFloat(maxArea) : undefined,
     minRating: minRating ? parseFloat(minRating) : undefined,
     amenities: selectedAmenities.length ? selectedAmenities : undefined,
-    sortBy: sortOpt.sortBy,
-    sortAscending: sortOpt.sortAscending,
+    sortBy,
+    sortAscending,
     // geo-search
     latitude: userLat,
     longitude: userLng,
@@ -113,6 +115,7 @@ export function useSearchFilters() {
     setCity('')
     setGovernorate('')
     setPropertyType('')
+    setRentalUnit('')
     setIsShared('')
     setPriceRange([500, 10000])
     setCommittedPriceRange([500, 10000])
@@ -122,14 +125,17 @@ export function useSearchFilters() {
     setMaxArea('')
     setMinRating('')
     setSelectedAmenities([])
-    setSortIndex(0)
+    setSortBy('Newest')
+    setSortAscending(false)
     setPage(1)
     // clear geo
     setUserLat(undefined)
     setUserLng(undefined)
     setRadiusKm(10)
     setLocationLabel('')
-  }, [])
+
+    setSearchParams(new URLSearchParams(), { replace: true })
+  }, [setSearchParams])
 
   const setUserLocation = useCallback(
     (lat: number, lng: number, label: string) => {
@@ -138,8 +144,8 @@ export function useSearchFilters() {
       setLocationLabel(label)
       setPage(1)
       // Auto-switch to "Nearest" sort
-      const nearestIdx = SORT_OPTIONS.findIndex((o) => o.sortBy === 'Distance')
-      if (nearestIdx !== -1) setSortIndex(nearestIdx)
+      setSortBy('Distance')
+      setSortAscending(true)
     },
     [],
   )
@@ -154,13 +160,24 @@ export function useSearchFilters() {
   const commitKeyword = useCallback((kw: string) => {
     setCommittedKw(kw)
     setPage(1)
-  }, [])
+    
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (kw) {
+        next.set('q', kw)
+      } else {
+        next.delete('q')
+      }
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
 
   const activeFilterCount = [
     committedKw,
     city,
     governorate,
     propertyType,
+    rentalUnit,
     isShared,
     selectedBeds !== 'Any',
     selectedBaths !== 'Any',
@@ -185,6 +202,8 @@ export function useSearchFilters() {
     setGovernorate: handleSetGovernorate,
     propertyType,
     setPropertyType,
+    rentalUnit,
+    setRentalUnit,
     isShared,
     setIsShared,
     priceRange,
@@ -202,8 +221,10 @@ export function useSearchFilters() {
     setMinRating,
     selectedAmenities,
     setSelectedAmenities,
-    sortIndex,
-    setSortIndex,
+    sortBy,
+    setSortBy,
+    sortAscending,
+    setSortAscending,
     page,
     setPage,
     showMap,

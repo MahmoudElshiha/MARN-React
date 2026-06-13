@@ -7,65 +7,67 @@ import {
   UserCheck,
   AlertCircle,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 
 export function PrivacyPage() {
+  const { t, i18n } = useTranslation('pages')
   const sections = [
     {
       icon: Database,
-      title: '1. Information We Collect',
-      content: `We collect information you provide directly to us when you create an account, list a property, or use our services. This includes:\n\n• Personal Information: Name, email address, phone number, profile photo\n• Identity Verification: Government-issued ID, social security number (encrypted)\n• Financial Information: Bank account details, payment card information\n• Property Information: Addresses, photos, descriptions, rental terms\n• Usage Data: How you interact with our platform, search queries, page views\n• Device Information: IP address, browser type, operating system, device identifiers\n• Location Data: GPS coordinates, city, region (with your permission)\n• Communications: Messages sent through our platform, support inquiries`,
+      title: t('privacy.sections.s1.title'),
+      content: t('privacy.sections.s1.content'),
     },
     {
       icon: Eye,
-      title: '2. How We Use Your Information',
-      content: `We use the information we collect to:\n\n• Provide, maintain, and improve our services\n• Process transactions and send related information\n• Verify your identity and prevent fraud\n• Send you technical notices, updates, and support messages\n• Respond to your comments, questions, and customer service requests\n• Communicate with you about products, services, and events\n• Monitor and analyze trends, usage, and activities\n• Personalize and improve your experience\n• Facilitate connections between property owners and tenants\n• Comply with legal obligations and enforce our policies`,
+      title: t('privacy.sections.s2.title'),
+      content: t('privacy.sections.s2.content'),
     },
     {
       icon: UserCheck,
-      title: '3. Information Sharing and Disclosure',
-      content: `We may share your information in the following circumstances:\n\n• With Other Users: Profile information is visible to other users when you list a property or apply for a rental\n• Service Providers: Third-party vendors who perform services on our behalf (payment processing, identity verification, analytics)\n• Business Transfers: In connection with any merger, sale, or acquisition of all or a portion of our business\n• Legal Requirements: When required by law or to protect our rights and safety\n• With Your Consent: When you explicitly authorize us to share your information\n\nWe do NOT sell your personal information to third parties for their marketing purposes.`,
+      title: t('privacy.sections.s3.title'),
+      content: t('privacy.sections.s3.content'),
     },
     {
       icon: Lock,
-      title: '4. Data Security',
-      content: `We take reasonable measures to protect your information from unauthorized access, use, or disclosure:\n\n• 256-bit SSL encryption for data transmission\n• Encrypted storage of sensitive information\n• Regular security audits and penetration testing\n• Restricted access to personal information on a need-to-know basis\n• Multi-factor authentication for account access\n• Compliance with PCI DSS standards for payment processing\n\nHowever, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.`,
+      title: t('privacy.sections.s4.title'),
+      content: t('privacy.sections.s4.content'),
     },
     {
-      title: '5. Your Privacy Rights',
-      content: `You have the following rights regarding your personal information:\n\n• Access: Request a copy of the personal information we hold about you\n• Correction: Update or correct inaccurate information\n• Deletion: Request deletion of your personal information (subject to legal obligations)\n• Portability: Receive your data in a structured, machine-readable format\n• Opt-Out: Unsubscribe from marketing communications at any time\n• Do Not Sell: Egyptian residents have the right to object to data processing for direct marketing (we don't sell data)\n\nTo exercise these rights, contact us at kareemmustafafoda@gmail.com or through your account settings.`,
+      title: t('privacy.sections.s5.title'),
+      content: t('privacy.sections.s5.content'),
     },
     {
-      title: '6. Cookies and Tracking Technologies',
-      content: `We use cookies and similar tracking technologies to:\n\n• Remember your preferences and settings\n• Understand how you use our platform\n• Deliver targeted advertising\n• Analyze site traffic and trends\n\nYou can control cookies through your browser settings. However, disabling cookies may limit your ability to use certain features of our platform.`,
+      title: t('privacy.sections.s6.title'),
+      content: t('privacy.sections.s6.content'),
     },
     {
-      title: '7. Third-Party Services',
-      content: `Our platform may contain links to third-party websites and services. We are not responsible for the privacy practices of these third parties. We encourage you to read their privacy policies before providing any information.\n\nWe use the following third-party services:\n• Google Analytics for usage analytics\n• Stripe for payment processing\n• AWS for cloud hosting\n• Twilio for SMS notifications`,
+      title: t('privacy.sections.s7.title'),
+      content: t('privacy.sections.s7.content'),
     },
     {
-      title: "8. Children's Privacy",
-      content: `MARN is not intended for use by children under the age of 18. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us immediately, and we will take steps to delete such information.`,
+      title: t('privacy.sections.s8.title'),
+      content: t('privacy.sections.s8.content'),
     },
     {
-      title: '9. International Data Transfers',
-      content: `Your information may be transferred to and processed in countries other than your country of residence. These countries may have different data protection laws. By using our services, you consent to the transfer of your information to Egypt and other countries where we operate.`,
+      title: t('privacy.sections.s9.title'),
+      content: t('privacy.sections.s9.content'),
     },
     {
-      title: '10. Data Retention',
-      content: `We retain your personal information for as long as necessary to:\n\n• Provide our services to you\n• Comply with legal obligations\n• Resolve disputes and enforce our agreements\n• Maintain business records\n\nWhen you delete your account, we will delete or anonymize your personal information within 30 days, except where we are required to retain it for legal purposes.`,
+      title: t('privacy.sections.s10.title'),
+      content: t('privacy.sections.s10.content'),
     },
     {
-      title: '11. Egyptian Privacy Rights',
-      content: `Egyptian residents have additional rights under the Egyptian Personal Data Protection Law (PDPL):\n\n• Right to know what personal data is being processed\n• Right to access personal data\n• Right to correct or modify personal data\n• Right to deletion of personal data\n• Right to object to the processing of personal data\n\nTo exercise these rights, email kareemmustafafoda@gmail.com or call +20 100 123 4567.`,
+      title: t('privacy.sections.s11.title'),
+      content: t('privacy.sections.s11.content'),
     },
     {
-      title: '12. Changes to This Privacy Policy',
-      content: `We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the "Last Updated" date. Your continued use of our services after changes constitutes acceptance of the updated policy.`,
+      title: t('privacy.sections.s12.title'),
+      content: t('privacy.sections.s12.content'),
     },
     {
-      title: '13. Contact Us',
-      content: `If you have questions or concerns about this Privacy Policy, please contact us:\n\nEmail: kareemmustafafoda@gmail.com\nPhone: +20 100 123 4567\nAddress: 123 Real Estate Ave, Maadi, Cairo, Egypt 11431\n\nData Protection Officer: dpo@marn.com`,
+      title: t('privacy.sections.s13.title'),
+      content: t('privacy.sections.s13.content'),
     },
   ]
 
@@ -83,15 +85,14 @@ export function PrivacyPage() {
             <div className="flex flex-col md:flex-row items-center justify-center gap-3 mb-6">
               <Shield className="w-12 h-12 text-[#3A6EA5]" />
               <h1 className="text-4xl md:text-6xl font-bold text-[#1a1a1a] text-center">
-                Privacy Policy
+                {t('privacy.title')}
               </h1>
             </div>
             <p className="text-xl text-[#4a5565] mb-4">
-              Last Updated: February 12, 2026
+              {t('privacy.lastUpdated')}
             </p>
             <p className="text-lg text-[#4a5565]">
-              Your privacy is important to us. This policy explains how we
-              collect, use, and protect your information.
+              {t('privacy.intro')}
             </p>
           </motion.div>
         </div>
@@ -105,13 +106,10 @@ export function PrivacyPage() {
               <AlertCircle className="w-8 h-8 md:w-6 md:h-6 text-[#3A6EA5] flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-semibold text-[#1a1a1a] mb-2">
-                  Your Privacy Matters
+                  {t('privacy.importantNotice.title')}
                 </h3>
                 <p className="text-[#4a5565]">
-                  We are committed to protecting your personal information and
-                  being transparent about our data practices. This policy
-                  describes how MARN collects, uses, shares, and protects your
-                  information.
+                  {t('privacy.importantNotice.body')}
                 </p>
               </div>
             </div>
@@ -159,10 +157,10 @@ export function PrivacyPage() {
         <div className="max-w-[1440px] mx-auto px-8 text-center">
           <Lock className="w-12 h-12 md:w-16 md:h-16 text-white mx-auto mb-6" />
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Questions About Your Privacy?
+            {t('privacy.cta.title')}
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Our privacy team is here to address your concerns
+            {t('privacy.cta.subtitle')}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <button
@@ -174,13 +172,13 @@ export function PrivacyPage() {
               }
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-[#3A6EA5] rounded-2xl font-semibold hover:bg-white/90 transition-colors shadow-lg cursor-pointer"
             >
-              Email Privacy Team
+              {t('privacy.cta.emailPrivacy')}
             </button>
             <a
               href="/contact"
               className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-2xl font-semibold hover:bg-white hover:text-[#3A6EA5] transition-colors"
             >
-              Contact Us
+              {t('privacy.cta.contactUs')}
             </a>
           </div>
         </div>

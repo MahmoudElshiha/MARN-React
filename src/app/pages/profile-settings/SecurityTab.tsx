@@ -20,8 +20,10 @@ import {
 import { toast } from 'sonner'
 import { useProfile } from '@/hooks/useProfile'
 import { HttpError } from '@/services/httpErrors'
+import { useTranslation } from 'react-i18next'
 
 export function SecurityTab() {
+  const { t } = useTranslation('profile')
   const { data: profileResponse, changePassword, toggle2FA } = useProfile()
   const apiProfile = profileResponse?.data
 
@@ -57,7 +59,7 @@ export function SecurityTab() {
         onSuccess: () => {
           setPasswords({ current: '', new: '', confirm: '' })
           setFieldErrors({})
-          toast.success('Password updated successfully!')
+          toast.success(t('securityTab.passwordUpdated'))
         },
         onError: (err) => {
           if (err instanceof HttpError && err.validationErrors) {
@@ -70,7 +72,7 @@ export function SecurityTab() {
             toast.error(
               err instanceof HttpError
                 ? err.message
-                : 'Failed to update password.',
+                : t('securityTab.passwordUpdateFailed'),
             )
           }
         },
@@ -99,15 +101,15 @@ export function SecurityTab() {
           setTwoFaPasswordError('')
           toast.success(
             enabled
-              ? 'Two-factor authentication enabled successfully.'
-              : 'Two-factor authentication disabled successfully.',
+              ? t('securityTab.twoFaEnabled')
+              : t('securityTab.twoFaDisabled'),
           )
         },
         onError: (err) => {
           setTwoFaPasswordError(
             err instanceof HttpError
               ? err.message
-              : 'Incorrect password. Please try again.',
+              : t('securityTab.incorrectPassword'),
           )
         },
       },
@@ -121,14 +123,14 @@ export function SecurityTab() {
           <div className="flex items-center gap-3">
             <Shield className="w-6 h-6 text-[#3A6EA5]" />
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Security Settings
+              {t('securityTab.title')}
             </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
           <div>
             <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">
-              Change Password
+              {t('securityTab.changePassword')}
             </h3>
             <div className="space-y-4">
               <div>
@@ -136,7 +138,7 @@ export function SecurityTab() {
                   htmlFor="current-password"
                   className="text-[#1a1a1a] mb-2 block"
                 >
-                  Current Password
+                  {t('securityTab.currentPassword')}
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
@@ -164,7 +166,7 @@ export function SecurityTab() {
                     htmlFor="new-password"
                     className="text-[#1a1a1a] mb-2 block"
                   >
-                    New Password
+                    {t('securityTab.newPassword')}
                   </Label>
                   <Input
                     id="new-password"
@@ -187,7 +189,7 @@ export function SecurityTab() {
                     htmlFor="confirm-password"
                     className="text-[#1a1a1a] mb-2 block"
                   >
-                    Confirm Password
+                    {t('securityTab.confirmPassword')}
                   </Label>
                   <Input
                     id="confirm-password"
@@ -212,22 +214,22 @@ export function SecurityTab() {
                 onClick={handleChangePassword}
                 className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
               >
-                {changePassword.isPending ? 'Updating…' : 'Update Password'}
+                {changePassword.isPending ? t('securityTab.updating') : t('securityTab.updatePassword')}
               </Button>
             </div>
           </div>
 
           <div className="border-t border-[#3A6EA5]/20 pt-8">
             <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">
-              Two-Factor Authentication
+              {t('securityTab.twoFaTitle')}
             </h3>
             <div className="flex items-center justify-between p-6 bg-white rounded-2xl">
               <div>
-                <p className="font-medium text-[#1a1a1a]">Enable 2FA</p>
+                <p className="font-medium text-[#1a1a1a]">{t('securityTab.enable2Fa')}</p>
                 <p className="text-sm text-[#4a5565] mt-1">
                   {twoFactorEnabled
-                    ? 'Your account is protected with 2FA'
-                    : 'Add an extra layer of security to your account'}
+                    ? t('securityTab.twoFaProtected')
+                    : t('securityTab.twoFaExtraLayer')}
                 </p>
               </div>
               <Switch
@@ -245,11 +247,11 @@ export function SecurityTab() {
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#1a1a1a]">
               {twoFactorEnabled
-                ? 'Disable Two-Factor Authentication'
-                : 'Enable Two-Factor Authentication'}
+                ? t('securityTab.disableTwoFa')
+                : t('securityTab.enableTwoFa')}
             </DialogTitle>
             <DialogDescription className="text-[#4a5565]">
-              Enter your account password to confirm
+              {t('securityTab.enterPasswordConfirm')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -258,7 +260,7 @@ export function SecurityTab() {
                 htmlFor="twofa-password"
                 className="text-[#1a1a1a] mb-2 block"
               >
-                Password
+                {t('securityTab.password')}
               </Label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
@@ -271,7 +273,7 @@ export function SecurityTab() {
                     setTwoFaPasswordError('')
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleConfirm2FA()}
-                  placeholder="Enter your password"
+                  placeholder={t('securityTab.enterPassword')}
                   className={`pl-12 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 ${twoFaPasswordError ? 'border-red-400' : ''}`}
                 />
               </div>
@@ -288,14 +290,14 @@ export function SecurityTab() {
               onClick={() => setShow2FAModal(false)}
               className="rounded-xl border-[#3A6EA5]/20"
             >
-              Cancel
+              {t('securityTab.cancel')}
             </Button>
             <Button
               disabled={toggle2FA.isPending}
               onClick={handleConfirm2FA}
               className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             >
-              {toggle2FA.isPending ? 'Confirming…' : 'Confirm'}
+              {toggle2FA.isPending ? t('securityTab.confirming') : t('securityTab.confirm')}
             </Button>
           </div>
         </DialogContent>

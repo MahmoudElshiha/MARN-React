@@ -8,8 +8,10 @@ import {
   Instagram,
   Linkedin,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export function Footer() {
+  const { t } = useTranslation('navigation')
   return (
     <footer className="bg-[#1a1a1a] border-t border-[#3A6EA5]/20 mt-20">
       <div className="max-w-[1440px] mx-auto px-8 py-12">
@@ -17,11 +19,10 @@ export function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img src="/Logo.png" alt="MARN Logo" className="h-16 w-auto rounded bg-white p-1" />
+              <img src="/Logo.png" alt={t('logoAlt', 'MARN Logo')} className="h-16 w-auto rounded bg-white p-1" />
             </div>
             <p className="text-[#99a1af] mb-4">
-              Your trusted platform for finding the perfect rental property and
-              roommates.
+              {t('footer.tagline')}
             </p>
             <div className="flex gap-3">
               <a
@@ -53,14 +54,14 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Quick Links</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   to="/search"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  Search Properties
+                  {t('footer.searchProperties')}
                 </Link>
               </li>
               <li>
@@ -68,7 +69,7 @@ export function Footer() {
                   to="/owner-dashboard"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  List Your Property
+                  {t('footer.listYourProperty')}
                 </Link>
               </li>
               <li>
@@ -76,7 +77,7 @@ export function Footer() {
                   to="/about"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  About Us
+                  {t('footer.aboutUs')}
                 </Link>
               </li>
               <li>
@@ -84,7 +85,7 @@ export function Footer() {
                   to="/how-it-works"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  How It Works
+                  {t('footer.howItWorks')}
                 </Link>
               </li>
 
@@ -93,14 +94,14 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Support</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.support')}</h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   to="/faq"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  FAQ
+                  {t('footer.faq')}
                 </Link>
               </li>
               <li>
@@ -108,7 +109,7 @@ export function Footer() {
                   to="/contact"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  Contact Us
+                  {t('footer.contactUs')}
                 </Link>
               </li>
               <li>
@@ -116,7 +117,7 @@ export function Footer() {
                   to="/terms"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  Terms of Service
+                  {t('footer.termsOfService')}
                 </Link>
               </li>
               <li>
@@ -124,7 +125,7 @@ export function Footer() {
                   to="/privacy"
                   className="text-[#3A6EA5] hover:text-[#9CBBDC] transition-colors"
                 >
-                  Privacy Policy
+                  {t('footer.privacyPolicy')}
                 </Link>
               </li>
             </ul>
@@ -132,7 +133,7 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="font-semibold text-white mb-4">Contact Us</h4>
+            <h4 className="font-semibold text-white mb-4">{t('footer.contactUs')}</h4>
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-[#99a1af]">
                 <Mail className="w-4 h-4 flex-shrink-0 text-[#3A6EA5]" />
@@ -156,7 +157,7 @@ export function Footer() {
 
         <div className="border-t border-[#3A6EA5]/20 pt-8">
           <p className="text-center text-[#99a1af]">
-            © 2026 MARN. All rights reserved.
+            {t('footer.copyright')}
           </p>
         </div>
       </div>

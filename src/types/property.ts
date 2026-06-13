@@ -121,10 +121,12 @@ export interface SearchProperty {
   bathrooms: number
   maxOccupants: number
   type: PropertyType
+  typeDisplayName?: string
   averageRating: number
   ratings: number
   price: number
   rentalUnit: RentalUnit
+  rentalUnitDisplayName?: string
   isSaved: boolean
 }
 

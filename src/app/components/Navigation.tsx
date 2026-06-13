@@ -24,6 +24,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { propertyService } from '@/services/propertyService'
 import { decodeUserFromToken } from '@/utils/tokenUtils'
 import { notificationService } from '@/services/notificationService'
+import { useTranslation } from 'react-i18next'
+import i18n from '@/i18n/config'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,14 +33,19 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 
-const AVAILABLE_DASHBOARDS = [
-  { role: 'admin', label: 'Admin Dashboard', path: '/admin-dashboard' },
-  { role: 'owner', label: 'Owner Dashboard', path: '/owner-dashboard' },
-  { role: 'tenant', label: 'Tenant Dashboard', path: '/tenant-dashboard' },
-]
+function useAvailableDashboards() {
+  const { t } = useTranslation('navigation')
+  return [
+    { role: 'admin', label: t('dashboards.adminDashboard'), path: '/admin-dashboard' },
+    { role: 'owner', label: t('dashboards.ownerDashboard'), path: '/owner-dashboard' },
+    { role: 'tenant', label: t('dashboards.tenantDashboard'), path: '/tenant-dashboard' },
+  ]
+}
 
 function BurgerDashboardItem({ closeMenu }: { closeMenu: () => void }) {
   const { user } = useAuth()
+  const { t } = useTranslation('navigation')
+  const AVAILABLE_DASHBOARDS = useAvailableDashboards()
   const [open, setOpen] = useState(false)
 
   const userRoles = user?.roles ?? (user?.role ? [user.role] : ['tenant'])
@@ -48,7 +55,7 @@ function BurgerDashboardItem({ closeMenu }: { closeMenu: () => void }) {
   )
 
   if (dashboards.length === 0) {
-    dashboards.push({ role: 'tenant', label: 'Tenant Dashboard', path: '/tenant-dashboard' })
+    dashboards.push({ role: 'tenant', label: t('dashboards.tenantDashboard'), path: '/tenant-dashboard' })
   }
 
   if (dashboards.length === 1) {
@@ -72,7 +79,7 @@ function BurgerDashboardItem({ closeMenu }: { closeMenu: () => void }) {
       >
         <div className="flex items-center gap-4">
           <LayoutDashboard className="w-5 h-5" />
-          <span className="font-medium">Dashboard</span>
+          <span className="font-medium">{t('menu.dashboard', 'Dashboard')}</span>
         </div>
         <ChevronDown
           className={`w-4 h-4 transition-[transform] duration-200 ${open ? 'rotate-180' : ''}`}
@@ -110,10 +117,27 @@ export function Navigation() {
   const navigate = useNavigate()
   const isHome = location.pathname === '/'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [lang, setLang] = useState<'en' | 'ar'>('en')
+  const lang = (i18n.language?.startsWith('ar') ? 'ar' : 'en') as 'en' | 'ar'
   const { isAuthenticated, login, logout, user } = useAuth()
   const [isBecomeHostLoading, setIsBecomeHostLoading] = useState(false)
+  const [isLanguageChanging, setIsLanguageChanging] = useState(false)
+  const [targetLanguage, setTargetLanguage] = useState<string | null>(null)
+  const { t } = useTranslation('navigation')
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+
+  const handleLanguageChange = (lng: string) => {
+    if (lng === i18n.language) return
+    setTargetLanguage(lng)
+    setIsLanguageChanging(true)
+    
+    // Instead of changing language immediately (which flips the layout before reloading),
+    // we just save the preference and reload. The new language takes effect instantly on load.
+    localStorage.setItem('i18nextLng', lng)
+    
+    setTimeout(() => {
+      window.location.reload()
+    }, 500)
+  }
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -168,22 +192,36 @@ export function Navigation() {
   }
 
   const menuItems = [
-    { icon: Home, label: 'Home', path: '/' },
-    { icon: MessageSquare, label: 'Chats', path: '/messages' },
-    { icon: MessageCircle, label: 'Chat Support', path: '/chatbot' },
-    { icon: HelpCircle, label: 'FAQ', path: '/faq' },
-    { icon: Phone, label: 'Contact', path: '/contact' },
-    { icon: User, label: 'Profile Settings', path: '/profile-settings' },
+    { icon: Home, label: t('menu.home'), path: '/' },
+    { icon: MessageSquare, label: t('menu.chats', 'Chats'), path: '/messages' },
+    { icon: MessageCircle, label: t('menu.chatSupport'), path: '/chatbot' },
+    { icon: HelpCircle, label: t('menu.faq'), path: '/faq' },
+    { icon: Phone, label: t('menu.contact'), path: '/contact' },
+    { icon: User, label: t('menu.settings'), path: '/profile-settings' },
   ]
 
   return (
     <>
+      <AnimatePresence>
+        {isLanguageChanging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-[99999] bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center"
+          >
+            <div className="w-12 h-12 border-4 border-[#3A6EA5] border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-[#1a1a1a] font-medium text-lg">
+              {targetLanguage === 'ar' ? 'جارٍ تغيير اللغة...' : 'Changing Language...'}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <nav className="sticky top-0 z-50 bg-white border-b border-[#3A6EA5]/20 shadow-sm">
         <div className="max-w-[1440px] mx-auto px-8 py-4">
           <div className="flex items-center justify-between gap-8">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 lg:ml-6">
-              <img src="/Logo-header.png" alt="MARN Logo" className="h-16 w-auto rounded bg-white p-1" />
+              <img src="/Logo-header.png" alt={t('logoAlt', 'MARN Logo')} className="h-16 w-auto rounded bg-white p-1" />
             </Link>
 
             {/* Search Bar - Hidden on Home and Mobile */}
@@ -196,15 +234,17 @@ export function Navigation() {
                   const q = formData.get('q')
                   if (q) {
                     navigate(`/search?q=${encodeURIComponent(q.toString())}`)
+                  } else {
+                    navigate('/search')
                   }
                 }}
               >
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]" />
+                  <Search className={`absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-[#6a7282]`} />
                   <Input
                     name="q"
-                    placeholder="Search by location, property type..."
-                    className="pl-12 pr-4 py-6 bg-white rounded-2xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] transition-all"
+                    placeholder={t('searchPlaceholder')}
+                    className={`${lang === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} h-12 bg-white rounded-2xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] transition-all`}
                   />
                 </div>
               </form>
@@ -218,7 +258,7 @@ export function Navigation() {
                   disabled={isBecomeHostLoading}
                   onClick={handleBecomeHost}
                 >
-                  {isBecomeHostLoading ? 'Please wait…' : 'Become a Host'}
+                  {isBecomeHostLoading ? t('pleaseWait') : t('becomeHost')}
                 </Button>
               )}
 
@@ -227,27 +267,27 @@ export function Navigation() {
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <button className="hidden md:flex items-center justify-center w-8 h-8 rounded-full border border-[#3A6EA5]/20 overflow-hidden hover:opacity-80 transition-opacity mr-2 outline-none">
-                      <img 
-                        src={lang === 'en' ? 'https://flagcdn.com/w40/gb.png' : 'https://flagcdn.com/w40/eg.png'} 
+                      <img
+                        src={lang === 'en' ? 'https://flagcdn.com/w40/gb.png' : 'https://flagcdn.com/w40/eg.png'}
                         alt={lang === 'en' ? 'English' : 'Arabic'}
                         className="w-full h-full object-cover"
                       />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40 rounded-xl bg-white p-1 shadow-lg border border-[#3A6EA5]/10">
-                    <DropdownMenuItem 
-                      onClick={() => setLang('en')}
-                      className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'en' ? 'bg-[#f5f7fa]' : ''}`}
+                    <DropdownMenuItem
+                      onClick={() => handleLanguageChange('en')}
+                      className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'en' ? 'bg-[#3A6EA5]/10 text-[#3A6EA5]' : ''}`}
                     >
                       <img src="https://flagcdn.com/w40/gb.png" alt="UK Flag" className="w-5 h-5 rounded-full object-cover" />
-                      <span className="font-medium text-sm text-[#1a1a1a]">English</span>
+                      <span className={`font-medium text-sm ${lang === 'en' ? 'text-[#3A6EA5]' : 'text-[#1a1a1a]'}`}>English</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => setLang('ar')}
-                      className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'ar' ? 'bg-[#f5f7fa]' : ''}`}
+                    <DropdownMenuItem
+                      onClick={() => handleLanguageChange('ar')}
+                      className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'ar' ? 'bg-[#3A6EA5]/10 text-[#3A6EA5]' : ''}`}
                     >
                       <img src="https://flagcdn.com/w40/eg.png" alt="Egypt Flag" className="w-5 h-5 rounded-full object-cover" />
-                      <span className="font-medium text-sm text-[#1a1a1a]">Arabic</span>
+                      <span className={`font-medium text-sm ${lang === 'ar' ? 'text-[#3A6EA5]' : 'text-[#1a1a1a]'}`}>العربية</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -323,35 +363,35 @@ export function Navigation() {
 
             {/* Drawer */}
             <motion.div
-              initial={{ x: '100%' }}
+              initial={{ x: lang === 'ar' ? '-100%' : '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
+              exit={{ x: lang === 'ar' ? '-100%' : '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-50"
+              className={`fixed top-0 ${lang === 'ar' ? 'left-0' : 'right-0'} h-full w-80 bg-white shadow-2xl z-50 flex flex-col`}
             >
               {/* Drawer Header */}
-              <div className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] p-6">
+              <div className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] p-6 shrink-0">
                 <div className="flex items-center justify-between mb-4">
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <button className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden hover:opacity-80 transition-opacity outline-none">
-                        <img 
-                          src={lang === 'en' ? 'https://flagcdn.com/w40/gb.png' : 'https://flagcdn.com/w40/eg.png'} 
+                        <img
+                          src={lang === 'en' ? 'https://flagcdn.com/w40/gb.png' : 'https://flagcdn.com/w40/eg.png'}
                           alt={lang === 'en' ? 'English' : 'Arabic'}
                           className="w-full h-full object-cover"
                         />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-40 rounded-xl bg-white p-1 shadow-lg border border-[#3A6EA5]/10">
-                      <DropdownMenuItem 
-                        onClick={() => setLang('en')}
+                      <DropdownMenuItem
+                        onClick={() => handleLanguageChange('en')}
                         className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'en' ? 'bg-[#f5f7fa]' : ''}`}
                       >
                         <img src="https://flagcdn.com/w40/gb.png" alt="UK Flag" className="w-5 h-5 rounded-full object-cover" />
                         <span className="font-medium text-sm text-[#1a1a1a]">English</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setLang('ar')}
+                      <DropdownMenuItem
+                        onClick={() => handleLanguageChange('ar')}
                         className={`flex items-center gap-3 cursor-pointer rounded-lg p-2 ${lang === 'ar' ? 'bg-[#f5f7fa]' : ''}`}
                       >
                         <img src="https://flagcdn.com/w40/eg.png" alt="Egypt Flag" className="w-5 h-5 rounded-full object-cover" />
@@ -368,12 +408,12 @@ export function Navigation() {
                   </button>
                 </div>
                 <p className="text-white/90 text-sm">
-                  Your Modern Rental Network
+                  {t('drawer.tagline')}
                 </p>
               </div>
 
               {/* Menu Items */}
-              <nav className="p-4">
+              <nav className="p-4 flex-1 overflow-y-auto">
                 <div className="space-y-2">
                   {menuItems.map((item, index) => {
                     const Icon = item.icon
@@ -428,7 +468,7 @@ export function Navigation() {
                         className="flex w-full items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
                       >
                         <LogOut className="w-5 h-5" />
-                        <span className="font-medium">Logout</span>
+                        <span className="font-medium">{t('menu.logout')}</span>
                       </button>
                     ) : (
                       <Link
@@ -437,7 +477,7 @@ export function Navigation() {
                         className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#1a1a1a] hover:bg-[#f5f7fa] hover:-translate-x-1 transition-all"
                       >
                         <User className="w-5 h-5" />
-                        <span className="font-medium">Login / Sign Up</span>
+                        <span className="font-medium">{t('menu.loginSignUp')}</span>
                       </Link>
                     )}
                   </motion.div>
@@ -446,10 +486,10 @@ export function Navigation() {
                 {/* Footer */}
                 <div className="mt-8 p-4 bg-[#f5f7fa] rounded-2xl border border-[#3A6EA5]/10">
                   <p className="text-sm text-[#1a1a1a] mb-2 font-semibold">
-                    Need Help?
+                    {t('drawer.needHelp')}
                   </p>
                   <p className="text-xs text-[#6a7282] mb-3">
-                    Our support team is available 24/7
+                    {t('drawer.supportAvailable')}
                   </p>
                   <Button
                     size="sm"
@@ -457,7 +497,7 @@ export function Navigation() {
                     asChild
                   >
                     <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
-                      Contact Support
+                      {t('drawer.contactSupport')}
                     </Link>
                   </Button>
                 </div>

@@ -5,8 +5,10 @@ import { useRenterDashboard } from '@/hooks/useRenterDashboard'
 import { getImageUrl } from '@/constants/assets'
 import { PropertyCard } from '../components/PropertyCard'
 import { Button } from '../components/ui/button'
+import { useTranslation } from 'react-i18next'
 
 export function SavedPropertiesPage() {
+  const { t } = useTranslation('properties')
   const { data: dashboardRes, isLoading } = useRenterDashboard()
 
   const savedProperties = dashboardRes?.data?.savedProperties ?? []
@@ -23,16 +25,16 @@ export function SavedPropertiesPage() {
             <div>
               <h1 className="text-4xl font-bold text-[#1a1a1a] flex items-center gap-3">
                 <Heart className="w-8 h-8 text-[#3A6EA5] fill-[#3A6EA5]" />
-                Saved Properties
+                {t('savedProperties.title')}
               </h1>
               <p className="text-lg text-[#4a5565] mt-2">
-                Keep track of the properties you love
+                {t('savedProperties.subtitle')}
               </p>
             </div>
 
             {savedProperties.length > 0 && (
               <p className="text-[#6a7282] font-medium bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
-                {savedProperties.length} {savedProperties.length === 1 ? 'property' : 'properties'} saved
+                {savedProperties.length === 1 ? t('savedProperties.savedCount_one', { count: savedProperties.length }) : t('savedProperties.savedCount_other', { count: savedProperties.length })}
               </p>
             )}
           </div>
@@ -40,7 +42,7 @@ export function SavedPropertiesPage() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-32">
               <Loader2 className="w-10 h-10 text-[#3A6EA5] animate-spin mb-4" />
-              <p className="text-[#4a5565]">Loading your saved properties...</p>
+              <p className="text-[#4a5565]">{t('savedProperties.loading')}</p>
             </div>
           ) : savedProperties.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-gray-100 mt-8">
@@ -48,10 +50,10 @@ export function SavedPropertiesPage() {
                 <Heart className="w-10 h-10 text-[#6a7282]" />
               </div>
               <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-3">
-                No saved properties yet
+                {t('savedProperties.noSaved')}
               </h2>
               <p className="text-[#4a5565] max-w-md mx-auto mb-8">
-                When you see a property you like, click the heart icon to save it here for later.
+                {t('savedProperties.noSavedDesc')}
               </p>
               <Button
                 asChild
@@ -59,7 +61,7 @@ export function SavedPropertiesPage() {
               >
                 <Link to="/search" className="flex items-center gap-2">
                   <Search className="w-4 h-4" />
-                  Explore Properties
+                  {t('savedProperties.explore')}
                 </Link>
               </Button>
             </div>
@@ -80,6 +82,8 @@ export function SavedPropertiesPage() {
                   baths={(property as any).bathrooms || (property as any).baths}
                   guests={(property as any).maxOccupants || (property as any).guests}
                   isSaved={true}
+                  rentalUnitDisplayName={(property as any).rentalUnitDisplayName}
+                  rentalUnit={(property as any).rentalUnit}
                 />
               ))}
             </div>

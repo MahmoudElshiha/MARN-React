@@ -31,6 +31,7 @@ import {
 import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export function ViewUserProfilePage() {
   const navigate = useNavigate()
@@ -42,10 +43,11 @@ export function ViewUserProfilePage() {
   const [reportReason, setReportReason] = useState('')
 
   const submitReport = useSubmitReport()
+  const { t, i18n } = useTranslation('pages')
 
   const handleReport = () => {
     if (!id || !reportReason.trim()) {
-      toast.error('Please provide a reason for reporting')
+      toast.error(t('viewUserProfile.toasts.reportReasonRequired', 'Please provide a reason for reporting'))
       return
     }
 
@@ -53,11 +55,11 @@ export function ViewUserProfilePage() {
       {
         reportableType: 'User',
         reportableTargetId: id,
-        reason: `${reportReason.trim()} REPORTMETAUSER ${id}`,
+        reason: reportReason.trim(),
       },
       {
         onSuccess: () => {
-          toast.success('Report submitted successfully. We will review it shortly.')
+          toast.success(t('viewUserProfile.toasts.reportSubmitted', 'Report submitted successfully. We will review it shortly.'))
           setShowReportDialog(false)
           setReportReason('')
         },
@@ -93,7 +95,10 @@ export function ViewUserProfilePage() {
           onClick={() => navigate(-1)}
           className="mb-6 rounded-xl hover:bg-[#E5EBF0]/50"
         >
-          ← Back
+          <span className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'}>
+            {i18n.language === 'ar' ? '→' : '←'}
+          </span>
+          {t('viewUserProfile.back')}
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -120,7 +125,7 @@ export function ViewUserProfilePage() {
                 {profile.accountStatus === 'Active' && (
                   <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 rounded-full text-green-700 text-sm font-medium mb-4">
                     <CheckCircle className="w-4 h-4" />
-                    Active User
+                    {t('viewUserProfile.verifiedUser')}
                   </div>
                 )}
 
@@ -137,8 +142,8 @@ export function ViewUserProfilePage() {
                     className="w-full rounded-xl bg-red-500 hover:bg-red-600"
                     onClick={() => setShowReportDialog(true)}
                   >
-                    <Flag className="w-4 h-4 mr-2" />
-                    Report User
+                    <Flag className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                    {t('viewUserProfile.reportUser')}
                   </Button>
                 </div>
               </CardContent>
@@ -150,7 +155,7 @@ export function ViewUserProfilePage() {
             {/* About */}
             <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">About</CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">{t('viewUserProfile.about')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-[#1a1a1a] leading-relaxed">
@@ -165,7 +170,7 @@ export function ViewUserProfilePage() {
                 <div className="flex items-center gap-3">
                   <Users className="w-6 h-6 text-[#3A6EA5]" />
                   <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Roommate Status
+                    {t('viewUserProfile.roommateStatus')}
                   </CardTitle>
                 </div>
               </CardHeader>
@@ -176,10 +181,10 @@ export function ViewUserProfilePage() {
                       <CheckCircle className="w-6 h-6 text-green-500" />
                       <div>
                         <p className="font-semibold text-[#1a1a1a]">
-                          Accepts Roommates
+                          {t('viewUserProfile.acceptsRoommates')}
                         </p>
                         <p className="text-sm text-[#6B7280]">
-                          This user is open to sharing accommodation
+                          {t('viewUserProfile.acceptsRoommatesDesc')}
                         </p>
                       </div>
                     </>
@@ -188,10 +193,10 @@ export function ViewUserProfilePage() {
                       <XCircle className="w-6 h-6 text-red-500" />
                       <div>
                         <p className="font-semibold text-[#1a1a1a]">
-                          Does Not Accept Roommates
+                          {t('viewUserProfile.doesNotAcceptRoommates')}
                         </p>
                         <p className="text-sm text-[#6B7280]">
-                          This user prefers to live alone
+                          {t('viewUserProfile.doesNotAcceptRoommatesDesc')}
                         </p>
                       </div>
                     </>
@@ -206,27 +211,27 @@ export function ViewUserProfilePage() {
                 <div className="flex items-center gap-3">
                   <Home className="w-6 h-6 text-[#3A6EA5]" />
                   <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Lifestyle & Preferences
+                    {t('viewUserProfile.lifestyle')}
                   </CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">Smoking</p>
+                    <p className="text-sm text-[#6B7280] mb-1">{t('viewUserProfile.lifestyle_fields.smoking', 'Smoking')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.smoking === null ? 'Unspecified' : (profile.smoking ? 'Yes' : 'No')}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">Pets</p>
+                    <p className="text-sm text-[#6B7280] mb-1">{t('viewUserProfile.lifestyle_fields.pets', 'Pets')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.pets === null ? 'Unspecified' : (profile.pets ? 'Yes' : 'No')}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
                     <p className="text-sm text-[#6B7280] mb-1">
-                      Sleep Schedule
+                      {t('viewUserProfile.lifestyle_fields.sleepSchedule', 'Sleep Schedule')}
                     </p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.sleepSchedule || 'Unspecified'}
@@ -235,7 +240,7 @@ export function ViewUserProfilePage() {
                   <div className="p-4 bg-white rounded-2xl">
                     <div className="flex items-center gap-2 mb-1">
                       <Volume2 className="w-4 h-4 text-[#6B7280]" />
-                      <p className="text-sm text-[#6B7280]">Noise Tolerance</p>
+                      <p className="text-sm text-[#6B7280]">{t('viewUserProfile.lifestyle_fields.noiseTolerance', 'Noise Tolerance')}</p>
                     </div>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.noiseTolerance !== null ? profile.noiseTolerance + '/5' : 'Unspecified'}
@@ -243,7 +248,7 @@ export function ViewUserProfilePage() {
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
                     <p className="text-sm text-[#6B7280] mb-1">
-                      Guests Frequency
+                      {t('viewUserProfile.lifestyle_fields.guestsFrequency', 'Guests Frequency')}
                     </p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.guestsFrequency || 'Unspecified'}
@@ -252,14 +257,14 @@ export function ViewUserProfilePage() {
                   <div className="p-4 bg-white rounded-2xl">
                     <div className="flex items-center gap-2 mb-1">
                       <Briefcase className="w-4 h-4 text-[#6B7280]" />
-                      <p className="text-sm text-[#6B7280]">Work Schedule</p>
+                      <p className="text-sm text-[#6B7280]">{t('viewUserProfile.lifestyle_fields.workSchedule', 'Work Schedule')}</p>
                     </div>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.workSchedule || 'Unspecified'}
                     </p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl md:col-span-2">
-                    <p className="text-sm text-[#6B7280] mb-1">Sharing Level</p>
+                    <p className="text-sm text-[#6B7280] mb-1">{t('viewUserProfile.lifestyle_fields.sharingLevel', 'Sharing Level')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.sharingLevel || 'Unspecified'}
                     </p>
@@ -274,7 +279,7 @@ export function ViewUserProfilePage() {
                 <div className="flex items-center gap-3">
                   <GraduationCap className="w-6 h-6 text-[#3A6EA5]" />
                   <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Education
+                    {t('viewUserProfile.education')}
                   </CardTitle>
                 </div>
               </CardHeader>
@@ -282,7 +287,7 @@ export function ViewUserProfilePage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="p-4 bg-white rounded-2xl">
                     <p className="text-sm text-[#6B7280] mb-1">
-                      Education Level
+                      {t('viewUserProfile.lifestyle_fields.educationLevel', 'Education Level')}
                     </p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.educationLevel || 'Unspecified'}
@@ -290,7 +295,7 @@ export function ViewUserProfilePage() {
                   </div>
                   <div className="p-4 bg-white rounded-2xl">
                     <p className="text-sm text-[#6B7280] mb-1">
-                      Field of Study
+                      {t('viewUserProfile.lifestyle_fields.fieldOfStudy', 'Field of Study')}
                     </p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {profile.fieldOfStudy || 'Unspecified'}
@@ -308,11 +313,10 @@ export function ViewUserProfilePage() {
         <DialogContent className="bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#1a1a1a]">
-              Report User
+              {t('viewUserProfile.report.title', 'Report User')}
             </DialogTitle>
             <DialogDescription className="text-[#6B7280]">
-              Please provide details about why you're reporting this user. Our
-              team will review your report.
+              {t('viewUserProfile.reportDialogDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -321,13 +325,13 @@ export function ViewUserProfilePage() {
                 htmlFor="report-reason"
                 className="text-[#1a1a1a] mb-2 block"
               >
-                Reason for Reporting
+                {t('viewUserProfile.reasonForReporting')}
               </Label>
               <Textarea
                 id="report-reason"
                 value={reportReason}
                 onChange={(e) => setReportReason(e.target.value)}
-                placeholder="Describe the issue..."
+                placeholder={t('viewUserProfile.report.reasonPlaceholder', 'Describe the issue...')}
                 className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
               />
             </div>
@@ -341,7 +345,7 @@ export function ViewUserProfilePage() {
               }}
               className="rounded-xl border-[#3A6EA5]/20"
             >
-              Cancel
+              {t('viewUserProfile.report.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleReport}
@@ -349,7 +353,7 @@ export function ViewUserProfilePage() {
               className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Submit Report
+              {t('viewUserProfile.report.submit', 'Submit Report')}
             </Button>
           </div>
         </DialogContent>

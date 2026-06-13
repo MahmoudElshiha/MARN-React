@@ -4,140 +4,163 @@ import { ChevronDown, Search, MessageCircle } from 'lucide-react'
 import { Input } from '../components/ui/input'
 import { Button } from '../components/ui/button'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 
 export function FAQPage() {
+  const { t, i18n } = useTranslation('pages')
   const [searchQuery, setSearchQuery] = useState('')
-  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const categories = [
     {
-      name: 'For Tenants',
+      name: t('faq.categories.cat1'),
       faqs: [
-        {
-          id: 1,
-          question: 'How do I search for properties?',
-          answer:
-            'Use our advanced search feature to filter properties by location, price range, number of bedrooms, amenities, and more. You can also save your searches for quick access later.',
-        },
-        {
-          id: 2,
-          question: 'Is there a fee to use MARN as a tenant?',
-          answer:
-            'No, MARN is completely free for tenants. You can search, browse, and message property owners at no cost.',
-        },
-        {
-          id: 3,
-          question: 'How do I schedule a property tour?',
-          answer:
-            'Click the "Schedule Tour" button on any property listing, select your preferred date and time, and the property owner will confirm your appointment.',
-        },
-        {
-          id: 4,
-          question: 'What is the roommate matching feature?',
-          answer:
-            'Our smart algorithm matches you with potential roommates based on lifestyle preferences, work schedules, cleanliness habits, and more. You can filter and chat with matches before making a decision.',
-        },
-        {
-          id: 5,
-          question: 'How do I apply for a property?',
-          answer:
-            'Once you find a property you like, click "Apply Now" and complete the online application form. You\'ll need to provide personal information, employment details, and references.',
-        },
+        { id: 'q1', question: t('faq.questions.q1.question'), answer: t('faq.questions.q1.answer') },
+        { id: 'q2', question: t('faq.questions.q2.question'), answer: t('faq.questions.q2.answer') },
+        { id: 'q3', question: t('faq.questions.q3.question'), answer: t('faq.questions.q3.answer') },
+        { id: 'q4', question: t('faq.questions.q4.question'), answer: t('faq.questions.q4.answer') },
+        { id: 'q5', question: t('faq.questions.q5.question'), answer: t('faq.questions.q5.answer') },
+        { id: 'q6', question: t('faq.questions.q6.question'), answer: t('faq.questions.q6.answer') },
+        { id: 'q7', question: t('faq.questions.q7.question'), answer: t('faq.questions.q7.answer') }
       ],
     },
     {
-      name: 'For Property Owners',
+      name: t('faq.categories.cat2'),
       faqs: [
-        {
-          id: 6,
-          question: 'How much does it cost to list a property?',
-          answer:
-            'We offer flexible pricing plans starting from $29/month for basic listings. Premium plans include featured placement, professional photography, and advanced analytics.',
-        },
-        {
-          id: 7,
-          question: 'How do I create a property listing?',
-          answer:
-            'Click "Become a Host" in the navigation menu, fill out the property details form, upload photos, set your pricing and availability, and publish. Your listing will go live within 24 hours after verification.',
-        },
-        {
-          id: 8,
-          question: 'How are tenants verified?',
-          answer:
-            'All tenants go through identity verification, employment verification, and background checks. You can review their full profiles before accepting applications.',
-        },
-        {
-          id: 9,
-          question: 'Can I manage multiple properties?',
-          answer:
-            'Yes! Our owner dashboard allows you to manage unlimited properties, track all bookings, handle maintenance requests, and view analytics for each property separately.',
-        },
-        {
-          id: 10,
-          question: 'How do I receive rent payments?',
-          answer:
-            'Tenants pay through our secure platform, and funds are automatically deposited to your bank account on your chosen schedule (weekly, bi-weekly, or monthly).',
-        },
+        { id: 'q8', question: t('faq.questions.q8.question'), answer: t('faq.questions.q8.answer') },
+        { id: 'q9', question: t('faq.questions.q9.question'), answer: t('faq.questions.q9.answer') },
+        { id: 'q10', question: t('faq.questions.q10.question'), answer: t('faq.questions.q10.answer') },
+        { id: 'q11', question: t('faq.questions.q11.question'), answer: t('faq.questions.q11.answer') },
+        { id: 'q12', question: t('faq.questions.q12.question'), answer: t('faq.questions.q12.answer') },
+        { id: 'q13', question: t('faq.questions.q13.question'), answer: t('faq.questions.q13.answer') }
       ],
     },
     {
-      name: 'Safety & Security',
+      name: t('faq.categories.cat3'),
       faqs: [
-        {
-          id: 11,
-          question: 'How does MARN verify property listings?',
-          answer:
-            'Our team manually reviews each listing, verifies ownership documents, and may conduct property inspections. All listings display a "Verified" badge once approved.',
-        },
-        {
-          id: 12,
-          question: 'Is my payment information secure?',
-          answer:
-            'Yes, we use bank-level 256-bit SSL encryption for all transactions. We never store your full payment details on our servers and comply with PCI DSS standards.',
-        },
-        {
-          id: 13,
-          question: 'What if I encounter a scam or fraud?',
-          answer:
-            'Report suspicious activity immediately through our platform. We have a dedicated trust and safety team that investigates all reports within 24 hours and takes appropriate action.',
-        },
-        {
-          id: 14,
-          question: 'Are background checks mandatory?',
-          answer:
-            'For tenants, background checks are optional but highly recommended and increase your chances of approval. Property owners can require them as part of their application process.',
-        },
+        { id: 'q14', question: t('faq.questions.q14.question'), answer: t('faq.questions.q14.answer') },
+        { id: 'q15', question: t('faq.questions.q15.question'), answer: t('faq.questions.q15.answer') },
+        { id: 'q16', question: t('faq.questions.q16.question'), answer: t('faq.questions.q16.answer') },
+        { id: 'q17', question: t('faq.questions.q17.question'), answer: t('faq.questions.q17.answer') },
+        { id: 'q18', question: t('faq.questions.q18.question'), answer: t('faq.questions.q18.answer') }
       ],
     },
     {
-      name: 'Payments & Billing',
+      name: t('faq.categories.cat4'),
       faqs: [
-        {
-          id: 15,
-          question: 'What payment methods do you accept?',
-          answer:
-            'We accept credit cards, debit cards, bank transfers (ACH), and digital wallets including PayPal and Apple Pay.',
-        },
-        {
-          id: 16,
-          question: 'When is rent due?',
-          answer:
-            "Rent due dates are set by individual property owners, typically on the 1st of each month. You'll receive reminders 5 days before the due date.",
-        },
-        {
-          id: 17,
-          question: 'Is there a security deposit?',
-          answer:
-            'Security deposit amounts vary by property and are determined by the property owner. Deposits are held securely and returned within 30 days of move-out, minus any deductions for damages.',
-        },
-        {
-          id: 18,
-          question: 'What are the cancellation policies?',
-          answer:
-            'Cancellation policies vary by property. Most require 30-60 days notice. Check the specific policy on each property listing before booking.',
-        },
+        { id: 'q19', question: t('faq.questions.q19.question'), answer: t('faq.questions.q19.answer') },
+        { id: 'q20', question: t('faq.questions.q20.question'), answer: t('faq.questions.q20.answer') },
+        { id: 'q21', question: t('faq.questions.q21.question'), answer: t('faq.questions.q21.answer') },
+        { id: 'q22', question: t('faq.questions.q22.question'), answer: t('faq.questions.q22.answer') },
+        { id: 'q23', question: t('faq.questions.q23.question'), answer: t('faq.questions.q23.answer') },
+        { id: 'q24', question: t('faq.questions.q24.question'), answer: t('faq.questions.q24.answer') }
       ],
     },
+    {
+      name: t('faq.categories.cat5'),
+      faqs: [
+        { id: 'q25', question: t('faq.questions.q25.question'), answer: t('faq.questions.q25.answer') },
+        { id: 'q26', question: t('faq.questions.q26.question'), answer: t('faq.questions.q26.answer') },
+        { id: 'q27', question: t('faq.questions.q27.question'), answer: t('faq.questions.q27.answer') },
+        { id: 'q28', question: t('faq.questions.q28.question'), answer: t('faq.questions.q28.answer') },
+        { id: 'q29', question: t('faq.questions.q29.question'), answer: t('faq.questions.q29.answer') },
+        { id: 'q30', question: t('faq.questions.q30.question'), answer: t('faq.questions.q30.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat6'),
+      faqs: [
+        { id: 'q31', question: t('faq.questions.q31.question'), answer: t('faq.questions.q31.answer') },
+        { id: 'q32', question: t('faq.questions.q32.question'), answer: t('faq.questions.q32.answer') },
+        { id: 'q33', question: t('faq.questions.q33.question'), answer: t('faq.questions.q33.answer') },
+        { id: 'q34', question: t('faq.questions.q34.question'), answer: t('faq.questions.q34.answer') },
+        { id: 'q35', question: t('faq.questions.q35.question'), answer: t('faq.questions.q35.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat7'),
+      faqs: [
+        { id: 'q36', question: t('faq.questions.q36.question'), answer: t('faq.questions.q36.answer') },
+        { id: 'q37', question: t('faq.questions.q37.question'), answer: t('faq.questions.q37.answer') },
+        { id: 'q38', question: t('faq.questions.q38.question'), answer: t('faq.questions.q38.answer') },
+        { id: 'q39', question: t('faq.questions.q39.question'), answer: t('faq.questions.q39.answer') },
+        { id: 'q40', question: t('faq.questions.q40.question'), answer: t('faq.questions.q40.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat8'),
+      faqs: [
+        { id: 'q41', question: t('faq.questions.q41.question'), answer: t('faq.questions.q41.answer') },
+        { id: 'q42', question: t('faq.questions.q42.question'), answer: t('faq.questions.q42.answer') },
+        { id: 'q43', question: t('faq.questions.q43.question'), answer: t('faq.questions.q43.answer') },
+        { id: 'q44', question: t('faq.questions.q44.question'), answer: t('faq.questions.q44.answer') },
+        { id: 'q45', question: t('faq.questions.q45.question'), answer: t('faq.questions.q45.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat9'),
+      faqs: [
+        { id: 'q46', question: t('faq.questions.q46.question'), answer: t('faq.questions.q46.answer') },
+        { id: 'q47', question: t('faq.questions.q47.question'), answer: t('faq.questions.q47.answer') },
+        { id: 'q48', question: t('faq.questions.q48.question'), answer: t('faq.questions.q48.answer') },
+        { id: 'q49', question: t('faq.questions.q49.question'), answer: t('faq.questions.q49.answer') },
+        { id: 'q50', question: t('faq.questions.q50.question'), answer: t('faq.questions.q50.answer') },
+        { id: 'q51', question: t('faq.questions.q51.question'), answer: t('faq.questions.q51.answer') },
+        { id: 'q52', question: t('faq.questions.q52.question'), answer: t('faq.questions.q52.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat10'),
+      faqs: [
+        { id: 'q53', question: t('faq.questions.q53.question'), answer: t('faq.questions.q53.answer') },
+        { id: 'q54', question: t('faq.questions.q54.question'), answer: t('faq.questions.q54.answer') },
+        { id: 'q55', question: t('faq.questions.q55.question'), answer: t('faq.questions.q55.answer') },
+        { id: 'q56', question: t('faq.questions.q56.question'), answer: t('faq.questions.q56.answer') },
+        { id: 'q57', question: t('faq.questions.q57.question'), answer: t('faq.questions.q57.answer') },
+        { id: 'q58', question: t('faq.questions.q58.question'), answer: t('faq.questions.q58.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat11'),
+      faqs: [
+        { id: 'q59', question: t('faq.questions.q59.question'), answer: t('faq.questions.q59.answer') },
+        { id: 'q60', question: t('faq.questions.q60.question'), answer: t('faq.questions.q60.answer') },
+        { id: 'q61', question: t('faq.questions.q61.question'), answer: t('faq.questions.q61.answer') },
+        { id: 'q62', question: t('faq.questions.q62.question'), answer: t('faq.questions.q62.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat12'),
+      faqs: [
+        { id: 'q63', question: t('faq.questions.q63.question'), answer: t('faq.questions.q63.answer') },
+        { id: 'q64', question: t('faq.questions.q64.question'), answer: t('faq.questions.q64.answer') },
+        { id: 'q65', question: t('faq.questions.q65.question'), answer: t('faq.questions.q65.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat13'),
+      faqs: [
+        { id: 'q66', question: t('faq.questions.q66.question'), answer: t('faq.questions.q66.answer') },
+        { id: 'q67', question: t('faq.questions.q67.question'), answer: t('faq.questions.q67.answer') },
+        { id: 'q68', question: t('faq.questions.q68.question'), answer: t('faq.questions.q68.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat14'),
+      faqs: [
+        { id: 'q69', question: t('faq.questions.q69.question'), answer: t('faq.questions.q69.answer') },
+        { id: 'q70', question: t('faq.questions.q70.question'), answer: t('faq.questions.q70.answer') },
+        { id: 'q71', question: t('faq.questions.q71.question'), answer: t('faq.questions.q71.answer') },
+        { id: 'q72', question: t('faq.questions.q72.question'), answer: t('faq.questions.q72.answer') },
+        { id: 'q73', question: t('faq.questions.q73.question'), answer: t('faq.questions.q73.answer') }
+      ],
+    },
+    {
+      name: t('faq.categories.cat15'),
+      faqs: [
+        { id: 'q74', question: t('faq.questions.q74.question'), answer: t('faq.questions.q74.answer') }
+      ],
+    }
   ]
 
   const filteredCategories = categories
@@ -163,23 +186,21 @@ export function FAQPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-6xl font-bold text-[#1a1a1a] mb-6">
-              Frequently Asked{' '}
-              <span className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">
-                Questions
-              </span>
+              {t('faq.title')}
             </h1>
             <p className="text-xl text-[#4a5565] mb-8">
-              Find answers to common questions about using MARN
+              {t('faq.subtitle')}
             </p>
 
             {/* Search Bar */}
             <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+              <Search className={`absolute ${i18n.language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]`} />
               <Input
-                placeholder="Search for answers..."
+                placeholder={t('faq.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-6 bg-white rounded-2xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] text-lg shadow-lg"
+                className={`${i18n.language === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-6 bg-white rounded-2xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] text-lg shadow-lg`}
+                dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}
               />
             </div>
           </motion.div>
@@ -192,14 +213,14 @@ export function FAQPage() {
           {filteredCategories.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-xl text-[#4a5565] mb-6">
-                No results found for "{searchQuery}"
+                {t('faq.noResults')} "{searchQuery}"
               </p>
               <Button
                 variant="outline"
                 className="rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                 onClick={() => setSearchQuery('')}
               >
-                Clear Search
+                {t('faq.clearSearch')}
               </Button>
             </div>
           ) : (
@@ -227,7 +248,7 @@ export function FAQPage() {
                           }
                           className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-[#9CBBDC]/20 transition-colors"
                         >
-                          <span className="font-semibold text-lg text-[#1a1a1a] pr-4">
+                          <span className={`font-semibold text-lg text-[#1a1a1a] ${i18n.language === 'ar' ? 'pl-4' : 'pr-4'}`}>
                             {faq.question}
                           </span>
                           <ChevronDown
@@ -242,11 +263,11 @@ export function FAQPage() {
                             height: expandedId === faq.id ? 'auto' : 0,
                             opacity: expandedId === faq.id ? 1 : 0,
                           }}
-                          transition={{ duration: 0.3 }}
+                          transition={{ duration: 0.15 }}
                           className="overflow-hidden"
                         >
                           <div className="px-6 pb-5 pt-2">
-                            <p className="text-[#4a5565] leading-relaxed">
+                            <p className="text-[#4a5565] leading-relaxed whitespace-pre-line">
                               {faq.answer}
                             </p>
                           </div>
@@ -267,10 +288,10 @@ export function FAQPage() {
           <div className="bg-white rounded-3xl p-12 shadow-2xl shadow-[#3A6EA5]/20 text-center max-w-3xl mx-auto">
             <MessageCircle className="w-16 h-16 text-[#3A6EA5] mx-auto mb-6" />
             <h2 className="text-3xl font-bold text-[#1a1a1a] mb-4">
-              Still Have Questions?
+              {t('faq.stillHaveQuestions.title')}
             </h2>
             <p className="text-lg text-[#4a5565] mb-8">
-              Our support team is here to help you 24/7
+              {t('faq.stillHaveQuestions.subtitle')}
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Button
@@ -278,7 +299,7 @@ export function FAQPage() {
                 className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl px-8 py-6 shadow-lg shadow-[#3A6EA5]/30"
                 asChild
               >
-                <Link to="/contact">Contact Support</Link>
+                <Link to="/contact">{t('faq.stillHaveQuestions.contactSupport')}</Link>
               </Button>
               <Button
                 size="lg"
@@ -286,7 +307,7 @@ export function FAQPage() {
                 className="border-2 border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white rounded-2xl px-8 py-6"
                 asChild
               >
-                <Link to="/messages">Live Chat</Link>
+                <Link to="/messages">{t('faq.stillHaveQuestions.liveChat')}</Link>
               </Button>
             </div>
           </div>

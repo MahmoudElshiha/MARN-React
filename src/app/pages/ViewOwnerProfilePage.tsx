@@ -30,6 +30,7 @@ import { toast } from 'sonner'
 import { getImageUrl } from '@/constants/assets'
 
 import { useUserProfile } from '@/hooks/useProfile'
+import { useTranslation } from 'react-i18next'
 
 export function ViewOwnerProfilePage() {
   const navigate = useNavigate()
@@ -38,13 +39,14 @@ export function ViewOwnerProfilePage() {
   const [reportReason, setReportReason] = useState('')
   const [visibleCount, setVisibleCount] = useState(6)
   const submitReport = useSubmitReport()
+  const { t, i18n } = useTranslation('pages')
 
   const { data: profileData, isLoading, isError } = useUserProfile(id)
   const profile = profileData?.data
 
   const handleReport = () => {
     if (!id || !reportReason.trim()) {
-      toast.error('Please provide a reason for reporting')
+      toast.error(t('viewOwnerProfile.toasts.reportReasonRequired'))
       return
     }
 
@@ -52,11 +54,11 @@ export function ViewOwnerProfilePage() {
       {
         reportableType: 'User',
         reportableTargetId: id,
-        reason: `${reportReason.trim()} REPORTMETAUSER ${id}`,
+        reason: reportReason.trim(),
       },
       {
         onSuccess: () => {
-          toast.success('Report submitted successfully. We will review it shortly.')
+          toast.success(t('viewOwnerProfile.toasts.reportSubmitted'))
           setShowReportDialog(false)
           setReportReason('')
         },
@@ -69,7 +71,7 @@ export function ViewOwnerProfilePage() {
 
   const handleChatClick = () => {
     navigate('/messages')
-    toast.success('Opening chat with owner...')
+    toast.success(t('viewOwnerProfile.toasts.openingChat'))
   }
 
   if (isLoading) {
@@ -99,7 +101,10 @@ export function ViewOwnerProfilePage() {
           onClick={() => navigate(-1)}
           className="mb-6 rounded-xl hover:bg-[#E5EBF0]/50"
         >
-          ← Back
+          <span className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'}>
+            {i18n.language === 'ar' ? '→' : '←'}
+          </span>
+          {t('viewOwnerProfile.back')}
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -123,12 +128,12 @@ export function ViewOwnerProfilePage() {
                 <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">
                   {profile.fullName}
                 </h2>
-                <p className="text-sm text-[#6B7280] mb-4">Property Owner</p>
+                <p className="text-sm text-[#6B7280] mb-4">{t('viewOwnerProfile.propertyOwner')}</p>
 
                 {profile.accountStatus === 'Active' && (
                   <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 rounded-full text-green-700 text-sm font-medium mb-4">
                     <CheckCircle className="w-4 h-4" />
-                    Verified User
+                    {t('viewOwnerProfile.verifiedUser')}
                   </div>
                 )}
 
@@ -141,7 +146,7 @@ export function ViewOwnerProfilePage() {
                     </span>
                   </div>
                   <span className="text-sm text-[#6B7280]">
-                    ({profile.ratingsCount || 0} reviews)
+                    ({profile.ratingsCount || 0} {t('viewOwnerProfile.reviews')})
                   </span>
                 </div>
 
@@ -159,12 +164,12 @@ export function ViewOwnerProfilePage() {
                   {profile.memberSince && (
                     <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
                       <Calendar className="w-4 h-4 text-[#3A6EA5]" />
-                      <span>Member since {profile.memberSince}</span>
+                      <span>{t('viewOwnerProfile.joinDate')} {profile.memberSince}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
                     <Building2 className="w-4 h-4 text-[#3A6EA5]" />
-                    <span>{properties.length} Properties</span>
+                    <span>{properties.length} {t('viewOwnerProfile.properties')}</span>
                   </div>
                 </div>
 
@@ -173,16 +178,16 @@ export function ViewOwnerProfilePage() {
                     className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
                     onClick={handleChatClick}
                   >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Chat with Owner
+                    <MessageCircle className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                    {t('viewOwnerProfile.chatWithOwner')}
                   </Button>
                   <Button
                     variant="destructive"
                     className="w-full rounded-xl bg-red-500 hover:bg-red-600"
                     onClick={() => setShowReportDialog(true)}
                   >
-                    <Flag className="w-4 h-4 mr-2" />
-                    Report Owner
+                    <Flag className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                    {t('viewOwnerProfile.reportOwner')}
                   </Button>
                 </div>
               </CardContent>
@@ -194,7 +199,7 @@ export function ViewOwnerProfilePage() {
             {/* About */}
             <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">About</CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">{t('viewOwnerProfile.about')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-[#1a1a1a] leading-relaxed">
@@ -207,7 +212,7 @@ export function ViewOwnerProfilePage() {
             <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Owner Statistics
+                  {t('viewOwnerProfile.ownerStatistics')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -216,7 +221,7 @@ export function ViewOwnerProfilePage() {
                     <p className="text-3xl font-bold text-[#3A6EA5] mb-1">
                       {properties.length}
                     </p>
-                    <p className="text-sm text-[#6B7280]">Total Properties</p>
+                    <p className="text-sm text-[#6B7280]">{t('viewOwnerProfile.totalProperties')}</p>
                   </div>
                   <div className="p-4 bg-white rounded-2xl text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
@@ -225,7 +230,7 @@ export function ViewOwnerProfilePage() {
                         {profile.averageRating?.toFixed(1) || 'New'}
                       </p>
                     </div>
-                    <p className="text-sm text-[#6B7280]">Average Rating</p>
+                    <p className="text-sm text-[#6B7280]">{t('viewOwnerProfile.averageRating')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -237,7 +242,7 @@ export function ViewOwnerProfilePage() {
                 <div className="flex items-center gap-3">
                   <Home className="w-6 h-6 text-[#3A6EA5]" />
                   <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Properties ({properties.length})
+                    {t('viewOwnerProfile.properties')} ({properties.length})
                   </CardTitle>
                 </div>
               </CardHeader>
@@ -312,11 +317,10 @@ export function ViewOwnerProfilePage() {
         <DialogContent className="bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#1a1a1a]">
-              Report Owner
+              {t('viewOwnerProfile.report.title')}
             </DialogTitle>
             <DialogDescription className="text-[#6B7280]">
-              Please provide details about why you're reporting this owner. Our
-              team will review your report.
+              {t('viewOwnerProfile.reportDialogDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -325,13 +329,13 @@ export function ViewOwnerProfilePage() {
                 htmlFor="report-reason"
                 className="text-[#1a1a1a] mb-2 block"
               >
-                Reason for Reporting
+                {t('viewOwnerProfile.report.reasonForReporting', 'Reason for Reporting')}
               </Label>
               <Textarea
                 id="report-reason"
                 value={reportReason}
                 onChange={(e) => setReportReason(e.target.value)}
-                placeholder="Describe the issue..."
+                placeholder={t('viewOwnerProfile.report.reasonPlaceholder')}
                 className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
               />
             </div>
@@ -345,7 +349,7 @@ export function ViewOwnerProfilePage() {
               }}
               className="rounded-xl border-[#3A6EA5]/20"
             >
-              Cancel
+              {t('viewOwnerProfile.report.cancel')}
             </Button>
             <Button
               onClick={handleReport}
@@ -353,7 +357,7 @@ export function ViewOwnerProfilePage() {
               className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Submit Report
+              {t('viewOwnerProfile.report.submit')}
             </Button>
           </div>
         </DialogContent>

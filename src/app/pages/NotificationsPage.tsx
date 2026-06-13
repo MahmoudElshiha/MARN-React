@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { contractService } from '@/services/contractService'
 import { rentalService } from '@/services/rentalService'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
 export type NotificationType = 'system' | 'message' | 'alert' | 'success'
 
@@ -154,6 +155,7 @@ export function NotificationsPage() {
   const [selectedNotification, setSelectedNotification] = useState<NotificationUI | null>(null)
   const [isProcessingAction, setIsProcessingAction] = useState(false)
   const queryClient = useQueryClient()
+  const { t, i18n } = useTranslation('pages')
 
   const handleNotificationClick = async (notification: NotificationUI) => {
     setSelectedNotification(notification)
@@ -273,10 +275,10 @@ export function NotificationsPage() {
               <div className="p-3 bg-white rounded-2xl shadow-sm border border-[#3A6EA5]/10">
                 <Bell className="w-6 h-6 text-[#3A6EA5]" />
               </div>
-              <h1 className="text-3xl font-bold text-[#1a1a1a]">Notifications</h1>
+              <h1 className="text-3xl font-bold text-[#1a1a1a]">{t('notifications.title')}</h1>
             </div>
-            <p className="text-[#6a7282] ml-1">
-              You have {unreadCount} unread message{unreadCount !== 1 ? 's' : ''}
+            <p className={`text-[#6a7282] ${i18n.language === 'ar' ? 'mr-1' : 'ml-1'}`}>
+              {t('notifications.unreadCount', { count: unreadCount })}
             </p>
           </div>
 
@@ -287,8 +289,8 @@ export function NotificationsPage() {
                 variant="outline"
                 className="bg-white hover:bg-[#f5f7fa] border-[#3A6EA5]/20 text-[#3A6EA5]"
               >
-                <Check className="w-4 h-4 mr-2" />
-                Mark all as read
+                <Check className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                {t('notifications.markAllAsRead')}
               </Button>
             )}
           </div>
@@ -304,7 +306,7 @@ export function NotificationsPage() {
                 : 'text-[#6a7282] hover:bg-[#3A6EA5]/5 hover:text-[#3A6EA5]'
             }`}
           >
-            Unread
+            {t('notifications.unread')}
           </button>
           <button
             onClick={() => setActiveTab('read')}
@@ -314,7 +316,7 @@ export function NotificationsPage() {
                 : 'text-[#6a7282] hover:bg-[#3A6EA5]/5 hover:text-[#3A6EA5]'
             }`}
           >
-            Read
+            {t('notifications.read')}
           </button>
         </div>
 
@@ -347,15 +349,15 @@ export function NotificationsPage() {
                     <Bell className="w-8 h-8 text-[#6a7282]/50" />
                   </div>
                   <h3 className="text-lg font-medium text-[#1a1a1a] mb-2">
-                    All caught up!
+                    {t('notifications.allCaughtUp')}
                   </h3>
                   <p className="text-[#6a7282] max-w-sm mx-auto">
-                    You don't have any new notifications at the moment. Check back later for updates.
+                    {t('notifications.noNewNotifications')}
                   </p>
                   <Button asChild className="mt-6 bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">
                     <Link to="/">
-                      <Home className="w-4 h-4 mr-2" />
-                      Back to Home
+                      <Home className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                      {t('notifications.backToHome')}
                     </Link>
                   </Button>
                 </motion.div>
@@ -410,7 +412,7 @@ export function NotificationsPage() {
                                 if (!notification.isRead) markAsRead(notification.id)
                               }}
                             >
-                              <Link to={notification.link}>View Details</Link>
+                              <Link to={notification.link}>{t('notifications.viewDetails')}</Link>
                             </Button>
                           )}
                         </div>
@@ -424,7 +426,7 @@ export function NotificationsPage() {
                             size="icon"
                             onClick={() => markAsRead(notification.id)}
                             className="h-8 w-8 text-[#3A6EA5] hover:bg-[#3A6EA5]/10 hover:text-[#3A6EA5]"
-                            title="Mark as read"
+                            title={t('notifications.markAsRead')}
                           >
                             <Check className="w-4 h-4" />
                           </Button>
@@ -434,7 +436,7 @@ export function NotificationsPage() {
 
                     {/* Unread Indicator */}
                     {!notification.isRead && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-[#3A6EA5] rounded-r-full" />
+                      <div className={`absolute ${i18n.language === 'ar' ? 'right-0 rounded-l-full' : 'left-0 rounded-r-full'} top-1/2 -translate-y-1/2 w-1 h-12 bg-[#3A6EA5]`} />
                     )}
                   </motion.div>
                 ))
@@ -463,7 +465,7 @@ export function NotificationsPage() {
           </DialogDescription>
           <div className="mt-6 flex justify-end gap-3">
             <Button variant="outline" onClick={() => setSelectedNotification(null)} className="rounded-xl">
-              Close
+              {t('notifications.close')}
             </Button>
             {selectedNotification?.backendType === 'NewBookingRequest' && selectedNotification?.actionId && (
               <div className="flex gap-2 w-full sm:w-auto">
@@ -472,7 +474,7 @@ export function NotificationsPage() {
                   disabled={isProcessingAction}
                   className="rounded-xl bg-green-600 hover:bg-green-700 text-white flex-1"
                 >
-                  {isProcessingAction ? 'Accepting...' : 'Accept Request'}
+                  {isProcessingAction ? t('notifications.accepting') : t('notifications.acceptRequest')}
                 </Button>
                 <Button 
                   onClick={() => handleActionClick('decline_booking', selectedNotification.actionId!)} 
@@ -480,7 +482,7 @@ export function NotificationsPage() {
                   variant="outline"
                   className="rounded-xl border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 flex-1"
                 >
-                  {isProcessingAction ? 'Declining...' : 'Decline'}
+                  {isProcessingAction ? t('notifications.declining') : t('notifications.decline')}
                 </Button>
               </div>
             )}
@@ -490,17 +492,17 @@ export function NotificationsPage() {
                 disabled={isProcessingAction}
                 className="rounded-xl bg-green-600 hover:bg-green-700 text-white"
               >
-                {isProcessingAction ? 'Signing...' : 'Sign Contract'}
+                {isProcessingAction ? t('notifications.signing') : t('notifications.signContract')}
               </Button>
             )}
             {selectedNotification?.link && (
               <Button asChild className="rounded-xl bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">
                 <Link to={selectedNotification.link}>
                   {selectedNotification.backendType === 'NewMessage' 
-                    ? 'Reply to Message' 
+                    ? t('notifications.replyToMessage')
                     : (selectedNotification.backendType === 'AccountBanned' || selectedNotification.title.toLowerCase().includes('banned'))
-                    ? 'Contact Support'
-                    : 'View Details'}
+                    ? t('notifications.contactSupport')
+                    : t('notifications.viewDetails')}
                 </Link>
               </Button>
             )}

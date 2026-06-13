@@ -5,6 +5,7 @@ import { Link } from 'react-router'
 import { ImageWithFallback } from './figma/ImageWithFallback'
 import { toast } from 'sonner'
 import { propertyService } from '@/services/propertyService'
+import { useTranslation } from 'react-i18next'
 
 interface PropertyCardProps {
   id: string
@@ -19,6 +20,8 @@ interface PropertyCardProps {
   baths?: number
   guests?: number
   isSaved?: boolean
+  rentalUnitDisplayName?: string
+  rentalUnit?: string
 }
 
 export function PropertyCard({
@@ -34,7 +37,10 @@ export function PropertyCard({
   baths,
   guests,
   isSaved,
-}: PropertyCardProps) {
+  rentalUnitDisplayName,
+  rentalUnit,
+} : PropertyCardProps) {
+  const { t, i18n } = useTranslation('properties')
   const [isFavorite, setIsFavorite] = useState(isSaved || false)
 
   useEffect(() => {
@@ -93,7 +99,7 @@ export function PropertyCard({
             {/* Property Type Badge */}
             <div className="absolute bottom-4 left-4">
               <span className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-sm text-[#1a1a1a]">
-                {type}
+                {t(`addProperty.detailsStep.types.${type?.toLowerCase()}`, { defaultValue: type })}
               </span>
             </div>
           </div>
@@ -118,25 +124,31 @@ export function PropertyCard({
               <span className="text-sm text-[#4a5565]">{location}</span>
             </div>
 
-            {beds && baths && (
+            {beds !== undefined && baths !== undefined && (
               <div className="flex items-center gap-4 mb-3 text-sm text-[#4a5565]">
-                <span>{beds} beds</span>
+                <span>{t('card.beds', { count: beds })}</span>
                 <span>•</span>
-                <span>{baths} baths</span>
-                {guests && (
+                <span>{t('card.baths', { count: baths })}</span>
+                {guests !== undefined && (
                   <>
                     <span>•</span>
-                    <span>{guests} guests</span>
+                    <span>{t('card.guests', { count: guests })}</span>
                   </>
                 )}
               </div>
             )}
 
-            <div className="flex items-baseline gap-1">
+            <div className="flex items-baseline gap-1" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
               <span className="text-2xl font-bold text-[#3A6EA5]">
-                {price.toLocaleString()} EGP
+                {i18n.language === 'ar' 
+                  ? `${price.toLocaleString()} ${t('currency', { ns: 'common' })}` 
+                  : `${t('currency', { ns: 'common' })} ${price.toLocaleString()}`}
               </span>
-              <span className="text-[#6a7282]">/ month</span>
+              <span className="text-[#6a7282]">
+                / {rentalUnit 
+                    ? t(`addProperty.availabilityStep.${rentalUnit.toLowerCase()}`, { defaultValue: rentalUnitDisplayName || t('card.perMonth') }) 
+                    : (rentalUnitDisplayName ? rentalUnitDisplayName : t('card.perMonth'))}
+              </span>
             </div>
           </div>
         </div>

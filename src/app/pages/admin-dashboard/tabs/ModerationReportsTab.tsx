@@ -1,625 +1,488 @@
-import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import {
-  ShieldAlert,
-  Loader2,
-  Eye,
-  Filter,
-  Search,
-  CheckCircle2,
-  XCircle,
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Eye, Search, XCircle, ShieldAlert, Loader2, Filter } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Input } from '../../../components/ui/input'
 import { Skeleton } from '../../../components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../components/ui/tooltip'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '../../../components/ui/dialog'
-import { Textarea } from '../../../components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../components/ui/select'
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../../../components/ui/tooltip'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
 import { Checkbox } from '../../../components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../../../components/ui/dropdown-menu'
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
 import {
   useAdminModerationReports,
+  useAdminModerationReport,
   useReviewModerationReport,
 } from '@/hooks/useAdminStats'
-import { adminService, type AdminModerationReport } from '@/services/adminService'
+import { ReportModerationActionType } from '@/services/adminService'
+import { getStatusBadge, TruncatedTooltip } from '../utils'
+import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useDebounce } from '@/hooks/useDebounce'
+import { Tabs, TabsList, TabsTrigger } from '../../../components/ui/tabs'
+import { useTranslation } from 'react-i18next'
 
 export function ModerationReportsTab() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const debouncedSearch = useDebounce(searchQuery, 500)
-  const [pageSize, setPageSize] = useState(20)
+  const { t, i18n } = useTranslation('admin')
+  const [pageSize, setPageSize] = useState(10)
+  const [search, setSearch] = useState('')
+  const [activeSearch, setActiveSearch] = useState('')
+  const [activeStatusTab, setActiveStatusTab] = useState('InReview')
+  
+  useEffect(() => {
+    setPageSize(10)
+  }, [activeStatusTab])
+  
+  const { data: reportsData, isLoading, isFetching } = useAdminModerationReports(1, pageSize, activeSearch || undefined, activeStatusTab)
+  const reports = reportsData?.data?.reports?.items || []
+  const totalCount = reportsData?.data?.reports?.totalCount || 0
 
-  const { data: reportsData, isLoading, isFetching } = useAdminModerationReports(1, pageSize, debouncedSearch)
-  const reviewReport = useReviewModerationReport()
-  const queryClient = useQueryClient()
+  const [typeFilters, setTypeFilters] = useState({
+    User: true,
+    Property: true,
+    Message: true,
+    PropertyComment: true,
+  })
+  const [pendingFilters, setPendingFilters] = useState(typeFilters)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
-  const [bannedUserIds, setBannedUserIds] = useState<Set<string>>(new Set())
-
-  const banUserMutation = useMutation({
-    mutationFn: (userId: string) => adminService.banUser(userId),
-    onSuccess: (_, userId) => {
-      toast.success('User banned successfully')
-      setBannedUserIds((prev) => {
-        const newSet = new Set(prev)
-        newSet.add(userId)
-        return newSet
-      })
-      queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
-    },
-    onError: () => toast.error('Failed to ban user')
+  const filteredReports = reports.filter(item => {
+    if (!item.reportableType) return true;
+    return typeFilters[item.reportableType as keyof typeof typeFilters] !== false
   })
 
-  const deletePropertyMutation = useMutation({
-    mutationFn: (propertyId: number) => adminService.deleteProperty(propertyId),
-    onSuccess: () => {
-      toast.success('Property deleted successfully')
-      queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
-    },
-    onError: () => toast.error('Failed to delete property')
-  })
+  const [selectedReportId, setSelectedReportId] = useState<number | null>(null)
+  const { data: reportDetailData, isLoading: detailLoading } = useAdminModerationReport(selectedReportId)
+  const reviewMutation = useReviewModerationReport()
 
-  const deleteCommentMutation = useMutation({
-    mutationFn: ({ propertyId, commentId }: { propertyId: number, commentId: number }) => adminService.deleteComment(propertyId, commentId),
-    onSuccess: () => {
-      toast.success('Comment deleted successfully')
-      queryClient.invalidateQueries({ queryKey: ['adminModerationReports'] })
-    },
-    onError: () => toast.error('Failed to delete comment')
-  })
+  const [reviewStatus, setReviewStatus] = useState<string>('Approved')
+  const [adminNote, setAdminNote] = useState('')
+  const [selectedActionTypes, setSelectedActionTypes] = useState<string[]>([])
 
-  const responseData: any = (reportsData?.data as any)?.reports ?? reportsData?.data
-  const reports: any[] = responseData?.items ?? responseData?.data ?? (Array.isArray(responseData) ? responseData : [])
-  const totalCount = responseData?.totalCount ?? responseData?.total ?? reports.length
-
-  const [searchParams, setSearchParams] = useSearchParams()
-  const filterStatus = searchParams.get('reportStatus') || 'InReview'
-  const setFilterStatus = (val: string) => {
-    setSearchParams((prev) => {
-      prev.set('reportStatus', val)
-      return prev
-    })
-  }
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [appliedReportTypes, setAppliedReportTypes] = useState({
-    user: true,
-    message: true,
-    property: true,
-    comment: true
-  })
-  const [stagedReportTypes, setStagedReportTypes] = useState({
-    user: true,
-    message: true,
-    property: true,
-    comment: true
-  })
-
-  const handleDropdownOpenChange = (open: boolean) => {
-    setIsDropdownOpen(open)
-    if (!open) {
-      setAppliedReportTypes(stagedReportTypes)
-    } else {
-      setStagedReportTypes(appliedReportTypes)
-    }
-  }
-
-  const filteredReports = (reports || []).filter((r) => {
-    if (!r) return false
-    if (filterStatus !== 'All' && r.status !== filterStatus) return false
-
-    const type = r.reportableType ? String(r.reportableType).toLowerCase() : ''
-    if (type === 'user' && !appliedReportTypes.user) return false
-    if (type === 'message' && !appliedReportTypes.message) return false
-    if (type === 'property' && !appliedReportTypes.property) return false
-    if (type === 'propertycomment' && !appliedReportTypes.comment) return false
-
-    return true
-  })
-
-  const [selectedReport, setSelectedReport] = useState<AdminModerationReport | null>(null)
-  const [reviewStatus, setReviewStatus] = useState<string>('Resolved')
-  const [adminNote, setAdminNote] = useState<string>('')
-
-  const openReviewModal = (report: AdminModerationReport) => {
-    setSelectedReport(report)
-    setReviewStatus(report.status === 'InReview' ? 'Resolved' : report.status)
-    setAdminNote(report.internalNotes || '')
+  const openReviewModal = (reportId: number) => {
+    setSelectedReportId(reportId)
+    setReviewStatus('Approved')
+    setAdminNote('')
+    setSelectedActionTypes([])
   }
 
   const handleReviewSubmit = () => {
-    if (!selectedReport) return
+    if (!selectedReportId) return
+    
+    if (reviewStatus === 'Approved' && selectedActionTypes.length === 0) {
+      toast.error('Please select at least one action if approving the report.')
+      return
+    }
 
-    reviewReport.mutate(
+    reviewMutation.mutate(
       {
-        reportId: selectedReport.reportId,
+        reportId: selectedReportId,
         payload: {
-          status: reviewStatus as any,
+          status: reviewStatus === 'Approved' ? 'Resolved' : 'Rejected',
           note: adminNote,
-        },
+          actionTypes: selectedActionTypes.length > 0 ? selectedActionTypes : undefined,
+        }
       },
       {
         onSuccess: () => {
-          setSelectedReport(null)
-        },
+          toast.success('Moderation review submitted successfully')
+          setSelectedReportId(null)
+        }
       }
     )
   }
 
-  const getStatusIcon = (status?: string) => {
-    const s = status?.toLowerCase() || ''
-    if (s === 'resolved' || s === 'approved') return <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-    if (s === 'rejected' || s === 'dismissed') return <XCircle className="w-5 h-5 text-red-500 shrink-0" />
-    return <ShieldAlert className="w-5 h-5 text-yellow-500 shrink-0" />
-  }
-
-  const getTargetLink = (type?: string, targetId?: string) => {
-    if (!type || !targetId) return '#'
-    switch (String(type).toLowerCase()) {
-      case 'user':
-        return `/user/${targetId}`
-      case 'property':
-      case 'propertycomment':
-        return `/property/${targetId}`
-      case 'message':
-        return `/messages`
-      default:
-        return '#'
-    }
-  }
+  const reportDetail = reportDetailData?.data
 
   return (
-    <>
+    <div className="space-y-6">
       <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <CardTitle className="text-2xl text-[#1a1a1a]">
-            Moderation Reports
-          </CardTitle>
-          <div className="flex w-full sm:max-w-md gap-2">
-            <Input
-              placeholder="Search by report text..."
-              className="w-full bg-white border-none rounded-xl"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Button size="icon" className="rounded-xl bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white shrink-0">
-              <Search className="w-4 h-4" />
-            </Button>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <CardTitle className="text-2xl text-[#1a1a1a]">
+              {t('moderationReports.title')}
+            </CardTitle>
+            <div className="flex w-full sm:w-auto items-center gap-2">
+              <Input
+                placeholder={t('moderationReports.search')}
+                className="w-full sm:w-64 bg-white rounded-xl border-[#3A6EA5]/20"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') setActiveSearch(search)
+                }}
+              />
+              <Button
+                size="icon"
+                className="bg-[#3A6EA5] hover:bg-[#2A527A] text-white rounded-xl flex-shrink-0"
+                onClick={() => setActiveSearch(search)}
+              >
+                <Search className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <Tabs value={activeStatusTab} onValueChange={setActiveStatusTab} className="w-full sm:w-auto flex-1" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+              <TabsList className="bg-[#E5E9F0] border-none rounded-xl p-1">
+                <TabsTrigger value="InReview" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+                  {t('moderationReports.inReview')}
+                </TabsTrigger>
+                <TabsTrigger value="Resolved" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+                  {t('moderationReports.resolved')}
+                </TabsTrigger>
+                <TabsTrigger value="Rejected" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+                  {t('moderationReports.rejected')}
+                </TabsTrigger>
+                <TabsTrigger value="All" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+                  {t('tabs.all')}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <Popover open={isFilterOpen} onOpenChange={(open) => {
+              setIsFilterOpen(open)
+              if (open) setPendingFilters(typeFilters)
+            }}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20 gap-2 shrink-0 bg-white">
+                  <Filter className="w-4 h-4" />
+                  {t('moderationReports.filterTypes')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 rounded-2xl p-4 shadow-xl border border-[#3A6EA5]/10 bg-white" align="end">
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-sm text-[#1a1a1a]">{t('moderationReports.filterByType')}</h4>
+                  <div className="space-y-3">
+                    {Object.entries({
+                      User: t('moderationReports.types.user'),
+                      Property: t('moderationReports.types.property'),
+                      Message: t('moderationReports.types.message'),
+                      PropertyComment: t('moderationReports.types.propertyComment')
+                    }).map(([key, label]) => (
+                      <label key={key} className="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-gray-50">
+                        <Checkbox 
+                          checked={pendingFilters[key as keyof typeof pendingFilters]} 
+                          onCheckedChange={(c) => setPendingFilters(prev => ({ ...prev, [key]: !!c }))}
+                        />
+                        <span className="text-sm text-[#4a5565]">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-100 mt-2">
+                    <Button variant="ghost" size="sm" className="rounded-xl text-[#4a5565]" onClick={() => setIsFilterOpen(false)}>
+                      {t('moderationReports.cancel')}
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="bg-[#3A6EA5] hover:bg-[#2A527A] text-white rounded-xl"
+                      onClick={() => {
+                        setTypeFilters(pendingFilters)
+                        setIsFilterOpen(false)
+                      }}
+                    >
+                      {t('moderationReports.apply')}
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="bg-white rounded-2xl p-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <div className="flex flex-wrap items-center gap-2">
-                {['InReview', 'Resolved', 'Rejected', 'All'].map((statusOption) => (
-                  <Button
-                    key={statusOption}
-                    variant={filterStatus === statusOption ? 'default' : 'outline'}
-                    size="sm"
-                    className={`rounded-xl px-4 py-1.5 h-auto text-sm font-medium transition-colors ${
-                      filterStatus === statusOption
-                        ? 'bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white border-transparent'
-                        : 'text-[#4a5565] border-[#3A6EA5]/20 hover:bg-[#F2F4F6]'
-                    }`}
-                    onClick={() => setFilterStatus(statusOption)}
-                  >
-                    {statusOption === 'InReview' ? 'In Review' : statusOption === 'Rejected' ? 'Dismissed' : statusOption}
-                  </Button>
-                ))}
-              </div>
-
-              <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownOpenChange}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="group rounded-xl px-3 border-[#3A6EA5]/20 text-[#4a5565] hover:bg-[#3A6EA5] hover:text-white">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter Types
-                    <span className="ml-2 bg-[#3A6EA5]/10 text-[#3A6EA5] group-hover:bg-white group-hover:text-[#3A6EA5] px-1.5 py-0.5 rounded-md text-xs font-semibold">
-                      {Object.values(appliedReportTypes).filter(Boolean).length === 4 ? 'All' : Object.values(appliedReportTypes).filter(Boolean).length}
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-xl p-2">
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    onClick={() => setStagedReportTypes(prev => ({ ...prev, user: !prev.user }))}
-                    className="flex items-center gap-3 rounded-lg cursor-pointer p-2 focus:bg-[#F2F4F6]"
-                  >
-                    <Checkbox 
-                      checked={stagedReportTypes.user} 
-                      className="data-[state=checked]:bg-white data-[state=checked]:text-[#3A6EA5] border-gray-300 data-[state=checked]:border-[#3A6EA5]" 
-                    />
-                    <span>User Reports</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    onClick={() => setStagedReportTypes(prev => ({ ...prev, message: !prev.message }))}
-                    className="flex items-center gap-3 rounded-lg cursor-pointer p-2 focus:bg-[#F2F4F6]"
-                  >
-                    <Checkbox 
-                      checked={stagedReportTypes.message} 
-                      className="data-[state=checked]:bg-white data-[state=checked]:text-[#3A6EA5] border-gray-300 data-[state=checked]:border-[#3A6EA5]" 
-                    />
-                    <span>Message Reports</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    onClick={() => setStagedReportTypes(prev => ({ ...prev, property: !prev.property }))}
-                    className="flex items-center gap-3 rounded-lg cursor-pointer p-2 focus:bg-[#F2F4F6]"
-                  >
-                    <Checkbox 
-                      checked={stagedReportTypes.property} 
-                      className="data-[state=checked]:bg-white data-[state=checked]:text-[#3A6EA5] border-gray-300 data-[state=checked]:border-[#3A6EA5]" 
-                    />
-                    <span>Property Reports</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    onClick={() => setStagedReportTypes(prev => ({ ...prev, comment: !prev.comment }))}
-                    className="flex items-center gap-3 rounded-lg cursor-pointer p-2 focus:bg-[#F2F4F6]"
-                  >
-                    <Checkbox 
-                      checked={stagedReportTypes.comment} 
-                      className="data-[state=checked]:bg-white data-[state=checked]:text-[#3A6EA5] border-gray-300 data-[state=checked]:border-[#3A6EA5]" 
-                    />
-                    <span>Comment Reports</span>
-                  </DropdownMenuItem>
-                  <div className="mt-2 pt-2 border-t flex justify-end">
-                    <Button 
-                      size="sm" 
-                      className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-lg w-full"
-                      onClick={() => handleDropdownOpenChange(false)}
-                    >
-                      Apply Filters
-                    </Button>
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
+          {!isLoading && filteredReports.length === 0 ? (
+            <div className="py-10 text-center text-[#4a5565] border-b border-[#3A6EA5]/20">
+              {t('moderationReports.noReports')}
             </div>
-
-            {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    className="h-20 w-full rounded-xl"
-                  />
-                ))}
-              </div>
-            ) : filteredReports.length === 0 ? (
-              <p className="text-center text-[#4a5565] py-6">
-                No moderation reports found for the selected filter.
-              </p>
-            ) : (
-              <div className="space-y-3 overflow-y-auto max-h-[600px] pr-2">
-                {filteredReports.map((report) => {
-                  let listReason = report?.reason ? String(report.reason) : ''
-                  if (listReason.includes('REPORTMETAUSER')) {
-                    listReason = listReason.split('REPORTMETAUSER')[0].trim()
-                  }
-                  if (listReason.includes('REPORTMETAPROPERTY')) {
-                    listReason = listReason.split('REPORTMETAPROPERTY')[0].trim()
-                  }
-                  if (listReason.includes('REPORTMETAID')) {
-                    listReason = listReason.split('REPORTMETAID')[0].trim()
-                  }
-                  if (listReason.includes('REPORTMETAMESSAGE')) {
-                    listReason = listReason.split('REPORTMETAMESSAGE')[0].trim()
-                  } else if (listReason.includes('REPORTMETACOMMENT')) {
-                    listReason = listReason.split('REPORTMETACOMMENT')[0].trim()
-                  }
-
-                  return (
-                  <div
-                    key={report?.reportId || Math.random()}
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-[#F2F4F6] rounded-xl gap-4"
-                  >
-                    <div className="flex items-start gap-3">
-                      {getStatusIcon(report.status)}
-                      <div>
-                        <p className="font-medium text-[#1a1a1a] flex items-center flex-wrap gap-2">
-                          <span>{report?.reportableTypeDisplayName || report?.reportableType || 'Unknown'} Report</span>
-                          {report?.reportableTargetId ? (
-                            <Link 
-                              to={getTargetLink(report.reportableType, report.reportableTargetId)}
-                              className="text-sm font-medium text-[#3A6EA5] hover:underline bg-[#3A6EA5]/10 px-2 py-0.5 rounded-md"
-                            >
-                              View Target (ID: {report.reportableTargetId})
-                            </Link>
-                          ) : (
-                            <span className="text-sm font-medium text-[#4a5565] bg-gray-200 px-2 py-0.5 rounded-md">
-                              Target: {(report as any)?.targetLabel || 'Unknown'}
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-sm text-[#1a1a1a] mt-1 line-clamp-2">
-                          <strong>Report Text:</strong> "{listReason}"
-                        </p>
-                        <p className="text-xs text-[#4a5565] mt-1">
-                          Submitted by {report?.reporterName || report?.reporterFullName || report?.reporterUserId || 'Unknown'} on {report?.createdAt ? new Date(report.createdAt).toLocaleDateString() : 'Unknown date'}
-                          {' • '}
-                          Status: {report?.statusDisplayName || report?.status || 'Unknown'}
-                        </p>
-                      </div>
-                    </div>
-                    <TooltipProvider delayDuration={200}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="rounded-xl border-[#3A6EA5]/20 shrink-0 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white w-8 h-8"
-                            onClick={() => openReviewModal(report)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent><p>Review Report</p></TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                )})}
-              </div>
-            )}
-            
-            {totalCount > reports.length && (
-              <div className="mt-4 flex justify-center items-center min-h-[40px]">
-                {isFetching ? (
-                  <Loader2 className="w-6 h-6 animate-spin text-[#3A6EA5]" />
+          ) : (
+          <div className="overflow-x-auto overflow-y-scroll max-h-[600px] border-b border-[#3A6EA5]/20">
+            <TooltipProvider delayDuration={700}>
+            <table className="w-full min-w-[800px] relative" style={{ tableLayout: 'fixed' }}>
+              <thead className="sticky top-0 bg-[#F2F4F6] z-10">
+                <tr className="border-b border-[#3A6EA5]/20">
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '20%' }}>{t('moderationReports.reportInfo')}</th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('moderationReports.target')}</th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '30%' }}>{t('moderationReports.reason')}</th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('moderationReports.status')}</th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>{t('moderationReports.date')}</th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>{t('moderationReports.actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b border-[#3A6EA5]/10">
+                      {Array.from({ length: 6 }).map((_, j) => (
+                        <td key={j} className="py-4 px-4">
+                          <Skeleton className="h-5 w-full rounded" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
                 ) : (
-                  <Button
-                    variant="outline"
-                    className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
-                    onClick={() => setPageSize((p) => p + 20)}
-                  >
-                    Load More Pages
-                  </Button>
+                  filteredReports.map((item) => (
+                    <tr key={item.reportId} className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors">
+                      <td className="py-4 px-4 text-[#1a1a1a]">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{t('moderationReports.modal.reportNumber', { id: item.reportId })}</span>
+                          <span className="text-xs text-[#4a5565]">{t('moderationReports.modal.by')}: {item.reporterName || t('moderationReports.modal.anonymous')}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-lg font-medium">
+                          {item.reportableTypeDisplayName || item.reportableType}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-[#4a5565] overflow-hidden">
+                        <TruncatedTooltip text={item.reason || ''} />
+                      </td>
+                      <td className="py-4 px-4">
+                        {getStatusBadge(item.statusDisplayName || item.status)}
+                      </td>
+                      <td className="py-4 px-4 text-[#4a5565]">
+                        {new Date(item.createdAt).toLocaleDateString('en-GB')}
+                      </td>
+                      <td className="py-4 px-4">
+                          <div className="flex gap-2 justify-start">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0"
+                                  onClick={() => openReviewModal(item.reportId)}
+                                >
+                                  {item.status === 'InReview' ? <ShieldAlert className="w-4 h-4 text-orange-500" /> : <Eye className="w-4 h-4" />}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent><p>{item.status === 'InReview' ? t('moderationReports.reviewReport') : t('moderationReports.viewReport')}</p></TooltipContent>
+                            </Tooltip>
+                          </div>
+                      </td>
+                    </tr>
+                  ))
                 )}
-              </div>
-            )}
-            {totalCount > reports.length && filterStatus !== 'All' && (
-              <p className="text-center text-xs text-[#4a5565] mt-4">
-                Note: Load more items under the 'All' tab to discover older reports.
-              </p>
-            )}
+              </tbody>
+              {totalCount > filteredReports.length && (
+                <tfoot>
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="py-6 flex justify-center items-center min-h-[40px]">
+                        {isFetching ? (
+                          <Loader2 className="w-6 h-6 animate-spin text-[#3A6EA5]" />
+                        ) : (
+                          <Button
+                            variant="outline"
+                            className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
+                            onClick={() => setPageSize((p) => p + 10)}
+                          >
+                            {t('table.showMore')}
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+            </TooltipProvider>
           </div>
+          )}
         </CardContent>
       </Card>
 
-      <Dialog open={!!selectedReport} onOpenChange={(open) => !open && setSelectedReport(null)}>
-        <DialogContent className="sm:max-w-[700px]">
+      <Dialog
+        open={selectedReportId !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedReportId(null)
+        }}
+      >
+        <DialogContent className="bg-white rounded-3xl max-w-4xl w-[95vw] mx-auto p-6 border-none shadow-2xl overflow-y-auto max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>Review Moderation Report</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-[#1a1a1a]">
+              {t('moderationReports.modal.title')}
+            </DialogTitle>
           </DialogHeader>
-          {selectedReport && (() => {
-            let displayReason = selectedReport.reason || ''
-            let reportedMessageContent = ''
-            let extractedPropertyId = ''
-            let extractedUserId = ''
-            let reportedCommentContent = ''
-            let extractedMetaId = ''
 
-            if (displayReason.includes('REPORTMETAUSER')) {
-              const parts = displayReason.split('REPORTMETAUSER')
-              extractedUserId = parts[1]?.trim() || ''
-              displayReason = parts[0].trim()
-            }
-            if (displayReason.includes('REPORTMETAPROPERTY')) {
-              const parts = displayReason.split('REPORTMETAPROPERTY')
-              extractedPropertyId = parts[1]?.trim() || ''
-              displayReason = parts[0].trim()
-            }
-            if (displayReason.includes('REPORTMETAID')) {
-              const parts = displayReason.split('REPORTMETAID')
-              extractedMetaId = parts[1]?.trim() || ''
-              displayReason = parts[0].trim()
-            }
+          {detailLoading ? (
+            <div className="flex items-center justify-center p-10">
+              <Loader2 className="w-8 h-8 animate-spin text-[#3A6EA5]" />
+            </div>
+          ) : reportDetail ? (
+            <div className="space-y-6 py-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-1 bg-[#F2F4F6] p-4 rounded-2xl">
+                  <p className="text-xs font-semibold text-[#4a5565] uppercase">{t('moderationReports.reportInfo')}</p>
+                  <p className="text-sm font-medium text-[#1a1a1a]">{t('moderationReports.modal.reportNumber', { id: reportDetail.reportId })}</p>
+                  <p className="text-sm text-[#4a5565]">{t('moderationReports.modal.submitted')}: {new Date(reportDetail.createdAt).toLocaleString('en-GB')}</p>
+                  <p className="text-sm text-[#4a5565]">{t('moderationReports.modal.by')}: {reportDetail.reporterName || t('moderationReports.modal.anonymous')}</p>
+                </div>
+                <div className="space-y-1 bg-[#F2F4F6] p-4 rounded-2xl">
+                  <p className="text-xs font-semibold text-[#4a5565] uppercase">{t('moderationReports.reason')}</p>
+                  <p className="text-sm text-[#1a1a1a]">{reportDetail.reason}</p>
+                </div>
+              </div>
 
-            if (displayReason.includes('REPORTMETAMESSAGE')) {
-              const parts = displayReason.split('REPORTMETAMESSAGE')
-              displayReason = parts[0].trim()
-              reportedMessageContent = parts[1]?.trim() || ''
-            } else if (displayReason.includes('REPORTMETACOMMENT')) {
-              const parts = displayReason.split('REPORTMETACOMMENT')
-              displayReason = parts[0].trim()
-              reportedCommentContent = parts[1]?.trim() || ''
-            }
+              {/* Target Details */}
+              <div className="space-y-2 border border-[#3A6EA5]/20 rounded-2xl p-4 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#3A6EA5]" />
+                <p className="text-sm font-semibold text-[#1a1a1a]">{t('moderationReports.modal.reportedContent')}: {reportDetail.reportableTypeDisplayName}</p>
+                {reportDetail.target ? (
+                  <div className="space-y-1 mt-2">
+                    <p className="text-sm font-medium text-[#1a1a1a]">{reportDetail.target.title}</p>
+                    {reportDetail.target.subtitle && <p className="text-xs text-[#4a5565]">{reportDetail.target.subtitle}</p>}
+                    <p className="text-sm bg-white p-3 rounded-xl border border-gray-100 mt-2 text-gray-700 italic">
+                      "{reportDetail.target.preview}"
+                    </p>
+                    
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {reportDetail.target.isHidden && <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-lg font-medium">{t('moderationReports.modal.hidden')}</span>}
+                      {reportDetail.target.isDeletedOrInactive && <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-lg font-medium">{t('moderationReports.modal.deletedInactive')}</span>}
+                      
+                      {reportDetail.target.propertyId && (
+                        <Link to={`/property/${reportDetail.target.propertyId}`} target="_blank" className="text-xs font-semibold text-[#3A6EA5] hover:underline px-2 py-1 bg-[#3A6EA5]/10 rounded-lg">
+                          {t('moderationReports.modal.viewProperty')}
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#4a5565]">{t('moderationReports.modal.targetNotAvailable')}</p>
+                )}
+              </div>
 
-            const backendTargetId = selectedReport.reportableTargetId || (selectedReport as any).targetId || ''
-            const finalTargetId = backendTargetId || extractedPropertyId || extractedUserId
+              {/* Resolution Form (only if InReview) */}
+              {reportDetail.status === 'InReview' ? (
+                <div className="space-y-4 pt-4 border-t border-[#3A6EA5]/10">
+                  <h4 className="font-semibold text-[#1a1a1a]">{t('moderationReports.modal.resolveReport')}</h4>
+                  
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">{t('moderationReports.modal.resolutionStatus')}</p>
+                    <Select value={reviewStatus} onValueChange={setReviewStatus}>
+                      <SelectTrigger className="w-full bg-[#F2F4F6] border-none rounded-xl">
+                        <SelectValue placeholder={t('moderationReports.modal.selectOutcome')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Approved">{t('moderationReports.modal.approveAction')}</SelectItem>
+                        <SelectItem value="Rejected">{t('moderationReports.modal.rejectAction')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            return (
-            <div className="space-y-4 py-4">
-              <div className="bg-[#F2F4F6] p-4 rounded-xl text-sm">
-                <p><strong>Type:</strong> {selectedReport.reportableTypeDisplayName || selectedReport.reportableType}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <strong>Target:</strong> 
-                  {finalTargetId ? (
-                    <Link 
-                      to={getTargetLink(selectedReport.reportableType, finalTargetId)}
-                      className="text-[#3A6EA5] hover:underline font-medium"
-                      target="_blank"
+                  {reviewStatus === 'Approved' && (
+                    <div className="space-y-3 bg-red-50/50 border border-red-100 p-4 rounded-xl">
+                      <p className="text-sm font-medium text-red-800">{t('moderationReports.modal.actionsToTake')}</p>
+                      
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/50 transition-colors">
+                          <Checkbox
+                            checked={selectedActionTypes.includes(ReportModerationActionType.BanUser)}
+                            onCheckedChange={(c) => setSelectedActionTypes(prev => c ? [...prev, ReportModerationActionType.BanUser] : prev.filter(x => x !== ReportModerationActionType.BanUser))}
+                          />
+                          <span className="text-sm font-medium text-red-700">{t('moderationReports.modal.banUser')}</span>
+                        </label>
+                        
+                        {reportDetail.reportableType === 'Property' && (
+                          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/50 transition-colors">
+                            <Checkbox
+                              checked={selectedActionTypes.includes(ReportModerationActionType.DeactivateProperty)}
+                              onCheckedChange={(c) => setSelectedActionTypes(prev => c ? [...prev, ReportModerationActionType.DeactivateProperty] : prev.filter(x => x !== ReportModerationActionType.DeactivateProperty))}
+                            />
+                            <span className="text-sm font-medium text-red-700">{t('moderationReports.modal.deactivateProperty')}</span>
+                          </label>
+                        )}
+                        
+                        {reportDetail.reportableType === 'Message' && (
+                          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/50 transition-colors">
+                            <Checkbox
+                              checked={selectedActionTypes.includes(ReportModerationActionType.HideMessage)}
+                              onCheckedChange={(c) => setSelectedActionTypes(prev => c ? [...prev, ReportModerationActionType.HideMessage] : prev.filter(x => x !== ReportModerationActionType.HideMessage))}
+                            />
+                            <span className="text-sm font-medium text-red-700">{t('moderationReports.modal.hideMessage')}</span>
+                          </label>
+                        )}
+                        
+                        {reportDetail.reportableType === 'PropertyComment' && (
+                          <label className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/50 transition-colors">
+                            <Checkbox
+                              checked={selectedActionTypes.includes(ReportModerationActionType.HidePropertyComment)}
+                              onCheckedChange={(c) => setSelectedActionTypes(prev => c ? [...prev, ReportModerationActionType.HidePropertyComment] : prev.filter(x => x !== ReportModerationActionType.HidePropertyComment))}
+                            />
+                            <span className="text-sm font-medium text-red-700">{t('moderationReports.modal.hideComment')}</span>
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">{t('moderationReports.modal.adminNote')}</p>
+                    <textarea
+                      className="w-full h-24 p-3 bg-[#F2F4F6] border-none rounded-xl text-sm focus:ring-2 focus:ring-[#3A6EA5] outline-none resize-none"
+                      placeholder={t('moderationReports.modal.addContext')}
+                      value={adminNote}
+                      onChange={(e) => setAdminNote(e.target.value)}
+                    />
+                  </div>
+
+                  <DialogFooter className="pt-4 flex-col sm:flex-row gap-3 sm:gap-0">
+                    <Button variant="outline" onClick={() => setSelectedReportId(null)} className="rounded-xl w-full sm:w-auto">
+                      {t('moderationReports.cancel')}
+                    </Button>
+                    <Button
+                      onClick={handleReviewSubmit}
+                      disabled={reviewMutation.isPending || (reviewStatus === 'Approved' && selectedActionTypes.length === 0)}
+                      className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl w-full sm:w-auto"
                     >
-                      {(selectedReport as any).targetLabel || finalTargetId} (Click to view)
-                    </Link>
-                  ) : (
-                    <span>{(selectedReport as any).targetLabel || 'Unknown'}</span>
+                      {reviewMutation.isPending ? t('moderationReports.modal.submitting') : t('moderationReports.modal.submitReview')}
+                    </Button>
+                  </DialogFooter>
+                </div>
+              ) : (
+                <div className="space-y-4 pt-4 border-t border-[#3A6EA5]/10 bg-gray-50/50 p-4 rounded-xl mt-4">
+                  <h4 className="font-semibold text-[#1a1a1a]">{t('moderationReports.modal.resolutionDetails')}</h4>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-semibold text-[#4a5565] uppercase">{t('moderationReports.modal.outcome')}</p>
+                      <p className="text-sm font-medium mt-1">{reportDetail.actionTakenDisplayName || t('moderationReports.modal.noActionTaken')}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[#4a5565] uppercase">{t('moderationReports.modal.reviewedBy')}</p>
+                      <p className="text-sm mt-1">{reportDetail.reviewerName}</p>
+                    </div>
+                  </div>
+                  {reportDetail.reviewerNote && (
+                    <div>
+                      <p className="text-xs font-semibold text-[#4a5565] uppercase">{t('moderationReports.modal.internalNote')}</p>
+                      <p className="text-sm mt-1 italic text-gray-700">{reportDetail.reviewerNote}</p>
+                    </div>
+                  )}
+                  {reportDetail.actionsTakenDisplayNames && reportDetail.actionsTakenDisplayNames.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-[#4a5565] uppercase">{t('moderationReports.modal.automatedActionsFired')}</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {reportDetail.actionsTakenDisplayNames.map((action, i) => (
+                          <span key={i} className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-lg font-medium">
+                            {action}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Submitted Report Text</p>
-                <Textarea 
-                  readOnly 
-                  disabled
-                  value={displayReason} 
-                  className="min-h-[80px] bg-white border border-gray-200 resize-none text-[#6B7280] shadow-sm cursor-not-allowed opacity-100" 
-                />
-              </div>
-
-              {reportedMessageContent && (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Reported Message Content</p>
-                  <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-sm text-[#1a1a1a]">
-                    {reportedMessageContent}
-                  </div>
-                </div>
               )}
-
-              {reportedCommentContent && (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Reported Review Content</p>
-                  <div className="bg-red-50 p-3 rounded-xl border border-red-200 text-sm text-[#1a1a1a]">
-                    {reportedCommentContent}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Review Status</p>
-                <Select value={reviewStatus} onValueChange={setReviewStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="InReview">In Review</SelectItem>
-                    <SelectItem value="Resolved">Resolved</SelectItem>
-                    <SelectItem value="Rejected">Dismissed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Internal Notes (Optional)</p>
-                <Textarea 
-                  placeholder="Add an internal note..."
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  className="min-h-[80px] bg-white border border-gray-200 resize-none text-[#1a1a1a] shadow-sm rounded-xl" 
-                />
-              </div>
-
-              <DialogFooter className="pt-4 border-t border-[#3A6EA5]/10 mt-6 flex-col sm:flex-col items-stretch space-y-4 sm:space-x-0">
-                {['property', 'user', 'propertycomment', 'message'].includes(selectedReport.reportableType?.toLowerCase() || '') ? (
-                  <div className="flex gap-2 w-full justify-start flex-wrap">
-                    {selectedReport.reportableType?.toLowerCase() === 'property' && (
-                      <TooltipProvider delayDuration={200}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button variant="destructive" onClick={() => deletePropertyMutation.mutate(Number(finalTargetId))} disabled={!finalTargetId || deletePropertyMutation.isPending} className="rounded-xl flex-1 sm:flex-none">
-                                {deletePropertyMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                Delete Property
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          {!finalTargetId && <TooltipContent><p>Target ID missing for this legacy report</p></TooltipContent>}
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                    {selectedReport.reportableType?.toLowerCase() === 'user' && (
-                      <TooltipProvider delayDuration={200}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button variant="destructive" onClick={() => banUserMutation.mutate(finalTargetId)} disabled={!finalTargetId || bannedUserIds.has(finalTargetId) || banUserMutation.isPending} className="rounded-xl flex-1 sm:flex-none">
-                                {banUserMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                Ban User
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          {bannedUserIds.has(finalTargetId) ? <TooltipContent><p>User already banned</p></TooltipContent> : (!finalTargetId && <TooltipContent><p>Target ID missing for this legacy report</p></TooltipContent>)}
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                    {selectedReport.reportableType?.toLowerCase() === 'message' && (
-                      <TooltipProvider delayDuration={200}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button variant="destructive" onClick={() => banUserMutation.mutate(extractedUserId)} disabled={!extractedUserId || bannedUserIds.has(extractedUserId) || banUserMutation.isPending} className="rounded-xl flex-1 sm:flex-none">
-                                {banUserMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                Ban User
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          {bannedUserIds.has(extractedUserId) ? <TooltipContent><p>User already banned</p></TooltipContent> : (!extractedUserId && <TooltipContent><p>Cannot extract User ID from legacy report</p></TooltipContent>)}
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                    {selectedReport.reportableType?.toLowerCase() === 'propertycomment' && (
-                      <>
-                        {extractedUserId && (
-                          <TooltipProvider delayDuration={200}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span>
-                                  <Button variant="destructive" onClick={() => banUserMutation.mutate(extractedUserId)} disabled={bannedUserIds.has(extractedUserId) || banUserMutation.isPending} className="rounded-xl flex-1 sm:flex-none">
-                                    {banUserMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                    Ban User
-                                  </Button>
-                                </span>
-                              </TooltipTrigger>
-                              {bannedUserIds.has(extractedUserId) && <TooltipContent><p>User already banned</p></TooltipContent>}
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
-                        <TooltipProvider delayDuration={200}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span>
-                                <Button variant="destructive" onClick={() => deleteCommentMutation.mutate({ propertyId: Number(extractedPropertyId), commentId: Number(extractedMetaId) })} disabled={deleteCommentMutation.isPending || !extractedPropertyId || !extractedMetaId} className="rounded-xl flex-1 sm:flex-none">
-                                  {deleteCommentMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                  Delete Comment
-                                </Button>
-                              </span>
-                            </TooltipTrigger>
-                            {(!extractedPropertyId || !extractedMetaId) && <TooltipContent><p>Missing IDs in legacy report</p></TooltipContent>}
-                          </Tooltip>
-                        </TooltipProvider>
-                      </>
-                    )}
-                  </div>
-                ) : null}
-                <div className="flex gap-2 w-full justify-end">
-                  <Button variant="outline" onClick={() => setSelectedReport(null)} className="rounded-xl">
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={handleReviewSubmit}
-                    disabled={reviewReport.isPending}
-                    className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white rounded-xl"
-                  >
-                    {reviewReport.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Submit Review
-                  </Button>
-                </div>
-              </DialogFooter>
             </div>
-            )
-          })()}
+          ) : (
+            <div className="p-10 text-center text-[#4a5565]">
+              {t('moderationReports.modal.notFound')}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   )
 }

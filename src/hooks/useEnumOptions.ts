@@ -23,6 +23,8 @@ export type EnumEndpoint =
   | 'work-schedules'
   | 'sharing-levels'
   | 'education-levels'
+  | 'amenity-types'
+  | 'property-sort-by'
 
 interface State {
   options: EnumOption[]

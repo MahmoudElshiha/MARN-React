@@ -31,11 +31,13 @@ import { useAuth } from '@/hooks/useAuth'
 import { useMutation } from '@tanstack/react-query'
 import { userService } from '@/services/userService'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export function PropertyByOwnerPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const { t, i18n } = useTranslation('properties')
 
   const { user } = useAuth()
   const updateComment = useUpdatePropertyComment()
@@ -134,7 +136,7 @@ export function PropertyByOwnerPage() {
   if (!property) {
     return (
       <div className="min-h-screen py-20 flex items-center justify-center text-[#4a5565]">
-        Property not found.
+        {t('details.propertyNotFound')}
       </div>
     )
   }
@@ -241,7 +243,7 @@ export function PropertyByOwnerPage() {
                       {property.rating}
                     </span>
                     <span className="text-[#6B7280]">
-                      ({property.reviews} reviews)
+                      ({property.reviews} {t('details.reviewsCount')})
                     </span>
                   </div>
                 )}
@@ -256,18 +258,18 @@ export function PropertyByOwnerPage() {
             <div className="flex gap-6">
               <div className="flex items-center gap-2">
                 <Bed className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-[#1a1a1a]">{property.beds} Bedrooms</span>
+                <span className="text-[#1a1a1a]">{(property as any).bedrooms ?? property.beds} {t('addProperty.detailsStep.beds')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Bath className="w-5 h-5 text-[#3A6EA5]" />
                 <span className="text-[#1a1a1a]">
-                  {property.baths} Bathrooms
+                  {(property as any).bathrooms ?? property.baths} {t('addProperty.detailsStep.baths')}
                 </span>
               </div>
-              {property.area && (
+              {((property as any).squareMeters ?? (property as any).area) && (
                 <div className="flex items-center gap-2">
                   <Maximize2 className="w-5 h-5 text-[#3A6EA5]" />
-                  <span className="text-[#1a1a1a]">{property.area} m²</span>
+                  <span className="text-[#1a1a1a]">{(property as any).squareMeters ?? (property as any).area} {t('details.sqm')}</span>
                 </div>
               )}
             </div>
@@ -276,7 +278,7 @@ export function PropertyByOwnerPage() {
             {property.description && (
               <div>
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-3">
-                  Description
+                  {t('details.description')}
                 </h2>
                 <p className="text-[#1a1a1a] leading-relaxed">
                   {property.description}
@@ -288,7 +290,7 @@ export function PropertyByOwnerPage() {
             {property.amenities.length > 0 && (
               <div>
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
-                  Amenities
+                  {t('details.amenities')}
                 </h2>
                 <div className="grid grid-cols-2 gap-3">
                   {property.amenities.map((amenity: any) => {
@@ -300,7 +302,7 @@ export function PropertyByOwnerPage() {
                         className="flex items-center gap-3 p-3 bg-[#E5EBF0] rounded-xl"
                       >
                         <CheckCircle className="w-5 h-5 text-[#3A6EA5]" />
-                        <span className="text-[#1a1a1a]">{display}</span>
+                        <span className="text-[#1a1a1a]">{t(`addProperty.detailsStep.amenitiesList.${display.replace(/[^a-zA-Z]/g, '')}`, { defaultValue: display })}</span>
                       </div>
                     )
                   })}
@@ -311,7 +313,7 @@ export function PropertyByOwnerPage() {
             {/* Rental Requests Section */}
             <div>
               <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
-                Rental Requests ({requestsLoading ? '…' : requests.length})
+                {t('propertyByOwner.rentalRequests')} ({requestsLoading ? '…' : requests.length})
               </h2>
               {requestsLoading ? (
                 <div className="space-y-4">
@@ -320,7 +322,7 @@ export function PropertyByOwnerPage() {
                   <Skeleton className="h-40 w-full rounded-3xl" />
                 </div>
               ) : requests.length === 0 ? (
-                <p className="text-[#4a5565]">No rental requests yet.</p>
+                <p className="text-[#4a5565]">{t('propertyByOwner.noRequests')}</p>
               ) : (
                 <div className="space-y-4">
                   {requests.map((request) => (
@@ -349,14 +351,14 @@ export function PropertyByOwnerPage() {
                             </div>
                           </div>
                           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                            Pending
+                            {t('propertyByOwner.pending')}
                           </span>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                           <div className="p-3 bg-white rounded-xl">
                             <p className="text-xs text-[#6B7280] mb-1">
-                              Move-in
+                              {t('details.moveInDate')}
                             </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {new Date(request.startDate).toLocaleDateString(
@@ -371,7 +373,7 @@ export function PropertyByOwnerPage() {
                           </div>
                           <div className="p-3 bg-white rounded-xl">
                             <p className="text-xs text-[#6B7280] mb-1">
-                              Move-out
+                              {t('propertyByOwner.moveOut')}
                             </p>
                             <p className="text-sm font-medium text-[#1a1a1a]">
                               {new Date(request.endDate).toLocaleDateString(
@@ -386,7 +388,7 @@ export function PropertyByOwnerPage() {
                           </div>
                           <div className="p-3 bg-white rounded-xl">
                             <p className="text-xs text-[#6B7280] mb-1">
-                              Payment Frequency
+                              {t('propertyByOwner.paymentFrequency')}
                             </p>
                             <p className="text-sm font-bold text-[#3A6EA5]">
                               {request.paymentFrequencyDisplayName}
@@ -401,7 +403,7 @@ export function PropertyByOwnerPage() {
                             disabled={accept.isPending}
                             onClick={() => accept.mutate(request.bookingRequestId.toString())}
                           >
-                            Accept
+                            {t('propertyByOwner.accept')}
                           </Button>
                           <Button
                             size="sm"
@@ -410,7 +412,7 @@ export function PropertyByOwnerPage() {
                             disabled={reject.isPending}
                             onClick={() => reject.mutate(request.bookingRequestId.toString())}
                           >
-                            Reject
+                            {t('propertyByOwner.reject')}
                           </Button>
                           <Button
                             size="sm"
@@ -419,7 +421,7 @@ export function PropertyByOwnerPage() {
                             }
                             className="flex-1 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
                           >
-                            View Chat
+                            {t('propertyByOwner.viewChat')}
                           </Button>
                         </div>
                       </CardContent>
@@ -433,7 +435,7 @@ export function PropertyByOwnerPage() {
             <div className="p-6 bg-[#E5EBF0] rounded-3xl mt-8 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a]">
-                  Reviews ({ratingSummary?.ratingsCount || property?.reviews || 0})
+                  {t('details.reviews')} ({ratingSummary?.ratingsCount || property?.reviews || 0})
                 </h2>
                 <div className="flex items-center gap-2">
                   <Star className="w-6 h-6 fill-[#FFB800] text-[#FFB800]" />
@@ -483,7 +485,7 @@ export function PropertyByOwnerPage() {
                                         }}
                                         className="w-full text-left px-4 py-2 text-sm text-[#1a1a1a] hover:bg-gray-50 flex items-center gap-2"
                                       >
-                                        <Edit className="w-4 h-4" /> Edit
+                                        <Edit className="w-4 h-4" /> {t('details.editReview')}
                                       </button>
                                     )}
                                     <button
@@ -493,7 +495,7 @@ export function PropertyByOwnerPage() {
                                       }}
                                       className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                     >
-                                      <Flag className="w-4 h-4" /> Report
+                                      <Flag className="w-4 h-4" /> {t('details.reportReview')}
                                     </button>
                                   </div>
                                 )}
@@ -515,7 +517,7 @@ export function PropertyByOwnerPage() {
                                   onClick={() => setEditingCommentId(null)}
                                   className="rounded-xl h-8 text-xs"
                                 >
-                                  Cancel
+                                  {t('details.cancel')}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -523,7 +525,7 @@ export function PropertyByOwnerPage() {
                                   disabled={updateComment.isPending}
                                   className="bg-[#3A6EA5] hover:bg-[#2C5580] text-white rounded-xl h-8 text-xs"
                                 >
-                                  Save
+                                  {t('details.save')}
                                 </Button>
                               </div>
                             </div>
@@ -538,7 +540,7 @@ export function PropertyByOwnerPage() {
                   ))
                 ) : (
                   <p className="text-center text-[#4a5565] py-4">
-                    No reviews yet.
+                    {t('details.noReviews')}
                   </p>
                 )}
               </div>
@@ -551,9 +553,11 @@ export function PropertyByOwnerPage() {
               <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
                 <CardContent className="p-6 space-y-4">
                   <div className="p-4 bg-white rounded-2xl text-center">
-                    <p className="text-sm text-[#6B7280] mb-1">Monthly Rent</p>
-                    <p className="text-4xl font-bold text-[#3A6EA5]">
-                      EGP {property.price.toLocaleString()}
+                    <p className="text-sm text-[#6B7280] mb-1">{t('details.monthlyRent')}</p>
+                    <p className="text-4xl font-bold text-[#3A6EA5]" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+                      {i18n.language === 'ar' 
+                        ? `${property.price.toLocaleString()} ${t('currency', { ns: 'common' })}` 
+                        : `${t('currency', { ns: 'common' })} ${property.price.toLocaleString()}`}
                     </p>
                   </div>
 
@@ -561,7 +565,7 @@ export function PropertyByOwnerPage() {
                     className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
                     onClick={() => navigate(`/edit-property/${id}`)}
                   >
-                    Edit Property
+                    {t('propertyByOwner.editProperty')}
                   </Button>
 
                   <Button
@@ -569,22 +573,22 @@ export function PropertyByOwnerPage() {
                     className="w-full rounded-xl border-[#3A6EA5]/20"
                     onClick={() => navigate('/owner-dashboard')}
                   >
-                    Back to Dashboard
+                    {t('propertyByOwner.backToDashboard')}
                   </Button>
 
                   <div className="pt-4 border-t border-[#3A6EA5]/20">
                     <h3 className="font-semibold text-[#1a1a1a] mb-3">
-                      Quick Stats
+                      {t('propertyByOwner.quickStats')}
                     </h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-[#6B7280]">Total Requests</span>
+                        <span className="text-[#6B7280]">{t('propertyByOwner.totalRequests')}</span>
                         <span className="font-semibold text-[#1a1a1a]">
                           {requests.length}
                         </span>
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[#6B7280]">Pending</span>
+                        <span className="text-[#6B7280]">{t('propertyByOwner.pending')}</span>
                         <span className="font-semibold text-[#1a1a1a]">
                           {requests.length}
                         </span>

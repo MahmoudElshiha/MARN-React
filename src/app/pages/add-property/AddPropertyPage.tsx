@@ -1,8 +1,20 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router'
-import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router'
+import { useTranslation } from 'react-i18next'
+import { ChevronLeft, ChevronRight, CheckCircle, RotateCcw } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../../components/ui/alert-dialog'
 import { toast } from 'sonner'
 import { PROPERTY_STEPS as STEPS } from '@/constants/property'
 import { PropertyFormData, TouchedFields } from './types'
@@ -31,7 +43,19 @@ const DEFAULT_FORM_DATA: PropertyFormData = {
 
 export function AddPropertyPage() {
   const navigate = useNavigate()
-  const [currentStep, setCurrentStep] = useState(1)
+  const { t } = useTranslation('properties')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const stepParam = parseInt(searchParams.get('step') || '1', 10)
+  const currentStep = isNaN(stepParam) || stepParam < 1 ? 1 : stepParam > STEPS.length ? STEPS.length : stepParam
+
+  const setCurrentStep = (step: number) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev)
+      newParams.set('step', step.toString())
+      return newParams
+    }, { replace: true })
+  }
+
   const [touched, setTouched] = useState<TouchedFields>({})
 
   const [formData, setFormData] = useState<PropertyFormData>(() => {
@@ -47,6 +71,43 @@ export function AddPropertyPage() {
     }
     return DEFAULT_FORM_DATA
   })
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('addPropertyFormData')
+    let hasActualData = false
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        hasActualData = Object.keys(DEFAULT_FORM_DATA).some((key) => {
+          if (key === 'photos' || key === 'legalDocs') return false
+          const defaultVal = DEFAULT_FORM_DATA[key as keyof PropertyFormData]
+          const savedVal = parsed[key]
+          
+          if (Array.isArray(defaultVal) || typeof defaultVal === 'object') {
+            return JSON.stringify(defaultVal) !== JSON.stringify(savedVal)
+          }
+          return defaultVal !== savedVal
+        })
+      } catch (e) {
+        hasActualData = false
+      }
+    }
+
+    setTimeout(() => {
+      if (hasActualData) {
+        toast.success(t('addProperty.toasts.draftRestored'), {
+          description: t('addProperty.toasts.draftRestoredDesc'),
+          duration: 4000,
+        })
+      } else {
+        toast.info(t('addProperty.toasts.pageRefreshed'), {
+          duration: 2000,
+        })
+      }
+    }, 100)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     try {
@@ -71,15 +132,21 @@ export function AddPropertyPage() {
   const handleNext = () => {
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
   const handlePrev = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
+  }
+
+  const handleReset = () => {
+    sessionStorage.removeItem('addPropertyFormData')
+    setFormData(DEFAULT_FORM_DATA)
+    setTouched({})
+    setCurrentStep(1)
+    toast.success(t('addProperty.toasts.progressReset'))
   }
 
   const handleSubmit = async () => {
@@ -90,7 +157,7 @@ export function AddPropertyPage() {
       errors.forEach(err => {
         // For special fields that map to multiple inputs, we mark a proxy key as touched
         newTouched[err.field as keyof PropertyFormData] = true
-        toast.error(`Step ${err.step} (${err.stepName}): ${err.label} is missing!`)
+        toast.error(t('addProperty.validation.fieldMissing', { step: err.step, stepName: err.stepName, label: err.label }))
       })
       setTouched(newTouched)
       setCurrentStep(errors[0].step)
@@ -206,12 +273,12 @@ export function AddPropertyPage() {
 
       await propertyService.createProperty(apiData)
 
-      toast.success('Property submitted for approval')
+      toast.success(t('addProperty.toasts.submitted'))
       sessionStorage.removeItem('addPropertyFormData') // Clear session on success
       navigate('/owner-dashboard')
     } catch (error) {
       console.error('Failed to submit property', error)
-      toast.error('Failed to submit property. Please check your data and try again.')
+      toast.error(t('addProperty.toasts.failed'))
     }
   }
 
@@ -225,13 +292,13 @@ export function AddPropertyPage() {
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors mb-4"
           >
             <ChevronLeft className="w-5 h-5" />
-            Back to Dashboard
+            {t('addProperty.backToDashboard')}
           </button>
           <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-            Add New Property
+            {t('addProperty.title')}
           </h1>
           <p className="text-[#4a5565]">
-            Fill out the details to list your property
+            {t('addProperty.subtitle')}
           </p>
         </div>
 
@@ -271,7 +338,14 @@ export function AddPropertyPage() {
                         : 'text-[#4a5565]'
                       }`}
                   >
-                    {step.title}
+                    {t(`addProperty.steps.${
+                      step.id === 1 ? 'details' :
+                      step.id === 2 ? 'amenities' :
+                      step.id === 3 ? 'photos' :
+                      step.id === 4 ? 'pricing' :
+                      step.id === 5 ? 'availability' :
+                      'legalDocs'
+                    }`)}
                   </span>
                 </div>
               )
@@ -332,31 +406,59 @@ export function AddPropertyPage() {
 
             {/* Navigation Buttons */}
             <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#3A6EA5]/20">
-              <Button
-                variant="outline"
-                onClick={handlePrev}
-                disabled={currentStep === 1}
-                className="rounded-xl border-[#3A6EA5]/20 disabled:opacity-50"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={handlePrev}
+                  disabled={currentStep === 1}
+                  className="rounded-xl border-[#3A6EA5]/20 disabled:opacity-50 flex items-center gap-2"
+                >
+                  <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+                  {t('addProperty.steps.previous')}
+                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-2"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      {t('addProperty.resetProgress')}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('addProperty.resetConfirmation.title')}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('addProperty.resetConfirmation.description')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('addProperty.resetConfirmation.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleReset} className="bg-red-500 hover:bg-red-600 text-white">
+                        {t('addProperty.resetConfirmation.confirm')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
 
               {currentStep < STEPS.length ? (
                 <Button
                   onClick={handleNext}
-                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
+                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30 flex items-center gap-2"
                 >
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-2" />
+                  {t('addProperty.steps.next')}
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 </Button>
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
+                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30 flex items-center gap-2"
                 >
-                  Submit for Approval
-                  <CheckCircle className="w-4 h-4 ml-2" />
+                  {t('addProperty.steps.submitForApproval')}
+                  <CheckCircle className="w-4 h-4" />
                 </Button>
               )}
             </div>

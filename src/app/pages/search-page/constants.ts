@@ -4,19 +4,20 @@ export const PAGE_SIZE = 9
 
 export type SortOption = {
   label: string
+  key: string
   sortBy: SortBy
   sortAscending: boolean
 }
 
 export const SORT_OPTIONS: SortOption[] = [
-  { label: 'Newest First', sortBy: 'Newest', sortAscending: false },
-  { label: 'Price: Low to High', sortBy: 'Price', sortAscending: true },
-  { label: 'Price: High to Low', sortBy: 'Price', sortAscending: false },
-  { label: 'Highest Rated', sortBy: 'Rating', sortAscending: false },
-  { label: 'Most Bedrooms', sortBy: 'Bedrooms', sortAscending: false },
-  { label: 'Most Bathrooms', sortBy: 'Bathrooms', sortAscending: false },
-  { label: 'Largest Area', sortBy: 'SquareMeters', sortAscending: false },
-  { label: 'Nearest', sortBy: 'Distance', sortAscending: true },
+  { label: 'Newest First', key: 'newestFirst', sortBy: 'Newest', sortAscending: false },
+  { label: 'Price: Low to High', key: 'priceAsc', sortBy: 'Price', sortAscending: true },
+  { label: 'Price: High to Low', key: 'priceDesc', sortBy: 'Price', sortAscending: false },
+  { label: 'Highest Rated', key: 'highestRated', sortBy: 'Rating', sortAscending: false },
+  { label: 'Most Bedrooms', key: 'mostBedrooms', sortBy: 'Bedrooms', sortAscending: false },
+  { label: 'Most Bathrooms', key: 'mostBathrooms', sortBy: 'Bathrooms', sortAscending: false },
+  { label: 'Largest Area', key: 'largestArea', sortBy: 'SquareMeters', sortAscending: false },
+  { label: 'Nearest', key: 'nearest', sortBy: 'Distance', sortAscending: true },
 ]
 
 export const PROPERTY_TYPES: PropertyType[] = [

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'motion/react'
 import {
@@ -18,9 +18,11 @@ import {
   useCancelContract,
 } from '@/hooks/useAdminStats'
 import { adminService } from '@/services/adminService'
-import { getStatusBadge } from '../utils'
+import { getStatusBadge, TruncatedTooltip } from '../utils'
+import { useTranslation } from 'react-i18next'
 
 export function ContractsModerationTab() {
+  const { t, i18n } = useTranslation('admin')
   const [pageSize, setPageSize] = useState(10)
   const [contractSearch, setContractSearch] = useState('')
   const [activeContractSearch, setActiveContractSearch] = useState('')
@@ -31,8 +33,12 @@ export function ContractsModerationTab() {
     setSearchParams((prev) => {
       prev.set('contractStatus', val)
       return prev
-    })
+    }, { preventScrollReset: true })
   }
+  
+  useEffect(() => {
+    setPageSize(10)
+  }, [contractStatus])
 
   const {
     data: contractsData,
@@ -84,11 +90,11 @@ export function ContractsModerationTab() {
       <CardHeader>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle className="text-2xl text-[#1a1a1a]">
-            Contracts Moderation
+            {t('contractsModeration.title')}
           </CardTitle>
           <div className="flex w-full sm:w-auto items-center gap-2">
             <Input
-              placeholder="Search contracts..."
+              placeholder={t('contractsModeration.search')}
               className="w-full sm:w-64 bg-white rounded-xl border-[#3A6EA5]/20"
               value={contractSearch}
               onChange={(e) => setContractSearch(e.target.value)}
@@ -113,80 +119,94 @@ export function ContractsModerationTab() {
               key={statusOption}
               variant={contractStatus === statusOption ? 'default' : 'outline'}
               size="sm"
-              className={`rounded-xl px-4 py-1.5 h-auto text-sm font-medium transition-colors ${
-                contractStatus === statusOption
-                  ? 'bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white border-transparent'
-                  : 'text-[#4a5565] border-[#3A6EA5]/20 hover:bg-[#F2F4F6]'
-              }`}
+              className={contractStatus === statusOption ? 'bg-[#3A6EA5] text-white rounded-xl' : 'rounded-xl border-[#3A6EA5]/20 text-[#4a5565]'}
               onClick={() => setContractStatus(statusOption)}
             >
-              {statusOption}
+              {statusOption === 'All' ? t('tabs.all') : t(`contractsModeration.${statusOption.toLowerCase()}`)}
             </Button>
           ))}
         </div>
-        <div className="overflow-x-auto overflow-y-auto max-h-[600px] border-b border-[#3A6EA5]/20">
-          <table className="w-full relative">
-            <thead className="sticky top-0 bg-[#F2F4F6] z-10">
-              <tr className="border-b border-[#3A6EA5]/20">
-                <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                  Contract
-                </th>
-                <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                  Owner
-                </th>
-                <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                  Renter
-                </th>
-                <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                  Value
-                </th>
-                <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                  Status
-                </th>
-                <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {contractsLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <tr key={i} className="border-b border-[#3A6EA5]/10">
-                    {Array.from({ length: 6 }).map((_, j) => (
-                      <td key={j} className="py-4 px-4">
-                        <Skeleton className="h-5 w-full rounded" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : contracts.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-10 text-center text-[#4a5565]">
-                    No contracts found.
-                  </td>
+        <TooltipProvider delayDuration={1000}>
+        {!contractsLoading && contracts.length === 0 ? (
+          <div className="py-10 text-center text-[#4a5565] border-b border-[#3A6EA5]/20">
+            {t('contractsModeration.noContracts')}
+          </div>
+        ) : (
+          <div className="overflow-x-auto overflow-y-scroll max-h-[600px] border-b border-[#3A6EA5]/20">
+            <table className="w-full relative" style={{ tableLayout: 'fixed' }}>
+              <thead className="sticky top-0 bg-[#F2F4F6] z-10">
+                <tr className="border-b border-[#3A6EA5]/20">
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '25%' }}>
+                    {t('table.contract')}
+                  </th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '20%' }}>
+                    {t('table.owner')}
+                  </th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '20%' }}>
+                    {t('table.renter')}
+                  </th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>
+                    {t('table.value')}
+                  </th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>
+                    {t('table.status')}
+                  </th>
+                  <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>
+                    {t('table.actions')}
+                  </th>
                 </tr>
-              ) : (
+              </thead>
+              <tbody>
+                {contractsLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b border-[#3A6EA5]/10">
+                      {Array.from({ length: 6 }).map((_, j) => (
+                        <td key={j} className="py-4 px-4">
+                          <Skeleton className="h-5 w-full rounded" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : (
                 contracts.map((item) => (
                   <tr key={item.contractId} className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors">
-                    <td className="py-4 px-4 text-[#1a1a1a] font-medium">
-                      <div className="flex items-center gap-3">
+                    <td className="py-4 px-4 text-[#1a1a1a] font-medium min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-xl bg-[#3A6EA5]/10 flex items-center justify-center shrink-0">
                           <FileText className="w-5 h-5 text-[#3A6EA5]" />
                         </div>
-                        <div>
-                          <div className="font-medium">{item.propertyTitle}</div>
-                          <div className="text-xs text-[#4a5565]">
+                        <div className="min-w-0">
+                          <TruncatedTooltip text={item.propertyTitle} className="font-medium" />
+                          <div className="text-xs text-[#4a5565] truncate">
                             {new Date(item.leaseStartDate).toLocaleDateString('en-GB')} - {new Date(item.leaseEndDate).toLocaleDateString('en-GB')}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-4 text-[#1a1a1a]">{item.ownerName}</td>
-                    <td className="py-4 px-4 text-[#1a1a1a]">{item.renterName}</td>
-                    <td className="py-4 px-4 font-semibold text-[#3A6EA5]">EGP {item.totalContractAmount.toLocaleString()}</td>
+                    <td className="py-4 px-4 text-[#1a1a1a] min-w-0">
+                      <TruncatedTooltip text={item.ownerName} />
+                    </td>
+                    <td className="py-4 px-4 text-[#1a1a1a] min-w-0">
+                      <TruncatedTooltip text={item.renterName} />
+                    </td>
+                    <td className="py-4 px-4 font-semibold text-[#3A6EA5]">
+                      <div className="flex items-center gap-1">
+                        {i18n.language === 'ar' ? (
+                          <>
+                            <span>{item.totalContractAmount.toLocaleString()}</span>
+                            <span>{t('currency', { ns: 'common' })}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{t('currency', { ns: 'common' })}</span>
+                            <span>{item.totalContractAmount.toLocaleString()}</span>
+                          </>
+                        )}
+                      </div>
+                    </td>
                     <td className="py-4 px-4">{getStatusBadge(item.statusDisplayName)}</td>
                     <td className="py-4 px-4">
-                      <TooltipProvider delayDuration={200}>
+                      <TooltipProvider delayDuration={700}>
                         <div className="flex gap-2 justify-start">
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -194,16 +214,16 @@ export function ContractsModerationTab() {
                                 <Download className="w-4 h-4" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent><p>Download PDF</p></TooltipContent>
+                            <TooltipContent><p>{t('table.downloadPdf')}</p></TooltipContent>
                           </Tooltip>
                           {item.canCancel && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="icon" variant="outline" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-xl w-8 h-8 shrink-0" disabled={cancelContractMutation.isPending} onClick={() => handleCancelContract(item.contractId)}>
+                                <Button size="icon" variant="outline" className="border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl w-8 h-8 shrink-0" disabled={cancelContractMutation.isPending} onClick={() => handleCancelContract(item.contractId)}>
                                   <XCircle className="w-4 h-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent><p>Cancel</p></TooltipContent>
+                              <TooltipContent><p>{t('modals.cancel')}</p></TooltipContent>
                             </Tooltip>
                           )}
                         </div>
@@ -213,19 +233,27 @@ export function ContractsModerationTab() {
                 ))
               )}
             </tbody>
-          </table>
-        </div>
-        {totalCount > contracts.length && (
-          <div className="mt-4 flex justify-center items-center min-h-[40px]">
-            {contractsFetching ? (
-              <Loader2 className="w-6 h-6 animate-spin text-[#3A6EA5]" />
-            ) : (
-              <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white" onClick={() => setPageSize((p) => p + 20)}>
-                Show More
-              </Button>
+            {totalCount > contracts.length && (
+              <tfoot>
+                <tr>
+                  <td colSpan={6}>
+                    <div className="py-6 flex justify-center items-center min-h-[40px]">
+                      {contractsFetching ? (
+                        <Loader2 className="w-6 h-6 animate-spin text-[#3A6EA5]" />
+                      ) : (
+                        <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white" onClick={() => setPageSize((p) => p + 10)}>
+                          {t('table.showMore')}
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              </tfoot>
             )}
+          </table>
           </div>
-        )}
+          )}
+          </TooltipProvider>
       </CardContent>
 
       {/* Confirmation Modal */}
@@ -237,11 +265,10 @@ export function ContractsModerationTab() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-              Confirm Action
+              {t('confirmModal.title')}
             </h3>
             <p className="text-[#4a5565] mb-6">
-              Are you sure you want to cancel this contract? 
-              This action cannot be reversed.
+              {t('confirmModal.cancelContractMessage')}
             </p>
             <div className="flex gap-4">
               <Button
@@ -252,14 +279,14 @@ export function ContractsModerationTab() {
                   setPendingCancelContractId(null)
                 }}
               >
-                Cancel
+                {t('confirmModal.cancel')}
               </Button>
               <Button
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl"
                 disabled={cancelContractMutation.isPending}
                 onClick={confirmCancelContract}
               >
-                {cancelContractMutation.isPending ? 'Processing…' : 'Confirm'}
+                {cancelContractMutation.isPending ? t('confirmModal.processing') : t('confirmModal.confirm')}
               </Button>
             </div>
           </motion.div>
