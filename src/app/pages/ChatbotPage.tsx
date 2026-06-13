@@ -109,8 +109,7 @@ export function ChatbotPage() {
 
   const quickActions = [
     t('chatbot.suggestions.findProperties'),
-    t('chatbot.suggestions.scheduleTour'),
-    t('chatbot.suggestions.roommateMatching'),
+    t('chatbot.suggestions.whatCanYouDo'),
     t('chatbot.suggestions.pricingInfo'),
   ]
 
