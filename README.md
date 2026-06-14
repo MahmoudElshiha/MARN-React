@@ -1,7 +1,7 @@
 
-  # MARN 2.0
+  # MARN
 
-  This is a code bundle for MARN 2.0. The original project is available at https://www.figma.com/design/OXgz3WMhgQnOr4u0gxL0Tf/MARN-2.0.
+  This is a code bundle for MARN. The original project is available at https://www.figma.com/design/OXgz3WMhgQnOr4u0gxL0Tf/MARN-2.0.
 
   ## Running the code
 
