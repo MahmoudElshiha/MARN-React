@@ -20,7 +20,7 @@ let notificationConnection: HubConnection | null = null
 export const startNotificationConnection = async () => {
   if (notificationConnection?.state === 'Connected') return notificationConnection
 
-  const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
+  const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || (import.meta.env.PROD ? 'https://marn.runasp.net' : '')
   const hubUrl = BASE_URL ? `${BASE_URL}/hubs/notification` : '/hubs/notification'
   
   const token = localStorage.getItem('token') ?? sessionStorage.getItem('token') ?? ''

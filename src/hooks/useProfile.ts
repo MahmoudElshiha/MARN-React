@@ -59,6 +59,11 @@ export function useProfile() {
     },
   })
 
+  const deleteAccount = useMutation({
+    mutationFn: () => userService.deleteProfile(),
+  })
+
+
   return {
     ...query,
     update,
@@ -67,6 +72,7 @@ export function useProfile() {
     uploadAvatar,
     toggle2FA,
     updateRoommate,
+    deleteAccount,
   }
 }
 

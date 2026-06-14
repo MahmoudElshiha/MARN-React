@@ -62,10 +62,12 @@
     "typeYourMessage": "اكتب رسالتك...",
     "suggestions": {
       "findProperties": "البحث عن عقارات",
-      "scheduleTour": "حجز جولة",
-      "roommateMatching": "مطابقة شركاء السكن",
-      "pricingInfo": "معلومات الأسعار",
+      "whatCanYouDo": "ماذا يمكنك أن تفعل؟",
+      "gettingStarted": "كيف أبدأ؟",
       "contactSupport": "تواصل مع الدعم"
-    }
+    },
+    "loginRequired": "يجب تسجيل الدخول",
+    "loginRequiredDescription": "يجب أن تكون مسجلاً للدخول للتحدث مع مساعد MARN.",
+    "loginButton": "تسجيل الدخول للمتابعة"
   }
 }

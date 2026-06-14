@@ -190,7 +190,7 @@ export function PropertiesStatsView() {
                             <div className="flex gap-2 justify-start">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Link to={item.isDeleted ? '#' : `/property/${item.propertyId}`} className={item.isDeleted ? 'pointer-events-none' : ''}>
+                                  <Link to={item.isDeleted ? '#' : `/admin/property/${item.propertyId}`} className={item.isDeleted ? 'pointer-events-none' : ''}>
                                     <Button size="icon" variant="outline" className={`rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0 ${item.isDeleted ? 'opacity-50' : ''}`} disabled={item.isDeleted}>
                                       <Eye className="w-4 h-4" />
                                     </Button>

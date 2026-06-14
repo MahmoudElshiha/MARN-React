@@ -164,6 +164,7 @@ export function FilterSidebar({
           <Label className="text-[#1a1a1a] mb-2 block">{t('search.keyword')}</Label>
           <div className="relative">
             <Input
+              id="mobile-keyword-input"
               placeholder={t('search.keywordPlaceholder')}
               value={keyword}
               onChange={(e) => onKeywordChange(e.target.value)}

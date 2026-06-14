@@ -7,6 +7,8 @@ import ahmedImg from '@/assets/Team Images/Ahmed Makled.jpg'
 import faresImg from '@/assets/Team Images/Fares Eldagen.jpg'
 import mahmoudImg from '@/assets/Team Images/Mahmoud Elshi7a.jpg'
 import mazinImg from '@/assets/Team Images/Mazin Rabie.jpg'
+import abdoImg from '@/assets/Team Images/Abdo.jpg'
+import kareemImg from '@/assets/Team Images/Kareem Foda.jpg'
 
 export function AboutPage() {
   const { t, i18n } = useTranslation('pages')
@@ -37,7 +39,7 @@ export function AboutPage() {
     {
       name: 'Abd Alrahman Eissa',
       role: 'AI Developer',
-      image: 'https://ui-avatars.com/api/?name=Abd+Alrahman+Eissa&background=3A6EA5&color=fff&size=400',
+      image: abdoImg,
     },
     {
       name: 'Fares Eldagen',
@@ -57,7 +59,8 @@ export function AboutPage() {
     {
       name: 'Kareem Foda',
       role: 'Front-end Developer & UI Designer',
-      image: 'https://ui-avatars.com/api/?name=Kareem+Foda&background=3A6EA5&color=fff&size=400',
+      image: kareemImg,
+      imageClass: 'scale-125',
     },
     {
       name: 'Ahmed Makled',
@@ -107,9 +110,7 @@ export function AboutPage() {
               <p className="text-lg text-[#4a5565] mb-6">
                 {t('about.mission.body')}
               </p>
-              <p className="text-lg text-[#4a5565] mb-6">
-                {t('about.mission.body2')}
-              </p>
+
               <div className="grid grid-cols-3 gap-6 mt-8" dir="ltr">
                 <div className="text-center">
                   <div className="text-4xl font-bold text-[#3A6EA5] mb-2">
@@ -216,11 +217,13 @@ export function AboutPage() {
               >
                 <div className="relative mb-6 group">
                   <div className="w-48 h-48 mx-auto rounded-3xl overflow-hidden shadow-lg shadow-[#3A6EA5]/10 group-hover:shadow-2xl group-hover:shadow-[#3A6EA5]/30 transition-all">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
+                    <div className="w-full h-full group-hover:scale-110 transition-transform duration-500">
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className={`w-full h-full object-cover ${member.imageClass || ''}`}
+                      />
+                    </div>
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-[#1a1a1a] mb-2">

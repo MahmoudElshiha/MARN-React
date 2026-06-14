@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { AuthContext } from './authContext'
 import type { User } from '@/types/user'
@@ -70,6 +70,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null)
     setUser(null)
   }, [queryClient])
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      logout()
+    }
+    window.addEventListener('auth-unauthorized', handleUnauthorized)
+    return () => window.removeEventListener('auth-unauthorized', handleUnauthorized)
+  }, [logout])
 
   return (
     <AuthContext.Provider

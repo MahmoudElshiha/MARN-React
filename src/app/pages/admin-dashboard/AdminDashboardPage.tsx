@@ -221,7 +221,7 @@ export function AdminDashboardPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64">
+                <div className="h-64" dir="ltr">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenueData}>
                       <CartesianGrid
@@ -240,7 +240,7 @@ export function AdminDashboardPage() {
                           return i18n.language === 'ar' ? (monthMap[label] || label) : label
                         }}
                       />
-                      <YAxis stroke="#4a5565" orientation={i18n.language === 'ar' ? 'right' : 'left'} />
+                      <YAxis stroke="#4a5565" />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'white',

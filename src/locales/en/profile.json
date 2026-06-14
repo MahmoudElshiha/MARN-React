@@ -51,7 +51,18 @@
       "passwordRequired": "Password is required.",
       "twoFactorEnabled": "Two-factor authentication enabled successfully.",
       "twoFactorDisabled": "Two-factor authentication disabled successfully.",
-      "incorrectPassword": "Incorrect password. Please try again."
+      "incorrectPassword": "Incorrect password. Please try again.",
+      "accountDeleted": "Account deleted successfully."
+    },
+    "deleteAccount": {
+      "title": "Delete Account",
+      "description": "Once you delete your account, there is no going back. Please be certain.",
+      "button": "Delete Account",
+      "confirmTitle": "Confirm Deletion",
+      "confirmMessage": "Are you sure you want to delete your account? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Yes, delete my account",
+      "processing": "Processing..."
     }
   },
   "documentsTab": {

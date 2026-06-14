@@ -75,7 +75,7 @@ export const getNotificationRoute = (actionType: string | null, actionId: string
     backendType === 'ContractStarted' || 
     backendType === 'ContractSigned'
   ) {
-    return '/tenant-dashboard#contracts';
+    return actionId ? `/contract/${actionId}` : '/tenant-dashboard#contracts';
   }
 
   if (backendType === 'AccountBanned' || title?.toLowerCase().includes('banned')) {

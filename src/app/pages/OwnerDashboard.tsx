@@ -20,7 +20,7 @@ import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
 import { Badge } from '../components/ui/badge'
 import { Skeleton } from '../components/ui/skeleton'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import {
   LineChart,
   Line,
@@ -35,6 +35,7 @@ import {
 } from 'recharts'
 import { toast } from 'sonner'
 import { useState, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useOwnerDashboard } from '@/hooks/useOwnerDashboard'
 import { useBookingMutations } from '@/hooks/useBookingRequests'
 import { paymentService } from '@/services/paymentService'
@@ -42,6 +43,12 @@ import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog'
 import { NotificationUI, mapNotification, getIcon, getBgColor } from './NotificationsPage'
 import { notificationService } from '@/services/notificationService'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
 
 const getContractStatusBadge = (status: string) => {
   const styles: Record<string, string> = {
@@ -75,6 +82,13 @@ export function OwnerDashboard() {
   const [isWithdrawing, setIsWithdrawing] = useState(false)
   const [selectedNotification, setSelectedNotification] = useState<NotificationUI | null>(null)
   const [showAllNotifications, setShowAllNotifications] = useState(false)
+  const [requestsLimit, setRequestsLimit] = useState(3)
+  const [propertiesLimit, setPropertiesLimit] = useState(3)
+  const [paymentsLimit, setPaymentsLimit] = useState(5)
+  const [contractsLimit, setContractsLimit] = useState(4)
+
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const { data: dashboardResponse, isLoading, refetch } = useOwnerDashboard()
 
@@ -134,8 +148,8 @@ export function OwnerDashboard() {
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAcceptRequest = (id: number) => {
     accept.mutate(id.toString(), {
-      onSuccess: () => toast.success('Booking request accepted'),
-      onError: () => toast.error('Failed to accept request'),
+      onSuccess: () => toast.success('Contract generated and sent to the tenant, awaiting signature.'),
+      onError: (err: any) => toast.error(err?.message || 'Failed to accept request'),
     })
   }
 
@@ -172,9 +186,21 @@ export function OwnerDashboard() {
       setIsWithdrawing(true)
       await paymentService.withdraw()
       toast.success('Transfer initiated successfully')
+      
+      // Optimistically update the dashboard data so the balance instantly drops to 0
+      queryClient.setQueryData(['ownerDashboard'], (oldData: any) => {
+        if (!oldData || !oldData.data) return oldData
+        return {
+          ...oldData,
+          data: {
+            ...oldData.data,
+            withdrawableEarnings: 0
+          }
+        }
+      })
       refetch()
-    } catch (error) {
-      toast.error('Failed to initiate transfer')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to initiate transfer')
     } finally {
       setIsWithdrawing(false)
     }
@@ -192,6 +218,36 @@ export function OwnerDashboard() {
       }
     }
   }
+
+  const renderPaginationButtons = (
+    currentLimit: number,
+    setLimit: React.Dispatch<React.SetStateAction<number>>,
+    totalItems: number,
+    baseLimit: number
+  ) => {
+    if (totalItems <= baseLimit) return null;
+    
+    if (currentLimit < totalItems) {
+      return (
+        <div className="flex justify-center gap-3 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setLimit(prev => prev + baseLimit)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+            {t('owner.properties.showMore')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setLimit(totalItems)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+            {t('owner.properties.showAll')}
+          </Button>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="flex justify-center mt-4">
+        <Button variant="outline" size="sm" onClick={() => setLimit(baseLimit)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+          {t('owner.properties.showLess')}
+        </Button>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen pb-20">
@@ -368,52 +424,54 @@ export function OwnerDashboard() {
                     No earning data available yet.
                   </p>
                 ) : (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={chartData}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#3A6EA5"
-                        opacity={0.1}
-                      />
-                      <XAxis 
-                        dataKey="month" 
-                        stroke="#4a5565" 
-                        tickFormatter={(label: string) => {
-                          const monthMap: Record<string, string> = {
-                            'Jan': 'يناير', 'Feb': 'فبراير', 'Mar': 'مارس', 'Apr': 'أبريل', 'May': 'مايو', 'Jun': 'يونيو',
-                            'Jul': 'يوليو', 'Aug': 'أغسطس', 'Sep': 'سبتمبر', 'Oct': 'أكتوبر', 'Nov': 'نوفمبر', 'Dec': 'ديسمبر'
+                  <div dir="ltr">
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={chartData}>
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#3A6EA5"
+                          opacity={0.1}
+                        />
+                        <XAxis 
+                          dataKey="month" 
+                          stroke="#4a5565" 
+                          tickFormatter={(label: string) => {
+                            const monthMap: Record<string, string> = {
+                              'Jan': 'يناير', 'Feb': 'فبراير', 'Mar': 'مارس', 'Apr': 'أبريل', 'May': 'مايو', 'Jun': 'يونيو',
+                              'Jul': 'يوليو', 'Aug': 'أغسطس', 'Sep': 'سبتمبر', 'Oct': 'أكتوبر', 'Nov': 'نوفمبر', 'Dec': 'ديسمبر'
+                            }
+                            return i18n.language === 'ar' ? (monthMap[label] || label) : label
+                          }}
+                        />
+                        <YAxis stroke="#4a5565" />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#FFFFFF',
+                            border: '1px solid #3A6EA5',
+                            borderRadius: '12px',
+                          }}
+                          formatter={(value: number) => 
+                            [`${value.toLocaleString()} ${t('currency', { ns: 'common' })}`, t('owner.chart.earnings', { defaultValue: 'Earnings' })]
                           }
-                          return i18n.language === 'ar' ? (monthMap[label] || label) : label
-                        }}
-                      />
-                      <YAxis stroke="#4a5565" orientation={i18n.language === 'ar' ? 'right' : 'left'} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#FFFFFF',
-                          border: '1px solid #3A6EA5',
-                          borderRadius: '12px',
-                        }}
-                        formatter={(value: number) => 
-                          [`${value.toLocaleString()} ${t('currency', { ns: 'common' })}`, t('owner.chart.earnings', { defaultValue: 'Earnings' })]
-                        }
-                        labelFormatter={(label: string) => {
-                          const monthMap: Record<string, string> = {
-                            'Jan': 'يناير', 'Feb': 'فبراير', 'Mar': 'مارس', 'Apr': 'أبريل', 'May': 'مايو', 'Jun': 'يونيو',
-                            'Jul': 'يوليو', 'Aug': 'أغسطس', 'Sep': 'سبتمبر', 'Oct': 'أكتوبر', 'Nov': 'نوفمبر', 'Dec': 'ديسمبر'
-                          }
-                          return i18n.language === 'ar' ? (monthMap[label] || label) : label
-                        }}
-                      />
-                      <Line
-                        name={t('owner.chart.earnings', { defaultValue: 'Earnings' })}
-                        type="monotone"
-                        dataKey="earnings"
-                        stroke="#3A6EA5"
-                        strokeWidth={3}
-                        dot={{ fill: '#3A6EA5', r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                          labelFormatter={(label: string) => {
+                            const monthMap: Record<string, string> = {
+                              'Jan': 'يناير', 'Feb': 'فبراير', 'Mar': 'مارس', 'Apr': 'أبريل', 'May': 'مايو', 'Jun': 'يونيو',
+                              'Jul': 'يوليو', 'Aug': 'أغسطس', 'Sep': 'سبتمبر', 'Oct': 'أكتوبر', 'Nov': 'نوفمبر', 'Dec': 'ديسمبر'
+                            }
+                            return i18n.language === 'ar' ? (monthMap[label] || label) : label
+                          }}
+                        />
+                        <Line
+                          name={t('owner.chart.earnings', { defaultValue: 'Earnings' })}
+                          type="monotone"
+                          dataKey="earnings"
+                          stroke="#3A6EA5"
+                          strokeWidth={3}
+                          dot={{ fill: '#3A6EA5', r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 )}
                 <div className="flex justify-center gap-3 mt-4">
                   {(['monthly', 'yearly'] as const).map((v) => (
@@ -458,7 +516,8 @@ export function OwnerDashboard() {
                     {t('owner.pendingRequests.noPending')}
                   </p>
                 ) : (
-                  pendingRequests.map((request) => (
+                  <>
+                  {pendingRequests.slice(0, requestsLimit).map((request) => (
                     <div
                       key={request.bookingRequestId}
                       className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow border border-[#3A6EA5]/10"
@@ -480,10 +539,14 @@ export function OwnerDashboard() {
                             <p className="text-sm text-[#4a5565] mb-2">
                               {request.propertyTitle}
                             </p>
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex flex-col gap-1 text-sm">
                               <div className="flex items-center gap-1 text-[#6a7282]">
                                 <Calendar className="w-4 h-4" />
                                 {formatDate(request.startDate)} - {formatDate(request.endDate)}
+                              </div>
+                              <div className="flex items-center gap-1 text-[#6a7282]">
+                                <DollarSign className="w-4 h-4" />
+                                {t('owner.pendingRequests.paymentFrequency')}: {request.paymentFrequencyDisplayName}
                               </div>
                             </div>
                           </div>
@@ -522,7 +585,9 @@ export function OwnerDashboard() {
                         </div>
                       </div>
                     </div>
-                  ))
+                  ))}
+                  {renderPaginationButtons(requestsLimit, setRequestsLimit, pendingRequests.length, 3)}
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -538,6 +603,7 @@ export function OwnerDashboard() {
                 {isLoading ? (
                   <Skeleton className="h-48 w-full rounded-2xl" />
                 ) : (
+                  <>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
@@ -557,6 +623,9 @@ export function OwnerDashboard() {
                           <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">
                             {t('owner.contracts.expiry')}
                           </th>
+                          <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">
+                            {t('owner.contracts.anchoring')}
+                          </th>
                           <th className="text-end py-4 px-4 text-[#1a1a1a] font-semibold">
                             {t('owner.contracts.actions')}
                           </th>
@@ -573,13 +642,15 @@ export function OwnerDashboard() {
                             </td>
                           </tr>
                         ) : (
-                          contracts.map((contract) => (
+                          contracts.slice(0, contractsLimit).map((contract) => (
                             <tr
                               key={contract.contractId}
                               className="border-b border-[#3A6EA5]/10 hover:bg-[#f5f7fa] transition-colors"
                             >
-                              <td className="py-4 px-4 text-[#1a1a1a] font-medium">
-                                {contract.contractId}
+                              <td className="py-4 px-4 font-medium">
+                                <Link to={`/contract/${contract.contractId}`} className="text-[#3A6EA5] hover:underline">
+                                  {contract.contractId}
+                                </Link>
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
                                 {contract.propertyTitle}
@@ -598,6 +669,9 @@ export function OwnerDashboard() {
                               </td>
                               <td className="py-4 px-4 text-[#4a5565]">
                                 {formatDate(contract.expiryDate)}
+                              </td>
+                              <td className="py-4 px-4 text-[#4a5565]">
+                                {contract.anchoringStatusDisplayName}
                               </td>
                               <td className="py-4 px-4 text-end">
                                 <Button
@@ -618,6 +692,8 @@ export function OwnerDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  {contracts.length > 0 && renderPaginationButtons(contractsLimit, setContractsLimit, contracts.length, 4)}
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -633,6 +709,7 @@ export function OwnerDashboard() {
                 {isLoading ? (
                   <Skeleton className="h-48 w-full rounded-2xl" />
                 ) : (
+                  <>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
@@ -665,7 +742,7 @@ export function OwnerDashboard() {
                             </td>
                           </tr>
                         ) : (
-                          receivedPayments.map((payment, idx) => (
+                          receivedPayments.slice(0, paymentsLimit).map((payment, idx) => (
                             <tr
                               key={idx}
                               className="border-b border-[#3A6EA5]/10 hover:bg-[#f5f7fa] transition-colors"
@@ -701,6 +778,8 @@ export function OwnerDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  {receivedPayments.length > 0 && renderPaginationButtons(paymentsLimit, setPaymentsLimit, receivedPayments.length, 5)}
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -730,11 +809,18 @@ export function OwnerDashboard() {
                     </Link>
                   </p>
                 ) : (
+                  <>
                   <div className="space-y-4">
-                    {myProperties.map((property) => (
+                    {myProperties.slice(0, propertiesLimit).map((property) => {
+                      const isFull = property.occupiedPlaces === property.totalPlaces || (property.type !== 'SharedRoom' && property.type !== 'Shared House' && property.occupiedPlaces > 0);
+                      const occupancyLabel = isFull ? t('owner.properties.full') : property.occupiedPlaces > 0 ? t('owner.properties.occupiedCount', { occupied: property.occupiedPlaces, total: property.totalPlaces }) : t('owner.properties.vacant');
+                      const badgeClass = isFull ? 'bg-green-100 text-green-700 hover:bg-green-100' : property.occupiedPlaces > 0 ? 'bg-blue-100 text-blue-700 hover:bg-blue-100' : 'bg-orange-100 text-orange-700 hover:bg-orange-100';
+
+                      return (
                       <div
                         key={property.id}
-                        className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow"
+                        onClick={() => navigate(`/property/${property.id}`)}
+                        className="bg-[#f5f7fa] rounded-2xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
                       >
                         <div className="flex gap-4">
                           <img
@@ -752,17 +838,11 @@ export function OwnerDashboard() {
                                   {property.address} • {property.typeDisplayName}
                                 </p>
                               </div>
-                              <Badge
-                                className={
-                                  property.occupiedPlaces > 0
-                                    ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                                    : 'bg-orange-100 text-orange-700 hover:bg-orange-100'
-                                }
-                              >
-                                {property.occupiedPlaces > 0 ? t('owner.properties.occupied') : t('owner.properties.vacant')}
+                              <Badge className={badgeClass}>
+                                {occupancyLabel}
                               </Badge>
                             </div>
-                            <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="grid grid-cols-3 gap-4 mb-4">
                               <div>
                                 <p className="text-xs text-[#6a7282] mb-1">
                                   {property.rentalUnitDisplayName} {t('owner.properties.monthlyRent')}
@@ -780,41 +860,46 @@ export function OwnerDashboard() {
                                   {property.averageRating ? property.averageRating.toFixed(1) : 'N/A'}
                                 </p>
                               </div>
+                              <div className="flex flex-col items-end">
+                                <p className="text-xs text-[#6a7282] mb-1">
+                                  <Eye className="w-3 h-3 inline mr-1" />
+                                  {t('owner.properties.views', { count: property.views || 0 })}
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="rounded-xl border-[#3A6EA5]/20"
-                                asChild
-                              >
-                                <Link to={`/edit-property/${property.id}`}>
-                                  {t('owner.properties.edit')}
-                                </Link>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="rounded-xl border-[#3A6EA5]/20"
-                                asChild
-                              >
-                                <Link to={`/property/${property.id}`}>
-                                  {t('owner.properties.viewDetails')}
-                                </Link>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-xl"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
+                            <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-xl hover:bg-[#3A6EA5]/10"
+                                  >
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/property/${property.id}`} className="w-full cursor-pointer">
+                                      {t('owner.properties.viewDetails')}
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/edit-property/${property.id}`} className="w-full cursor-pointer">
+                                      {t('owner.properties.edit')}
+                                    </Link>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </div>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
+                  {myProperties.length > 0 && renderPaginationButtons(propertiesLimit, setPropertiesLimit, myProperties.length, 3)}
+                  </>
                 )}
               </CardContent>
             </Card>

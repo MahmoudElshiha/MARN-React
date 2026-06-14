@@ -32,7 +32,7 @@ import { LegalDocsStep } from './steps/LegalDocsStep'
 const DEFAULT_FORM_DATA: PropertyFormData = {
   title: '', type: '', address: '', city: '', governorate: '', zip: '',
   bedrooms: '', beds: '', baths: '', sqm: '', description: '', numPeople: '', occupancyPreference: '',
-  mapLocation: { lat: 37.7749, lng: -122.4194 },
+  mapLocation: { lat: 31.4403, lng: 31.6517 },
   selectedAmenities: [], additionalAmenities: [], price: '', deposit: '',
   utilities: [], availableFrom: '', leaseDuration: 'Monthly',
   tenantPreferences: ['Students Welcome', 'Professionals Only', 'Families Welcome', 'No Smoking', 'Pets Allowed'],

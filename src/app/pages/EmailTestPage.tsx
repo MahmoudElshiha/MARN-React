@@ -69,51 +69,18 @@ const emailTemplates = [
     name: 'Send 2FA Email',
     html: `<!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2FA Code</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #f2f4f6; font-family: 'Inter', Arial, sans-serif;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f2f4f6; padding: 40px 20px;">
-        <tr>
-            <td align="center">
-                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 500px; background: #ffffff; border-radius: 16px; padding: 40px 30px; box-shadow: 0 4px 24px rgba(0,0,0,0.05);">
-                    <tr>
-                        <td align="center" style="font-size: 24px; font-weight: 600; color: #1a1a1a; padding-bottom: 16px;">
-                            Two-Factor Authentication
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="font-size: 16px; color: #4a5565; line-height: 1.6; padding-bottom: 32px;">
-                            Use the verification code below to complete your sign-in.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center">
-                            <div style="display: inline-block; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #3a6ea5; background: #f8f9fb; padding: 20px 32px; border-radius: 12px; border: 1px solid rgba(58, 110, 165, 0.2);">
-                                {code}
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="font-size: 14px; color: #6a7282; padding-top: 32px; line-height: 1.5;">
-                            This code will expire in 5 minutes.<br/>
-                            If you did not request this code, please ignore this email.
-                        </td>
-                    </tr>
-                </table>
-                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 500px; padding-top: 24px;">
-                    <tr>
-                        <td align="center" style="font-size: 13px; color: #99a1af;">
-                            &copy; {DateTime.UtcNow.Year} MARN. All rights reserved.
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
+  <body style="font-family: 'Inter', Arial, sans-serif; background-color: #f2f4f6; margin: 0; padding: 40px 20px;">
+    <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.05); text-align: center;">
+      <h2 style="color: #1a1a1a; font-size: 24px; margin-bottom: 16px; margin-top: 0;">Two-Factor Authentication</h2>
+      <p style="font-size: 16px; color: #4a5565; line-height: 1.6; margin-bottom: 32px;">Use the verification code below to complete your sign-in.</p>
+      <div style="display: inline-block; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #3a6ea5; background: #f8f9fb; padding: 20px 32px; border-radius: 12px; border: 1px solid rgba(58, 110, 165, 0.2); margin-bottom: 32px;">
+        {code}
+      </div>
+      <p style="font-size: 14px; color: #6a7282; line-height: 1.5; margin-bottom: 0;">This code will expire in 5 minutes.<br/>If you did not request this code, please ignore this email.</p>
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 40px 0 20px 0;" />
+      <p style="font-size: 13px; color: #99a1af; margin: 0;">&copy; {DateTime.UtcNow.Year} MARN. All rights reserved.</p>
+    </div>
+  </body>
 </html>`
   },
   {
@@ -192,9 +159,9 @@ export default function EmailTestPage() {
           <h1 className="text-2xl font-bold text-foreground">Email Template Viewer</h1>
           <p className="text-muted-foreground text-sm mt-1">Select a template to preview or copy the HTML code.</p>
         </div>
-        
+
         <div className="flex items-center gap-4">
-          <select 
+          <select
             className="p-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             value={selectedIndex}
             onChange={(e) => setSelectedIndex(Number(e.target.value))}
@@ -223,13 +190,13 @@ export default function EmailTestPage() {
 
       <div className="flex-1 overflow-auto bg-[#f8f9fb] p-6 flex justify-center items-start">
         {viewMode === 'preview' ? (
-          <div 
+          <div
             className="w-full max-w-[800px] bg-white rounded-xl shadow-sm border border-border overflow-hidden"
             dangerouslySetInnerHTML={{ __html: renderHtmlWithData(selectedTemplate.html) }}
           />
         ) : (
           <div className="w-full max-w-[800px] relative">
-            <button 
+            <button
               className="absolute top-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
               onClick={() => {
                 navigator.clipboard.writeText(selectedTemplate.html);

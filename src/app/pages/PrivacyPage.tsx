@@ -69,6 +69,14 @@ export function PrivacyPage() {
       title: t('privacy.sections.s13.title'),
       content: t('privacy.sections.s13.content'),
     },
+    {
+      title: t('privacy.sections.s14.title'),
+      content: t('privacy.sections.s14.content'),
+    },
+    {
+      title: t('privacy.sections.s15.title'),
+      content: t('privacy.sections.s15.content'),
+    },
   ]
 
   return (

@@ -278,9 +278,7 @@ export function ContactPage() {
                   </h3>
                   <p className="text-[#4a5565] mb-2">{t('contact.location.address1')}</p>
                   <p className="text-[#4a5565] mb-6">{t('contact.location.address2')}</p>
-                  <p className="text-sm text-[#4a5565]">
-                    Interactive map would be displayed here
-                  </p>
+
                 </div>
               </div>
             </motion.div>

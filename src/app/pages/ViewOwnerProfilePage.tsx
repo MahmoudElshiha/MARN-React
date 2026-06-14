@@ -45,8 +45,8 @@ export function ViewOwnerProfilePage() {
   const profile = profileData?.data
 
   const handleReport = () => {
-    if (!id || !reportReason.trim()) {
-      toast.error(t('viewOwnerProfile.toasts.reportReasonRequired'))
+    if (!id || reportReason.trim().length < 5) {
+      toast.error(t('viewUserProfile.toasts.reportReasonRequired', 'Please provide a reason of at least 5 characters for reporting'))
       return
     }
 
@@ -335,9 +335,14 @@ export function ViewOwnerProfilePage() {
                 id="report-reason"
                 value={reportReason}
                 onChange={(e) => setReportReason(e.target.value)}
-                placeholder={t('viewOwnerProfile.report.reasonPlaceholder')}
+                placeholder={t('viewOwnerProfile.report.reasonPlaceholder', 'Describe the issue...')}
                 className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
               />
+              {reportReason.trim().length > 0 && reportReason.trim().length < 5 && (
+                <p className="text-xs text-red-500 mt-2">
+                  Please enter at least 5 characters. ({reportReason.trim().length}/5)
+                </p>
+              )}
             </div>
           </div>
           <div className="flex gap-3 justify-end">
@@ -353,7 +358,7 @@ export function ViewOwnerProfilePage() {
             </Button>
             <Button
               onClick={handleReport}
-              disabled={!reportReason.trim() || submitReport.isPending}
+              disabled={reportReason.trim().length < 5 || submitReport.isPending}
               className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}

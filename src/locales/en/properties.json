@@ -68,7 +68,10 @@
       "next": "Next",
       "page": "Page {{current}} of {{total}}"
     },
-    "near": "Near"
+    "near": "Near",
+    "goToPage": "Go to page",
+    "apply": "Apply",
+    "maxPagesError": "Max number of pages is {{max}}"
   },
   "details": {
     "notFound": "Property not found.",
@@ -517,5 +520,7 @@
     "maxFileSize": "Maximum file size: {{size}}MB",
     "uploaded": "Uploaded",
     "replace": "Replace"
-  }
+  },
+  "egp": "EGP",
+  "copied": "Copied successfully"
 }

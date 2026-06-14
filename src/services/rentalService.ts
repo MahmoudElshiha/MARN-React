@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient'
+import { apiClient, axiosInstance } from './apiClient'
 import type { ApiResponse, PaginatedResponse } from '@/types/common'
 import type { BookingRequest, Contract } from '@/types/rental'
 
@@ -21,7 +21,13 @@ export const rentalService = {
     apiClient.get<PaginatedResponse<Contract>>('/api/Rentals/contracts'),
 
   getContractById: (id: string) =>
-    apiClient.get<ApiResponse<Contract>>(`/api/Rentals/contracts/${id}`),
+    apiClient.get<ApiResponse<Contract>>(`/api/contracts/${id}`),
+
+  signContract: (id: string) =>
+    apiClient.post<ApiResponse<any>>(`/api/contracts/${id}/sign`, {}),
+
+  downloadContract: (id: string) =>
+    axiosInstance.get(`/api/contracts/${id}/download`, { responseType: 'blob' }),
 
   addBookingRequest: (payload: any) =>
     apiClient.post<ApiResponse<any>>('/api/BookingRequest/add', payload),

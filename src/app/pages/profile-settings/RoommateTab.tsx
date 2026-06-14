@@ -41,7 +41,7 @@ function ImportanceRating({
   const { t } = useTranslation('profile')
   return (
     <div className="flex items-center gap-1.5 mt-2.5">
-      <span className="text-xs text-[#4a5565] shrink-0 mr-1">{t('roommateTab.importance')}</span>
+      <span className="text-xs text-[#4a5565] shrink-0 me-1">{t('roommateTab.fields.importance')}</span>
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
@@ -181,25 +181,25 @@ export function RoommateTab() {
       {
         userId: apiProfile.id,
         roommatePreferencesEnabled: settings.profileVisible,
-        governorate: settings.governorate || null,
-        searchStatus: settings.searchStatus || null,
+        governorate: settings.governorate || undefined,
+        searchStatus: settings.searchStatus || undefined,
         smoking: settings.smoking,
         smokingImportance: settings.smokingImportance,
         pets: settings.pets,
         petsImportance: settings.petsImportance,
-        sleepSchedule: settings.sleepSchedule || null,
+        sleepSchedule: settings.sleepSchedule || undefined,
         sleepImportance: settings.sleepImportance,
-        educationLevel: settings.educationLevel || null,
+        educationLevel: settings.educationLevel || undefined,
         educationImportance: settings.educationImportance,
-        fieldOfStudy: settings.fieldOfStudy || null,
+        fieldOfStudy: settings.fieldOfStudy || undefined,
         fieldOfStudyImportance: settings.fieldOfStudyImportance,
         noiseTolerance: settings.noiseTolerance[0],
         noiseToleranceImportance: settings.noiseToleranceImportance,
-        guestsFrequency: settings.guestsFrequency || null,
+        guestsFrequency: settings.guestsFrequency || undefined,
         guestsFrequencyImportance: settings.guestsFrequencyImportance,
-        workSchedule: settings.workSchedule || null,
+        workSchedule: settings.workSchedule || undefined,
         workScheduleImportance: settings.workScheduleImportance,
-        sharingLevel: settings.sharingLevel || null,
+        sharingLevel: settings.sharingLevel || undefined,
         sharingLevelImportance: settings.sharingLevelImportance,
         budgetRangeMin: settings.budgetRangeMin
           ? Number(settings.budgetRangeMin)
@@ -212,13 +212,13 @@ export function RoommateTab() {
       {
         onSuccess: () => {
           setHasUnsavedChanges(false)
-          toast.success(t('roommateTab.preferencesSaved'))
+          toast.success(t('roommateTab.toasts.saved'))
         },
         onError: (err) => {
           if (err instanceof HttpError) {
-            toast.error(err.message ?? t('roommateTab.preferencesError'))
+            toast.error(err.message ?? t('roommateTab.toasts.failed'))
           } else {
-            toast.error(t('roommateTab.preferencesError'))
+            toast.error(t('roommateTab.toasts.failed'))
           }
         },
       },
@@ -262,19 +262,19 @@ export function RoommateTab() {
       </CardHeader>
 
       <CardContent className="space-y-8">
-        {/* ── Location & Search ───────────────────────────────────────────── */}
+        {/* ── {t('roommateTab.sections.locationSearch')} ───────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <MapPin className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              {t('roommateTab.locationSearch')}
+              {t('roommateTab.sections.locationSearch')}
             </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <EnumSelect
                 id="governorate"
-                label={t('roommateTab.governorate')}
+                label={t('roommateTab.fields.governorate')}
                 endpoint="governorates"
                 value={settings.governorate}
                 onChange={(v) => patch({ governorate: v })}
@@ -284,11 +284,11 @@ export function RoommateTab() {
             <div>
               <EnumSelect
                 id="search-status"
-                label={t('roommateTab.searchStatus')}
+                label={t('roommateTab.fields.searchStatus')}
                 endpoint="roommate-search-statuses"
                 value={settings.searchStatus}
                 onChange={(v) => patch({ searchStatus: v })}
-                placeholder={t('roommateTab.searchStatusPlaceholder')}
+                placeholder={t('roommateTab.fields.searchStatusPlaceholder')}
               />
             </div>
           </div>
@@ -296,21 +296,21 @@ export function RoommateTab() {
 
         <Separator className="bg-[#3A6EA5]/20" />
 
-        {/* ── Lifestyle & Preferences ──────────────────────────────────────── */}
+        {/* ── {t('roommateTab.sections.lifestylePreferences')} ──────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Coffee className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              {t('roommateTab.lifestylePreferences')}
+              {t('roommateTab.sections.lifestylePreferences')}
             </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {/* Smoking */}
             <div>
-              <Label className="text-[#1a1a1a] mb-3 block">{t('roommateTab.smoking')}</Label>
+              <Label className="text-[#1a1a1a] mb-3 block">{t('roommateTab.fields.smoking')}</Label>
               <div className="flex items-center justify-between p-4 bg-white rounded-2xl">
                 <span className="text-[#1a1a1a]">
-                  {settings.smoking ? t('roommateTab.yes') : t('roommateTab.no')}
+                  {settings.smoking ? t('roommateTab.fields.yes') : t('roommateTab.fields.no')}
                 </span>
                 <Switch
                   checked={settings.smoking}
@@ -326,10 +326,10 @@ export function RoommateTab() {
 
             {/* Pets */}
             <div>
-              <Label className="text-[#1a1a1a] mb-3 block">{t('roommateTab.pets')}</Label>
+              <Label className="text-[#1a1a1a] mb-3 block">{t('roommateTab.fields.pets')}</Label>
               <div className="flex items-center justify-between p-4 bg-white rounded-2xl">
                 <span className="text-[#1a1a1a]">
-                  {settings.pets ? t('roommateTab.yes') : t('roommateTab.no')}
+                  {settings.pets ? t('roommateTab.fields.yes') : t('roommateTab.fields.no')}
                 </span>
                 <Switch
                   checked={settings.pets}
@@ -347,13 +347,13 @@ export function RoommateTab() {
             {settings.pets && (
               <div>
                 <Label htmlFor="pet-type" className="text-[#1a1a1a] mb-2 block">
-                  {t('roommateTab.petType')}
+                  {t('roommateTab.fields.petType')}
                 </Label>
                 <Input
                   id="pet-type"
                   value={settings.petType}
                   onChange={(e) => patch({ petType: e.target.value })}
-                  placeholder={t('roommateTab.petTypePlaceholder')}
+                  placeholder={t('roommateTab.fields.petTypePlaceholder')}
                   className="bg-white rounded-xl border-[#3A6EA5]/20"
                 />
               </div>
@@ -363,7 +363,7 @@ export function RoommateTab() {
             <div>
               <EnumSelect
                 id="sleep-schedule"
-                label={t('roommateTab.sleepSchedule')}
+                label={t('roommateTab.fields.sleepSchedule')}
                 endpoint="sleep-schedules"
                 value={settings.sleepSchedule}
                 onChange={(v) => patch({ sleepSchedule: v })}
@@ -382,13 +382,13 @@ export function RoommateTab() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <GraduationCap className="w-5 h-5 text-[#3A6EA5]" />
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">{t('roommateTab.education')}</h3>
+            <h3 className="text-lg font-semibold text-[#1a1a1a]">{t('roommateTab.sections.education')}</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <EnumSelect
                 id="education-level"
-                label={t('roommateTab.educationLevel')}
+                label={t('roommateTab.fields.educationLevel')}
                 endpoint="education-levels"
                 value={settings.educationLevel}
                 onChange={(v) => patch({ educationLevel: v })}
@@ -402,7 +402,7 @@ export function RoommateTab() {
             <div>
               <EnumSelect
                 id="field-of-study"
-                label={t('roommateTab.fieldOfStudy')}
+                label={t('roommateTab.fields.fieldOfStudy')}
                 endpoint="fields-of-study"
                 value={settings.fieldOfStudy}
                 onChange={(v) => patch({ fieldOfStudy: v })}
@@ -417,25 +417,25 @@ export function RoommateTab() {
 
         <Separator className="bg-[#3A6EA5]/20" />
 
-        {/* ── Social & Work ────────────────────────────────────────────────── */}
+        {/* ── {t('roommateTab.sections.socialWork')} ────────────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Briefcase className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              {t('roommateTab.socialWork')}
+              {t('roommateTab.sections.socialWork')}
             </h3>
           </div>
           <div className="space-y-6">
             {/* Noise Tolerance */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <Label className="text-[#1a1a1a]">{t('roommateTab.noiseTolerance')}</Label>
+                <Label className="text-[#1a1a1a]">{t('roommateTab.fields.noiseTolerance')}</Label>
                 <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                   <Volume2 className="w-4 h-4" />
                   <span>
-                    {settings.noiseTolerance[0] <= 2 && t('roommateTab.low')}
-                    {settings.noiseTolerance[0] === 3 && t('roommateTab.medium')}
-                    {settings.noiseTolerance[0] >= 4 && t('roommateTab.high')} (
+                    {settings.noiseTolerance[0] <= 2 && t('roommateTab.fields.noiseLow')}
+                    {settings.noiseTolerance[0] === 3 && t('roommateTab.fields.noiseMedium')}
+                    {settings.noiseTolerance[0] >= 4 && t('roommateTab.fields.noiseHigh')} (
                     {settings.noiseTolerance[0]}/5)
                   </span>
                 </div>
@@ -449,9 +449,9 @@ export function RoommateTab() {
                 className="w-full"
               />
               <div className="flex justify-between mt-2 text-xs text-[#4a5565]">
-                <span>{t('roommateTab.low')}</span>
-                <span>{t('roommateTab.medium')}</span>
-                <span>{t('roommateTab.high')}</span>
+                <span>{t('roommateTab.fields.noiseLow')}</span>
+                <span>{t('roommateTab.fields.noiseMedium')}</span>
+                <span>{t('roommateTab.fields.noiseHigh')}</span>
               </div>
               <ImportanceRating
                 value={settings.noiseToleranceImportance}
@@ -464,11 +464,11 @@ export function RoommateTab() {
               <div>
                 <EnumSelect
                   id="guests-frequency"
-                  label={t('roommateTab.guestsFrequency')}
+                  label={t('roommateTab.fields.guestsFrequency')}
                   endpoint="guests-frequencies"
                   value={settings.guestsFrequency}
                   onChange={(v) => patch({ guestsFrequency: v })}
-                  placeholder={t('roommateTab.guestsFrequencyPlaceholder')}
+                  placeholder={t('roommateTab.fields.guestsFrequencyPlaceholder')}
                 />
                 <ImportanceRating
                   value={settings.guestsFrequencyImportance}
@@ -480,7 +480,7 @@ export function RoommateTab() {
               <div>
                 <EnumSelect
                   id="work-schedule"
-                  label={t('roommateTab.workSchedule')}
+                  label={t('roommateTab.fields.workSchedule')}
                   endpoint="work-schedules"
                   value={settings.workSchedule}
                   onChange={(v) => patch({ workSchedule: v })}
@@ -496,7 +496,7 @@ export function RoommateTab() {
             <div>
               <EnumSelect
                 id="sharing-level"
-                label={t('roommateTab.sharingLevel')}
+                label={t('roommateTab.fields.sharingLevel')}
                 endpoint="sharing-levels"
                 value={settings.sharingLevel}
                 onChange={(v) => patch({ sharingLevel: v })}
@@ -511,24 +511,24 @@ export function RoommateTab() {
 
         <Separator className="bg-[#3A6EA5]/20" />
 
-        {/* ── Budget Range ─────────────────────────────────────────────────── */}
+        {/* ── {t('roommateTab.sections.budgetRange')} ─────────────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-6">
             <Wallet className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              {t('roommateTab.budgetRange')}
+              {t('roommateTab.sections.budgetRange')}
             </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="budget-min" className="text-[#1a1a1a] mb-2 block">
-                {t('roommateTab.minimum')}{' '}
+                {t('roommateTab.fields.budgetMin')}{' '}
                 <span className="text-[#4a5565] text-sm font-normal">
-                  {t('roommateTab.perMonth')}
+                  {t('roommateTab.fields.perMonth')}
                 </span>
               </Label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a5565] text-sm font-medium">
+                <span className="absolute start-4 top-1/2 -translate-y-1/2 text-[#4a5565] text-sm font-medium">
                   $
                 </span>
                 <Input
@@ -538,20 +538,20 @@ export function RoommateTab() {
                   value={settings.budgetRangeMin}
                   onChange={(e) => patch({ budgetRangeMin: e.target.value })}
                   placeholder="500"
-                  className="pl-8 bg-white rounded-xl border-[#3A6EA5]/20"
+                  className="ps-8 bg-white rounded-xl border-[#3A6EA5]/20"
                 />
               </div>
             </div>
 
             <div>
               <Label htmlFor="budget-max" className="text-[#1a1a1a] mb-2 block">
-                {t('roommateTab.maximum')}{' '}
+                {t('roommateTab.fields.budgetMax')}{' '}
                 <span className="text-[#4a5565] text-sm font-normal">
-                  {t('roommateTab.perMonth')}
+                  {t('roommateTab.fields.perMonth')}
                 </span>
               </Label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4a5565] text-sm font-medium">
+                <span className="absolute start-4 top-1/2 -translate-y-1/2 text-[#4a5565] text-sm font-medium">
                   $
                 </span>
                 <Input
@@ -561,7 +561,7 @@ export function RoommateTab() {
                   value={settings.budgetRangeMax}
                   onChange={(e) => patch({ budgetRangeMax: e.target.value })}
                   placeholder="1500"
-                  className="pl-8 bg-white rounded-xl border-[#3A6EA5]/20"
+                  className="ps-8 bg-white rounded-xl border-[#3A6EA5]/20"
                 />
               </div>
             </div>
@@ -579,19 +579,19 @@ export function RoommateTab() {
           <div className="flex items-center gap-2 mb-6">
             <Shield className="w-5 h-5 text-[#3A6EA5]" />
             <h3 className="text-lg font-semibold text-[#1a1a1a]">
-              {t('roommateTab.visibilitySettings')}
+              {t('roommateTab.sections.visibilitySettings')}
             </h3>
           </div>
           <div className="bg-white rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="font-medium text-[#1a1a1a] mb-1">
-                  {t('roommateTab.profileVisibility')}
+                  {t('roommateTab.fields.profileVisibility')}
                 </p>
                 <p className="text-sm text-[#4a5565]">
                   {settings.profileVisible
-                    ? t('roommateTab.visibleToRoommates')
-                    : t('roommateTab.onlyYouSee')}
+                    ? t('roommateTab.fields.profileVisibilityOn')
+                    : t('roommateTab.fields.profileVisibilityOff')}
                 </p>
               </div>
               <Switch
@@ -604,7 +604,7 @@ export function RoommateTab() {
               <div className="mt-4 p-4 bg-[#F2F4F6] rounded-xl flex items-start gap-3">
                 <Shield className="w-5 h-5 text-[#3A6EA5] mt-0.5 shrink-0" />
                 <p className="text-sm text-[#1a1a1a]">
-                  {t('roommateTab.hiddenFromUsers')}
+                  {t('roommateTab.visibility.hiddenNote')}
                 </p>
               </div>
             )}
@@ -620,7 +620,7 @@ export function RoommateTab() {
           >
             <Bell className="w-5 h-5 text-[#3A6EA5]" />
             <p className="text-sm text-[#1a1a1a]">
-              {t('roommateTab.unsavedChanges')}
+              {t('roommateTab.unsavedBanner')}
             </p>
           </motion.div>
         )}
@@ -640,7 +640,7 @@ export function RoommateTab() {
             className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             onClick={handleSave}
           >
-            {updateRoommate.isPending ? t('roommateTab.saving') : t('roommateTab.savePreferences')}
+            {updateRoommate.isPending ? t('roommateTab.savePreferences') : t('roommateTab.savePreferences')}
           </Button>
         </div>
       </CardContent>

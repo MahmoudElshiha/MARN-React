@@ -65,6 +65,8 @@
       "transferMoney": "تحويل الأموال",
       "withdraw": "سحب",
       "withdrawing": "جاري السحب...",
+      "connectStripe": "ربط سترايب",
+      "connecting": "جاري الربط...",
       "activeBookings": "الحجوزات النشطة",
       "pendingRequests": "الطلبات المعلقة",
       "awaitingResponse": "بانتظار ردك"
@@ -93,6 +95,7 @@
       "new": "جديد",
       "tenantLabel": "المستأجر",
       "dateLabel": "التاريخ",
+      "paymentFrequency": "معدل الدفع",
       "unknownTenant": "مستأجر غير معروف",
       "unknownProperty": "عقار غير معروف"
     },
@@ -107,6 +110,7 @@
       "tenant": "المستأجر",
       "status": "الحالة",
       "expiry": "تاريخ الانتهاء",
+      "anchoring": "التوثيق المالي",
       "actions": "إجراءات"
     },
     "receivedPayments": {
@@ -134,8 +138,14 @@
       "edit": "تعديل",
       "occupied": "مشغول",
       "vacant": "شاغر",
-      "monthlyRent": "الإيجار الشهري",
-      "rating": "التقييم"
+      "full": "مكتمل",
+      "occupiedCount": "مشغول {{occupied}}/{{total}}",
+      "views": "{{count}} مشاهدة",
+      "monthlyRent": "الإيجار",
+      "rating": "التقييم",
+      "showMore": "عرض المزيد",
+      "showAll": "عرض الكل",
+      "showLess": "عرض أقل"
     },
     "quickActions": {
       "title": "إجراءات سريعة",

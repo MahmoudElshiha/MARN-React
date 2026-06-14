@@ -141,14 +141,12 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2 text-[#99a1af]">
                 <Phone className="w-4 h-4 flex-shrink-0 text-[#3A6EA5]" />
-                <span>+20 (012) 3456-7890</span>
+                <span>{t('footer.phoneNumber')}</span>
               </li>
               <li className="flex items-start gap-2 text-[#99a1af]">
                 <MapPin className="w-4 h-4 flex-shrink-0 mt-1 text-[#3A6EA5]" />
-                <span>
-                  123 Tahrir Square
-                  <br />
-                  Cairo, Egypt
+                <span className="whitespace-pre-line">
+                  {t('footer.address')}
                 </span>
               </li>
             </ul>

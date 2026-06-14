@@ -32,6 +32,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog'
 import { NotificationUI, mapNotification, getIcon, getBgColor } from './NotificationsPage'
 import { useTranslation } from 'react-i18next'
+import { PaymentModal } from '@/components/PaymentModal'
 
 function formatDate(iso: string | undefined | null) {
   if (!iso) return '—'
@@ -63,10 +64,44 @@ export function TenantDashboard() {
   const dashboard = dashboardRes?.data
   const unreadNotifications = dashboard?.notifications?.filter((n: any) => !n.isRead) || []
 
-  const [showAllPayments, setShowAllPayments] = useState(false)
-  const [showAllContracts, setShowAllContracts] = useState(false)
+  const [contractsLimit, setContractsLimit] = useState(4)
+  const [paymentsLimit, setPaymentsLimit] = useState(5)
+  const [pendingLimit, setPendingLimit] = useState(3)
+  const [recommendedLimit, setRecommendedLimit] = useState(4)
+  const [notificationsLimit, setNotificationsLimit] = useState(5)
   const [selectedNotification, setSelectedNotification] = useState<NotificationUI | null>(null)
   const [payingScheduleId, setPayingScheduleId] = useState<number | null>(null)
+  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null)
+
+  const renderPaginationButtons = (
+    currentLimit: number,
+    setLimit: React.Dispatch<React.SetStateAction<number>>,
+    totalItems: number,
+    baseLimit: number
+  ) => {
+    if (totalItems <= baseLimit) return null;
+    
+    if (currentLimit < totalItems) {
+      return (
+        <div className="flex justify-center gap-3 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setLimit(prev => prev + baseLimit)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+            {t('tenant.showMore', { defaultValue: 'Show More' })}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setLimit(totalItems)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+            {t('tenant.showAll', { defaultValue: 'Show All' })}
+          </Button>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="flex justify-center mt-4">
+        <Button variant="outline" size="sm" onClick={() => setLimit(baseLimit)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+          {t('tenant.showLess', { defaultValue: 'Show Less' })}
+        </Button>
+      </div>
+    );
+  };
 
   useEffect(() => {
     if (!dashboardLoading && window.location.hash) {
@@ -90,6 +125,8 @@ export function TenantDashboard() {
       const res = await paymentService.startPayment({ paymentScheduleId: scheduleId })
       if (res.data?.url) {
         window.location.href = res.data.url
+      } else if (typeof res.data === 'string' && res.data.includes('_secret_')) {
+        setPaymentClientSecret(res.data)
       } else {
         toast.success('Payment started successfully!')
       }
@@ -310,7 +347,7 @@ export function TenantDashboard() {
                                   {rental.propertyTitle || rental.propertyName}
                                 </Link>
                                 <p className="text-sm text-[#6a7282] mt-1">
-                                  {rental.propertyAddress || 'Cairo, Egypt'}
+                                  {rental.propertyAddress || 'New Damietta, Egypt'}
                                 </p>
                               </div>
                               <div className="flex gap-2">
@@ -405,7 +442,7 @@ export function TenantDashboard() {
                       <Skeleton className="h-24 w-full rounded-2xl" />
                     ) : (
                       <div className="space-y-3">
-                        {dashboard!.pendingBookingRequests.map((req, i) => (
+                        {dashboard!.pendingBookingRequests.slice(0, pendingLimit).map((req, i) => (
                           <div
                             key={req.bookingRequestId || req.id || req.propertyId || i}
                             className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between"
@@ -445,6 +482,7 @@ export function TenantDashboard() {
                             </Badge>
                           </div>
                         ))}
+                        {renderPaginationButtons(pendingLimit, setPendingLimit, dashboard!.pendingBookingRequests.length, 3)}
                       </div>
                     )}
                   </CardContent>
@@ -470,7 +508,7 @@ export function TenantDashboard() {
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {recommendedProperties.map((property, i) => (
+                    {recommendedProperties.slice(0, recommendedLimit).map((property, i) => (
                       <PropertyCard
                         key={property.id || i}
                         id={property.id.toString()}
@@ -490,6 +528,9 @@ export function TenantDashboard() {
                     ))}
                   </div>
                 )}
+                {!recommendedLoading && recommendedProperties.length > 0 && 
+                  renderPaginationButtons(recommendedLimit, setRecommendedLimit, recommendedProperties.length, 4)
+                }
               </CardContent>
             </Card>
           </div>
@@ -515,7 +556,7 @@ export function TenantDashboard() {
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {unreadNotifications.slice(0, 3).map((n, i) => (
+                    {unreadNotifications.slice(0, notificationsLimit).map((n, i) => (
                       <div
                         key={n.id || i}
                         onClick={() => handleNotificationClick(n)}
@@ -541,15 +582,7 @@ export function TenantDashboard() {
                         </div>
                       </div>
                     ))}
-                    {unreadNotifications.length > 3 && (
-                      <Button
-                        variant="outline"
-                        className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white mt-2"
-                        asChild
-                      >
-                        <Link to="/notifications">Show All</Link>
-                      </Button>
-                    )}
+                    {renderPaginationButtons(notificationsLimit, setNotificationsLimit, unreadNotifications.length, 5)}
                   </div>
                 )}
               </CardContent>
@@ -569,15 +602,15 @@ export function TenantDashboard() {
                       <Skeleton className="h-20 w-full rounded-2xl" />
                     ) : (
                       <div className="space-y-3">
-                        {dashboard!.allContracts.slice(0, 3).map((c, i) => (
+                        {dashboard!.allContracts.slice(0, contractsLimit).map((c, i) => (
                           <div
                             key={c.contractId || c.id || i}
                             className="bg-[#f5f7fa] rounded-2xl p-4"
                           >
                             <div className="flex items-center justify-between mb-1">
-                              <p className="text-sm font-medium text-[#1a1a1a]">
+                              <Link to={`/contract/${c.contractId || c.id}`} className="text-sm font-medium text-[#3A6EA5] hover:underline">
                                 {c.propertyTitle || c.propertyName}
-                              </p>
+                              </Link>
                               <div className="flex gap-2">
                                 {c.isAnchoredToBlockChain && (
                                   <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 text-[10px] px-1.5 py-0 h-5">
@@ -631,15 +664,7 @@ export function TenantDashboard() {
                             </div>
                           </div>
                         ))}
-                        {dashboard!.allContracts.length > 3 && (
-                          <Button
-                            variant="outline"
-                            className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white mt-2"
-                            onClick={() => setShowAllContracts(true)}
-                          >
-                            {t('tenant.contracts.showAll')}
-                          </Button>
-                        )}
+                        {renderPaginationButtons(contractsLimit, setContractsLimit, dashboard!.allContracts.length, 4)}
                       </div>
                     )}
                   </CardContent>
@@ -721,7 +746,7 @@ export function TenantDashboard() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {dashboard!.paidPayments.slice(0, 3).map((p, i) => {
+                        {dashboard!.paidPayments.slice(0, paymentsLimit).map((p, i) => {
                           const contract = dashboard!.allContracts?.find(c => c.contractId === p.contractId)
                           return (
                             <div
@@ -743,15 +768,7 @@ export function TenantDashboard() {
                             </div>
                           )
                         })}
-                        {dashboard!.paidPayments.length > 3 && (
-                          <Button
-                            variant="outline"
-                            className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white mt-2"
-                            onClick={() => setShowAllPayments(true)}
-                          >
-                            {t('tenant.paymentHistory.showAll')}
-                          </Button>
-                        )}
+                        {renderPaginationButtons(paymentsLimit, setPaymentsLimit, dashboard!.paidPayments.length, 5)}
                       </div>
                     )}
                   </CardContent>
@@ -762,113 +779,7 @@ export function TenantDashboard() {
         </div>
       </div>
 
-      <Dialog open={showAllPayments} onOpenChange={setShowAllPayments}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Payment History</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {dashboard?.paidPayments?.length ? (
-              dashboard.paidPayments.map((payment, i) => (
-                <div
-                  key={payment.id || payment.transactionId || i}
-                  className="flex items-center justify-between p-4 rounded-xl border border-gray-100"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-[#1a1a1a]">
-                      {payment.propertyTitle || payment.propertyName}
-                    </p>
-                    <p className="text-xs text-[#6a7282] mt-1">
-                      {formatDate(payment.paidAt)}
-                    </p>
-                  </div>
-                  <p className="text-sm font-semibold text-green-600">
-                    {i18n.language === 'ar' ? `${(payment.amountPaid ?? payment.amount ?? payment.price ?? 0).toLocaleString()} ${t('currency', { ns: 'common' })}` : `${t('currency', { ns: 'common' })} ${(payment.amountPaid ?? payment.amount ?? payment.price ?? 0).toLocaleString()}`}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-[#6a7282] text-center">No payment history.</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      <Dialog open={showAllContracts} onOpenChange={setShowAllContracts}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>All Contracts</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {dashboard?.allContracts?.length ? (
-              dashboard.allContracts.map((c, i) => (
-                <div
-                  key={c.contractId || c.id || i}
-                  className="bg-[#f5f7fa] rounded-2xl p-4"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-medium text-[#1a1a1a]">
-                      {c.propertyTitle || c.propertyName}
-                    </p>
-                    <div className="flex gap-2">
-                      {c.isAnchoredToBlockChain && (
-                        <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 h-5 text-[10px] px-1.5">
-                          {c.anchoringStatusDisplayName || c.anchoringStatus || 'Anchored'}
-                        </Badge>
-                      )}
-                      <Badge
-                        variant="outline"
-                        className={
-                          c.contractStatus === 'Active' || c.status === 'Active'
-                            ? 'text-green-700 border-green-300 bg-green-50'
-                            : c.contractStatus === 'Pending' || c.status === 'Pending'
-                              ? 'text-yellow-700 border-yellow-300 bg-yellow-50'
-                              : 'text-[#6a7282] border-[#d1d5db]'
-                        }
-                      >
-                        {c.contractStatusDisplayName || c.contractStatus || 'Active'}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-xs text-[#6a7282]">
-                    Expires: {formatDate(c.expiryDate || c.endDate)}
-                  </p>
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5]"
-                      onClick={() => {
-                        if (c.documentUrl) {
-                          window.open(c.documentUrl, '_blank')
-                        } else {
-                          toast.success(`Downloading contract ${c.contractId || c.id}`)
-                        }
-                      }}
-                    >
-                      <Download className="w-3 h-3 mr-1" />
-                      Download
-                    </Button>
-                    {(c.contractStatus === 'Pending' || c.status === 'Pending') && (
-                      <Button
-                        size="sm"
-                        className="rounded-xl bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white"
-                        onClick={() => handleSignContract((c.contractId || c.id)!)}
-                        disabled={signingContractId === (c.contractId || c.id)}
-                      >
-                        <PenTool className="w-3 h-3 mr-1" />
-                        {signingContractId === (c.contractId || c.id) ? 'Signing...' : 'Sign'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-[#6a7282] text-center">No contracts available.</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Notification Details Modal */}
       <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
@@ -898,6 +809,15 @@ export function TenantDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <PaymentModal 
+        clientSecret={paymentClientSecret} 
+        onClose={() => setPaymentClientSecret(null)} 
+        onSuccess={() => {
+          setPaymentClientSecret(null)
+          refetchDashboard?.()
+        }} 
+      />
     </div>
   )
 }

@@ -6,10 +6,12 @@
   "menu": {
     "home": "الرئيسية",
     "exploreProperties": "استكشف العقارات",
+    "findRoommates": "البحث عن شركاء سكن",
     "chats": "المحادثات",
     "chatSupport": "دعم المحادثة",
     "faq": "الأسئلة الشائعة",
     "contact": "تواصل معنا",
+    "profile": "الملف الشخصي",
     "settings": "الإعدادات",
     "dashboard": "لوحة التحكم",
     "logout": "تسجيل الخروج",
@@ -40,7 +42,8 @@
     "termsOfService": "شروط الخدمة",
     "privacyPolicy": "سياسة الخصوصية",
     "copyright": "© 2026 MARN. جميع الحقوق محفوظة.",
-    "address": "بجوار جامعة دمياط\nدمياط الجديدة، مصر"
+    "address": "بجوار جامعة دمياط الجديدة\nدمياط الجديدة، مصر",
+    "phoneNumber": "010 1234 5678"
   },
   "logoAlt": "شعار MARN"
 }

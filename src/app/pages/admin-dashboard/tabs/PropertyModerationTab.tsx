@@ -52,7 +52,9 @@ export function PropertyModerationTab() {
   const { data, isLoading, isFetching } = useAdminPropertyModerationQueue(1, pageSize, activeSearch)
   const reviewMutation = useReviewPropertyModeration()
 
-  const queueItems = data?.data?.items ?? []
+  const queueItems = [...(data?.data?.items ?? [])].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
   const totalCount = data?.data?.totalCount ?? 0
 
   const handleReviewSubmit = () => {
@@ -60,12 +62,12 @@ export function PropertyModerationTab() {
     reviewMutation.mutate(
       {
         propertyId: selectedProperty.propertyId,
-        status: reviewStatus as any,
+        status: 'Rejected',
         note: adminNote,
       },
       {
         onSuccess: () => {
-          toast.success(t('toasts.propertyApproved')) // We might want a generic one, but fallback to t for now or just generic 'Property review submitted'
+          toast.success(t('toasts.propertyDeclined', { defaultValue: 'Property verification declined' }))
           setSelectedProperty(null)
         },
       }
@@ -167,13 +169,9 @@ export function PropertyModerationTab() {
                         <tr key={item.propertyId} className="border-b border-[#3A6EA5]/10 hover:bg-white/50 transition-colors">
                           <td className="py-4 px-4">
                             <div className="flex flex-col max-w-xs">
-                              <Link
-                                to={`/properties/${item.propertyId}`}
-                                target="_blank"
-                                className="font-medium text-[#3A6EA5] hover:underline truncate"
-                              >
+                              <span className="font-medium text-[#1a1a1a] truncate">
                                 {item.title || `Property #${item.propertyId}`}
-                              </Link>
+                              </span>
                               <span className="text-xs text-[#4a5565] truncate mt-1">
                                 {item.typeDisplayName} — {item.cityDisplayName}, {item.governorateDisplayName}
                               </span>
@@ -214,9 +212,11 @@ export function PropertyModerationTab() {
                                         variant="outline"
                                         className="border-[#00A650] text-[#00A650] hover:bg-[#00A650] hover:text-white rounded-xl w-8 h-8 shrink-0"
                                         onClick={() => {
-                                          setSelectedProperty(item)
-                                          setReviewStatus('Approved')
-                                          setAdminNote('')
+                                          reviewMutation.mutate({ propertyId: item.propertyId, status: 'Approved', note: '' }, {
+                                            onSuccess: () => {
+                                              toast.success(t('toasts.propertyApproved'))
+                                            }
+                                          })
                                         }}
                                       >
                                         <CheckCircle className="w-4 h-4" />
@@ -300,31 +300,9 @@ export function PropertyModerationTab() {
                   <p><strong>{t('table.name')}:</strong> {selectedProperty.title}</p>
                   <p className="mt-1"><strong>{t('propertyModal.owner')}:</strong> {selectedProperty.ownerFullName}</p>
                   <p className="mt-1"><strong>{t('propertyModal.status')}:</strong> {selectedProperty.statusDisplayName}</p>
-                  <div className="mt-3">
-                    <Link
-                      to={`/properties/${selectedProperty.propertyId}`}
-                      target="_blank"
-                      className="text-[#3A6EA5] hover:underline font-medium inline-flex items-center gap-1"
-                    >
-                      {t('table.view')} <Eye className="w-3 h-3" />
-                    </Link>
-                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <p className="text-sm font-medium">{t('propertyModal.status')}</p>
-                <Select value={reviewStatus} onValueChange={setReviewStatus}>
-                  <SelectTrigger className="w-full bg-[#F2F4F6] border-none rounded-xl">
-                    <SelectValue placeholder="Select outcome" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Approved">{t('table.approve')}</SelectItem>
-                    <SelectItem value="Rejected">{t('table.reject')}</SelectItem>
-                    <SelectItem value="Pending">{t('verifications.pending')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">{t('declineModal.declineReason')}</p>

@@ -18,7 +18,7 @@ let chatConnection: HubConnection | null = null
 export const startChatConnection = async () => {
   if (chatConnection?.state === 'Connected') return chatConnection
 
-  const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
+  const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || (import.meta.env.PROD ? 'https://marn.runasp.net' : '')
   const hubUrl = BASE_URL ? `${BASE_URL}/hubs/chat` : '/hubs/chat'
   
   const token = localStorage.getItem('token') ?? sessionStorage.getItem('token') ?? ''

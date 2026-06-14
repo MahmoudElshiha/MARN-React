@@ -65,6 +65,8 @@
       "transferMoney": "Transfer Money",
       "withdraw": "Withdraw",
       "withdrawing": "Withdrawing...",
+      "connectStripe": "Connect Stripe",
+      "connecting": "Connecting...",
       "activeBookings": "Active Bookings",
       "pendingRequests": "Pending Requests",
       "awaitingResponse": "Awaiting your response"
@@ -93,6 +95,7 @@
       "new": "New",
       "tenantLabel": "Tenant",
       "dateLabel": "Date",
+      "paymentFrequency": "Frequency",
       "unknownTenant": "Unknown Tenant",
       "unknownProperty": "Unknown Property"
     },
@@ -107,6 +110,7 @@
       "tenant": "Tenant",
       "status": "Status",
       "expiry": "Expiry",
+      "anchoring": "Anchoring",
       "actions": "Actions"
     },
     "receivedPayments": {
@@ -134,8 +138,14 @@
       "edit": "Edit",
       "occupied": "Occupied",
       "vacant": "Vacant",
-      "monthlyRent": "Monthly Rent",
-      "rating": "Rating"
+      "full": "Full",
+      "occupiedCount": "Occupied {{occupied}}/{{total}}",
+      "views": "{{count}} views",
+      "monthlyRent": "Rent",
+      "rating": "Rating",
+      "showMore": "Show More",
+      "showAll": "Show All",
+      "showLess": "Show Less"
     },
     "quickActions": {
       "title": "Quick Actions",

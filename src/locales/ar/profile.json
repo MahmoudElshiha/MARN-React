@@ -51,7 +51,18 @@
       "passwordRequired": "كلمة المرور مطلوبة.",
       "twoFactorEnabled": "تم تفعيل التحقق بخطوتين بنجاح.",
       "twoFactorDisabled": "تم تعطيل التحقق بخطوتين بنجاح.",
-      "incorrectPassword": "كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى."
+      "incorrectPassword": "كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.",
+      "accountDeleted": "تم حذف الحساب بنجاح."
+    },
+    "deleteAccount": {
+      "title": "حذف الحساب",
+      "description": "بمجرد حذف حسابك، لا يمكنك التراجع. يرجى التأكد.",
+      "button": "حذف الحساب",
+      "confirmTitle": "تأكيد الحذف",
+      "confirmMessage": "هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.",
+      "cancel": "إلغاء",
+      "confirm": "نعم، احذف حسابي",
+      "processing": "جاري المعالجة..."
     }
   },
   "documentsTab": {

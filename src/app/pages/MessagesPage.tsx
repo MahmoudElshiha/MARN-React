@@ -123,7 +123,7 @@ export function MessagesPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
   const handleReportSubmit = () => {
-    if (!effectiveConversation?.participant.id || !reportReason.trim()) return
+    if (!effectiveConversation?.participant.id || reportReason.trim().length < 5) return
     
     const finalReason = reportReason.trim()
 
@@ -717,11 +717,16 @@ export function MessagesPage() {
               {t('reportDesc')}
             </p>
             <Textarea
-              placeholder={t('reasonForReport')}
+              placeholder={t('reasonForReportPlaceholder', 'Describe the issue...')}
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
-              className="min-h-[100px] rounded-xl resize-none"
+              className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
             />
+            {reportReason.trim().length > 0 && reportReason.trim().length < 5 && (
+              <p className="text-xs text-red-500 mt-2">
+                Please enter at least 5 characters. ({reportReason.trim().length}/5)
+              </p>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsReportModalOpen(false)} className="rounded-xl">
@@ -729,7 +734,7 @@ export function MessagesPage() {
             </Button>
             <Button 
               onClick={handleReportSubmit} 
-              disabled={!reportReason.trim() || submitReport.isPending}
+              disabled={reportReason.trim().length < 5 || submitReport.isPending}
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
               {submitReport.isPending ? t('submitting') : t('submitReport')}

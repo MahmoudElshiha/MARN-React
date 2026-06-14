@@ -68,7 +68,10 @@
       "next": "التالي",
       "page": "الصفحة {{current}} من {{total}}"
     },
-    "near": "بالقرب من"
+    "near": "بالقرب من",
+    "goToPage": "الانتقال إلى الصفحة",
+    "apply": "تطبيق",
+    "maxPagesError": "أقصى عدد للصفحات هو {{max}}"
   },
   "details": {
     "notFound": "العقار غير موجود.",
@@ -118,7 +121,29 @@
     "notChargedYet": "لن يتم خصم أي مبلغ الآن",
     "lookingForRoommates": "تبحث عن شركاء سكن؟",
     "roommateMatchingDesc": "استخدم ميزة مطابقة شركاء السكن للعثور على شركاء متوافقين",
-    "noReviews": "لا توجد تقييمات بعد."
+    "noReviews": "لا توجد تقييمات بعد.",
+    "currentTenants": "المستأجرون الحاليون",
+    "occupied": "مشغول",
+    "occupiedCount": "مشغول {{count}}/{{max}}",
+    "full": "ممتلئ",
+    "yourReview": "تقييمك",
+    "day": "يوم",
+    "days": "أيام",
+    "month": "شهر",
+    "months": "أشهر",
+    "year": "سنة",
+    "years": "سنوات",
+    "selectDuration": "اختر المدة",
+    "sendingRequest": "جارٍ الإرسال...",
+    "reportProperty": "الإبلاغ عن العقار",
+    "reasonForReport": "سبب الإبلاغ...",
+    "roommateFeature": "استخدم ميزة مطابقة شركاء السكن للعثور على شركاء متوافقين",
+    "rating": "تقييم",
+    "properties": "عقارات",
+    "sharedSpaceAvailable": "هذا العقار يتيح مساحات مشتركة ويوجد مكان شاغر حالياً! يمكنك حجزه.",
+    "sharedSpaceFull": "هذا العقار المشترك ممتلئ حالياً.",
+    "deleteReview": "حذف التقييم",
+    "confirmDeleteReview": "هل أنت متأكد أنك تريد حذف تقييمك؟"
   },
   "propertyByOwner": {
     "rentalRequests": "طلبات الإيجار",
@@ -517,5 +542,7 @@
     "maxFileSize": "الحجم الأقصى للملف: {{size}} ميغابايت",
     "uploaded": "تم الرفع",
     "replace": "استبدال"
-  }
+  },
+  "egp": "جنيه",
+  "copied": "تم النسخ بنجاح"
 }

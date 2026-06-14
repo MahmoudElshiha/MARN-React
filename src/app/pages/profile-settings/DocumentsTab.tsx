@@ -90,7 +90,7 @@ export function DocumentsTab() {
       {
         onSuccess: () => {
           setFieldErrors({})
-          toast.success(t('documentsTab.documentsSubmitted'))
+          toast.success(t('documentsTab.toasts.submitted'))
         },
         onError: (err) => {
           if (err instanceof HttpError && err.validationErrors) {
@@ -103,7 +103,7 @@ export function DocumentsTab() {
             toast.error(
               err instanceof HttpError
                 ? err.message
-                : t('documentsTab.submitFailed'),
+                : t('documentsTab.toasts.failed'),
             )
           }
         },
@@ -184,7 +184,7 @@ export function DocumentsTab() {
 
           <div>
             <Label htmlFor="nameArabic" className="text-[#1a1a1a] mb-2 block">
-              {t('documentsTab.nameArabic')}
+              {t('documentsTab.nameInArabic')}
             </Label>
             <Input
               id="nameArabic"
@@ -197,7 +197,7 @@ export function DocumentsTab() {
                 clearFieldError('ArabicFullName')
               }}
               className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ArabicFullName ? 'border-red-400' : ''}`}
-              placeholder={t('documentsTab.nameArabicPlaceholder')}
+              placeholder={t('documentsTab.nameInArabicPlaceholder')}
               dir="rtl"
             />
             {fieldErrors.ArabicFullName && (
@@ -212,7 +212,7 @@ export function DocumentsTab() {
               htmlFor="addressArabic"
               className="text-[#1a1a1a] mb-2 block"
             >
-              {t('documentsTab.addressArabic')}
+              {t('documentsTab.addressInArabic')}
             </Label>
             <Input
               id="addressArabic"
@@ -225,7 +225,7 @@ export function DocumentsTab() {
                 clearFieldError('ArabicAddress')
               }}
               className={`bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.ArabicAddress ? 'border-red-400' : ''}`}
-              placeholder={t('documentsTab.addressArabicPlaceholder')}
+              placeholder={t('documentsTab.addressInArabicPlaceholder')}
               dir="rtl"
             />
             {fieldErrors.ArabicAddress && (

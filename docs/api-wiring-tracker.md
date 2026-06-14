@@ -1033,12 +1033,12 @@ Update the **Status** and **Notes** fields as endpoints get wired.
 ## Roommate
 
 ### GET `/api/Roommate/matches`
-- **Status:** ❌ Missing
-- **Service:** —
-- **Hook:** —
+- **Status:** ✅ Wired
+- **Service:** `roommateService.getMatches(limit)` → `src/services/roommateService.ts`
+- **Hook:** `useRoommateMatches` → `src/hooks/useRoommateMatches.ts`
 - **Options:** None (uses auth profile preferences)
 - **Response:** Top roommate matches ranked by preference score
-- **Notes:** Wire to the Roommate Finder page. Requires `roommatePreferencesEnabled: true`.
+- **Notes:** Wired to `/roommate-matching` page. Interface defined manually (swagger has `content?: never`). Requires `roommatePreferencesEnabled: true` — page shows CTA to set preferences if disabled.
 
 ---
 

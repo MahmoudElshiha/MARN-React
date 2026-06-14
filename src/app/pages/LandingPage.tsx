@@ -23,7 +23,7 @@ const FEATURED_PROPERTIES = [
     id: '1',
     image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
     title: 'Modern Downtown Apartment',
-    location: 'Cairo, Egypt',
+    location: 'New Damietta, Egypt',
     price: 12500,
     rating: 4.9,
     reviews: 124,
@@ -36,7 +36,7 @@ const FEATURED_PROPERTIES = [
     id: '2',
     image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800',
     title: 'Cozy Apartment in Zamalek',
-    location: 'Cairo, Egypt',
+    location: 'New Damietta, Egypt',
     price: 8500,
     rating: 4.8,
     reviews: 89,
@@ -49,7 +49,7 @@ const FEATURED_PROPERTIES = [
     id: '3',
     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
     title: 'Luxury House in New Cairo',
-    location: 'Cairo, Egypt',
+    location: 'New Damietta, Egypt',
     price: 35000,
     rating: 5.0,
     reviews: 156,
@@ -62,7 +62,7 @@ const FEATURED_PROPERTIES = [
     id: '4',
     image: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?w=800',
     title: 'Penthouse with Nile View',
-    location: 'Cairo, Egypt',
+    location: 'New Damietta, Egypt',
     price: 28000,
     rating: 4.9,
     reviews: 203,
@@ -356,7 +356,7 @@ export function LandingPage() {
                   />
                 ))}
               </div>
-              <p className="text-[#364153] mb-6 leading-relaxed">
+              <p className="text-[#364153] mb-6 leading-relaxed" dir="ltr">
                 "{testimonial.text}"
               </p>
               <div className="flex items-center gap-3">

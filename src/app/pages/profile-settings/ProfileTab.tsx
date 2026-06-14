@@ -113,7 +113,7 @@ export function ProfileTab() {
       <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-2xl text-[#1a1a1a]">
-            {t('profileTab.personalInfo')}
+            {t('profileTab.cardTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -123,7 +123,7 @@ export function ProfileTab() {
                 {t('profileTab.firstName')}
               </Label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <User className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="firstName"
                   value={profileData.firstName}
@@ -134,7 +134,7 @@ export function ProfileTab() {
                     })
                     clearFieldError('FirstName')
                   }}
-                  className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.FirstName ? 'border-red-400' : ''}`}
+                  className={`ps-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.FirstName ? 'border-red-400' : ''}`}
                 />
               </div>
               {fieldErrors.FirstName && (
@@ -149,7 +149,7 @@ export function ProfileTab() {
                 {t('profileTab.lastName')}
               </Label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <User className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="lastName"
                   value={profileData.lastName}
@@ -157,7 +157,7 @@ export function ProfileTab() {
                     setProfileData({ ...profileData, lastName: e.target.value })
                     clearFieldError('LastName')
                   }}
-                  className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.LastName ? 'border-red-400' : ''}`}
+                  className={`ps-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.LastName ? 'border-red-400' : ''}`}
                 />
               </div>
               {fieldErrors.LastName && (
@@ -169,16 +169,16 @@ export function ProfileTab() {
 
             <div>
               <Label htmlFor="email" className="text-[#1a1a1a] mb-2 block">
-                {t('profileTab.email')}
+                {t('profileTab.emailAddress')}
               </Label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <Mail className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="email"
                   type="email"
                   value={profileData.email}
                   disabled
-                  className="pl-12 bg-[#9CBBDC]/20 rounded-xl border-[#3A6EA5]/20 cursor-not-allowed"
+                  className="ps-12 bg-[#9CBBDC]/20 rounded-xl border-[#3A6EA5]/20 cursor-not-allowed"
                 />
               </div>
               <p className="text-xs text-[#4a5565] mt-1">
@@ -191,7 +191,7 @@ export function ProfileTab() {
                 {t('profileTab.phoneNumber')}
               </Label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <Phone className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="phone"
                   value={profileData.phone}
@@ -199,7 +199,7 @@ export function ProfileTab() {
                     setProfileData({ ...profileData, phone: e.target.value })
                     clearFieldError('PhoneNumber')
                   }}
-                  className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.PhoneNumber ? 'border-red-400' : ''}`}
+                  className={`ps-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.PhoneNumber ? 'border-red-400' : ''}`}
                 />
               </div>
               {fieldErrors.PhoneNumber && (
@@ -348,7 +348,7 @@ export function ProfileTab() {
                         }
                         setFieldErrors(flat)
                       } else {
-                        toast.error(t('profileTab.updateError'))
+                        toast.error(t('profileTab.toasts.failed'))
                       }
                     },
                   },
@@ -356,7 +356,7 @@ export function ProfileTab() {
               }}
               className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             >
-              {update.isPending ? t('profileTab.saving') : t('profileTab.saveChanges')}
+              {update.isPending ? t('profileTab.saveChanges') : t('profileTab.saveChanges')}
             </Button>
           </div>
         </CardContent>

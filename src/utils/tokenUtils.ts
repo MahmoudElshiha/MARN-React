@@ -43,16 +43,38 @@ function extractRoles(raw: string | string[] | undefined): UserRole[] {
 
 export function decodeUserFromToken(token: string): User {
   const payloadB64 = token.split('.')[1]
-  const payload = JSON.parse(atob(payloadB64)) as Record<
+  const rawPayload = atob(payloadB64)
+  const payload = JSON.parse(rawPayload) as Record<
     string,
     string | string[]
   >
 
+  // JSON.parse ignores duplicate keys. ASP.NET often serializes multiple roles as duplicate identical claims.
+  // We use regex to extract all occurrences of the role claim from the raw JSON string.
+  const rawRoles: string[] = []
+  
+  // Also collect what JSON.parse found (useful if it's already an array)
+  const parsedRole = payload[CLAIM_ROLE] || payload['role'] || payload['roles']
+  if (Array.isArray(parsedRole)) {
+    rawRoles.push(...parsedRole)
+  } else if (typeof parsedRole === 'string') {
+    rawRoles.push(parsedRole)
+  }
+
+  const roleRegex = /"(?:http:\/\/schemas\.microsoft\.com\/ws\/2008\/06\/identity\/claims\/role|role|roles)"\s*:\s*"([^"]+)"/gi
+  let match: RegExpExecArray | null
+  while ((match = roleRegex.exec(rawPayload)) !== null) {
+    rawRoles.push(match[1])
+  }
+
+  const uniqueRoles = Array.from(new Set(rawRoles))
+  const finalRoles = uniqueRoles.length > 0 ? uniqueRoles : undefined
+
   return {
     id: (payload[CLAIM_ID] as string) ?? (payload['sub'] as string) ?? '',
     email: (payload[CLAIM_EMAIL] as string) ?? '',
-    role: pickRole(payload[CLAIM_ROLE]),
-    roles: extractRoles(payload[CLAIM_ROLE]),
+    role: pickRole(finalRoles),
+    roles: extractRoles(finalRoles),
     firstName: (payload[CLAIM_GIVEN_NAME] as string) ?? (payload['given_name'] as string) ?? (payload['name'] as string) ?? '',
     lastName: (payload[CLAIM_SURNAME] as string) ?? (payload['family_name'] as string) ?? '',
   }

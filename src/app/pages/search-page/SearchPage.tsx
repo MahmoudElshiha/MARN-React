@@ -57,6 +57,17 @@ export function SearchPage() {
     setAllMapProperties(null)
   }, [JSON.stringify(filtersWithoutPage)])
 
+  useEffect(() => {
+    const handleOpenFilters = () => {
+      setShowMobileFilters(true)
+      setTimeout(() => {
+        document.getElementById('mobile-keyword-input')?.focus()
+      }, 300)
+    }
+    window.addEventListener('open-mobile-filters-and-focus-search', handleOpenFilters)
+    return () => window.removeEventListener('open-mobile-filters-and-focus-search', handleOpenFilters)
+  }, [])
+
   const handleToggleShowAllMap = async () => {
     if (allMapProperties) {
       setAllMapProperties(null)
