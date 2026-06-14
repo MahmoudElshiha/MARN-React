@@ -18,8 +18,10 @@ import { adminService } from '@/services/adminService'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { buildImageUrl, getStatusBadge } from '../utils'
+import { useTranslation } from 'react-i18next'
 
 export function VerificationsTab() {
+  const { t } = useTranslation('admin')
   const [selectedVerificationId, setSelectedVerificationId] = useState<
     string | null
   >(null)
@@ -44,25 +46,25 @@ export function VerificationsTab() {
   const approveVerification = useMutation({
     mutationFn: (userId: string) => adminService.approveVerification(userId),
     onSuccess: () => {
-      toast.success('Verification approved')
+      toast.success(t('toasts.verificationApproved'))
       queryClient.invalidateQueries({ queryKey: ['adminVerifications'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
     },
-    onError: () => toast.error('Failed to approve'),
+    onError: () => toast.error(t('toasts.actionFailed')),
   })
 
   const rejectVerification = useMutation({
     mutationFn: ({ userId, reason }: { userId: string; reason: string }) =>
       adminService.rejectVerification(userId, reason),
     onSuccess: () => {
-      toast.success('Verification rejected')
+      toast.success(t('toasts.verificationRejected'))
       queryClient.invalidateQueries({ queryKey: ['adminVerifications'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
       setShowRejectModal(false)
       setPendingRejectUserId(null)
       setRejectReason('')
     },
-    onError: () => toast.error('Failed to reject'),
+    onError: () => toast.error(t('toasts.actionFailed')),
   })
 
   const handleApprove = (userId: string) => approveVerification.mutate(userId)
@@ -87,40 +89,40 @@ export function VerificationsTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Pending Verifications
+              {t('tabs.verifications')}
             </CardTitle>
             <span className="text-sm text-[#4a5565]">
-              {pendingVerifications.length} pending
+              {t('verifications.pendingCount', { count: pendingVerifications.length })}
             </span>
           </div>
         </CardHeader>
         <CardContent>
           {!verificationsLoading && pendingVerifications.length === 0 ? (
             <div className="py-10 text-center text-[#4a5565] border-b border-[#3A6EA5]/20">
-              No pending verifications.
+              {t('verifications.noPending')}
             </div>
           ) : (
             <div className="overflow-x-auto overflow-y-scroll max-h-[600px] border-b border-[#3A6EA5]/20">
               <table className="w-full relative">
                 <thead className="sticky top-0 bg-[#F2F4F6] z-10">
                   <tr className="border-b border-[#3A6EA5]/20">
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                      Full Name
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">
+                      {t('table.fullName')}
                     </th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                      Email
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">
+                      {t('table.email')}
                     </th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                      National ID
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">
+                      {t('verificationModal.nationalId')}
                     </th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                      Submitted
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">
+                      {t('table.submitted')}
                     </th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                      Status
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">
+                      {t('table.status')}
                     </th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">
-                      Actions
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">
+                      {t('table.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -177,7 +179,7 @@ export function VerificationsTab() {
                                   <Eye className="w-4 h-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent><p>View Details</p></TooltipContent>
+                              <TooltipContent><p>{t('table.view')}</p></TooltipContent>
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -191,7 +193,7 @@ export function VerificationsTab() {
                                   <CheckCircle className="w-4 h-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent><p>Approve</p></TooltipContent>
+                              <TooltipContent><p>{t('table.approve')}</p></TooltipContent>
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -205,7 +207,7 @@ export function VerificationsTab() {
                                   <XCircle className="w-4 h-4" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent><p>Reject</p></TooltipContent>
+                              <TooltipContent><p>{t('table.reject')}</p></TooltipContent>
                             </Tooltip>
                           </div>
                         </TooltipProvider>
@@ -227,7 +229,7 @@ export function VerificationsTab() {
                   className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                   onClick={() => setPageSize((p) => p + 20)}
                 >
-                  Show More
+                  {t('table.showMore')}
                 </Button>
               )}
             </div>
@@ -292,25 +294,25 @@ export function VerificationsTab() {
               ) : (
                 <>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">National ID</p>
+                    <p className="text-[#4a5565] mb-1">{t('verificationModal.nationalId')}</p>
                     <p className="font-mono font-semibold text-[#1a1a1a]">
                       {verificationDetail?.nationalIDNumber ?? '—'}
                     </p>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Arabic Address</p>
+                    <p className="text-[#4a5565] mb-1">{t('verificationModal.address')}</p>
                     <p className="font-semibold text-[#1a1a1a]" dir="rtl">
                       {verificationDetail?.arabicAddress ?? '—'}
                     </p>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Phone</p>
+                    <p className="text-[#4a5565] mb-1">{t('verificationModal.phone')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {verificationDetail?.phoneNumber ?? '—'}
                     </p>
                   </div>
                   <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                    <p className="text-[#4a5565] mb-1">Submitted</p>
+                    <p className="text-[#4a5565] mb-1">{t('verificationModal.submitted')}</p>
                     <p className="font-semibold text-[#1a1a1a]">
                       {verificationDetail?.createdAt
                         ? new Date(
@@ -334,13 +336,13 @@ export function VerificationsTab() {
                   ))
                 : [
                     {
-                      label: 'Front ID',
+                      label: t('verificationModal.frontId'),
                       src: buildImageUrl(
                         verificationDetail?.frontIdPhoto ?? null,
                       ),
                     },
                     {
-                      label: 'Back ID',
+                      label: t('verificationModal.backId'),
                       src: buildImageUrl(
                         verificationDetail?.backIdPhoto ?? null,
                       ),
@@ -359,7 +361,7 @@ export function VerificationsTab() {
                           />
                       ) : (
                         <div className="w-full rounded-2xl border border-dashed border-[#3A6EA5]/30 bg-[#F2F4F6] flex items-center justify-center h-32 text-[#4a5565] text-sm">
-                          No image
+                          {t('verificationModal.noImage')}
                         </div>
                       )}
                     </div>
@@ -379,7 +381,7 @@ export function VerificationsTab() {
                 }}
               >
                 <CheckCircle className="w-5 h-5 mr-2" />
-                Approve
+                {t('table.approve')}
               </Button>
               <Button
                 variant="outline"
@@ -393,7 +395,7 @@ export function VerificationsTab() {
                 }}
               >
                 <XCircle className="w-5 h-5 mr-2" />
-                Reject
+                {t('table.reject')}
               </Button>
             </div>
           </motion.div>
@@ -409,15 +411,15 @@ export function VerificationsTab() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-              Reject Verification
+              {t('declineModal.title')}
             </h3>
             <p className="text-[#4a5565] mb-5">
-              Please provide a reason for rejecting this verification request.
+              {t('declineModal.declineReason')}
             </p>
             <textarea
               className="w-full rounded-xl border border-[#3A6EA5]/30 bg-[#F2F4F6] p-3 text-sm text-[#1a1a1a] resize-none focus:outline-none focus:ring-2 focus:ring-[#3A6EA5]/40"
               rows={4}
-              placeholder="Enter rejection reason…"
+              placeholder={t('declineModal.placeholder')}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
             />
@@ -431,14 +433,14 @@ export function VerificationsTab() {
                   setRejectReason('')
                 }}
               >
-                Cancel
+                {t('declineModal.cancel')}
               </Button>
               <Button
                 className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl"
                 disabled={rejectVerification.isPending || !rejectReason.trim()}
                 onClick={confirmReject}
               >
-                {rejectVerification.isPending ? 'Rejecting…' : 'Confirm Reject'}
+                {rejectVerification.isPending ? t('declineModal.declining') : t('declineModal.confirmDecline')}
               </Button>
             </div>
           </motion.div>

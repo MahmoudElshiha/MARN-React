@@ -5,10 +5,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router'
 import { useEffect, useState } from 'react'
 import { authService } from '@/services/authService'
 import { HttpError } from '@/services/httpErrors'
+import { useTranslation } from 'react-i18next'
 
 type Status = 'loading' | 'success' | 'error'
 
 export function ConfirmEmailPage() {
+  const { t } = useTranslation('auth')
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -20,7 +22,7 @@ export function ConfirmEmailPage() {
   )
   const [message, setMessage] = useState(
     !userId || !tokenParam
-      ? 'Invalid confirmation link. Please check your email and try again.'
+      ? t('confirmEmail.invalidLink')
       : '',
   )
 
@@ -39,7 +41,7 @@ export function ConfirmEmailPage() {
         if (err instanceof HttpError) {
           setMessage(err.message)
         } else {
-          setMessage('Something went wrong. Please try again.')
+          setMessage(t('confirmEmail.somethingWentWrong'))
         }
       })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -58,9 +60,9 @@ export function ConfirmEmailPage() {
               <Loader2 className="w-16 h-16 text-[#3A6EA5] animate-spin" />
             </div>
             <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-              Verifying your email
+              {t('confirmEmail.verifying')}
             </h2>
-            <p className="text-[#4a5565]">Please wait a moment…</p>
+            <p className="text-[#4a5565]">{t('confirmEmail.pleaseWait')}</p>
           </>
         )}
 
@@ -75,19 +77,19 @@ export function ConfirmEmailPage() {
               <CheckCircle className="w-16 h-16 text-green-500" />
             </motion.div>
             <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-              Email confirmed!
+              {t('confirmEmail.confirmed')}
             </h2>
             <p className="text-[#4a5565] mb-6">
-              {message || 'Your email has been verified successfully.'}
+              {message || t('confirmEmail.verifiedSuccessfully')}
             </p>
             <p className="text-sm text-[#6a7282] mb-6">
-              Redirecting you to login in a few seconds…
+              {t('confirmEmail.redirecting')}
             </p>
             <Button
               onClick={() => navigate('/login')}
               className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6"
             >
-              Go to Login
+              {t('confirmEmail.goToLogin')}
             </Button>
           </>
         )}
@@ -103,7 +105,7 @@ export function ConfirmEmailPage() {
               <XCircle className="w-16 h-16 text-red-500" />
             </motion.div>
             <h2 className="text-2xl font-bold text-[#1a1a1a] mb-2">
-              Confirmation failed
+              {t('confirmEmail.failed')}
             </h2>
             <p className="text-[#4a5565] mb-8">{message}</p>
             <div className="flex flex-col gap-3">
@@ -111,13 +113,13 @@ export function ConfirmEmailPage() {
                 onClick={() => navigate('/login')}
                 className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6"
               >
-                Go to Login
+                {t('confirmEmail.goToLogin')}
               </Button>
               <Link
                 to="/signup"
                 className="text-sm text-[#3A6EA5] hover:underline"
               >
-                Back to Sign Up
+                {t('confirmEmail.backToSignUp')}
               </Link>
             </div>
           </>

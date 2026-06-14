@@ -26,7 +26,7 @@ const RENTAL_REQUEST = {
   apartment: {
     name: 'Modern Downtown Apartment',
     image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
-    location: 'Cairo, Egypt',
+    location: 'New Damietta, Egypt',
     price: 28000,
   },
   requestedPeriod: {

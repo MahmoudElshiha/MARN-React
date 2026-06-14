@@ -2,6 +2,7 @@ import { Upload, X } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
 import { PropertyFormData, FileData, TouchedFields } from '../types'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getImageUrl } from '@/constants/assets'
 
 interface PhotosStepProps {
@@ -11,6 +12,7 @@ interface PhotosStepProps {
 }
 
 export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProps) {
+  const { t } = useTranslation('properties')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +70,7 @@ export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProp
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-        Upload Photos <span className="text-red-500">*</span>
+        {t('editProperty.photosStep.title')} <span className="text-red-500">*</span>
       </h2>
 
       <div className="bg-white rounded-2xl p-8">
@@ -86,10 +88,10 @@ export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProp
         >
           <Upload className="w-16 h-16 mx-auto mb-4 text-[#3A6EA5]" />
           <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">
-            Drag & drop photos here
+            {t('editProperty.photosStep.dragDropPhotos')}
           </h3>
           <p className="text-[#4a5565] mb-4">
-            or click to browse from your computer
+            {t('editProperty.photosStep.orClickToBrowse')}
           </p>
           <Button 
             type="button" 
@@ -99,34 +101,32 @@ export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProp
               fileInputRef.current?.click()
             }}
           >
-            Choose Files
+            {t('editProperty.photosStep.chooseFiles')}
           </Button>
         </div>
       </div>
 
       {formData.existingPrimaryImageUrl && (
         <div className="bg-white rounded-2xl p-6 mb-6 border border-[#3A6EA5]/20">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#1a1a1a]">Current Primary Image</h3>
-            {(existingPhotosList.length > 0 || photosList.length > 0) && (
-              <button
-                type="button"
-                onClick={removePrimaryImage}
-                className="text-red-500 hover:text-red-700 text-sm font-medium flex items-center gap-1 bg-red-50 px-3 py-1.5 rounded-lg"
-              >
-                <X className="w-4 h-4" /> Remove
-              </button>
-            )}
-          </div>
-          <div className="relative aspect-video max-w-sm rounded-xl overflow-hidden bg-gray-100">
+          <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">{t('editProperty.photosStep.currentPrimaryImage')}</h3>
+          <div className="relative aspect-video max-w-sm rounded-xl overflow-hidden bg-gray-100 group">
             <img 
               src={getImageUrl(formData.existingPrimaryImageUrl)} 
               alt="Primary Image" 
               className="w-full h-full object-cover"
               onError={(e) => { e.currentTarget.src = formData.existingPrimaryImageUrl || '' }}
             />
+            {(existingPhotosList.length > 0 || photosList.length > 0) && (
+              <button
+                type="button"
+                onClick={removePrimaryImage}
+                className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
-          <p className="text-sm text-[#4a5565] mt-2">Uploading a new primary image will replace this one.</p>
+          <p className="text-sm text-[#4a5565] mt-3">{t('editProperty.photosStep.uploadingNewPrimaryReplacesExisting')}</p>
         </div>
       )}
 
@@ -188,9 +188,7 @@ export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProp
 
       <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
         <p className="text-sm text-[#1a1a1a]">
-          <strong>Tip:</strong> Properties with 5+ high-quality photos
-          get 40% more views. Include photos of living areas,
-          bedrooms, kitchen, bathroom, and exterior.
+          {t('editProperty.photosStep.tip')}
         </p>
       </div>
     </div>

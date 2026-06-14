@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
@@ -31,8 +32,20 @@ const DEFAULT_FORM_DATA: PropertyFormData = {
 
 export function EditPropertyPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation('properties')
   const { id } = useParams<{ id: string }>()
-  const [currentStep, setCurrentStep] = useState(1)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const stepParam = parseInt(searchParams.get('step') || '1', 10)
+  const currentStep = isNaN(stepParam) || stepParam < 1 ? 1 : stepParam > STEPS.length ? STEPS.length : stepParam
+
+  const setCurrentStep = (step: number) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev)
+      newParams.set('step', step.toString())
+      return newParams
+    }, { replace: true })
+  }
+
   const [touched, setTouched] = useState<TouchedFields>({})
   const [loading, setLoading] = useState(true)
 
@@ -123,6 +136,7 @@ export function EditPropertyPage() {
 
             const isDefault = (key: keyof PropertyFormData) => {
               if (key === 'tenantPreferences') return prev.tenantPreferences.length === DEFAULT_FORM_DATA.tenantPreferences.length
+              if (key === 'mapLocation') return JSON.stringify(prev[key]) === JSON.stringify(DEFAULT_FORM_DATA[key])
               return prev[key] === DEFAULT_FORM_DATA[key] || (Array.isArray(prev[key]) && (prev[key] as any[]).length === 0)
             }
 
@@ -141,7 +155,7 @@ export function EditPropertyPage() {
               sqm: isDefault('sqm') ? (data.squareMeters?.toString() || '') : prev.sqm,
               numPeople: isDefault('numPeople') ? (data.maxOccupants?.toString() || '') : prev.numPeople,
               occupancyPreference: isDefault('occupancyPreference') ? (data.isShared ? 'shared' : 'private') : prev.occupancyPreference,
-              mapLocation: { lat: data.latitude || 37.7749, lng: data.longitude || -122.4194 },
+              mapLocation: isDefault('mapLocation') ? { lat: data.latitude || 37.7749, lng: data.longitude || -122.4194 } : prev.mapLocation,
               price: isDefault('price') ? (data.price?.toString() || '') : prev.price,
               leaseDuration: isDefault('leaseDuration') ? (data.rentalUnit || 'Monthly') : prev.leaseDuration,
               existingPhotos: data.media || [],
@@ -157,12 +171,47 @@ export function EditPropertyPage() {
           })
         }
         setLoading(false)
+        setTimeout(() => window.scrollTo(0, 0), 10)
       }).catch((err) => {
         console.error(err)
         toast.error('Failed to load property')
         setLoading(false)
+        setTimeout(() => window.scrollTo(0, 0), 10)
       })
     }
+  }, [id])
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem(`editPropertyFormData_${id}`)
+    let hasActualData = false
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        hasActualData = Object.keys(DEFAULT_FORM_DATA).some((key) => {
+          if (key === 'photos' || key === 'legalDocs') return false
+          const defaultVal = DEFAULT_FORM_DATA[key as keyof PropertyFormData]
+          const savedVal = parsed[key]
+          
+          if (Array.isArray(defaultVal) || typeof defaultVal === 'object') {
+            return JSON.stringify(defaultVal) !== JSON.stringify(savedVal)
+          }
+          return defaultVal !== savedVal
+        })
+      } catch (e) {
+        hasActualData = false
+      }
+    }
+
+    setTimeout(() => {
+      if (hasActualData) {
+        toast.success(t('editProperty.toasts.draftRestored'), {
+          description: t('editProperty.toasts.draftRestoredDesc'),
+          duration: 4000,
+        })
+      }
+    }, 100)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   useEffect(() => {
@@ -181,8 +230,6 @@ export function EditPropertyPage() {
   const updateTouched = (field: keyof PropertyFormData) => {
     setTouched((prev) => ({ ...prev, [field]: true }))
   }
-
-  // mapLocation is now part of formData
 
   const handleNext = () => {
     if (currentStep < STEPS.length) {
@@ -204,9 +251,8 @@ export function EditPropertyPage() {
     if (errors.length > 0) {
       const newTouched = { ...touched }
       errors.forEach(err => {
-        // For special fields that map to multiple inputs, we mark a proxy key as touched
         newTouched[err.field as keyof PropertyFormData] = true
-        toast.error(`Step ${err.step} (${err.stepName}): ${err.label} is missing!`)
+        toast.error(t('editProperty.validation.fieldMissing', { step: err.step, stepName: err.stepName, label: err.label }))
       })
       setTouched(newTouched)
       setCurrentStep(errors[0].step)
@@ -381,19 +427,19 @@ export function EditPropertyPage() {
 
       await propertyService.submitPropertyEdit(id!, apiData)
 
-      toast.success('Property updated successfully')
+      toast.success(t('editProperty.toasts.updated'))
       sessionStorage.removeItem(`editPropertyFormData_${id}`)
       navigate('/owner-dashboard')
     } catch (error) {
       console.error('Failed to update property', error)
-      toast.error('Failed to update property. Please check your data and try again.')
+      toast.error(t('editProperty.toasts.failed'))
     }
   }
 
   if (loading) {
     return (
       <div className="min-h-screen pb-20 flex items-center justify-center text-[#4a5565]">
-        Loading property details...
+        <div className="w-8 h-8 border-4 border-[#3A6EA5] border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
@@ -407,14 +453,14 @@ export function EditPropertyPage() {
             onClick={() => navigate('/owner-dashboard')}
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors mb-4"
           >
-            <ChevronLeft className="w-5 h-5" />
-            Back to Dashboard
+            <ChevronLeft className="w-5 h-5 rtl:rotate-180" />
+            {t('editProperty.backToDashboard')}
           </button>
           <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-            Edit Property
+            {t('editProperty.title')}
           </h1>
           <p className="text-[#4a5565]">
-            Modify the details of your property
+            {t('editProperty.subtitle')}
           </p>
         </div>
 
@@ -454,7 +500,14 @@ export function EditPropertyPage() {
                         : 'text-[#4a5565]'
                       }`}
                   >
-                    {step.title}
+                    {t(`editProperty.steps.${
+                      step.id === 1 ? 'details' :
+                      step.id === 2 ? 'amenities' :
+                      step.id === 3 ? 'photos' :
+                      step.id === 4 ? 'pricing' :
+                      step.id === 5 ? 'availability' :
+                      'legalDocs'
+                    }`)}
                   </span>
                 </div>
               )
@@ -515,31 +568,33 @@ export function EditPropertyPage() {
 
             {/* Navigation Buttons */}
             <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#3A6EA5]/20">
-              <Button
-                variant="outline"
-                onClick={handlePrev}
-                disabled={currentStep === 1}
-                className="rounded-xl border-[#3A6EA5]/20 disabled:opacity-50"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={handlePrev}
+                  disabled={currentStep === 1}
+                  className="rounded-xl border-[#3A6EA5]/20 disabled:opacity-50 flex items-center gap-2"
+                >
+                  <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+                  {t('editProperty.steps.previous')}
+                </Button>
+              </div>
 
               {currentStep < STEPS.length ? (
                 <Button
                   onClick={handleNext}
-                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
+                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30 flex items-center gap-2"
                 >
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-2" />
+                  {t('editProperty.steps.next')}
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 </Button>
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30"
+                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl shadow-lg shadow-[#3A6EA5]/30 flex items-center gap-2"
                 >
-                  Save Changes
-                  <CheckCircle className="w-4 h-4 ml-2" />
+                  {t('editProperty.steps.saveChanges')}
+                  <CheckCircle className="w-4 h-4" />
                 </Button>
               )}
             </div>

@@ -13,8 +13,10 @@ import {
 } from '../../../components/ui/select'
 import { TooltipProvider } from '../../../components/ui/tooltip'
 import { useAdminRevenue } from '@/hooks/useAdminStats'
+import { useTranslation } from 'react-i18next'
 
 export function RevenueStatsView() {
+  const { t } = useTranslation('admin')
   const [pageSize, setPageSize] = useState(20)
   const [search, setSearch] = useState('')
   const [activeSearch, setActiveSearch] = useState('')
@@ -46,7 +48,7 @@ export function RevenueStatsView() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Revenue Stats
+              {t('revenue.title')}
             </CardTitle>
             <div className="flex flex-col sm:flex-row w-full sm:w-auto items-center gap-2">
               <Select value={period} onValueChange={setPeriod}>
@@ -54,15 +56,15 @@ export function RevenueStatsView() {
                   <SelectValue placeholder="Period" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="thisMonth">This Month</SelectItem>
-                  <SelectItem value="thisYear">This Year</SelectItem>
-                  <SelectItem value="allTime">All Time</SelectItem>
+                  <SelectItem value="thisMonth">{t('generateReport.periodOptions.thisMonth')}</SelectItem>
+                  <SelectItem value="thisYear">{t('generateReport.periodOptions.thisYear')}</SelectItem>
+                  <SelectItem value="allTime">{t('generateReport.periodOptions.allTime')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <div className="flex w-full sm:w-auto items-center gap-2">
                 <Input
-                  placeholder="Search payments..."
+                  placeholder={t('revenue.search')}
                   className="w-full sm:w-64 bg-white rounded-xl border-[#3A6EA5]/20"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -89,7 +91,7 @@ export function RevenueStatsView() {
                 className={statusFilter === status ? 'bg-[#3A6EA5] text-white rounded-xl' : 'rounded-xl border-[#3A6EA5]/20 text-[#4a5565]'}
                 onClick={() => setStatusFilter(status)}
               >
-                {status}
+                {status === 'All' ? t('tabs.all') : t(`revenue.status.${status.charAt(0).toLowerCase() + status.slice(1)}`)}
               </Button>
             ))}
           </div>
@@ -101,8 +103,8 @@ export function RevenueStatsView() {
                 <DollarSign className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-[#4a5565]">Total Sales</p>
-                <p className="text-xl font-bold text-[#1a1a1a]">EGP {(apiStats?.totalSales ?? 0).toLocaleString()}</p>
+                <p className="text-sm text-[#4a5565]">{t('revenue.totalSales')}</p>
+                <p className="text-xl font-bold text-[#1a1a1a]">{(apiStats?.totalSales ?? 0).toLocaleString()} {t('currency', { ns: 'common' })}</p>
               </div>
             </div>
             <div className="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-sm">
@@ -110,8 +112,8 @@ export function RevenueStatsView() {
                 <DollarSign className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-[#4a5565]">Platform Revenue</p>
-                <p className="text-xl font-bold text-[#1a1a1a]">EGP {(apiStats?.totalRevenue ?? 0).toLocaleString()}</p>
+                <p className="text-sm text-[#4a5565]">{t('revenue.platformRevenue')}</p>
+                <p className="text-xl font-bold text-[#1a1a1a]">{(apiStats?.totalRevenue ?? 0).toLocaleString()} {t('currency', { ns: 'common' })}</p>
               </div>
             </div>
             <div className="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-sm">
@@ -119,15 +121,15 @@ export function RevenueStatsView() {
                 <DollarSign className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-[#4a5565]">Owner Payouts</p>
-                <p className="text-xl font-bold text-[#1a1a1a]">EGP {(apiStats?.totalOwnerPayouts ?? 0).toLocaleString()}</p>
+                <p className="text-sm text-[#4a5565]">{t('revenue.ownerPayouts')}</p>
+                <p className="text-xl font-bold text-[#1a1a1a]">{(apiStats?.totalOwnerPayouts ?? 0).toLocaleString()} {t('currency', { ns: 'common' })}</p>
               </div>
             </div>
           </div>
 
           {!isLoading && payments.length === 0 ? (
             <div className="py-10 text-center text-[#4a5565] border-b border-[#3A6EA5]/20">
-              No payments found for this period.
+              {t('revenue.noPayments')}
             </div>
           ) : (
             <div className="overflow-x-auto overflow-y-scroll max-h-[500px] border-b border-[#3A6EA5]/20">
@@ -135,12 +137,12 @@ export function RevenueStatsView() {
               <table className="w-full relative" style={{ tableLayout: 'fixed' }}>
                 <thead className="sticky top-0 bg-[#F2F4F6] z-10">
                   <tr className="border-b border-[#3A6EA5]/20">
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '30%' }}>Contract</th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>Sales</th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>Revenue</th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>Owner Payout</th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>Status</th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>Date</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '30%' }}>{t('table.contract')}</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('revenue.sales')}</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('revenue.revenue')}</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('revenue.ownerPayout')}</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('table.status')}</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>{t('revenue.date')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,18 +162,33 @@ export function RevenueStatsView() {
                       <td className="py-4 px-4 text-[#1a1a1a] font-medium">
                         <div className="flex flex-col">
                           <span>{item.propertyTitle}</span>
-                          <span className="text-xs text-[#4a5565] font-normal">Renter: {item.renterName} • Owner: {item.ownerName}</span>
+                          <span className="text-xs text-[#4a5565] font-normal">{t('table.renter')}: {item.renterName} • {t('table.owner')}: {item.ownerName}</span>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-[#1a1a1a]">EGP {(item.amountTotal ?? 0).toLocaleString()}</td>
-                      <td className="py-4 px-4 text-green-600 font-medium">EGP {(item.platformFee ?? 0).toLocaleString()}</td>
-                      <td className="py-4 px-4 text-[#4a5565]">EGP {(item.ownerAmount ?? 0).toLocaleString()}</td>
+                      <td className="py-4 px-4 text-[#1a1a1a]">
+                        <div className="flex items-center gap-1">
+                          <span>{t('currency', { ns: 'common' })}</span>
+                          <span>{(item.amountTotal ?? 0).toLocaleString()}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-green-600 font-medium">
+                        <div className="flex items-center gap-1">
+                          <span>{t('currency', { ns: 'common' })}</span>
+                          <span>{(item.platformFee ?? 0).toLocaleString()}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-[#4a5565]">
+                        <div className="flex items-center gap-1">
+                          <span>{t('currency', { ns: 'common' })}</span>
+                          <span>{(item.ownerAmount ?? 0).toLocaleString()}</span>
+                        </div>
+                      </td>
                       <td className="py-4 px-4">
                         <span className={`px-2 py-1 text-xs rounded-lg font-medium ${item.status === 'Available' ? 'bg-green-100 text-green-700' :
                             item.status === 'Withdrawn' ? 'bg-blue-100 text-blue-700' :
                               'bg-yellow-100 text-yellow-700'
                           }`}>
-                          {item.statusDisplayName || item.status}
+                          {t(`revenue.status.${item.status.charAt(0).toLowerCase() + item.status.slice(1)}`, { defaultValue: item.status })}
                         </span>
                       </td>
                       <td className="py-4 px-4 text-[#4a5565]">
@@ -194,7 +211,7 @@ export function RevenueStatsView() {
                   className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                   onClick={() => setPageSize((p) => p + 20)}
                 >
-                  Show More
+                  {t('table.showMore')}
                 </Button>
               )}
             </div>

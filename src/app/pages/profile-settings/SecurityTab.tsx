@@ -20,9 +20,11 @@ import {
 import { toast } from 'sonner'
 import { useProfile } from '@/hooks/useProfile'
 import { HttpError } from '@/services/httpErrors'
+import { useTranslation } from 'react-i18next'
 
 export function SecurityTab() {
-  const { data: profileResponse, changePassword, toggle2FA } = useProfile()
+  const { t } = useTranslation('profile')
+  const { data: profileResponse, changePassword, toggle2FA, deleteAccount } = useProfile()
   const apiProfile = profileResponse?.data
 
   const [passwords, setPasswords] = useState({
@@ -36,6 +38,8 @@ export function SecurityTab() {
   const [show2FAModal, setShow2FAModal] = useState(false)
   const [twoFaPassword, setTwoFaPassword] = useState('')
   const [twoFaPasswordError, setTwoFaPasswordError] = useState('')
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const clearFieldError = (key: string) =>
     setFieldErrors((prev) => {
@@ -57,7 +61,7 @@ export function SecurityTab() {
         onSuccess: () => {
           setPasswords({ current: '', new: '', confirm: '' })
           setFieldErrors({})
-          toast.success('Password updated successfully!')
+          toast.success(t('securityTab.toasts.passwordUpdated'))
         },
         onError: (err) => {
           if (err instanceof HttpError && err.validationErrors) {
@@ -70,7 +74,7 @@ export function SecurityTab() {
             toast.error(
               err instanceof HttpError
                 ? err.message
-                : 'Failed to update password.',
+                : t('securityTab.toasts.passwordFailed'),
             )
           }
         },
@@ -99,19 +103,37 @@ export function SecurityTab() {
           setTwoFaPasswordError('')
           toast.success(
             enabled
-              ? 'Two-factor authentication enabled successfully.'
-              : 'Two-factor authentication disabled successfully.',
+              ? t('securityTab.toasts.twoFactorEnabled')
+              : t('securityTab.toasts.twoFactorDisabled'),
           )
         },
         onError: (err) => {
           setTwoFaPasswordError(
             err instanceof HttpError
               ? err.message
-              : 'Incorrect password. Please try again.',
+              : t('securityTab.toasts.incorrectPassword'),
           )
         },
       },
     )
+  }
+
+  const handleDeleteAccount = () => {
+    deleteAccount.mutate(undefined, {
+      onSuccess: () => {
+        setShowDeleteModal(false)
+        toast.success(t('securityTab.accountDeleted'))
+        // Optional: Perform logout or redirect here, e.g. using a global auth hook or window.location
+        window.location.href = '/'
+      },
+      onError: (err) => {
+        toast.error(
+          err instanceof HttpError
+            ? err.message
+            : 'Failed to delete account. Please try again.',
+        )
+      },
+    })
   }
 
   return (
@@ -121,14 +143,14 @@ export function SecurityTab() {
           <div className="flex items-center gap-3">
             <Shield className="w-6 h-6 text-[#3A6EA5]" />
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Security Settings
+              {t('securityTab.title')}
             </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
           <div>
             <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">
-              Change Password
+              {t('securityTab.changePassword')}
             </h3>
             <div className="space-y-4">
               <div>
@@ -136,10 +158,10 @@ export function SecurityTab() {
                   htmlFor="current-password"
                   className="text-[#1a1a1a] mb-2 block"
                 >
-                  Current Password
+                  {t('securityTab.currentPassword')}
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                  <Lock className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                   <Input
                     id="current-password"
                     type="password"
@@ -148,7 +170,7 @@ export function SecurityTab() {
                       setPasswords({ ...passwords, current: e.target.value })
                       clearFieldError('CurrentPassword')
                     }}
-                    className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.CurrentPassword ? 'border-red-400' : ''}`}
+                    className={`ps-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.CurrentPassword ? 'border-red-400' : ''}`}
                   />
                 </div>
                 {fieldErrors.CurrentPassword && (
@@ -164,7 +186,7 @@ export function SecurityTab() {
                     htmlFor="new-password"
                     className="text-[#1a1a1a] mb-2 block"
                   >
-                    New Password
+                    {t('securityTab.newPassword')}
                   </Label>
                   <Input
                     id="new-password"
@@ -187,7 +209,7 @@ export function SecurityTab() {
                     htmlFor="confirm-password"
                     className="text-[#1a1a1a] mb-2 block"
                   >
-                    Confirm Password
+                    {t('securityTab.confirmPassword')}
                   </Label>
                   <Input
                     id="confirm-password"
@@ -212,22 +234,22 @@ export function SecurityTab() {
                 onClick={handleChangePassword}
                 className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
               >
-                {changePassword.isPending ? 'Updating…' : 'Update Password'}
+                {changePassword.isPending ? t('securityTab.updatePassword') : t('securityTab.updatePassword')}
               </Button>
             </div>
           </div>
 
           <div className="border-t border-[#3A6EA5]/20 pt-8">
             <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">
-              Two-Factor Authentication
+              {t('securityTab.twoFactor')}
             </h3>
             <div className="flex items-center justify-between p-6 bg-white rounded-2xl">
               <div>
-                <p className="font-medium text-[#1a1a1a]">Enable 2FA</p>
+                <p className="font-medium text-[#1a1a1a]">{t('securityTab.enable2FA')}</p>
                 <p className="text-sm text-[#4a5565] mt-1">
                   {twoFactorEnabled
-                    ? 'Your account is protected with 2FA'
-                    : 'Add an extra layer of security to your account'}
+                    ? t('securityTab.protectedWith2FA')
+                    : t('securityTab.add2FALayer')}
                 </p>
               </div>
               <Switch
@@ -235,6 +257,26 @@ export function SecurityTab() {
                 onCheckedChange={handle2FAToggle}
                 className="data-[state=checked]:bg-[#3A6EA5]"
               />
+            </div>
+          </div>
+
+          <div className="border-t border-[#3A6EA5]/20 pt-8">
+            <h3 className="text-lg font-semibold text-red-600 mb-4">
+              {t('securityTab.deleteAccount.title')}
+            </h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-red-50 rounded-2xl border border-red-100 gap-4">
+              <div>
+                <p className="text-sm text-red-800">
+                  {t('securityTab.deleteAccount.description')}
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteModal(true)}
+                className="bg-red-600 hover:bg-red-700 text-white rounded-xl shrink-0"
+              >
+                {t('securityTab.deleteAccount.button')}
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -245,11 +287,11 @@ export function SecurityTab() {
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#1a1a1a]">
               {twoFactorEnabled
-                ? 'Disable Two-Factor Authentication'
-                : 'Enable Two-Factor Authentication'}
+                ? t('securityTab.disable2FATitle')
+                : t('securityTab.enable2FATitle')}
             </DialogTitle>
             <DialogDescription className="text-[#4a5565]">
-              Enter your account password to confirm
+              {t('securityTab.enterPasswordToConfirm')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -258,10 +300,10 @@ export function SecurityTab() {
                 htmlFor="twofa-password"
                 className="text-[#1a1a1a] mb-2 block"
               >
-                Password
+                {t('securityTab.enterPassword')}
               </Label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <Lock className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="twofa-password"
                   type="password"
@@ -271,8 +313,8 @@ export function SecurityTab() {
                     setTwoFaPasswordError('')
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleConfirm2FA()}
-                  placeholder="Enter your password"
-                  className={`pl-12 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 ${twoFaPasswordError ? 'border-red-400' : ''}`}
+                  placeholder={t('securityTab.enterPassword')}
+                  className={`ps-12 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 ${twoFaPasswordError ? 'border-red-400' : ''}`}
                 />
               </div>
               {twoFaPasswordError && (
@@ -288,14 +330,45 @@ export function SecurityTab() {
               onClick={() => setShow2FAModal(false)}
               className="rounded-xl border-[#3A6EA5]/20"
             >
-              Cancel
+              {t('securityTab.cancel')}
             </Button>
             <Button
               disabled={toggle2FA.isPending}
               onClick={handleConfirm2FA}
               className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             >
-              {toggle2FA.isPending ? 'Confirming…' : 'Confirm'}
+              {toggle2FA.isPending ? t('securityTab.confirm') : t('securityTab.confirm')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="bg-white rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-[#1a1a1a]">
+              {t('securityTab.deleteAccount.confirmTitle')}
+            </DialogTitle>
+            <DialogDescription className="text-[#4a5565]">
+              {t('securityTab.deleteAccount.confirmMessage')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 justify-end mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteModal(false)}
+              className="rounded-xl border-[#3A6EA5]/20"
+            >
+              {t('securityTab.deleteAccount.cancel')}
+            </Button>
+            <Button
+              disabled={deleteAccount.isPending}
+              onClick={handleDeleteAccount}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
+            >
+              {deleteAccount.isPending
+                ? t('securityTab.deleteAccount.processing')
+                : t('securityTab.deleteAccount.confirm')}
             </Button>
           </div>
         </DialogContent>

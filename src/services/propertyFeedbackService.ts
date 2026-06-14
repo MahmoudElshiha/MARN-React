@@ -73,4 +73,13 @@ export const propertyFeedbackService = {
     )
     return response.data
   },
+
+  deleteRating: async (
+    propertyId: string,
+  ): Promise<ApiResponse<any>> => {
+    const response = await axiosInstance.delete(
+      `/api/properties/${propertyId}/ratings/me`,
+    )
+    return response.data
+  },
 }

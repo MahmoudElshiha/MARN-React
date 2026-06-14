@@ -2,6 +2,7 @@ import { Upload, X } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
 import { PropertyFormData, FileData, TouchedFields } from '../types'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface PhotosStepProps {
   formData: PropertyFormData
@@ -10,6 +11,7 @@ interface PhotosStepProps {
 }
 
 export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProps) {
+  const { t } = useTranslation('properties')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +55,7 @@ export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProp
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-        Upload Photos <span className="text-red-500">*</span>
+        {t('addProperty.photosStep.title')} <span className="text-red-500">*</span>
       </h2>
 
       <div className="bg-white rounded-2xl p-8">
@@ -71,10 +73,10 @@ export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProp
         >
           <Upload className="w-16 h-16 mx-auto mb-4 text-[#3A6EA5]" />
           <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">
-            Drag & drop photos here
+            {t('addProperty.photosStep.dragDropPhotos')}
           </h3>
           <p className="text-[#4a5565] mb-4">
-            or click to browse from your computer
+            {t('addProperty.photosStep.orClickToBrowse')}
           </p>
           <Button 
             type="button" 
@@ -84,7 +86,7 @@ export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProp
               fileInputRef.current?.click()
             }}
           >
-            Choose Files
+            {t('addProperty.photosStep.chooseFiles')}
           </Button>
         </div>
       </div>
@@ -128,9 +130,7 @@ export function PhotosStep({ formData, updateFormData, touched }: PhotosStepProp
 
       <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
         <p className="text-sm text-[#1a1a1a]">
-          <strong>Tip:</strong> Properties with 5+ high-quality photos
-          get 40% more views. Include photos of living areas,
-          bedrooms, kitchen, bathroom, and exterior.
+          {t('addProperty.photosStep.tip')}
         </p>
       </div>
     </div>

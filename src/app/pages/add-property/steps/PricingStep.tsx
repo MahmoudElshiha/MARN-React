@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../../../components/ui/tooltip'
+import { useTranslation } from 'react-i18next'
 
 interface PricingStepProps {
   formData: PropertyFormData
@@ -19,6 +20,7 @@ interface PricingStepProps {
 }
 
 export function PricingStep({ formData, updateFormData, touched, updateTouched }: PricingStepProps) {
+  const { t } = useTranslation('properties')
   const [localPrice, setLocalPrice] = useState(formData.price)
   const [localDeposit, setLocalDeposit] = useState(formData.deposit)
 
@@ -46,13 +48,13 @@ export function PricingStep({ formData, updateFormData, touched, updateTouched }
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-        Pricing Configuration
+        {t('addProperty.pricingStep.title')}
       </h2>
 
       <div className="bg-white rounded-2xl p-6 space-y-6">
         <div className="flex items-center gap-2 mb-4">
           <h3 className="font-semibold text-[#1a1a1a] mb-0">
-            Rental Pricing <span className="text-red-500">*</span>
+            {t('addProperty.pricingStep.rentalPricing')} <span className="text-red-500">*</span>
           </h3>
           <TooltipProvider>
             <Tooltip>
@@ -60,7 +62,7 @@ export function PricingStep({ formData, updateFormData, touched, updateTouched }
                 <HelpCircle className="w-4 h-4 text-[#4a5565] cursor-pointer hover:text-[#3A6EA5] transition-colors" />
               </TooltipTrigger>
               <TooltipContent className="max-w-75">
-                <p>Set a price for the property based on the lease duration selected in the Availability step.</p>
+                <p>{t('addProperty.pricingStep.tooltipText')}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -72,14 +74,14 @@ export function PricingStep({ formData, updateFormData, touched, updateTouched }
               htmlFor="price"
               className="text-[#1a1a1a] mb-2 block"
             >
-              Rent Price
+              {t('addProperty.pricingStep.rentPrice')}
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
               <Input
                 id="price"
                 type="number"
-                placeholder="2800"
+                placeholder={t('addProperty.pricingStep.pricePlaceholder', { defaultValue: '2800' })}
                 className={rentInputClass}
                 value={localPrice}
                 onChange={(e) => setLocalPrice(e.target.value)}
@@ -99,14 +101,14 @@ export function PricingStep({ formData, updateFormData, touched, updateTouched }
             htmlFor="deposit"
             className="text-[#1a1a1a] mb-2 block"
           >
-            Security Deposit
+            {t('addProperty.pricingStep.securityDeposit')}
           </Label>
           <div className="relative">
             <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
             <Input
               id="deposit"
               type="number"
-              placeholder="2800"
+              placeholder={t('addProperty.pricingStep.pricePlaceholder', { defaultValue: '2800' })}
               className="pl-12 rounded-xl bg-white border-[#3A6EA5]/20"
               value={localDeposit}
               onChange={(e) => setLocalDeposit(e.target.value)}
@@ -121,7 +123,7 @@ export function PricingStep({ formData, updateFormData, touched, updateTouched }
 
       <div className="bg-white rounded-2xl p-6">
         <h3 className="font-semibold text-[#1a1a1a] mb-4">
-          Utilities Included
+          {t('addProperty.pricingStep.utilitiesIncluded')}
         </h3>
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -141,9 +143,9 @@ export function PricingStep({ formData, updateFormData, touched, updateTouched }
               />
               <label
                 htmlFor={utility}
-                className="ml-3 text-[#1a1a1a] cursor-pointer"
+                className="ms-3 text-[#1a1a1a] cursor-pointer"
               >
-                {utility}
+                {t(`addProperty.pricingStep.utilities.${utility}`)}
               </label>
             </div>
           ))}

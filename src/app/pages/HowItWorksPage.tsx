@@ -12,82 +12,76 @@ import {
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 
 export function HowItWorksPage() {
+  const { t, i18n } = useTranslation('pages')
   const tenantSteps = [
     {
       icon: Search,
-      title: 'Search & Filter',
-      description:
-        'Browse thousands of verified listings with advanced filters for location, price, amenities, and roommate preferences.',
+      title: t('howItWorks.forTenants.steps.search'),
+      description: t('howItWorks.forTenants.steps.searchDesc'),
     },
     {
       icon: CheckCircle,
-      title: 'Schedule Tours',
-      description:
-        'Book virtual or in-person property tours at your convenience. View detailed photos and 3D walkthroughs.',
+      title: t('howItWorks.forTenants.steps.tours'),
+      description: t('howItWorks.forTenants.steps.toursDesc'),
     },
     {
       icon: MessageSquare,
-      title: 'Connect & Chat',
-      description:
-        'Message property owners and potential roommates directly. Get answers to all your questions instantly.',
+      title: t('howItWorks.forTenants.steps.connect'),
+      description: t('howItWorks.forTenants.steps.connectDesc'),
     },
     {
       icon: Home,
-      title: 'Book & Move In',
-      description:
-        'Complete your application online, sign the lease digitally, and pay securely. Move into your new home!',
+      title: t('howItWorks.forTenants.steps.book'),
+      description: t('howItWorks.forTenants.steps.bookDesc'),
     },
   ]
 
   const ownerSteps = [
     {
       icon: Upload,
-      title: 'List Your Property',
-      description:
-        'Create a detailed listing with photos, descriptions, and amenities. Set your price and availability.',
+      title: t('howItWorks.forOwners.steps.list'),
+      description: t('howItWorks.forOwners.steps.listDesc'),
     },
     {
       icon: Users,
-      title: 'Screen Tenants',
-      description:
-        'Review verified tenant profiles, background checks, and references. Choose the best match for your property.',
+      title: t('howItWorks.forOwners.steps.screen'),
+      description: t('howItWorks.forOwners.steps.screenDesc'),
     },
     {
       icon: MessageSquare,
-      title: 'Communicate',
-      description:
-        'Chat with interested tenants, schedule tours, and answer questions through our secure messaging platform.',
+      title: t('howItWorks.forOwners.steps.communicate'),
+      description: t('howItWorks.forOwners.steps.communicateDesc'),
     },
     {
       icon: DollarSign,
-      title: 'Manage & Earn',
-      description:
-        'Accept payments, handle maintenance requests, and track your earnings all from one dashboard.',
+      title: t('howItWorks.forOwners.steps.manage'),
+      description: t('howItWorks.forOwners.steps.manageDesc'),
     },
   ]
 
   const features = [
     {
       icon: CheckCircle,
-      title: 'Verified Listings',
-      description: 'All properties are verified for authenticity and accuracy.',
+      title: t('howItWorks.features.verifiedListings'),
+      description: t('howItWorks.features.verifiedListingsDesc'),
     },
     {
       icon: Shield,
-      title: 'Secure Payments',
-      description: 'End-to-end encrypted payment processing for your safety.',
+      title: t('howItWorks.features.securePayments'),
+      description: t('howItWorks.features.securePaymentsDesc'),
     },
     {
       icon: Users,
-      title: 'Compatibility Matching',
-      description: 'Smart algorithm matches you with compatible roommates.',
+      title: t('howItWorks.features.compatibility'),
+      description: t('howItWorks.features.compatibilityDesc'),
     },
     {
       icon: TrendingUp,
-      title: 'Market Insights',
-      description: 'Access real-time market data and pricing analytics.',
+      title: t('howItWorks.features.insights'),
+      description: t('howItWorks.features.insightsDesc'),
     },
   ]
 
@@ -103,15 +97,10 @@ export function HowItWorksPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-6xl font-bold text-[#1a1a1a] mb-6">
-              How{' '}
-              <span className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] bg-clip-text text-transparent">
-                MARN
-              </span>{' '}
-              Works
+              {t('howItWorks.title')}
             </h1>
             <p className="text-xl text-[#4a5565]">
-              Your complete guide to finding the perfect rental or listing your
-              property
+              {t('howItWorks.subtitle')}
             </p>
           </motion.div>
         </div>
@@ -122,10 +111,10 @@ export function HowItWorksPage() {
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
-              For Tenants
+              {t('howItWorks.forTenants.title')}
             </h2>
             <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
-              Find your perfect home in four simple steps
+              {t('howItWorks.forTenants.subtitle')}
             </p>
           </div>
 
@@ -168,7 +157,7 @@ export function HowItWorksPage() {
               className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl px-8 py-6 shadow-lg shadow-[#3A6EA5]/30"
               asChild
             >
-              <Link to="/search">Start Searching</Link>
+              <Link to="/search">{t('howItWorks.forTenants.startSearching')}</Link>
             </Button>
           </div>
         </div>
@@ -184,10 +173,10 @@ export function HowItWorksPage() {
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
-              For Property Owners
+              {t('howItWorks.forOwners.title')}
             </h2>
             <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
-              List and manage your properties with ease
+              {t('howItWorks.forOwners.subtitle')}
             </p>
           </div>
 
@@ -230,7 +219,7 @@ export function HowItWorksPage() {
               className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl px-8 py-6 shadow-lg shadow-[#3A6EA5]/30"
               asChild
             >
-              <Link to="/add-property">List Your Property</Link>
+              <Link to="/add-property">{t('howItWorks.forOwners.listProperty')}</Link>
             </Button>
           </div>
         </div>
@@ -241,10 +230,10 @@ export function HowItWorksPage() {
         <div className="max-w-[1440px] mx-auto px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-[#1a1a1a] mb-4">
-              Why Choose MARN?
+              {t('howItWorks.whyChoose.title')}
             </h2>
             <p className="text-lg text-[#4a5565] max-w-2xl mx-auto">
-              Features that make your rental experience seamless
+              {t('howItWorks.whyChoose.subtitle')}
             </p>
           </div>
 
@@ -280,10 +269,10 @@ export function HowItWorksPage() {
       <section className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] py-20">
         <div className="max-w-[1440px] mx-auto px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Get Started?
+            {t('howItWorks.cta.title')}
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Join thousands of happy users who found their perfect rental match
+            {t('howItWorks.cta.subtitle')}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Button
@@ -291,14 +280,14 @@ export function HowItWorksPage() {
               className="bg-white text-[#3A6EA5] hover:bg-white/90 rounded-2xl px-8 py-6"
               asChild
             >
-              <Link to="/signup">Create Account</Link>
+              <Link to="/signup">{t('howItWorks.cta.createAccount')}</Link>
             </Button>
             <Button
               size="lg"
               className="bg-[#1e3a5f] text-white hover:bg-[#13253c] shadow-lg shadow-[#1e3a5f]/20 rounded-2xl px-8 py-6"
               asChild
             >
-              <Link to="/contact">Contact Us</Link>
+              <Link to="/contact">{t('howItWorks.cta.contactUs')}</Link>
             </Button>
           </div>
         </div>

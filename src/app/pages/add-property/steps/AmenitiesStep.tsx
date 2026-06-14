@@ -1,5 +1,6 @@
 import { Label } from '../../../components/ui/label'
 import { Checkbox } from '../../../components/ui/checkbox'
+import { useTranslation } from 'react-i18next'
 import { PROPERTY_AMENITIES as AMENITIES } from '@/constants/property'
 import { PropertyFormData } from '../types'
 
@@ -9,6 +10,7 @@ interface AmenitiesStepProps {
 }
 
 export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) {
+  const { t } = useTranslation('properties')
   const toggleAmenity = (amenity: string) => {
     const isSelected = formData.selectedAmenities.includes(amenity)
     const newAmenities = isSelected
@@ -31,7 +33,7 @@ export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-        Select Amenities
+        {t('addProperty.amenitiesStep.title')}
       </h2>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -50,7 +52,7 @@ export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) 
               }`}
             >
               <Icon className="w-8 h-8 mx-auto mb-3" />
-              <p className="text-sm font-medium">{amenity.name}</p>
+              <p className="text-sm font-medium">{t(`addProperty.amenitiesStep.items.${amenity.name}`, { defaultValue: amenity.name })}</p>
             </button>
           )
         })}
@@ -58,7 +60,7 @@ export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) 
 
       <div className="bg-white rounded-2xl p-6">
         <Label className="text-[#1a1a1a] mb-3 block">
-          Additional Amenities
+          {t('addProperty.amenitiesStep.additionalAmenities')}
         </Label>
         <div className="space-y-3">
           {[
@@ -80,9 +82,9 @@ export function AmenitiesStep({ formData, updateFormData }: AmenitiesStepProps) 
               />
               <label
                 htmlFor={amenity}
-                className="ml-3 text-[#1a1a1a] cursor-pointer"
+                className="ms-3 text-[#1a1a1a] cursor-pointer"
               >
-                {amenity}
+                {t(`addProperty.amenitiesStep.items.${amenity}`)}
               </label>
             </div>
           ))}

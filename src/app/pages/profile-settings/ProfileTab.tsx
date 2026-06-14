@@ -16,8 +16,10 @@ import { getImageUrl } from '@/constants/assets'
 import { useProfile } from '@/hooks/useProfile'
 import { EnumSelect } from '../../components/EnumSelect'
 import { HttpError } from '@/services/httpErrors'
+import { useTranslation } from 'react-i18next'
 
 export function ProfileTab() {
+  const { t } = useTranslation('profile')
   const { data: profileResponse, isLoading, update } = useProfile()
   const apiProfile = profileResponse?.data
 
@@ -101,7 +103,7 @@ export function ProfileTab() {
               className="w-full rounded-xl border-[#3A6EA5]/20 hover:bg-[#3A6EA5]/8 hover:border-[#3A6EA5]/40 hover:text-[#3A6EA5] transition-colors"
               asChild
             >
-              <span>{avatarFile ? avatarFile.name : 'Upload New Photo'}</span>
+              <span>{avatarFile ? avatarFile.name : t('profileTab.uploadPhoto')}</span>
             </Button>
           </label>
         </CardContent>
@@ -111,17 +113,17 @@ export function ProfileTab() {
       <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-2xl text-[#1a1a1a]">
-            Personal Information
+            {t('profileTab.cardTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="firstName" className="text-[#1a1a1a] mb-2 block">
-                First Name
+                {t('profileTab.firstName')}
               </Label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <User className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="firstName"
                   value={profileData.firstName}
@@ -132,7 +134,7 @@ export function ProfileTab() {
                     })
                     clearFieldError('FirstName')
                   }}
-                  className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.FirstName ? 'border-red-400' : ''}`}
+                  className={`ps-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.FirstName ? 'border-red-400' : ''}`}
                 />
               </div>
               {fieldErrors.FirstName && (
@@ -144,10 +146,10 @@ export function ProfileTab() {
 
             <div>
               <Label htmlFor="lastName" className="text-[#1a1a1a] mb-2 block">
-                Last Name
+                {t('profileTab.lastName')}
               </Label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <User className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="lastName"
                   value={profileData.lastName}
@@ -155,7 +157,7 @@ export function ProfileTab() {
                     setProfileData({ ...profileData, lastName: e.target.value })
                     clearFieldError('LastName')
                   }}
-                  className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.LastName ? 'border-red-400' : ''}`}
+                  className={`ps-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.LastName ? 'border-red-400' : ''}`}
                 />
               </div>
               {fieldErrors.LastName && (
@@ -167,29 +169,29 @@ export function ProfileTab() {
 
             <div>
               <Label htmlFor="email" className="text-[#1a1a1a] mb-2 block">
-                Email Address
+                {t('profileTab.emailAddress')}
               </Label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <Mail className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="email"
                   type="email"
                   value={profileData.email}
                   disabled
-                  className="pl-12 bg-[#9CBBDC]/20 rounded-xl border-[#3A6EA5]/20 cursor-not-allowed"
+                  className="ps-12 bg-[#9CBBDC]/20 rounded-xl border-[#3A6EA5]/20 cursor-not-allowed"
                 />
               </div>
               <p className="text-xs text-[#4a5565] mt-1">
-                Email cannot be changed
+                {t('profileTab.emailCannotChange')}
               </p>
             </div>
 
             <div>
               <Label htmlFor="phone" className="text-[#1a1a1a] mb-2 block">
-                Phone Number
+                {t('profileTab.phoneNumber')}
               </Label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                <Phone className="absolute start-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
                 <Input
                   id="phone"
                   value={profileData.phone}
@@ -197,7 +199,7 @@ export function ProfileTab() {
                     setProfileData({ ...profileData, phone: e.target.value })
                     clearFieldError('PhoneNumber')
                   }}
-                  className={`pl-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.PhoneNumber ? 'border-red-400' : ''}`}
+                  className={`ps-12 bg-white rounded-xl border-[#3A6EA5]/20 ${fieldErrors.PhoneNumber ? 'border-red-400' : ''}`}
                 />
               </div>
               {fieldErrors.PhoneNumber && (
@@ -212,7 +214,7 @@ export function ProfileTab() {
                 htmlFor="dateOfBirth"
                 className="text-[#1a1a1a] mb-2 block"
               >
-                Date of Birth
+                {t('profileTab.dateOfBirth')}
               </Label>
               <Input
                 id="dateOfBirth"
@@ -237,7 +239,7 @@ export function ProfileTab() {
             <div>
               <EnumSelect
                 id="country"
-                label="Country"
+                label={t('profileTab.country')}
                 endpoint="countries"
                 value={profileData.country}
                 onChange={(value) => {
@@ -255,7 +257,7 @@ export function ProfileTab() {
             <div>
               <EnumSelect
                 id="gender"
-                label="Gender"
+                label={t('profileTab.gender')}
                 endpoint="genders"
                 value={profileData.gender}
                 onChange={(value) => {
@@ -273,7 +275,7 @@ export function ProfileTab() {
             <div>
               <EnumSelect
                 id="language"
-                label="Language"
+                label={t('profileTab.language')}
                 endpoint="languages"
                 value={profileData.language}
                 onChange={(value) => {
@@ -291,7 +293,7 @@ export function ProfileTab() {
 
           <div>
             <Label htmlFor="bio" className="text-[#1a1a1a] mb-2 block">
-              Bio
+              {t('profileTab.bio')}
             </Label>
             <Textarea
               id="bio"
@@ -301,7 +303,7 @@ export function ProfileTab() {
                 clearFieldError('Bio')
               }}
               className={`bg-white rounded-xl border-[#3A6EA5]/20 min-h-[120px] ${fieldErrors.Bio ? 'border-red-400' : ''}`}
-              placeholder="Tell us about yourself..."
+              placeholder={t('profileTab.bioPlaceholder')}
             />
             {fieldErrors.Bio && (
               <p className="text-xs text-red-500 mt-1">{fieldErrors.Bio}</p>
@@ -313,7 +315,7 @@ export function ProfileTab() {
               variant="outline"
               className="rounded-xl border-[#3A6EA5]/20"
             >
-              Cancel
+              {t('profileTab.cancel')}
             </Button>
             <Button
               disabled={update.isPending}
@@ -346,7 +348,7 @@ export function ProfileTab() {
                         }
                         setFieldErrors(flat)
                       } else {
-                        toast.error('Failed to update profile.')
+                        toast.error(t('profileTab.toasts.failed'))
                       }
                     },
                   },
@@ -354,7 +356,7 @@ export function ProfileTab() {
               }}
               className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             >
-              {update.isPending ? 'Saving…' : 'Save Changes'}
+              {update.isPending ? t('profileTab.saveChanges') : t('profileTab.saveChanges')}
             </Button>
           </div>
         </CardContent>

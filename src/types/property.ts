@@ -1,4 +1,4 @@
-export type PropertyStatus = 'available' | 'rented' | 'pending' | 'inactive'
+export type PropertyStatus = 'available' | 'rented' | 'pending' | 'inactive' | 'Occupied' | 'occupied'
 
 export type PropertyType =
   | 'Apartment'
@@ -6,7 +6,7 @@ export type PropertyType =
   | 'Room'
   | 'SharedRoom'
 
-export type RentalUnit = 'Daily' | 'Monthly' | 'Yearly'
+export type RentalUnit = 'Daily' | 'Monthly' | 'Quarterly' | 'Yearly'
 
 export type SortBy =
   | 'Newest'
@@ -67,14 +67,20 @@ export interface Property {
   title: string
   description?: string
   type: PropertyType
+  typeDisplayName?: string
   status: PropertyStatus
   location: string
   address?: string
   city?: string
+  cityDisplayName?: string
   governorate?: string
+  governorateDisplayName?: string
+  zipCode?: string
   price: number
   beds: number
+  bedrooms?: number
   baths: number
+  bathrooms?: number
   guests: number
   area?: number
   squareMeters?: number
@@ -82,9 +88,12 @@ export interface Property {
   /** Primary listing image — first entry of images or standalone thumbnail. */
   image?: string
   imagePath?: string
-  amenities: string[]
+  amenities: any[]
+  rules?: any[]
   rating?: number
+  averageRating?: number
   reviews?: number
+  ratingsCount?: number
   ownerId?: string
   ownerName?: string
   ownerAvatarUrl?: string
@@ -93,10 +102,19 @@ export interface Property {
   hostName?: string
   hostProfileImage?: string
   hostBio?: string
+  hostedBy?: {
+    id: string
+    fullName: string
+    profileImage: string
+    averageRating: number
+    propertiesCount: number
+    bio: string
+  }
   propertiesCount?: number
   featured?: boolean
   isShared?: boolean
   rentalUnit?: RentalUnit
+  rentalUnitDisplayName?: string
   latitude?: number
   longitude?: number
   createdAt?: string
@@ -104,10 +122,18 @@ export interface Property {
   isSaved?: boolean
   maxOccupants?: number
   currentOccupantsCount?: number
+  isActive?: boolean
+  availability?: boolean
   tenants?: Array<{
     id: string
     fullName: string
     profileImage?: string
+  }>
+  activeRenters?: Array<{
+    id: string
+    name: string
+    profilePhoto?: string
+    matchingPercentage?: number
   }>
 }
 
@@ -121,10 +147,12 @@ export interface SearchProperty {
   bathrooms: number
   maxOccupants: number
   type: PropertyType
+  typeDisplayName?: string
   averageRating: number
   ratings: number
   price: number
   rentalUnit: RentalUnit
+  rentalUnitDisplayName?: string
   isSaved: boolean
 }
 

@@ -93,6 +93,9 @@ export const propertyService = {
   getPropertyById: (id: string) =>
     apiClient.get<ApiResponse<Property>>(`/api/Property/${id}`),
 
+  getAdminPropertyById: (id: string) =>
+    apiClient.get<ApiResponse<any>>(`/api/Admin/stats/properties/${id}`),
+
   createProperty: (data: FormData) =>
     apiClient.post<ApiResponse<Property>>('/api/Property/add', data),
 

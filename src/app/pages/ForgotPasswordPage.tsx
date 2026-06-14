@@ -7,8 +7,10 @@ import { Link } from 'react-router'
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { authService } from '@/services/authService'
+import { useTranslation } from 'react-i18next'
 
 export function ForgotPasswordPage() {
+  const { t, i18n } = useTranslation('auth')
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -20,7 +22,7 @@ export function ForgotPasswordPage() {
       setError(
         err instanceof Error
           ? err.message
-          : 'Something went wrong. Please try again.',
+          : t('forgotPassword.somethingWentWrong'),
       )
     },
   })
@@ -58,19 +60,19 @@ export function ForgotPasswordPage() {
             </motion.div>
 
             <h2 className="text-3xl font-bold text-[#1a1a1a] mb-4">
-              Check Your Email
+              {t('forgotPassword.success.title')}
             </h2>
             <p className="text-[#4a5565] mb-2">
-              We've sent password reset instructions to:
+              {t('forgotPassword.success.sentTo')}
             </p>
             <p className="text-[#3A6EA5] font-semibold mb-6">{email}</p>
             <p className="text-sm text-[#4a5565] mb-8">
-              Didn't receive the email? Check your spam folder or{' '}
+              {t('forgotPassword.success.didntReceive')} {' '}
               <button
                 onClick={() => setIsSubmitted(false)}
                 className="text-[#3A6EA5] hover:underline font-semibold"
               >
-                try again
+                {t('forgotPassword.success.tryAgain')}
               </button>
             </p>
 
@@ -79,7 +81,7 @@ export function ForgotPasswordPage() {
               className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6"
               asChild
             >
-              <Link to="/login">Back to Login</Link>
+              <Link to="/login">{t('forgotPassword.backToLogin')}</Link>
             </Button>
           </div>
         </motion.div>
@@ -104,17 +106,16 @@ export function ForgotPasswordPage() {
             <span className="text-4xl font-bold text-[#1a1a1a]">MARN</span>
           </div>
           <h1 className="text-5xl font-bold text-[#1a1a1a] mb-6">
-            Forgot Your Password?
+            {t('forgotPassword.heading')}
           </h1>
           <p className="text-xl text-[#4a5565] mb-8">
-            No worries! Enter your email address and we'll send you instructions
-            to reset your password.
+            {t('forgotPassword.subtitle')}
           </p>
           <div className="space-y-4">
             {[
-              'Reset link valid for 24 hours',
-              'Secure password recovery',
-              'Access restored in minutes',
+              t('forgotPassword.features.linkValid'),
+              t('forgotPassword.features.secureRecovery'),
+              t('forgotPassword.features.accessRestored'),
             ].map((feature, index) => (
               <motion.div
                 key={feature}
@@ -142,16 +143,16 @@ export function ForgotPasswordPage() {
               to="/login"
               className="inline-flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors mb-6"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Login</span>
+              <ArrowLeft className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
+              <span>{t('forgotPassword.backToLogin')}</span>
             </Link>
 
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2">
-                Reset Your Password
+                {t('forgotPassword.formTitle')}
               </h2>
               <p className="text-[#4a5565]">
-                Enter your email to receive reset instructions
+                {t('forgotPassword.formSubtitle')}
               </p>
             </div>
 
@@ -159,10 +160,10 @@ export function ForgotPasswordPage() {
               {/* Email Input */}
               <div>
                 <Label htmlFor="email" className="text-[#1a1a1a] mb-2 block">
-                  Email Address
+                  {t('forgotPassword.emailLabel')}
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]" />
+                  <Mail className={`absolute ${i18n.language === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-5 h-5 text-[#4a5565]`} />
                   <Input
                     id="email"
                     type="email"
@@ -172,10 +173,10 @@ export function ForgotPasswordPage() {
                       setEmail(e.target.value)
                       setError('')
                     }}
-                    className={`pl-12 pr-4 py-6 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${
+                    className={`${i18n.language === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-6 bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 focus:border-[#3A6EA5] ${
                       error ? 'border-red-500 focus:border-red-500' : ''
                     }`}
-                    placeholder="you@example.com"
+                    placeholder={t('forgotPassword.emailPlaceholder')}
                     disabled={isLoading}
                   />
                 </div>
@@ -192,10 +193,10 @@ export function ForgotPasswordPage() {
                 {isLoading ? (
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Sending...
+                    {t('forgotPassword.sending')}
                   </div>
                 ) : (
-                  'Send Reset Link'
+                  t('forgotPassword.sendResetLink')
                 )}
               </Button>
             </form>
@@ -203,12 +204,12 @@ export function ForgotPasswordPage() {
             {/* Help Text */}
             <div className="mt-8 p-4 bg-[#F2F4F6] rounded-2xl border border-[#3A6EA5]/20">
               <p className="text-sm text-[#4a5565] text-center">
-                Remember your password?{' '}
+                {t('forgotPassword.rememberPassword')} {' '}
                 <Link
                   to="/login"
                   className="text-[#3A6EA5] hover:underline font-semibold"
                 >
-                  Sign in
+                  {t('forgotPassword.signIn')}
                 </Link>
               </p>
             </div>

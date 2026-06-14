@@ -31,6 +31,8 @@ import { getImageUrl } from '@/constants/assets'
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog'
 import { NotificationUI, mapNotification, getIcon, getBgColor } from './NotificationsPage'
+import { useTranslation } from 'react-i18next'
+import { PaymentModal } from '@/components/PaymentModal'
 
 function formatDate(iso: string | undefined | null) {
   if (!iso) return '—'
@@ -52,6 +54,7 @@ function timeAgo(iso: string | undefined | null) {
 }
 
 export function TenantDashboard() {
+  const { t, i18n } = useTranslation('dashboard')
   const { user } = useAuth()
   const { data: dashboardRes, isLoading: dashboardLoading, refetch: refetchDashboard } =
     useRenterDashboard()
@@ -61,10 +64,44 @@ export function TenantDashboard() {
   const dashboard = dashboardRes?.data
   const unreadNotifications = dashboard?.notifications?.filter((n: any) => !n.isRead) || []
 
-  const [showAllPayments, setShowAllPayments] = useState(false)
-  const [showAllContracts, setShowAllContracts] = useState(false)
+  const [contractsLimit, setContractsLimit] = useState(4)
+  const [paymentsLimit, setPaymentsLimit] = useState(5)
+  const [pendingLimit, setPendingLimit] = useState(3)
+  const [recommendedLimit, setRecommendedLimit] = useState(4)
+  const [notificationsLimit, setNotificationsLimit] = useState(5)
   const [selectedNotification, setSelectedNotification] = useState<NotificationUI | null>(null)
   const [payingScheduleId, setPayingScheduleId] = useState<number | null>(null)
+  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null)
+
+  const renderPaginationButtons = (
+    currentLimit: number,
+    setLimit: React.Dispatch<React.SetStateAction<number>>,
+    totalItems: number,
+    baseLimit: number
+  ) => {
+    if (totalItems <= baseLimit) return null;
+    
+    if (currentLimit < totalItems) {
+      return (
+        <div className="flex justify-center gap-3 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setLimit(prev => prev + baseLimit)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+            {t('tenant.showMore', { defaultValue: 'Show More' })}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setLimit(totalItems)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+            {t('tenant.showAll', { defaultValue: 'Show All' })}
+          </Button>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="flex justify-center mt-4">
+        <Button variant="outline" size="sm" onClick={() => setLimit(baseLimit)} className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white">
+          {t('tenant.showLess', { defaultValue: 'Show Less' })}
+        </Button>
+      </div>
+    );
+  };
 
   useEffect(() => {
     if (!dashboardLoading && window.location.hash) {
@@ -88,6 +125,8 @@ export function TenantDashboard() {
       const res = await paymentService.startPayment({ paymentScheduleId: scheduleId })
       if (res.data?.url) {
         window.location.href = res.data.url
+      } else if (typeof res.data === 'string' && res.data.includes('_secret_')) {
+        setPaymentClientSecret(res.data)
       } else {
         toast.success('Payment started successfully!')
       }
@@ -141,9 +180,9 @@ export function TenantDashboard() {
               </div>
             ) : (
               <>
-                <h1 className="text-4xl font-bold text-[#1a1a1a]">My Dashboard</h1>
+                <h1 className="text-4xl font-bold text-[#1a1a1a]">{t('tenant.title')}</h1>
                 <p className="text-[#4a5565] mt-2">
-                  Welcome back, {profileRes?.data?.firstName || user?.firstName || 'there'}!
+                  {t('tenant.welcome', { name: profileRes?.data?.firstName || user?.firstName || 'there' })}
                 </p>
               </>
             )}
@@ -168,7 +207,7 @@ export function TenantDashboard() {
             className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
             asChild
           >
-            <Link to="/search">Find Properties</Link>
+            <Link to="/search">{t('tenant.findProperties')}</Link>
           </Button>
         </div>
 
@@ -181,8 +220,8 @@ export function TenantDashboard() {
                 <div>
                   <p className="text-white/80 mb-1">
                     {dashboard?.nextPayment?.date && new Date(dashboard.nextPayment.date).getFullYear() > 1970
-                      ? 'Next Payment Due'
-                      : 'Current Rent'}
+                      ? t('tenant.cards.nextPaymentDue')
+                      : t('tenant.cards.currentRent')}
                   </p>
                   {dashboardLoading ? (
                     <Skeleton className="h-8 w-28 bg-white/30" />
@@ -192,12 +231,12 @@ export function TenantDashboard() {
                         {dashboard?.nextPayment?.date && new Date(dashboard.nextPayment.date).getFullYear() > 1970
                           ? formatDate(dashboard.nextPayment.date)
                           : dashboard?.nextPayment?.amount
-                            ? `${(dashboard.nextPayment.amount).toLocaleString()} EGP`
-                            : 'No active rental'}
+                            ? i18n.language === 'ar' ? `${(dashboard.nextPayment.amount).toLocaleString()} ${t('currency', { ns: 'common' })}` : `${t('currency', { ns: 'common' })} ${(dashboard.nextPayment.amount).toLocaleString()}`
+                            : t('tenant.cards.noActiveRental')}
                       </p>
                       {dashboard?.nextPayment?.date && new Date(dashboard.nextPayment.date).getFullYear() > 1970 && (
                         <p className="text-sm text-white/70 mt-1">
-                          {(dashboard.nextPayment.amount ?? 0).toLocaleString()} EGP for {dashboard.nextPayment.propertyTitle || 'Property'}
+                          {i18n.language === 'ar' ? `${(dashboard.nextPayment.amount ?? 0).toLocaleString()} ${t('currency', { ns: 'common' })}` : `${t('currency', { ns: 'common' })} ${(dashboard.nextPayment.amount ?? 0).toLocaleString()}`} for {dashboard.nextPayment.propertyTitle || 'Property'}
                         </p>
                       )}
                     </>
@@ -213,7 +252,7 @@ export function TenantDashboard() {
             <CardContent className="p-6">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <Home className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-base">Active Rentals</span>
+                <span className="text-base">{t('tenant.cards.activeRentals')}</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
                 {dashboardLoading ? '…' : (dashboard?.activeRentalsCount ?? 0)}
@@ -227,7 +266,7 @@ export function TenantDashboard() {
               <Link to="/saved" className="block w-full h-full">
                 <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                   <Heart className="w-5 h-5 text-[#3A6EA5]" />
-                  <span className="text-base">Saved Properties</span>
+                  <span className="text-base">{t('tenant.cards.savedProperties')}</span>
                 </CardTitle>
                 <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
                   {dashboardLoading
@@ -243,7 +282,7 @@ export function TenantDashboard() {
             <CardContent className="p-6">
               <CardTitle className="flex items-center gap-2 text-[#1a1a1a]">
                 <Bell className="w-5 h-5 text-[#3A6EA5]" />
-                <span className="text-base">Notifications</span>
+                <span className="text-base">{t('tenant.cards.notifications')}</span>
               </CardTitle>
               <p className="text-3xl font-bold text-[#3A6EA5] mt-2">
                 {dashboardLoading
@@ -261,7 +300,7 @@ export function TenantDashboard() {
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Active Rentals
+                  {t('tenant.activeRentals.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -269,12 +308,12 @@ export function TenantDashboard() {
                   <Skeleton className="h-36 w-full rounded-2xl" />
                 ) : !activeRental ? (
                   <div className="text-center py-8 text-[#4a5565]">
-                    No active rentals.{' '}
+                    {t('tenant.activeRentals.none')}{' '}
                     <Link
                       to="/search"
                       className="text-[#3A6EA5] hover:underline"
                     >
-                      Find a property.
+                      {t('tenant.activeRentals.findProperty')}
                     </Link>
                   </div>
                 ) : (
@@ -308,7 +347,7 @@ export function TenantDashboard() {
                                   {rental.propertyTitle || rental.propertyName}
                                 </Link>
                                 <p className="text-sm text-[#6a7282] mt-1">
-                                  {rental.propertyAddress || 'Cairo, Egypt'}
+                                  {rental.propertyAddress || 'New Damietta, Egypt'}
                                 </p>
                               </div>
                               <div className="flex gap-2">
@@ -356,7 +395,7 @@ export function TenantDashboard() {
                                   {rental.paymentFrequencyDisplayName || rental.paymentFrequency || 'Monthly'} Rent
                                 </p>
                                 <p className="text-xl font-bold text-[#3A6EA5]">
-                                  {(rental.rentAmount ?? rental.monthlyRent ?? rental.price ?? 50000).toLocaleString()} EGP
+                                  {i18n.language === 'ar' ? `${(rental.rentAmount ?? rental.monthlyRent ?? rental.price ?? 50000).toLocaleString()} ${t('currency', { ns: 'common' })}` : `${t('currency', { ns: 'common' })} ${(rental.rentAmount ?? rental.monthlyRent ?? rental.price ?? 50000).toLocaleString()}`}
                                 </p>
                               </div>
                               <div className="flex gap-2">
@@ -366,7 +405,7 @@ export function TenantDashboard() {
                                   onClick={() => handlePayRent(rental.nextPaymentScheduleId)}
                                   className="rounded-full border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white px-5 h-9"
                                 >
-                                  {payingScheduleId === rental.nextPaymentScheduleId ? 'Processing...' : 'Pay Rent'}
+                                  {payingScheduleId === rental.nextPaymentScheduleId ? t('tenant.activeRentals.processing') : t('tenant.activeRentals.payRent')}
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -395,7 +434,7 @@ export function TenantDashboard() {
                 <Card className="rounded-3xl shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-2xl text-[#1a1a1a]">
-                      Pending Requests
+                      {t('tenant.pendingRequests.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -403,7 +442,7 @@ export function TenantDashboard() {
                       <Skeleton className="h-24 w-full rounded-2xl" />
                     ) : (
                       <div className="space-y-3">
-                        {dashboard!.pendingBookingRequests.map((req, i) => (
+                        {dashboard!.pendingBookingRequests.slice(0, pendingLimit).map((req, i) => (
                           <div
                             key={req.bookingRequestId || req.id || req.propertyId || i}
                             className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between"
@@ -443,6 +482,7 @@ export function TenantDashboard() {
                             </Badge>
                           </div>
                         ))}
+                        {renderPaginationButtons(pendingLimit, setPendingLimit, dashboard!.pendingBookingRequests.length, 3)}
                       </div>
                     )}
                   </CardContent>
@@ -453,7 +493,7 @@ export function TenantDashboard() {
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  Recommended for You
+                  {t('tenant.recommended.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -464,11 +504,11 @@ export function TenantDashboard() {
                   </div>
                 ) : recommendedProperties.length === 0 ? (
                   <p className="text-[#4a5565] text-center py-8">
-                    No recommendations available.
+                    {t('tenant.recommended.none')}
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {recommendedProperties.map((property, i) => (
+                    {recommendedProperties.slice(0, recommendedLimit).map((property, i) => (
                       <PropertyCard
                         key={property.id || i}
                         id={property.id.toString()}
@@ -482,10 +522,15 @@ export function TenantDashboard() {
                         beds={property.bedrooms}
                         baths={property.bathrooms}
                         guests={property.maxOccupants}
+                        rentalUnitDisplayName={property.rentalUnitDisplayName}
+                        rentalUnit={(property as any).rentalUnit}
                       />
                     ))}
                   </div>
                 )}
+                {!recommendedLoading && recommendedProperties.length > 0 && 
+                  renderPaginationButtons(recommendedLimit, setRecommendedLimit, recommendedProperties.length, 4)
+                }
               </CardContent>
             </Card>
           </div>
@@ -496,7 +541,7 @@ export function TenantDashboard() {
             <Card className="rounded-3xl shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a]">
-                  Recent Notifications
+                  {t('tenant.recentNotifications.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -507,11 +552,11 @@ export function TenantDashboard() {
                   </div>
                 ) : !unreadNotifications.length ? (
                   <p className="text-sm text-[#6a7282] text-center py-6">
-                    No unread notifications.
+                    {t('tenant.recentNotifications.none')}
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {unreadNotifications.slice(0, 3).map((n, i) => (
+                    {unreadNotifications.slice(0, notificationsLimit).map((n, i) => (
                       <div
                         key={n.id || i}
                         onClick={() => handleNotificationClick(n)}
@@ -537,15 +582,7 @@ export function TenantDashboard() {
                         </div>
                       </div>
                     ))}
-                    {unreadNotifications.length > 3 && (
-                      <Button
-                        variant="outline"
-                        className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white mt-2"
-                        asChild
-                      >
-                        <Link to="/notifications">Show All</Link>
-                      </Button>
-                    )}
+                    {renderPaginationButtons(notificationsLimit, setNotificationsLimit, unreadNotifications.length, 5)}
                   </div>
                 )}
               </CardContent>
@@ -557,7 +594,7 @@ export function TenantDashboard() {
                 <Card id="contracts" className="rounded-3xl shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-xl text-[#1a1a1a]">
-                      Contracts
+                      {t('tenant.contracts.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -565,15 +602,15 @@ export function TenantDashboard() {
                       <Skeleton className="h-20 w-full rounded-2xl" />
                     ) : (
                       <div className="space-y-3">
-                        {dashboard!.allContracts.slice(0, 3).map((c, i) => (
+                        {dashboard!.allContracts.slice(0, contractsLimit).map((c, i) => (
                           <div
                             key={c.contractId || c.id || i}
                             className="bg-[#f5f7fa] rounded-2xl p-4"
                           >
                             <div className="flex items-center justify-between mb-1">
-                              <p className="text-sm font-medium text-[#1a1a1a]">
+                              <Link to={`/contract/${c.contractId || c.id}`} className="text-sm font-medium text-[#3A6EA5] hover:underline">
                                 {c.propertyTitle || c.propertyName}
-                              </p>
+                              </Link>
                               <div className="flex gap-2">
                                 {c.isAnchoredToBlockChain && (
                                   <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 text-[10px] px-1.5 py-0 h-5">
@@ -627,15 +664,7 @@ export function TenantDashboard() {
                             </div>
                           </div>
                         ))}
-                        {dashboard!.allContracts.length > 3 && (
-                          <Button
-                            variant="outline"
-                            className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white mt-2"
-                            onClick={() => setShowAllContracts(true)}
-                          >
-                            Show All Contracts
-                          </Button>
-                        )}
+                        {renderPaginationButtons(contractsLimit, setContractsLimit, dashboard!.allContracts.length, 4)}
                       </div>
                     )}
                   </CardContent>
@@ -648,7 +677,7 @@ export function TenantDashboard() {
                 <Card className="rounded-3xl shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-xl text-[#1a1a1a]">
-                      Saved Properties
+                      {t('tenant.savedPropertiesCard.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -691,7 +720,7 @@ export function TenantDashboard() {
                             className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                             asChild
                           >
-                            <Link to="/saved">View all saved properties</Link>
+                            <Link to="/saved">{t('tenant.savedPropertiesCard.viewAll')}</Link>
                           </Button>
                         </div>
                       </>
@@ -706,7 +735,7 @@ export function TenantDashboard() {
                 <Card className="rounded-3xl shadow-lg">
                   <CardHeader>
                     <CardTitle className="text-xl text-[#1a1a1a]">
-                      Payment History
+                      {t('tenant.paymentHistory.title')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -717,7 +746,7 @@ export function TenantDashboard() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {dashboard!.paidPayments.slice(0, 3).map((p, i) => {
+                        {dashboard!.paidPayments.slice(0, paymentsLimit).map((p, i) => {
                           const contract = dashboard!.allContracts?.find(c => c.contractId === p.contractId)
                           return (
                             <div
@@ -729,7 +758,7 @@ export function TenantDashboard() {
                                   {p.propertyTitle || p.propertyName || contract?.propertyTitle || 'Property'}
                                 </p>
                                 <p className="text-sm font-bold text-green-600 flex-shrink-0">
-                                  {(p.amountPaid ?? p.amount ?? p.price ?? 0).toLocaleString()} EGP
+                                  {i18n.language === 'ar' ? `${(p.amountPaid ?? p.amount ?? p.price ?? 0).toLocaleString()} ${t('currency', { ns: 'common' })}` : `${t('currency', { ns: 'common' })} ${(p.amountPaid ?? p.amount ?? p.price ?? 0).toLocaleString()}`}
                                 </p>
                               </div>
                               <p className="text-xs text-[#6a7282] flex items-center gap-1">
@@ -739,15 +768,7 @@ export function TenantDashboard() {
                             </div>
                           )
                         })}
-                        {dashboard!.paidPayments.length > 3 && (
-                          <Button
-                            variant="outline"
-                            className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white mt-2"
-                            onClick={() => setShowAllPayments(true)}
-                          >
-                            Show All
-                          </Button>
-                        )}
+                        {renderPaginationButtons(paymentsLimit, setPaymentsLimit, dashboard!.paidPayments.length, 5)}
                       </div>
                     )}
                   </CardContent>
@@ -758,113 +779,7 @@ export function TenantDashboard() {
         </div>
       </div>
 
-      <Dialog open={showAllPayments} onOpenChange={setShowAllPayments}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Payment History</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {dashboard?.paidPayments?.length ? (
-              dashboard.paidPayments.map((payment, i) => (
-                <div
-                  key={payment.id || payment.transactionId || i}
-                  className="flex items-center justify-between p-4 rounded-xl border border-gray-100"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-[#1a1a1a]">
-                      {payment.propertyTitle || payment.propertyName}
-                    </p>
-                    <p className="text-xs text-[#6a7282] mt-1">
-                      {formatDate(payment.paidAt)}
-                    </p>
-                  </div>
-                  <p className="text-sm font-semibold text-green-600">
-                    E£{(payment.amountPaid ?? payment.amount ?? payment.price ?? 0).toLocaleString()}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-[#6a7282] text-center">No payment history.</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      <Dialog open={showAllContracts} onOpenChange={setShowAllContracts}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>All Contracts</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {dashboard?.allContracts?.length ? (
-              dashboard.allContracts.map((c, i) => (
-                <div
-                  key={c.contractId || c.id || i}
-                  className="bg-[#f5f7fa] rounded-2xl p-4"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-medium text-[#1a1a1a]">
-                      {c.propertyTitle || c.propertyName}
-                    </p>
-                    <div className="flex gap-2">
-                      {c.isAnchoredToBlockChain && (
-                        <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 h-5 text-[10px] px-1.5">
-                          {c.anchoringStatusDisplayName || c.anchoringStatus || 'Anchored'}
-                        </Badge>
-                      )}
-                      <Badge
-                        variant="outline"
-                        className={
-                          c.contractStatus === 'Active' || c.status === 'Active'
-                            ? 'text-green-700 border-green-300 bg-green-50'
-                            : c.contractStatus === 'Pending' || c.status === 'Pending'
-                              ? 'text-yellow-700 border-yellow-300 bg-yellow-50'
-                              : 'text-[#6a7282] border-[#d1d5db]'
-                        }
-                      >
-                        {c.contractStatusDisplayName || c.contractStatus || 'Active'}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-xs text-[#6a7282]">
-                    Expires: {formatDate(c.expiryDate || c.endDate)}
-                  </p>
-                  <div className="flex gap-2 mt-3">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5]"
-                      onClick={() => {
-                        if (c.documentUrl) {
-                          window.open(c.documentUrl, '_blank')
-                        } else {
-                          toast.success(`Downloading contract ${c.contractId || c.id}`)
-                        }
-                      }}
-                    >
-                      <Download className="w-3 h-3 mr-1" />
-                      Download
-                    </Button>
-                    {(c.contractStatus === 'Pending' || c.status === 'Pending') && (
-                      <Button
-                        size="sm"
-                        className="rounded-xl bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white"
-                        onClick={() => handleSignContract((c.contractId || c.id)!)}
-                        disabled={signingContractId === (c.contractId || c.id)}
-                      >
-                        <PenTool className="w-3 h-3 mr-1" />
-                        {signingContractId === (c.contractId || c.id) ? 'Signing...' : 'Sign'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-[#6a7282] text-center">No contracts available.</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Notification Details Modal */}
       <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
@@ -894,6 +809,15 @@ export function TenantDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <PaymentModal 
+        clientSecret={paymentClientSecret} 
+        onClose={() => setPaymentClientSecret(null)} 
+        onSuccess={() => {
+          setPaymentClientSecret(null)
+          refetchDashboard?.()
+        }} 
+      />
     </div>
   )
 }

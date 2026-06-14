@@ -25,8 +25,10 @@ import { adminService } from '@/services/adminService'
 import { toast } from 'sonner'
 import { RevenueStatsView } from './RevenueStatsView'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
+import { useTranslation } from 'react-i18next'
 
 export function ReportsTab() {
+  const { t, i18n } = useTranslation('admin')
   const [reportScope, setReportScope] = useState<string>('Overview')
   const [reportFormat, setReportFormat] = useState<string>('Pdf')
   const [reportPeriod, setReportPeriod] = useState<string>('ThisMonth')
@@ -53,7 +55,7 @@ export function ReportsTab() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch {
-      toast.error('Failed to download report')
+      toast.error(t('toasts.reportDownloadFailed'))
     }
   }
 
@@ -72,13 +74,13 @@ export function ReportsTab() {
 
   return (
     <div className="space-y-6">
-      <Tabs value={activeSubTab} onValueChange={handleSubTabChange} className="w-full">
+      <Tabs value={activeSubTab} onValueChange={handleSubTabChange} className="w-full" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
         <TabsList className="bg-[#E5E9F0] border-none rounded-xl p-1 mb-6">
           <TabsTrigger value="reports" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
-            Generated Reports
+            {t('generateReport.generatedReports')}
           </TabsTrigger>
           <TabsTrigger value="revenue" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
-            Revenue Stats
+            {t('revenue.title')}
           </TabsTrigger>
         </TabsList>
 
@@ -86,19 +88,19 @@ export function ReportsTab() {
           <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
             <CardHeader>
               <CardTitle className="text-2xl text-[#1a1a1a]">
-                Analytics Reports
+                {t('reports.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Generate Action */}
               <div className="bg-white rounded-2xl p-6 space-y-4">
                 <h3 className="font-semibold text-[#1a1a1a]">
-                  Generate New Report
+                  {t('generateReport.title')}
                 </h3>
                 <div className="grid sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
                     <p className="text-xs text-[#4a5565] font-medium">
-                      Scope
+                      {t('generateReport.scope')}
                     </p>
                     <Select
                       value={reportScope}
@@ -108,20 +110,20 @@ export function ReportsTab() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Overview">Overview</SelectItem>
-                        <SelectItem value="Users">Users</SelectItem>
+                        <SelectItem value="Overview">{t('generateReport.scopeOptions.overview')}</SelectItem>
+                        <SelectItem value="Users">{t('generateReport.scopeOptions.users')}</SelectItem>
                         <SelectItem value="Properties">
-                          Properties
+                          {t('generateReport.scopeOptions.properties')}
                         </SelectItem>
-                        <SelectItem value="Contracts">Contracts</SelectItem>
-                        <SelectItem value="Revenue">Revenue</SelectItem>
-                        <SelectItem value="Full">Full</SelectItem>
+                        <SelectItem value="Contracts">{t('generateReport.scopeOptions.contracts')}</SelectItem>
+                        <SelectItem value="Revenue">{t('generateReport.scopeOptions.revenue')}</SelectItem>
+                        <SelectItem value="Full">{t('generateReport.scopeOptions.full')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-[#4a5565] font-medium">
-                      Format
+                      {t('generateReport.format')}
                     </p>
                     <Select
                       value={reportFormat}
@@ -131,14 +133,14 @@ export function ReportsTab() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Pdf">PDF</SelectItem>
-                        <SelectItem value="Csv">CSV</SelectItem>
+                        <SelectItem value="Pdf">{t('generateReport.formatOptions.pdf')}</SelectItem>
+                        <SelectItem value="Csv">{t('generateReport.formatOptions.csv')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-[#4a5565] font-medium">
-                      Period
+                      {t('generateReport.period')}
                     </p>
                     <Select
                       value={reportPeriod}
@@ -149,11 +151,11 @@ export function ReportsTab() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="ThisMonth">
-                          This Month
+                          {t('generateReport.periodOptions.thisMonth')}
                         </SelectItem>
-                        <SelectItem value="ThisYear">This Year</SelectItem>
-                        <SelectItem value="AllTime">All Time</SelectItem>
-                        <SelectItem value="Custom">Custom Range</SelectItem>
+                        <SelectItem value="ThisYear">{t('generateReport.periodOptions.thisYear')}</SelectItem>
+                        <SelectItem value="AllTime">{t('generateReport.periodOptions.allTime')}</SelectItem>
+                        <SelectItem value="Custom">{t('generateReport.periodOptions.custom')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -162,7 +164,7 @@ export function ReportsTab() {
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <p className="text-xs text-[#4a5565] font-medium">
-                        From
+                        {t('generateReport.from')}
                       </p>
                       <Input
                         type="date"
@@ -173,7 +175,7 @@ export function ReportsTab() {
                     </div>
                     <div className="space-y-1">
                       <p className="text-xs text-[#4a5565] font-medium">
-                        To
+                        {t('generateReport.to')}
                       </p>
                       <Input
                         type="date"
@@ -220,15 +222,15 @@ export function ReportsTab() {
                 >
                   <TrendingUp className="w-5 h-5 mr-2" />
                   {generateReport.isPending
-                    ? 'Generating…'
-                    : 'Generate Report'}
+                    ? t('generateReport.generating')
+                    : t('generateReport.generate')}
                 </Button>
               </div>
 
               {/* Generated Reports List */}
               <div className="bg-white rounded-2xl p-6">
                 <h3 className="font-semibold text-[#1a1a1a] mb-4">
-                  Generated Reports
+                  {t('generateReport.generatedReports')}
                 </h3>
                 {analyticsReportsLoading ? (
                   <div className="space-y-3">
@@ -241,7 +243,7 @@ export function ReportsTab() {
                   </div>
                 ) : analyticsReports.length === 0 ? (
                   <p className="text-center text-[#4a5565] py-6">
-                    No reports generated yet.
+                    {t('generateReport.noReports')}
                   </p>
                 ) : (
                   <div className="space-y-3 overflow-y-auto max-h-[600px] pr-2">
@@ -305,7 +307,7 @@ export function ReportsTab() {
                         className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                         onClick={() => setPageSize((p) => p + 20)}
                       >
-                        Show More
+                        {t('table.showMore')}
                       </Button>
                     )}
                   </div>

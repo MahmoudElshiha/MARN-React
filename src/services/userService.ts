@@ -203,18 +203,25 @@ export interface PublicProfile {
   email: string
   profileImage: string | null
   accountStatus: string
+  accountStatusDisplayName?: string
   bio: string | null
   isOwner: boolean
   roommatePreferencesEnabled: boolean
   smoking: boolean | null
   pets: boolean | null
   sleepSchedule: string | null
+  sleepScheduleDisplayName?: string
   educationLevel: string | null
+  educationLevelDisplayName?: string
   fieldOfStudy: string | null
+  fieldOfStudyDisplayName?: string
   noiseTolerance: number | null
   guestsFrequency: string | null
+  guestsFrequencyDisplayName?: string
   workSchedule: string | null
+  workScheduleDisplayName?: string
   sharingLevel: string | null
+  sharingLevelDisplayName?: string
   budgetRangeMin: number | null
   budgetRangeMax: number | null
   
@@ -222,13 +229,21 @@ export interface PublicProfile {
   memberSince?: string
   dateOfBirth?: string | null
   gender?: string | null
+  genderDisplayName?: string
   country?: string | null
+  countryDisplayName?: string
 
   // Owner Data
   averageRating?: number
   ratingsCount?: number
   ownedPropertiesCount?: number
   ownedProperties?: PublicProfileProperty[]
+
+  // Match Data (when viewed by another user)
+  matchingPercentage?: number | null
+  topMatchingTraits?: string[]
+  mismatchedTraits?: string[]
+  dealbreakersFound?: string[]
 }
 
 export interface Toggle2FAPayload {
@@ -247,28 +262,28 @@ export interface UpdateLegalProfilePayload {
 export interface UpdateRoommatePreferencesPayload {
   userId: string
   roommatePreferencesEnabled: boolean
-  governorate: string | null
-  searchStatus: string | null
-  smoking: boolean | null
+  governorate?: string | null
+  searchStatus?: string | null
+  smoking?: boolean | null
   smokingImportance: number
-  pets: boolean | null
+  pets?: boolean | null
   petsImportance: number
-  sleepSchedule: string | null
+  sleepSchedule?: string | null
   sleepImportance: number
-  educationLevel: string | null
+  educationLevel?: string | null
   educationImportance: number
-  fieldOfStudy: string | null
+  fieldOfStudy?: string | null
   fieldOfStudyImportance: number
-  noiseTolerance: number | null
+  noiseTolerance?: number | null
   noiseToleranceImportance: number
-  guestsFrequency: string | null
+  guestsFrequency?: string | null
   guestsFrequencyImportance: number
-  workSchedule: string | null
+  workSchedule?: string | null
   workScheduleImportance: number
-  sharingLevel: string | null
+  sharingLevel?: string | null
   sharingLevelImportance: number
-  budgetRangeMin: number | null
-  budgetRangeMax: number | null
+  budgetRangeMin?: number | null
+  budgetRangeMax?: number | null
   budgetImportance: number
 }
 
@@ -472,4 +487,7 @@ export const userService = {
 
   submitReport: (payload: { reportableType: string; reportableTargetId: string; reason: string }) =>
     apiClient.post<ApiResponse<any>>('/api/Reports', payload),
+
+  deleteProfile: () =>
+    apiClient.delete<void>('/api/Profile/delete-profile'),
 }

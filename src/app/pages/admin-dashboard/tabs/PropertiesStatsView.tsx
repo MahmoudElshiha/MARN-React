@@ -16,10 +16,10 @@ import { useAdminProperties, useRestoreProperty, useDeleteProperty } from '@/hoo
 import { getStatusBadge, TruncatedTooltip } from '../utils'
 import type { AdminPropertyStatsItem } from '@/services/adminService'
 import { Link } from 'react-router-dom'
-
-
+import { useTranslation } from 'react-i18next'
 
 export function PropertiesStatsView() {
+  const { t } = useTranslation('admin')
   const [pageSize, setPageSize] = useState(20)
   const [search, setSearch] = useState('')
   const [activeSearch, setActiveSearch] = useState('')
@@ -83,11 +83,11 @@ export function PropertiesStatsView() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              All Properties
+              {t('tabs.properties')}
             </CardTitle>
             <div className="flex w-full sm:w-auto items-center gap-2">
               <Input
-                placeholder="Search properties..."
+                placeholder={t('properties.search')}
                 className="w-full sm:w-64 bg-white rounded-xl border-[#3A6EA5]/20"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -113,7 +113,7 @@ export function PropertiesStatsView() {
                 className={statusFilter === status ? 'bg-[#3A6EA5] text-white rounded-xl' : 'rounded-xl border-[#3A6EA5]/20 text-[#4a5565]'}
                 onClick={() => setStatusFilter(status)}
               >
-                {status}
+                {status === 'All' ? t('tabs.all') : status === 'Pending' ? t('verifications.pending') : status === 'Verified' ? t('properties.verified') : t('properties.declined')}
               </Button>
             ))}
           </div>
@@ -122,20 +122,20 @@ export function PropertiesStatsView() {
           <TooltipProvider delayDuration={1000}>
             {!isLoading && properties.length === 0 ? (
               <div className="py-10 text-center text-[#4a5565]">
-                No properties found.
+                {t('properties.noProperties')}
               </div>
             ) : (
               <div className="overflow-x-auto overflow-y-scroll max-h-[600px] border-b border-[#3A6EA5]/20">
                 <table className="w-full relative" style={{ tableLayout: 'fixed' }}>
                   <thead className="sticky top-0 bg-[#F2F4F6] z-10">
                     <tr className="border-b border-[#3A6EA5]/20">
-                      <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '22%' }}>Property</th>
-                      <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>Owner</th>
-                      <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '12%' }}>Type</th>
-                      <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>Location</th>
-                      <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '13%' }}>Submitted Date</th>
-                      <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '12%' }}>Status</th>
-                      <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '11%' }}>Actions</th>
+                      <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '22%' }}>{t('table.property')}</th>
+                      <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('table.owner')}</th>
+                      <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '12%' }}>{t('table.type')}</th>
+                      <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('table.location')}</th>
+                      <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '13%' }}>{t('table.submitted')}</th>
+                      <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '12%' }}>{t('table.status')}</th>
+                      <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '11%' }}>{t('table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -180,7 +180,7 @@ export function PropertiesStatsView() {
                             {getStatusBadge(item.statusDisplayName)}
                             {item.isDeleted && (
                               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-600">
-                                Deleted
+                                {t('userModal.deleted')}
                               </span>
                             )}
                           </div>
@@ -190,13 +190,13 @@ export function PropertiesStatsView() {
                             <div className="flex gap-2 justify-start">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Link to={item.isDeleted ? '#' : `/property/${item.propertyId}`} className={item.isDeleted ? 'pointer-events-none' : ''}>
+                                  <Link to={item.isDeleted ? '#' : `/admin/property/${item.propertyId}`} className={item.isDeleted ? 'pointer-events-none' : ''}>
                                     <Button size="icon" variant="outline" className={`rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0 ${item.isDeleted ? 'opacity-50' : ''}`} disabled={item.isDeleted}>
                                       <Eye className="w-4 h-4" />
                                     </Button>
                                   </Link>
                                 </TooltipTrigger>
-                                <TooltipContent><p>View Details</p></TooltipContent>
+                                <TooltipContent><p>{t('table.view')}</p></TooltipContent>
                               </Tooltip>
                               {item.isDeleted ? (
                                 <Tooltip>
@@ -211,7 +211,7 @@ export function PropertiesStatsView() {
                                       <RotateCcw className="w-4 h-4" />
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent><p>Restore</p></TooltipContent>
+                                  <TooltipContent><p>{t('table.restore')}</p></TooltipContent>
                                 </Tooltip>
                               ) : (
                                 <Tooltip>
@@ -226,7 +226,7 @@ export function PropertiesStatsView() {
                                       <Trash2 className="w-4 h-4" />
                                     </Button>
                                   </TooltipTrigger>
-                                  <TooltipContent><p>Delete (Soft)</p></TooltipContent>
+                                  <TooltipContent><p>{t('table.delete')}</p></TooltipContent>
                                 </Tooltip>
                               )}
                             </div>
@@ -250,7 +250,7 @@ export function PropertiesStatsView() {
                   className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                   onClick={() => setPageSize((p) => p + 20)}
                 >
-                  Show More
+                  {t('table.showMore')}
                 </Button>
               )}
             </div>
@@ -266,10 +266,10 @@ export function PropertiesStatsView() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-              Confirm Action
+              {t('confirmModal.title')}
             </h3>
             <p className="text-[#4a5565] mb-6">
-              Are you sure you want to {pendingAction} this property?
+              {t('confirmModal.message', { action: pendingAction })}
             </p>
             <div className="flex gap-4">
               <Button
@@ -281,14 +281,14 @@ export function PropertiesStatsView() {
                   setPendingAction(null)
                 }}
               >
-                Cancel
+                {t('confirmModal.cancel')}
               </Button>
               <Button
                 className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl"
                 disabled={deletePropertyMutation.isPending || restorePropertyMutation.isPending}
                 onClick={confirmAction}
               >
-                {deletePropertyMutation.isPending || restorePropertyMutation.isPending ? 'Processing…' : 'Confirm'}
+                {deletePropertyMutation.isPending || restorePropertyMutation.isPending ? t('confirmModal.processing') : t('confirmModal.confirm')}
               </Button>
             </div>
           </motion.div>

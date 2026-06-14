@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useParams, useNavigate } from 'react-router'
+import { useTranslation } from 'react-i18next'
+import { motion } from 'motion/react'
 import {
   Star,
   MapPin,
@@ -28,6 +30,7 @@ import {
   ShieldAlert,
   MoreVertical,
   Edit,
+  Mail,
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
@@ -66,6 +69,7 @@ import {
   usePropertyComments,
   useAddPropertyFeedback,
   useUpdatePropertyComment,
+  useDeletePropertyFeedback,
 } from '@/hooks/usePropertyFeedback'
 import { useSubmitReport } from '@/hooks/useConversations'
 import { useAddBookingRequest } from '@/hooks/useBookingRequests'
@@ -99,6 +103,7 @@ const AMENITY_ICONS: Record<string, React.ElementType> = {
 }
 
 export function PropertyDetailsPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -124,12 +129,34 @@ export function PropertyDetailsPage() {
   }, [property, user, id, navigate]);
   const { data: ratingSummaryData } = usePropertyRatingSummary(id)
   const ratingSummary = ratingSummaryData?.data
-  
+
   const { data: commentsData } = usePropertyComments(id)
-  const comments = commentsData?.data?.items || []
-  
+  const rawComments = commentsData?.data?.items || property?.comments || []
+  const displayComments = useMemo(() => {
+    return [...rawComments].sort((a, b) => {
+      const isAUser = (a.commenterId || a.userId) === user?.id;
+      const isBUser = (b.commenterId || b.userId) === user?.id;
+      if (isAUser && !isBUser) return -1;
+      if (!isAUser && isBUser) return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [rawComments, user?.id]);
+
   const addFeedbackMutation = useAddPropertyFeedback()
   const updateComment = useUpdatePropertyComment()
+  const deleteFeedback = useDeletePropertyFeedback()
+
+  const [deleteCommentId, setDeleteCommentId] = useState<number | null>(null)
+
+  const [showExistingReviewModal, setShowExistingReviewModal] = useState(false)
+  const [existingUserComment, setExistingUserComment] = useState<any>(null)
+
+  const userExistingComment = useMemo(() => {
+    if (!user?.id) return null
+    return displayComments.find(
+      (c: any) => (c.commenterId || c.userId) === user.id
+    ) || null
+  }, [displayComments, user?.id])
 
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
   const [editContent, setEditContent] = useState('')
@@ -150,9 +177,9 @@ export function PropertyDetailsPage() {
 
   const bookMutation = useAddBookingRequest()
   const submitReport = useSubmitReport()
-  
+
   const [newCommentText, setNewCommentText] = useState('')
-  const [newCommentRating, setNewCommentRating] = useState(5)
+  const [newCommentRating, setNewCommentRating] = useState(0)
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [reportReason, setReportReason] = useState('')
@@ -161,19 +188,34 @@ export function PropertyDetailsPage() {
   const [selectedReviewToReport, setSelectedReviewToReport] = useState<any>(null)
   const [reviewReportReason, setReviewReportReason] = useState('')
 
-  const handleSubmitComment = () => {
-    if (!newCommentText.trim() || !id) return
+  const [isTenantModalOpen, setIsTenantModalOpen] = useState(false)
+  const [selectedTenant, setSelectedTenant] = useState<any>(null)
+
+  const handleTenantClick = (tenant: any) => {
+    setSelectedTenant(tenant)
+    setIsTenantModalOpen(true)
+  }
+
+  const executeSubmitComment = () => {
     setIsSubmittingComment(true)
+    const finalRating = newCommentRating === 0 ? 5 : newCommentRating;
+    
     addFeedbackMutation.mutate({
-      propertyId: id,
+      propertyId: id!,
       commentData: { content: newCommentText },
-      ratingData: { rating: newCommentRating }
+      ratingData: { rating: finalRating },
+      _optimistic: {
+        userId: user!.id,
+        displayName: (user as any)?.fullName || (user as any)?.displayName || user!.email || 'You',
+        profileImage: (user as any)?.profileImage || (user as any)?.profilePhoto,
+      },
     }, {
       onSuccess: () => {
         setNewCommentText('')
-        setNewCommentRating(5)
+        setNewCommentRating(0)
         setIsSubmittingComment(false)
         toast.success('Review added successfully!')
+        window.location.reload()
       },
       onError: (error: any) => {
         setIsSubmittingComment(false)
@@ -183,9 +225,22 @@ export function PropertyDetailsPage() {
     })
   }
 
+  const handleSubmitComment = () => {
+    if (!newCommentText.trim() || !id) return
+
+    // Check if user already has a review locally
+    if (userExistingComment) {
+      setExistingUserComment(userExistingComment)
+      setShowExistingReviewModal(true)
+      return
+    }
+
+    executeSubmitComment()
+  }
+
   const handleReportSubmit = () => {
     if (!id || !reportReason.trim()) return
-    
+
     submitReport.mutate(
       {
         reportableType: 'Property',
@@ -207,7 +262,7 @@ export function PropertyDetailsPage() {
 
   const handleReviewReportSubmit = () => {
     if (!selectedReviewToReport || !reviewReportReason.trim()) return
-    
+
     const commentTargetId = selectedReviewToReport.commentId || selectedReviewToReport.id || ''
     const targetUserId = selectedReviewToReport.userId || selectedReviewToReport.authorId || '';
 
@@ -233,19 +288,19 @@ export function PropertyDetailsPage() {
 
   const isShared = property?.isShared || property?.type === 'SharedRoom' || property?.type === 'Room'
   const maxOccupants = property?.maxOccupants || property?.guests || 1
-  const currentOccupantsCount = property?.currentOccupantsCount || property?.tenants?.length || 0
+  const currentOccupantsCount = property?.currentOccupantsCount || property?.activeRenters?.length || 0
   const hasSpace = currentOccupantsCount < maxOccupants
   const isAvailable = property?.status === 'available' || property?.availability === true
   const isInactive = property?.status === 'inactive' || property?.isActive === false
   const canBook = isAvailable || (isShared && hasSpace && !isInactive)
 
-  let unavailableText = 'Property Unavailable'
+  let unavailableText = t('details.unavailable', { ns: 'properties', defaultValue: 'Property Unavailable' })
   const isOccupied = property?.status === 'rented' || property?.status === 'Occupied' || property?.status === 'occupied' || (isShared && !hasSpace) || property?.availability === false
   if (isOccupied) {
-    if (currentOccupantsCount > 0 && maxOccupants > 1) {
-      unavailableText = `Occupied ${currentOccupantsCount}/${maxOccupants}`
+    if (isShared && currentOccupantsCount > 0 && maxOccupants > 1) {
+      unavailableText = t('details.occupiedCount', { ns: 'properties', count: currentOccupantsCount, max: maxOccupants, defaultValue: `Occupied ${currentOccupantsCount}/${maxOccupants}` })
     } else {
-      unavailableText = 'Occupied'
+      unavailableText = t('details.full', { ns: 'properties', defaultValue: 'Full' })
     }
   }
 
@@ -253,7 +308,7 @@ export function PropertyDetailsPage() {
     if (!checkIn) return undefined;
     const num = parseInt(duration, 10) || 1;
     const unit = property?.rentalUnit || 'Monthly';
-    
+
     if (unit === 'Daily') {
       return addDays(checkIn, num);
     } else if (unit === 'Yearly') {
@@ -280,7 +335,7 @@ export function PropertyDetailsPage() {
       toast.error('Please select a move-in date and duration')
       return
     }
-    
+
     let paymentFrequency = 'Monthly';
     if (property?.rentalUnit === 'Daily') paymentFrequency = 'OneTime';
     if (property?.rentalUnit === 'Quarterly') paymentFrequency = 'Quarterly';
@@ -348,10 +403,17 @@ export function PropertyDetailsPage() {
   const effectiveOwnerRating = hostedBy?.averageRating || property?.rating || 4.9
   const effectiveOwnerPropertiesCount = hostedBy?.propertiesCount || property?.propertiesCount || 1
   const effectiveOwnerBio = hostedBy?.bio || property?.ownerBio || property?.hostBio || 'Experienced property manager committed to providing excellent service and ensuring tenant satisfaction.'
+  const effectiveOwnerEmail = hostedBy?.email || property?.ownerEmail || property?.hostEmail || (property as any)?.email
+
+  const copyToClipboard = (text: string) => {
+    if (!text) return
+    navigator.clipboard.writeText(text)
+    toast.success(t('details.copied', { ns: 'properties', defaultValue: 'Copied successfully' }))
+  }
 
   const handleScheduleTour = () => {
     const message = `Hi ${effectiveOwnerName}, I'm interested in "${property?.title || 'this property'}" and would love to schedule a tour.`
-    
+
     const params = new URLSearchParams({
       autoSend: 'true',
       recipientId: effectiveOwnerId,
@@ -401,9 +463,9 @@ export function PropertyDetailsPage() {
   if (isError) {
     return (
       <div className="min-h-screen flex items-center justify-center text-[#4a5565]">
-        Property not found.{' '}
+        {t('details.notFound', { ns: 'properties', defaultValue: 'Property not found.' })}{' '}
         <Link to="/search" className="text-[#3A6EA5] hover:underline ml-1">
-          Back to search
+          {t('details.backToSearch', { ns: 'properties', defaultValue: 'Back to search' })}
         </Link>
       </div>
     )
@@ -418,8 +480,8 @@ export function PropertyDetailsPage() {
             to="/search"
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
-            Back to Search
+            <ChevronLeft className="w-5 h-5 rtl:rotate-180" />
+            {t('details.backToSearch', { ns: 'properties', defaultValue: 'Back to Search' })}
           </Link>
           <div className="flex gap-3">
             <Button
@@ -451,12 +513,12 @@ export function PropertyDetailsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="rounded-xl">
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
                   onClick={() => setIsReportModalOpen(true)}
                 >
-                  <ShieldAlert className="w-4 h-4 mr-2" />
-                  Report Property
+                  <ShieldAlert className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                  {t('details.reportProperty', { ns: 'properties', defaultValue: 'Report Property' })}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -477,22 +539,21 @@ export function PropertyDetailsPage() {
                     len <= 3
                       ? images.map((_, i) => i)
                       : [
-                          ...new Set([
-                            (currentImageIndex - 1 + len) % len,
-                            currentImageIndex,
-                            (currentImageIndex + 1) % len,
-                          ]),
-                        ]
+                        ...new Set([
+                          (currentImageIndex - 1 + len) % len,
+                          currentImageIndex,
+                          (currentImageIndex + 1) % len,
+                        ]),
+                      ]
                   return windowIndices.map((index) => {
                     const isActive = index === currentImageIndex
                     return (
                       <div
                         key={images[index]}
-                        className={`absolute inset-0 transition-opacity duration-300 ${
-                          isActive
-                            ? 'opacity-100 z-10'
-                            : 'opacity-0 z-0 pointer-events-none'
-                        }`}
+                        className={`absolute inset-0 transition-opacity duration-300 ${isActive
+                          ? 'opacity-100 z-10'
+                          : 'opacity-0 z-0 pointer-events-none'
+                          }`}
                         style={isActive ? { willChange: 'opacity' } : undefined}
                       >
                         <ImageWithFallback
@@ -508,7 +569,7 @@ export function PropertyDetailsPage() {
                 })()
               ) : (
                 <div className="w-full h-full bg-[#9CBBDC]/20 flex items-center justify-center text-[#4a5565]">
-                  No images available
+                  {t('details.noImages', { ns: 'properties', defaultValue: 'No images available' })}
                 </div>
               )}
 
@@ -537,8 +598,8 @@ export function PropertyDetailsPage() {
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
                     className={`h-2 rounded-full transition-all ${index === currentImageIndex
-                        ? 'bg-white w-8'
-                        : 'bg-white/50 hover:bg-white/75 w-2'
+                      ? 'bg-white w-8'
+                      : 'bg-white/50 hover:bg-white/75 w-2'
                       }`}
                   />
                 ))}
@@ -582,7 +643,7 @@ export function PropertyDetailsPage() {
                           </span>
                           {property.reviews !== undefined && (
                             <span className="text-[#4a5565]">
-                              ({property.reviews} reviews)
+                              ({property.reviews} {t('details.reviews', { ns: 'properties', defaultValue: 'reviews' })})
                             </span>
                           )}
                         </div>
@@ -594,8 +655,8 @@ export function PropertyDetailsPage() {
                     </span>
                     <span className="text-[#4a5565]">•</span>
                     <span className="text-[#1a1a1a]">
-                      {(property as any)?.bedrooms ?? property?.beds} {((property as any)?.bedrooms ?? property?.beds) === 1 ? 'bed' : 'beds'} • {(property as any)?.bathrooms ?? property?.baths} {((property as any)?.bathrooms ?? property?.baths) === 1 ? 'bath' : 'baths'}
-                      {property?.area ? ` • ${property.area} sq ft` : ''}
+                      {(property as any)?.bedrooms ?? property?.beds} {((property as any)?.bedrooms ?? property?.beds) === 1 ? t('details.bed', { ns: 'properties', defaultValue: 'bed' }) : t('details.beds', { ns: 'properties', defaultValue: 'beds' })} • {(property as any)?.bathrooms ?? property?.baths} {((property as any)?.bathrooms ?? property?.baths) === 1 ? t('details.bath', { ns: 'properties', defaultValue: 'bath' }) : t('details.baths', { ns: 'properties', defaultValue: 'baths' })}
+                      {property?.area ? ` • ${property.area} ${t('details.sqft', { ns: 'properties', defaultValue: 'sq ft' })}` : ''}
                     </span>
                   </div>
                 </>
@@ -613,9 +674,9 @@ export function PropertyDetailsPage() {
             ) : property?.description ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
-                  About This Property
+                  {t('details.aboutProperty', { ns: 'properties', defaultValue: 'About This Property' })}
                 </h2>
-                <p className="text-[#1a1a1a] leading-relaxed">
+                <p dir="auto" className="text-[#1a1a1a] leading-relaxed">
                   {property.description}
                 </p>
               </div>
@@ -625,7 +686,7 @@ export function PropertyDetailsPage() {
             {!isLoading && property?.amenities?.length ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Amenities
+                  {t('details.amenities', { ns: 'properties', defaultValue: 'Amenities' })}
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {property.amenities.map((amenityItem: any) => {
@@ -657,37 +718,35 @@ export function PropertyDetailsPage() {
             ) : null}
 
             {/* Current Tenants */}
-            {!isLoading && property?.tenants && property.tenants.length > 0 && (
+            {!isLoading && property?.activeRenters && property.activeRenters.length > 0 && (
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-semibold text-[#1a1a1a]">
-                    Current Tenants
+                    {t('details.currentTenants', { ns: 'properties', defaultValue: 'Current Tenants' })}
                   </h2>
                   {isShared && (
                     <span className="px-3 py-1 bg-[#3A6EA5]/10 text-[#3A6EA5] rounded-full text-sm font-medium">
-                      {currentOccupantsCount} / {maxOccupants} Occupied
+                      {currentOccupantsCount} / {maxOccupants} {t('details.occupied', { ns: 'properties', defaultValue: 'Occupied' })}
                     </span>
                   )}
                 </div>
-                <div className="space-y-4">
-                  {property.tenants.map(tenant => (
-                    <div key={tenant.id} className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                      <Avatar className="w-12 h-12 border-2 border-white shadow-sm">
-                        <AvatarImage src={tenant.profileImage} />
-                        <AvatarFallback>{tenant.fullName?.slice(0, 2).toUpperCase() || 'T'}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-[#1a1a1a]">{tenant.fullName}</p>
-                        <p className="text-sm text-[#4a5565]">Occupant</p>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-3">
+                  {property.activeRenters.map((tenant: any) => (
+                    <Avatar
+                      key={tenant.id}
+                      className="w-14 h-14 border-2 border-white shadow-sm cursor-pointer hover:ring-2 hover:ring-[#3A6EA5] transition-all"
+                      onClick={() => handleTenantClick(tenant)}
+                    >
+                      <AvatarImage src={tenant.profilePhoto ? getImageUrl(tenant.profilePhoto) : undefined} className="object-cover" />
+                      <AvatarFallback>{tenant.name?.slice(0, 2).toUpperCase() || 'T'}</AvatarFallback>
+                    </Avatar>
                   ))}
                 </div>
                 {isShared && hasSpace && (
                   <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-green-800">
-                      This property allows multiple renters and currently has space available! You can still book a spot.
+                      {t('details.sharedSpaceAvailable', { ns: 'properties', defaultValue: 'This property allows multiple renters and currently has space available! You can still book a spot.' })}
                     </p>
                   </div>
                 )}
@@ -695,7 +754,7 @@ export function PropertyDetailsPage() {
                   <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
                     <ShieldAlert className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-red-800">
-                      This shared property is currently full.
+                      {t('details.sharedSpaceFull', { ns: 'properties', defaultValue: 'This shared property is currently full.' })}
                     </p>
                   </div>
                 )}
@@ -706,7 +765,7 @@ export function PropertyDetailsPage() {
             {!isLoading && (
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  Hosted By
+                  {t('details.hostedBy', { ns: 'properties', defaultValue: 'Hosted By' })}
                 </h2>
                 <div className="flex items-center gap-4 mb-4">
                   <Avatar className="w-16 h-16">
@@ -725,28 +784,39 @@ export function PropertyDetailsPage() {
                     </Link>
                     <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                       <Star className="w-4 h-4 fill-[#3A6EA5] text-[#3A6EA5]" />
-                      <span>{effectiveOwnerRating} rating • {effectiveOwnerPropertiesCount} properties</span>
+                      <span>{effectiveOwnerRating} {t('details.rating', { ns: 'properties', defaultValue: 'rating' })} • {effectiveOwnerPropertiesCount} {t('details.properties', { ns: 'properties', defaultValue: 'properties' })}</span>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
-                    onClick={() => {
-                      const params = new URLSearchParams({
-                        recipientId: effectiveOwnerId,
-                        ownerName: effectiveOwnerName,
-                        propertyId: property?.id || id || '',
-                        propertyName: property?.title || 'Property',
-                        propertyImage: images[0] ? getImageUrl(images[0]) : '',
-                      })
-                      navigate(`/messages?${params.toString()}`)
-                    }}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Message
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      className="rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
+                      onClick={() => {
+                        const params = new URLSearchParams({
+                          recipientId: effectiveOwnerId,
+                          ownerName: effectiveOwnerName,
+                          propertyId: property?.id || id || '',
+                          propertyName: property?.title || 'Property',
+                          propertyImage: images[0] ? getImageUrl(images[0]) : '',
+                        })
+                        navigate(`/messages?${params.toString()}`)
+                      }}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                      {t('details.message', { ns: 'properties', defaultValue: 'Message' })}
+                    </Button>
+                    {effectiveOwnerEmail && (
+                      <button
+                        onClick={() => copyToClipboard(effectiveOwnerEmail)}
+                        className="flex items-center justify-center gap-2 px-4 py-2 cursor-pointer w-full hover:bg-[#f0f4f8] transition-colors rounded-xl text-sm font-medium text-[#3A6EA5] border border-transparent hover:border-[#3A6EA5]/20"
+                      >
+                        <Mail className="w-4 h-4 text-[#3A6EA5]" />
+                        {effectiveOwnerEmail}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <p className="text-[#1a1a1a] mt-4">
+                <p dir="auto" className="text-[#1a1a1a] mt-4">
                   {effectiveOwnerBio}
                 </p>
               </div>
@@ -769,7 +839,7 @@ export function PropertyDetailsPage() {
               {/* Add Review Form */}
               {isAuthenticated ? (
                 <div className="p-4 bg-white rounded-2xl mb-6">
-                  <h4 className="font-semibold text-[#1a1a1a] mb-3">Leave a Review</h4>
+                  <h4 className="font-semibold text-[#1a1a1a] mb-3">{t('details.leaveReview', { ns: 'properties', defaultValue: 'Leave a Review' })}</h4>
                   <div className="flex items-center gap-2 mb-3">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -778,17 +848,16 @@ export function PropertyDetailsPage() {
                         className="hover:scale-110 transition-transform"
                       >
                         <Star
-                          className={`w-6 h-6 ${
-                            star <= newCommentRating
-                              ? 'fill-[#FFB800] text-[#FFB800]'
-                              : 'text-[#4a5565]/30'
-                          }`}
+                          className={`w-6 h-6 ${star <= newCommentRating
+                            ? 'fill-[#FFB800] text-[#FFB800]'
+                            : 'text-[#4a5565]/30'
+                            }`}
                         />
                       </button>
                     ))}
                   </div>
                   <Textarea
-                    placeholder="Share your experience..."
+                    placeholder={t('details.shareExperience', { ns: 'properties', defaultValue: 'Share your experience...' })}
                     value={newCommentText}
                     onChange={(e) => setNewCommentText(e.target.value)}
                     className="mb-3 resize-none bg-[#f5f7fa] border-none"
@@ -799,34 +868,61 @@ export function PropertyDetailsPage() {
                     disabled={isSubmittingComment || !newCommentText.trim()}
                     className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white"
                   >
-                    {isSubmittingComment ? 'Submitting...' : 'Post Review'}
+                    {isSubmittingComment ? t('details.submitting', { ns: 'properties', defaultValue: 'Submitting...' }) : t('details.postReview', { ns: 'properties', defaultValue: 'Post Review' })}
                   </Button>
                 </div>
               ) : (
                 <div className="p-4 bg-white rounded-2xl mb-6 flex flex-col items-center justify-center text-center">
-                  <p className="text-[#4a5565] mb-4">Please log in to leave a review.</p>
+                  <p className="text-[#4a5565] mb-4">{t('details.loginToReview', { ns: 'properties', defaultValue: 'Please log in to leave a review.' })}</p>
                   <Button onClick={() => navigate('/login')} className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">
-                    Login
+                    {t('details.login', { ns: 'common', defaultValue: 'Login' })}
                   </Button>
                 </div>
               )}
 
               <div className="space-y-4">
-                {comments.length > 0 ? (
-                  comments.map((comment: any) => (
+                {displayComments.length > 0 ? (
+                  displayComments.map((comment: any) => {
+                    const isCurrentUser = (comment.commenterId || comment.userId) === user?.id;
+                    const profileImage = comment.commenterProfileImage || comment.userProfileImage;
+                    const displayName = comment.commenterFullName || comment.userDisplayName || 'Guest';
+                    const commentRating = isCurrentUser ? (comment.rating || ratingSummary?.currentUserRating) : comment.rating;
+
+                    return (
                     <div key={comment.commentId} className="p-4 bg-white rounded-2xl">
                       <div className="flex items-start gap-4 mb-3">
                         <Avatar className="w-12 h-12">
-                          {comment.userProfileImage && <AvatarImage src={getImageUrl(comment.userProfileImage)} />}
+                          {profileImage && <AvatarImage src={getImageUrl(profileImage)} />}
                           <AvatarFallback>
-                            {comment.userDisplayName?.slice(0, 2).toUpperCase() || 'U'}
+                            {displayName?.slice(0, 2).toUpperCase() || 'U'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <h4 className="font-semibold text-[#1a1a1a]">
-                              {comment.userDisplayName || 'Guest'}
-                            </h4>
+                            <div className="flex flex-col gap-1">
+                              <h4 className="font-semibold text-[#1a1a1a] flex items-center gap-2">
+                                {displayName}
+                                {isCurrentUser && (
+                                  <span className="text-xs bg-[#3A6EA5]/10 text-[#3A6EA5] px-2 py-0.5 rounded-full font-medium">
+                                    {t('details.yourReview', { ns: 'properties', defaultValue: 'Your review' })}
+                                  </span>
+                                )}
+                              </h4>
+                              {commentRating !== undefined && commentRating > 0 && (
+                                <div className="flex items-center gap-0.5">
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`w-3.5 h-3.5 ${
+                                        i < commentRating
+                                          ? 'fill-[#f59e0b] text-[#f59e0b]'
+                                          : 'fill-gray-200 text-gray-200'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                             <div className="flex items-center gap-3">
                               <span className="text-sm text-[#4a5565]">
                                 {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
@@ -839,28 +935,39 @@ export function PropertyDetailsPage() {
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" className="rounded-xl">
-                                    {comment.userId === user?.id && (
-                                      <DropdownMenuItem 
-                                        className="text-[#1a1a1a] focus:bg-gray-50 cursor-pointer"
+                                    {isCurrentUser ? (
+                                      <>
+                                        <DropdownMenuItem
+                                          className="text-[#1a1a1a] focus:bg-gray-50 cursor-pointer"
+                                          onClick={() => {
+                                            setEditingCommentId(comment.commentId)
+                                            setEditContent(comment.content)
+                                          }}
+                                        >
+                                          <Edit className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                                          {t('details.editReview', { ns: 'properties', defaultValue: 'Edit Review' })}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                                          onClick={() => setDeleteCommentId(comment.commentId)}
+                                          disabled={deleteFeedback.isPending}
+                                        >
+                                          <ShieldAlert className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                                          {t('details.deleteReview', { ns: 'properties', defaultValue: 'Delete Review' })}
+                                        </DropdownMenuItem>
+                                      </>
+                                    ) : (
+                                      <DropdownMenuItem
+                                        className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
                                         onClick={() => {
-                                          setEditingCommentId(comment.commentId)
-                                          setEditContent(comment.content)
+                                          setSelectedReviewToReport(comment)
+                                          setIsReviewReportModalOpen(true)
                                         }}
                                       >
-                                        <Edit className="w-4 h-4 mr-2" />
-                                        Edit Review
+                                        <ShieldAlert className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                                        {t('details.reportReview', { ns: 'properties', defaultValue: 'Report Review' })}
                                       </DropdownMenuItem>
                                     )}
-                                    <DropdownMenuItem 
-                                      className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
-                                      onClick={() => {
-                                        setSelectedReviewToReport(comment)
-                                        setIsReviewReportModalOpen(true)
-                                      }}
-                                    >
-                                      <ShieldAlert className="w-4 h-4 mr-2" />
-                                      Report Review
-                                    </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               )}
@@ -881,7 +988,7 @@ export function PropertyDetailsPage() {
                                   onClick={() => setEditingCommentId(null)}
                                   className="rounded-xl h-8 text-xs"
                                 >
-                                  Cancel
+                                  {t('details.cancel', { ns: 'common', defaultValue: 'Cancel' })}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -889,22 +996,23 @@ export function PropertyDetailsPage() {
                                   disabled={updateComment.isPending}
                                   className="bg-[#3A6EA5] hover:bg-[#2C5580] text-white rounded-xl h-8 text-xs"
                                 >
-                                  Save
+                                  {t('details.save', { ns: 'common', defaultValue: 'Save' })}
                                 </Button>
                               </div>
                             </div>
                           ) : (
-                            <p className="text-[#1a1a1a] text-sm leading-relaxed mt-2">
+                            <p dir="auto" className="text-[#1a1a1a] text-sm leading-relaxed mt-2">
                               {comment.content}
                             </p>
                           )}
                         </div>
                       </div>
                     </div>
-                  ))
+                  );
+                  })
                 ) : (
                   <p className="text-center text-[#4a5565] py-4">
-                    No reviews yet. Be the first to leave one!
+                    {t('details.noReviews', { ns: 'properties', defaultValue: 'No reviews yet. Be the first to leave one!' })}
                   </p>
                 )}
               </div>
@@ -927,9 +1035,9 @@ export function PropertyDetailsPage() {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-2 mb-1">
                         <span className="text-4xl font-bold text-[#3A6EA5]">
-                          {property?.price?.toLocaleString()} EGP
+                          {property?.price?.toLocaleString()} {t('egp', { ns: 'properties', defaultValue: 'EGP' })}
                         </span>
-                        <span className="text-[#4a5565]">/ month</span>
+                        <span className="text-[#4a5565]">/ {t('details.month', { ns: 'properties', defaultValue: 'month' })}</span>
                       </div>
                       {property?.rating !== undefined && (
                         <div className="flex items-center gap-1 text-sm">
@@ -937,7 +1045,7 @@ export function PropertyDetailsPage() {
                           <span className="text-[#1a1a1a]">
                             {property.rating}{' '}
                             {property.reviews !== undefined &&
-                              `(${property.reviews} reviews)`}
+                              `(${property.reviews} ${t('details.reviews', { ns: 'properties', defaultValue: 'reviews' })})`}
                           </span>
                         </div>
                       )}
@@ -947,16 +1055,16 @@ export function PropertyDetailsPage() {
                     <div className="space-y-4 mb-6">
                       <div>
                         <label className="text-sm text-[#1a1a1a] mb-2 block">
-                          Move-in Date
+                          {t('details.moveInDate', { ns: 'properties', defaultValue: 'Move-in Date' })}
                         </label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full justify-start text-left rounded-xl border-[#3A6EA5]/20 hover:bg-white"
+                              className="w-full justify-start text-start rounded-xl border-[#3A6EA5]/20 hover:bg-white"
                             >
                               <Calendar className="mr-2 h-4 w-4 text-[#3A6EA5]" />
-                              {checkIn ? format(checkIn, 'PPP') : 'Select date'}
+                              {checkIn ? format(checkIn, 'PPP') : t('details.selectDate', { ns: 'properties', defaultValue: 'Select date' })}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -971,21 +1079,25 @@ export function PropertyDetailsPage() {
                       </div>
                       <div>
                         <label className="text-sm text-[#1a1a1a] mb-2 block">
-                          Duration
+                          {t('details.duration', { ns: 'properties', defaultValue: 'Duration' })}
                         </label>
                         <Select value={duration} onValueChange={setDuration}>
                           <SelectTrigger className="w-full rounded-xl border-[#3A6EA5]/20 bg-white">
-                            <SelectValue placeholder="Select duration" />
+                            <SelectValue placeholder={t('details.selectDuration', { ns: 'properties', defaultValue: 'Select duration' })} />
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from(
                               { length: property?.rentalUnit === 'Daily' ? 30 : property?.rentalUnit === 'Yearly' ? 5 : 12 },
                               (_, i) => i + 1
                             ).map((num) => {
-                              const label = property?.rentalUnit === 'Daily' ? 'Day' : property?.rentalUnit === 'Yearly' ? 'Year' : 'Month';
+                              const unitLabel = property?.rentalUnit === 'Daily' 
+                                ? t('details.days', { count: num, ns: 'properties', defaultValue: num === 1 ? 'Day' : 'Days' })
+                                : property?.rentalUnit === 'Yearly'
+                                ? t('details.years', { count: num, ns: 'properties', defaultValue: num === 1 ? 'Year' : 'Years' })
+                                : t('details.months', { count: num, ns: 'properties', defaultValue: num === 1 ? 'Month' : 'Months' });
                               return (
                                 <SelectItem key={num} value={num.toString()}>
-                                  {num} {label}{num > 1 ? 's' : ''}
+                                  {num} {unitLabel}
                                 </SelectItem>
                               );
                             })}
@@ -998,29 +1110,29 @@ export function PropertyDetailsPage() {
                     {/* Price Summary */}
                     <div className="space-y-3 mb-6 p-4 bg-white rounded-2xl">
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Monthly rent</span>
-                        <span>{property?.price?.toLocaleString()} EGP</span>
+                        <span>{t('details.monthlyRent', { ns: 'properties', defaultValue: 'Monthly rent' })}</span>
+                        <span>{property?.price?.toLocaleString()} {t('egp', { ns: 'properties', defaultValue: 'EGP' })}</span>
                       </div>
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Security deposit</span>
-                        <span>{property?.price?.toLocaleString()} EGP</span>
+                        <span>{t('details.securityDeposit', { ns: 'properties', defaultValue: 'Security deposit' })}</span>
+                        <span>{property?.price?.toLocaleString()} {t('egp', { ns: 'properties', defaultValue: 'EGP' })}</span>
                       </div>
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>Service fee</span>
+                        <span>{t('details.serviceFee', { ns: 'properties', defaultValue: 'Service fee' })}</span>
                         <span>
                           {Math.round(
                             (property?.price ?? 0) * 0.05,
                           ).toLocaleString()}{' '}
-                          EGP
+                          {t('egp', { ns: 'properties', defaultValue: 'EGP' })}
                         </span>
                       </div>
                       <div className="border-t border-[#3A6EA5]/20 pt-3 flex justify-between font-semibold text-[#1a1a1a]">
-                        <span>Total (First Month)</span>
+                        <span>{t('details.totalFirstMonth', { ns: 'properties', defaultValue: 'Total (First Month)' })}</span>
                         <span className="text-[#3A6EA5]">
                           {Math.round(
                             (property?.price ?? 0) * 2.05,
                           ).toLocaleString()}{' '}
-                          EGP
+                          {t('egp', { ns: 'properties', defaultValue: 'EGP' })}
                         </span>
                       </div>
                     </div>
@@ -1034,12 +1146,12 @@ export function PropertyDetailsPage() {
                       {bookMutation.isPending ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Sending Request...
+                          {t('details.sendingRequest', { ns: 'properties', defaultValue: 'Sending Request...' })}
                         </>
                       ) : !canBook ? (
                         unavailableText
                       ) : (
-                        'Book Now'
+                        t('details.bookNow', { ns: 'properties', defaultValue: 'Book Now' })
                       )}
                     </Button>
 
@@ -1049,11 +1161,11 @@ export function PropertyDetailsPage() {
                       className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                       onClick={handleScheduleTour}
                     >
-                      Schedule Tour
+                      {t('details.scheduleTour', { ns: 'properties', defaultValue: 'Schedule Tour' })}
                     </Button>
 
                     <p className="text-xs text-center text-[#4a5565] mt-4">
-                      You won't be charged yet
+                      {t('details.wontBeChargedYet', { ns: 'properties', defaultValue: "You won't be charged yet" })}
                     </p>
                   </>
                 )}
@@ -1065,12 +1177,11 @@ export function PropertyDetailsPage() {
                   <Users className="w-5 h-5 text-[#3A6EA5] flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-semibold text-[#1a1a1a] mb-1">
-                      Looking for Roommates?
+                      {t('details.lookingForRoommates', { ns: 'properties', defaultValue: 'Looking for Roommates?' })}
                     </h4>
-                    <p className="text-sm text-[#4a5565]">
-                      Use our roommate matching feature to find compatible
-                      housemates
-                    </p>
+                    <Link to="/roommate-matching" className="text-sm text-[#3A6EA5] hover:underline font-medium">
+                      {t('details.roommateFeature', { ns: 'properties', defaultValue: 'Use our roommate matching feature to find compatible housemates' })}
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -1085,14 +1196,14 @@ export function PropertyDetailsPage() {
       }}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Report Property</DialogTitle>
+            <DialogTitle>{t('details.reportProperty', { ns: 'properties', defaultValue: 'Report Property' })}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-[#4a5565] mb-4">
-              Please provide a reason for reporting this property. Our moderation team will review this report shortly.
+              {t('details.reportPropertyReason', { ns: 'properties', defaultValue: 'Please provide a reason for reporting this property. Our moderation team will review this report shortly.' })}
             </p>
             <Textarea
-              placeholder="Reason for report..."
+              placeholder={t('details.reasonForReport', { ns: 'properties', defaultValue: 'Reason for report...' })}
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
               className="min-h-[100px] rounded-xl resize-none"
@@ -1100,10 +1211,10 @@ export function PropertyDetailsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsReportModalOpen(false)} className="rounded-xl">
-              Cancel
+              {t('details.cancel', { ns: 'common', defaultValue: 'Cancel' })}
             </Button>
-            <Button 
-              onClick={handleReportSubmit} 
+            <Button
+              onClick={handleReportSubmit}
               disabled={!reportReason.trim() || submitReport.isPending}
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
@@ -1138,19 +1249,170 @@ export function PropertyDetailsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsReviewReportModalOpen(false)} className="rounded-xl">
-              Cancel
+              {t('details.cancel', { ns: 'common', defaultValue: 'Cancel' })}
             </Button>
-            <Button 
-              onClick={handleReviewReportSubmit} 
+            <Button
+              onClick={handleReviewReportSubmit}
               disabled={!reviewReportReason.trim() || submitReport.isPending}
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Submit Report
+              {t('details.submitReport', { ns: 'properties', defaultValue: 'Submit Report' })}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isTenantModalOpen} onOpenChange={setIsTenantModalOpen}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>{t('details.tenantProfile', { ns: 'properties', defaultValue: 'Tenant Profile' })}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-4">
+            <Link to={`/user/${selectedTenant?.userId || selectedTenant?.id}`} className="flex flex-col items-center hover:opacity-80 transition-opacity">
+              <Avatar className="w-24 h-24 mb-4 border-2 border-transparent hover:border-[#3A6EA5]/20">
+                <AvatarImage src={selectedTenant?.profilePhoto ? getImageUrl(selectedTenant.profilePhoto) : undefined} className="object-cover" />
+                <AvatarFallback>{selectedTenant?.name?.slice(0, 2).toUpperCase() || 'T'}</AvatarFallback>
+              </Avatar>
+              <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2 hover:underline hover:text-[#3A6EA5] transition-colors">{selectedTenant?.name}</h3>
+            </Link>
+            {selectedTenant?.matchingPercentage !== undefined && selectedTenant?.matchingPercentage !== null ? (
+              <div className="px-4 py-2 bg-[#9CBBDC]/20 text-[#3A6EA5] rounded-full text-sm font-medium">
+                {t('details.matchRate', { ns: 'properties', defaultValue: 'Match Rate' })}: {selectedTenant.matchingPercentage}%
+              </div>
+            ) : (
+              <div className="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm">
+                {t('details.matchRateHidden', { ns: 'properties', defaultValue: 'Match rate hidden' })}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Review Confirmation Modal */}
+      {deleteCommentId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+          >
+            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
+              {t('details.deleteReview', { ns: 'properties', defaultValue: 'Delete Review' })}
+            </h3>
+            <p className="text-[#4a5565] mb-6">
+              {t('details.confirmDeleteReview', { ns: 'properties', defaultValue: 'Are you sure you want to delete your review?' })}
+            </p>
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl border-[#3A6EA5]/20"
+                onClick={() => setDeleteCommentId(null)}
+              >
+                {t('details.cancel', { ns: 'common', defaultValue: 'Cancel' })}
+              </Button>
+              <Button
+                className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl"
+                disabled={deleteFeedback.isPending}
+                onClick={() => {
+                  deleteFeedback.mutate({ propertyId: id!, commentId: deleteCommentId.toString() }, {
+                    onSuccess: () => {
+                      setDeleteCommentId(null)
+                      toast.success('Review deleted successfully')
+                      window.location.reload()
+                    },
+                    onError: () => {
+                      setDeleteCommentId(null)
+                      toast.error('Failed to delete review. Please try again.')
+                    },
+                  })
+                }}
+              >
+                {deleteFeedback.isPending ? t('details.sendingRequest', { ns: 'properties', defaultValue: 'Sending Request...' }) : t('details.deleteReview', { ns: 'properties', defaultValue: 'Delete Review' })}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Existing Review Prompt Modal */}
+      {showExistingReviewModal && existingUserComment && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+          >
+            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
+              {t('details.existingReview', { ns: 'properties', defaultValue: 'You Already Have a Review' })}
+            </h3>
+            <p className="text-[#4a5565] mb-4">
+              {t('details.existingReviewMessage', { ns: 'properties', defaultValue: 'You can only leave one review per property. Would you like to delete your existing review first?' })}
+            </p>
+
+            {/* Show existing review details */}
+            <div className="p-4 bg-[#f5f7fa] rounded-2xl mb-6">
+              <div className="flex items-center gap-0.5 mb-2">
+                {Array.from({ length: 5 }).map((_, i) => {
+                  const existingRating = existingUserComment.rating || ratingSummary?.currentUserRating || 0;
+                  return (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < existingRating
+                          ? 'fill-[#f59e0b] text-[#f59e0b]'
+                          : 'fill-gray-200 text-gray-200'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+              <p dir="auto" className="text-[#1a1a1a] text-sm leading-relaxed">
+                {existingUserComment.content}
+              </p>
+            </div>
+
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl border-[#3A6EA5]/20"
+                onClick={() => {
+                  setShowExistingReviewModal(false)
+                  setExistingUserComment(null)
+                }}
+              >
+                {t('details.cancel', { ns: 'common', defaultValue: 'Cancel' })}
+              </Button>
+              <Button
+                className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl"
+                disabled={deleteFeedback.isPending}
+                onClick={() => {
+                  deleteFeedback.mutate(
+                    { propertyId: id!, commentId: existingUserComment.commentId.toString() },
+                    {
+                      onSuccess: () => {
+                        setShowExistingReviewModal(false)
+                        setExistingUserComment(null)
+                        toast.success('Previous review deleted. Submitting new review...')
+                        executeSubmitComment()
+                      },
+                      onError: () => {
+                        setShowExistingReviewModal(false)
+                        setExistingUserComment(null)
+                        toast.error('Failed to delete review. Please try again.')
+                      },
+                    }
+                  )
+                }}
+              >
+                {deleteFeedback.isPending
+                  ? t('details.sendingRequest', { ns: 'properties', defaultValue: 'Sending Request...' })
+                  : t('details.deleteReview', { ns: 'properties', defaultValue: 'Delete Review' })}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

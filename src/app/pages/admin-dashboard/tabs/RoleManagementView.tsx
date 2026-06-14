@@ -14,8 +14,10 @@ import {
 } from '../../../components/ui/tooltip'
 import { useAdminRoleUsers, useAdminRoles, useUpdateUserRoles } from '@/hooks/useAdminStats'
 import { getStatusBadge } from '../utils'
+import { useTranslation } from 'react-i18next'
 
 export function RoleManagementView() {
+  const { t } = useTranslation('admin')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   const [search, setSearch] = useState('')
@@ -65,11 +67,11 @@ export function RoleManagementView() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Role Management
+              {t('roles.title')}
             </CardTitle>
             <div className="flex w-full sm:w-auto items-center gap-2">
               <Input
-                placeholder="Search administrators..."
+                placeholder={t('roles.search')}
                 className="w-full sm:w-64 bg-white rounded-xl border-[#3A6EA5]/20"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -96,17 +98,17 @@ export function RoleManagementView() {
         <CardContent>
           {!isLoading && users.length === 0 ? (
             <div className="py-10 text-center text-[#4a5565]">
-              No role users found.
+              {t('roles.noRoles')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-[#F2F4F6]">
                   <tr className="border-b border-[#3A6EA5]/20">
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">User</th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">Roles</th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">Status</th>
-                    <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold">Actions</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">{t('table.fullName')}</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">{t('table.roles')}</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">{t('table.status')}</th>
+                    <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold">{t('table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -143,7 +145,7 @@ export function RoleManagementView() {
                           {getStatusBadge(user.accountStatusDisplayName)}
                           {user.isDeleted && (
                             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-600">
-                              Deleted
+                              {t('userModal.deleted')}
                             </span>
                           )}
                         </div>
@@ -166,8 +168,8 @@ export function RoleManagementView() {
                             </TooltipTrigger>
                             <TooltipContent>
                               {user.isDeleted || user.accountStatus === 'Banned' 
-                                ? <p>Cannot edit roles for deleted or banned users</p> 
-                                : <p>Update Roles</p>}
+                                ? <p>{t('roles.cannotEditDeleted')}</p> 
+                                : <p>{t('roles.updateRoles')}</p>}
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -189,7 +191,7 @@ export function RoleManagementView() {
                   className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                   onClick={() => setPageSize((p) => p + 20)}
                 >
-                  Show More
+                  {t('table.showMore')}
                 </Button>
               )}
             </div>
@@ -205,9 +207,9 @@ export function RoleManagementView() {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
-            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">Update User Roles</h3>
+            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">{t('roles.updateRoles')}</h3>
             <p className="text-[#4a5565] mb-6 text-sm">
-              Select the assignable roles for this user. Protected roles (like Owner and Renter) are preserved automatically.
+              {t('roles.updateDescription')}
             </p>
             <div className="space-y-3 mb-6">
               {assignableRoles.map((role) => (
@@ -236,14 +238,14 @@ export function RoleManagementView() {
                   setSelectedRoles([])
                 }}
               >
-                Cancel
+                {t('roles.cancel')}
               </Button>
               <Button
                 className="flex-1 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl"
                 disabled={updateRolesMutation.isPending}
                 onClick={handleUpdateRoles}
               >
-                {updateRolesMutation.isPending ? 'Saving…' : 'Save Roles'}
+                {updateRolesMutation.isPending ? t('roles.saving') : t('roles.saveRoles')}
               </Button>
             </div>
           </motion.div>

@@ -1,4 +1,4 @@
-import { MapIcon, MapPin } from 'lucide-react'
+import { MapIcon, MapPin, ArrowDown, ArrowUp } from 'lucide-react'
 import { Button } from '@/app/components/ui/button'
 import {
   Select,
@@ -7,13 +7,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/app/components/ui/select'
-import { SORT_OPTIONS } from './constants'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/app/components/ui/tooltip'
+import { useTranslation } from 'react-i18next'
 
 interface SearchHeaderProps {
   total: number
   isLoading: boolean
-  sortIndex: number
-  onSortChange: (index: number) => void
+  sortBy: string
+  onSortByChange: (sortBy: string) => void
+  sortAscending: boolean
+  onSortAscendingChange: (asc: boolean) => void
+  sortByOptions: { id: number | string; name: string; displayName?: string }[]
+  sortByLoading: boolean
   showMap: boolean
   onToggleMap: () => void
   locationLabel?: string
@@ -23,47 +33,87 @@ interface SearchHeaderProps {
 export function SearchHeader({
   total,
   isLoading,
-  sortIndex,
-  onSortChange,
+  sortBy,
+  onSortByChange,
+  sortAscending,
+  onSortAscendingChange,
+  sortByOptions,
+  sortByLoading,
   showMap,
   onToggleMap,
   locationLabel,
   radiusKm,
 }: SearchHeaderProps) {
+  const { t, i18n } = useTranslation('properties')
+  
+  // fallback if options not loaded
+  const defaultOptions = [
+    { name: 'Newest', displayName: 'Newest' },
+    { name: 'Price', displayName: 'Price' },
+    { name: 'Rating', displayName: 'Rating' },
+    { name: 'Bedrooms', displayName: 'Bedrooms' },
+    { name: 'Bathrooms', displayName: 'Bathrooms' },
+    { name: 'SquareMeters', displayName: 'Square Meters' },
+    { name: 'Distance', displayName: 'Distance' }
+  ]
+  
+  const options = sortByOptions?.length ? sortByOptions : defaultOptions
+
   return (
-    <div className="flex items-center justify-between mb-8">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
       <div>
         <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-          Find Your Perfect Property
+          {t('search.title')}
         </h1>
         <p className="text-[#4a5565] flex items-center gap-2 flex-wrap">
-          {isLoading ? 'Searching…' : `${total.toLocaleString()} properties found`}
+          {isLoading ? t('search.searching') : t('search.propertiesFound', { count: total })}
           {locationLabel && (
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#3A6EA5]/10 rounded-full text-xs font-medium text-[#3A6EA5]">
               <MapPin className="w-3 h-3" />
-              Near: {locationLabel} • {radiusKm}km
+              {t('search.near')}: {locationLabel} • {radiusKm}km
             </span>
           )}
         </p>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {/* Sort */}
-        <Select
-          value={String(sortIndex)}
-          onValueChange={(v) => onSortChange(Number(v))}
-        >
-          <SelectTrigger className="w-[220px] rounded-xl bg-white border-[#3A6EA5]/20">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((opt, i) => (
-              <SelectItem key={i} value={String(i)}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select
+            value={sortBy}
+            onValueChange={onSortByChange}
+            dir={i18n.dir()}
+          >
+            <SelectTrigger className="w-[180px] rounded-xl bg-white border-[#3A6EA5]/20" dir={i18n.dir()}>
+              <SelectValue placeholder={sortByLoading ? t('search.loading') : t('search.sortBy')} />
+            </SelectTrigger>
+            <SelectContent dir={i18n.dir()}>
+              {options.map((opt) => (
+                <SelectItem key={opt.name} value={opt.name}>
+                  {opt.displayName || opt.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-xl border-[#3A6EA5]/20 hover:bg-[#3A6EA5]/10"
+                  onClick={() => onSortAscendingChange(!sortAscending)}
+                >
+                  {sortAscending ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-[#1a1a1a] text-white text-xs border-none rounded-lg px-2 py-1.5 shadow-xl" dir={i18n.dir()}>
+                {sortAscending ? t('search.sortAscending', 'Ascending') : t('search.sortDescending', 'Descending')}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
 
         <Button
           variant={showMap ? 'default' : 'outline'}
@@ -75,7 +125,7 @@ export function SearchHeader({
           onClick={onToggleMap}
         >
           <MapIcon className="w-4 h-4 mr-2" />
-          {showMap ? 'Hide Map' : 'Show Map'}
+          {showMap ? t('search.hideMap') : t('search.showMap')}
         </Button>
       </div>
     </div>

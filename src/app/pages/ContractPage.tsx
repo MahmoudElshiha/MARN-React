@@ -15,45 +15,57 @@ import { toast } from 'sonner'
 import { Label } from '../components/ui/label'
 import { Skeleton } from '../components/ui/skeleton'
 import { useContract } from '@/hooks/useBookingRequests'
+import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/hooks/useAuth'
+import { rentalService } from '@/services/rentalService'
 
 export function ContractPage() {
+  const { t, i18n } = useTranslation('contracts')
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [uploadedContract, setUploadedContract] = useState<File | null>(null)
+  const { user } = useAuth()
 
   const { data: contractData, isLoading } = useContract(id)
   const contract = contractData?.data ?? null
 
-  const isCompleted = contract?.status === 'Active'
+  const isCompleted = contract?.contractStatus === 'Active'
 
-  const handleDownload = () => {
-    if (contract?.documentUrl) {
-      window.open(contract.documentUrl, '_blank')
-    } else {
-      toast.success('Contract downloaded successfully')
+  const isOwner = contract?.ownerInfo?.id === user?.id
+  const isTenant = contract?.renterInfo?.id === user?.id
+
+  const [isDownloading, setIsDownloading] = useState(false)
+  const handleDownload = async () => {
+    if (!contract?.contractId) return;
+    try {
+      setIsDownloading(true);
+      const res = await rentalService.downloadContract(contract.contractId.toString());
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Contract_${contract.contractId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error('Failed to download contract');
+    } finally {
+      setIsDownloading(false);
     }
   }
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (file.type === 'application/pdf') {
-        setUploadedContract(file)
-        toast.success('Signed contract uploaded successfully')
-      } else {
-        toast.error('Please upload a PDF file')
-      }
-    }
-  }
-
-  const handleSubmit = () => {
-    if (uploadedContract) {
-      toast.success(
-        'Contract submitted for review. You will be notified once approved.',
-      )
-      navigate('/tenant-dashboard')
-    } else {
-      toast.error('Please upload the signed contract first')
+  const [isSigning, setIsSigning] = useState(false)
+  const handleSign = async () => {
+    if (!contract?.contractId) return;
+    try {
+      setIsSigning(true);
+      await rentalService.signContract(contract.contractId.toString());
+      toast.success(t('toasts.signed', { defaultValue: 'Contract submitted, awaiting review' }));
+      navigate('/');
+    } catch (e) {
+      toast.error('Failed to sign contract');
+    } finally {
+      setIsSigning(false);
     }
   }
 
@@ -73,7 +85,7 @@ export function ContractPage() {
   if (!contract) {
     return (
       <div className="min-h-screen py-20 flex items-center justify-center text-[#4a5565]">
-        Contract not found.
+        {t('notFound')}
       </div>
     )
   }
@@ -86,15 +98,18 @@ export function ContractPage() {
           onClick={() => navigate(-1)}
           className="mb-6 rounded-xl hover:bg-[#E5EBF0]/50"
         >
-          ← Back
+          <span className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'}>
+            {i18n.language === 'ar' ? '→' : '←'}
+          </span>
+          {t('back')}
         </Button>
 
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-            Rental Contract
+            {t('title')}
           </h1>
           <p className="text-lg text-[#6B7280]">
-            Download, sign, and upload your rental agreement
+            {t('subtitle')}
           </p>
         </div>
 
@@ -116,13 +131,13 @@ export function ContractPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#1a1a1a]">
-                    Contract Status
+                    {t('contractStatus')}
                   </h3>
                   <p className="text-sm text-[#6B7280]">
-                    {contract.status === 'Pending' && 'Awaiting signatures'}
-                    {contract.status === 'Active' && 'Fully executed'}
-                    {contract.status === 'Expired' && 'Contract expired'}
-                    {contract.status === 'Terminated' && 'Contract terminated'}
+                    {contract.contractStatus === 'Pending' && t('statusText.awaitingSignatures')}
+                    {contract.contractStatus === 'Active' && t('statusText.fullyExecuted')}
+                    {contract.contractStatus === 'Expired' && t('statusText.expired')}
+                    {contract.contractStatus === 'Terminated' && t('statusText.terminated')}
                   </p>
                 </div>
               </div>
@@ -133,7 +148,7 @@ export function ContractPage() {
                     : 'bg-yellow-100 text-yellow-700'
                 }`}
               >
-                {contract.status}
+                {contract.contractStatusDisplayName || contract.contractStatus}
               </div>
             </div>
           </CardContent>
@@ -143,19 +158,19 @@ export function ContractPage() {
         <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
           <CardHeader>
             <CardTitle className="text-2xl text-[#1a1a1a]">
-              Contract Details
+              {t('contractDetails')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-[#6B7280] mb-1">Contract ID</p>
-                <p className="font-semibold text-[#1a1a1a]">{contract.id}</p>
+                <p className="text-sm text-[#6B7280] mb-1">{t('contractId')}</p>
+                <p className="font-semibold text-[#1a1a1a]">{contract.contractId}</p>
               </div>
               <div>
-                <p className="text-sm text-[#6B7280] mb-1">Monthly Rent</p>
+                <p className="text-sm text-[#6B7280] mb-1">{t('monthlyRent')}</p>
                 <p className="font-semibold text-[#1a1a1a]">
-                  EGP {contract.monthlyRent.toLocaleString()}
+                  EGP {(contract.totalContractValue || 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -164,13 +179,13 @@ export function ContractPage() {
             <div className="p-4 bg-white rounded-2xl">
               <div className="flex items-center gap-2 mb-3">
                 <Home className="w-5 h-5 text-[#3A6EA5]" />
-                <h4 className="font-semibold text-[#1a1a1a]">Property</h4>
+                <h4 className="font-semibold text-[#1a1a1a]">{t('property')}</h4>
               </div>
               <p className="font-medium text-[#1a1a1a] mb-2">
-                {contract.propertyName}
+                {contract.propertyInfo?.name}
               </p>
               <p className="text-lg font-bold text-[#3A6EA5]">
-                EGP {contract.monthlyRent.toLocaleString()}/month
+                EGP {(contract.totalContractValue || 0).toLocaleString()}/month
               </p>
             </div>
 
@@ -179,20 +194,20 @@ export function ContractPage() {
               <div className="p-4 bg-white rounded-2xl">
                 <div className="flex items-center gap-2 mb-3">
                   <User className="w-5 h-5 text-[#3A6EA5]" />
-                  <h4 className="font-semibold text-[#1a1a1a]">Tenant</h4>
+                  <h4 className="font-semibold text-[#1a1a1a]">{t('tenant')}</h4>
                 </div>
                 <p className="font-medium text-[#1a1a1a]">
-                  {contract.tenantName}
+                  {contract.renterInfo?.fullName}
                 </p>
               </div>
-              {contract.ownerName && (
+              {contract.ownerInfo?.fullName && (
                 <div className="p-4 bg-white rounded-2xl">
                   <div className="flex items-center gap-2 mb-3">
                     <User className="w-5 h-5 text-[#3A6EA5]" />
-                    <h4 className="font-semibold text-[#1a1a1a]">Owner</h4>
+                    <h4 className="font-semibold text-[#1a1a1a]">{t('owner')}</h4>
                   </div>
                   <p className="font-medium text-[#1a1a1a]">
-                    {contract.ownerName}
+                    {contract.ownerInfo.fullName}
                   </p>
                 </div>
               )}
@@ -202,11 +217,11 @@ export function ContractPage() {
             <div className="p-4 bg-white rounded-2xl">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-5 h-5 text-[#3A6EA5]" />
-                <h4 className="font-semibold text-[#1a1a1a]">Rental Period</h4>
+                <h4 className="font-semibold text-[#1a1a1a]">{t('rentalPeriod')}</h4>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-[#6B7280] mb-1">Start Date</p>
+                  <p className="text-sm text-[#6B7280] mb-1">{t('startDate')}</p>
                   <p className="font-medium text-[#1a1a1a]">
                     {new Date(contract.startDate).toLocaleDateString('en-US', {
                       month: 'long',
@@ -216,149 +231,157 @@ export function ContractPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-[#6B7280] mb-1">End Date</p>
+                  <p className="text-sm text-[#6B7280] mb-1">{t('endDate')}</p>
                   <p className="font-medium text-[#1a1a1a]">
-                    {new Date(contract.expiryDate).toLocaleDateString('en-US', {
+                    {contract.endDate ? new Date(contract.endDate).toLocaleDateString('en-US', {
                       month: 'long',
                       day: 'numeric',
                       year: 'numeric',
-                    })}
+                    }) : '-'}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Monthly Rent highlight */}
+            {/* Blockchain Verification */}
+            {contract.isAnchoredToBlockChain && (
+              <div className="p-4 bg-white rounded-2xl border border-green-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <h4 className="font-semibold text-[#1a1a1a]">{t('blockchainVerification', { defaultValue: 'Blockchain Verification' })}</h4>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-[#6B7280] mb-1">{t('anchoringStatus', { defaultValue: 'Anchoring Status' })}</p>
+                    <p className="font-medium text-green-700 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                      {contract.anchoringStatusDisplayName || contract.anchoringStatus}
+                    </p>
+                  </div>
+                  {contract.transactionId && (
+                    <div>
+                      <p className="text-sm text-[#6B7280] mb-1">{t('transactionId', { defaultValue: 'Transaction ID' })}</p>
+                      <p className="text-xs font-mono bg-[#f5f7fa] p-2 rounded-lg text-[#4a5565] break-all border border-[#E5EBF0]">
+                        {contract.transactionId}
+                      </p>
+                    </div>
+                  )}
+                  {contract.merkleRoot && (
+                    <div>
+                      <p className="text-sm text-[#6B7280] mb-1">{t('merkleRoot', { defaultValue: 'Merkle Root' })}</p>
+                      <p className="text-xs font-mono bg-[#f5f7fa] p-2 rounded-lg text-[#4a5565] break-all border border-[#E5EBF0]">
+                        {contract.merkleRoot}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="p-4 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] rounded-2xl text-white">
-              <p className="text-sm mb-1 opacity-90">Monthly Rent</p>
+              <p className="text-sm mb-1 opacity-90">{t('monthlyRent')}</p>
               <p className="text-3xl font-bold">
-                EGP {contract.monthlyRent.toLocaleString()}
+                EGP {(contract.totalContractValue || 0).toLocaleString()}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Download Contract */}
-        <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
-          <CardHeader>
-            <CardTitle className="text-2xl text-[#1a1a1a]">
-              Download Contract
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="p-6 bg-white rounded-2xl">
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-[#E5EBF0] flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-8 h-8 text-[#3A6EA5]" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-[#1a1a1a] mb-1">
-                    Rental Agreement PDF
-                  </h4>
-                  <p className="text-sm text-[#6B7280] mb-4">
-                    Download the rental contract, review all terms carefully,
-                    sign it, and upload the signed copy below.
-                  </p>
-                  <Button
-                    onClick={handleDownload}
-                    className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Contract
-                  </Button>
-                </div>
+        {/* Conditional Actions */}
+        {!isCompleted && contract?.contractStatus === 'Pending' && isOwner && (
+          <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center justify-center p-6 text-center">
+                <FileText className="w-12 h-12 text-[#3A6EA5] mb-4" />
+                <h3 className="text-xl font-semibold text-[#1a1a1a] mb-2">
+                  {t('awaitingTenantSignature', { defaultValue: 'Contract sent to tenant' })}
+                </h3>
+                <p className="text-[#6B7280]">
+                  {t('awaitingTenantSignatureDesc', { defaultValue: 'Awaiting signature from the tenant.' })}
+                </p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Upload Signed Contract */}
-        <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
-          <CardHeader>
-            <CardTitle className="text-2xl text-[#1a1a1a]">
-              Upload Signed Contract
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <Label className="text-[#1a1a1a] mb-2 block">
-                  Upload Signed Document (PDF only)
-                </Label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    id="contract-upload"
-                    accept=".pdf"
-                    onChange={handleUpload}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="contract-upload"
-                    className="flex flex-col items-center justify-center w-full h-40 bg-white rounded-xl border-2 border-dashed border-[#3A6EA5]/20 hover:border-[#3A6EA5]/40 cursor-pointer transition-colors"
-                  >
-                    <Upload className="w-12 h-12 text-[#6B7280] mb-3" />
-                    <span className="text-sm text-[#6B7280] mb-1">
-                      {uploadedContract
-                        ? uploadedContract.name
-                        : 'Click to upload signed contract'}
-                    </span>
-                    <span className="text-xs text-[#6B7280]">
-                      PDF format only
-                    </span>
-                  </label>
-                </div>
+        {!isCompleted && contract?.contractStatus === 'Pending' && isTenant && (
+          <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
+            <CardHeader>
+              <CardTitle className="text-2xl text-[#1a1a1a]">
+                {t('signContract', { defaultValue: 'Sign Contract' })}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="p-6 bg-white rounded-2xl text-center">
+                <p className="text-[#6B7280] mb-6">
+                  {t('signContractDesc', { defaultValue: 'By clicking below, you digitally sign the contract and it will be recorded on the blockchain.' })}
+                </p>
+                <Button
+                  onClick={handleSign}
+                  disabled={isSigning}
+                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl px-8"
+                >
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  {isSigning ? t('signing', { defaultValue: 'Signing...' }) : t('signContractButton', { defaultValue: 'Sign Contract' })}
+                </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
 
-              {uploadedContract && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+        {/* Download Contract (Visible when Active) */}
+        {isCompleted && (
+          <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 mb-6">
+            <CardHeader>
+              <CardTitle className="text-2xl text-[#1a1a1a]">
+                {t('download')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="p-6 bg-white rounded-2xl">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-[#E5EBF0] flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-8 h-8 text-[#3A6EA5]" />
+                  </div>
                   <div className="flex-1">
-                    <p className="font-medium text-green-900">
-                      Contract uploaded successfully
+                    <h4 className="font-semibold text-[#1a1a1a] mb-1">
+                      {t('rentalAgreementPdf')}
+                    </h4>
+                    <p className="text-sm text-[#6B7280] mb-4">
+                      {t('rentalAgreementDesc')}
                     </p>
-                    <p className="text-sm text-green-700">
-                      {uploadedContract.name}
-                    </p>
+                    <Button
+                      onClick={handleDownload}
+                      disabled={isDownloading}
+                      className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {isDownloading ? t('downloading', { defaultValue: 'Downloading...' }) : t('download')}
+                    </Button>
                   </div>
                 </div>
-              )}
-
-              <div className="flex gap-3 justify-end pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(-1)}
-                  className="rounded-xl border-[#3A6EA5]/20"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!uploadedContract}
-                  className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Submit Contract
-                </Button>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Important Notes */}
-        <Card className="bg-yellow-50 border-2 border-yellow-200 rounded-3xl">
-          <CardHeader>
-            <CardTitle className="text-xl text-yellow-900">
-              Important Notes
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-yellow-800 space-y-2">
-            <p>• Please read the entire contract carefully before signing</p>
-            <p>• Both parties must sign the contract for it to be valid</p>
-            <p>• Keep a copy of the signed contract for your records</p>
-            <p>• Contact support if you have any questions or concerns</p>
-            <p>• The contract becomes effective on the start date specified</p>
-          </CardContent>
-        </Card>
+        {!isCompleted && (
+          <Card className="bg-yellow-50 border-2 border-yellow-200 rounded-3xl">
+            <CardHeader>
+              <CardTitle className="text-xl text-yellow-900">
+                {t('importantNotes.title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-yellow-800 space-y-2">
+              <p>• {t('importantNotes.readCarefully')}</p>
+              <p>• {t('importantNotes.bothParties')}</p>
+              <p>• {t('importantNotes.keepCopy')}</p>
+              <p>• {t('importantNotes.contactSupport')}</p>
+              <p>• {t('importantNotes.effectiveDate')}</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

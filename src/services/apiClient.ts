@@ -1,16 +1,16 @@
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
+import i18n from '@/i18n/config'
 import { HttpError, TimeoutError } from './httpErrors'
 
 // In dev with no VITE_API_BASE_URL set, use '' so requests go to localhost
 // and are forwarded by the Vite proxy — this avoids CORS preflight issues.
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || (import.meta.env.PROD ? 'https://marn.runasp.net' : '')
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15_000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept-Language': 'en',
   },
 })
 
@@ -22,6 +22,8 @@ axiosInstance.interceptors.request.use((config) => {
   if (isFormData) {
     delete (config.headers as Record<string, string>)['Content-Type']
   }
+
+  config.headers['Accept-Language'] = i18n.language?.split('-')[0] || 'en'
 
   const token = localStorage.getItem('token') ?? sessionStorage.getItem('token')
   if (token) {
@@ -40,17 +42,28 @@ axiosInstance.interceptors.response.use(
       }
 
       const status = error.response?.status ?? 0
+
+      // Auto-logout on 401 Unauthorized
+      if (status === 401) {
+        localStorage.removeItem('token')
+        sessionStorage.removeItem('token')
+        localStorage.removeItem('user')
+        sessionStorage.removeItem('user')
+        window.dispatchEvent(new CustomEvent('auth-unauthorized'))
+      }
+
       const body = error.response?.data as
         | {
             message?: string
             title?: string
+            detail?: string
             errors?: unknown
             action?: unknown
           }
         | undefined
 
-      // Prefer ASP.NET `title`, fall back to custom `message`, then axios message
-      const serverMessage = body?.title ?? body?.message ?? error.message
+      // Prefer ASP.NET `detail`, fall back to `title`, then custom `message`, then axios message
+      const serverMessage = body?.detail ?? body?.title ?? body?.message ?? error.message
 
       // `errors` is either a string[] (business logic) or Record<string,string[]> (field validation)
       const rawErrors = body?.errors
@@ -82,17 +95,18 @@ axiosInstance.interceptors.response.use(
 )
 
 export const apiClient = {
-  get: <T>(path: string) => axiosInstance.get<T>(path).then((r) => r.data),
+  get: <T>(path: string, config?: AxiosRequestConfig) => 
+    axiosInstance.get<T>(path, config).then((r) => r.data),
 
-  post: <T>(path: string, body?: unknown) =>
-    axiosInstance.post<T>(path, body).then((r) => r.data),
+  post: <T>(path: string, body?: unknown, config?: AxiosRequestConfig) =>
+    axiosInstance.post<T>(path, body, config).then((r) => r.data),
 
-  put: <T>(path: string, body?: unknown) =>
-    axiosInstance.put<T>(path, body).then((r) => r.data),
+  put: <T>(path: string, body?: unknown, config?: AxiosRequestConfig) =>
+    axiosInstance.put<T>(path, body, config).then((r) => r.data),
 
-  patch: <T>(path: string, body?: unknown) =>
-    axiosInstance.patch<T>(path, body).then((r) => r.data),
+  patch: <T>(path: string, body?: unknown, config?: AxiosRequestConfig) =>
+    axiosInstance.patch<T>(path, body, config).then((r) => r.data),
 
-  delete: <T>(path: string) =>
-    axiosInstance.delete<T>(path).then((r) => r.data),
+  delete: <T>(path: string, config?: AxiosRequestConfig) =>
+    axiosInstance.delete<T>(path, config).then((r) => r.data),
 }

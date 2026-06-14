@@ -5,6 +5,7 @@ import { Input } from '../../../components/ui/input'
 import { Checkbox } from '../../../components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '../../../components/ui/radio-group'
 import { Button } from '../../../components/ui/button'
+import { useTranslation } from 'react-i18next'
 import { PropertyFormData } from '../types'
 import { toast } from 'sonner'
 
@@ -14,6 +15,7 @@ interface AvailabilityStepProps {
 }
 
 export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepProps) {
+  const { t, i18n } = useTranslation('properties')
   const [localAvailableFrom, setLocalAvailableFrom] = useState(formData.availableFrom)
   const [newPreference, setNewPreference] = useState('')
 
@@ -49,7 +51,7 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
     if (newPreference.trim() && !formData.customPreferences.includes(newPreference.trim())) {
       updateFormData({ customPreferences: [...formData.customPreferences, newPreference.trim()] })
       setNewPreference('')
-      toast.success('Preference added')
+      toast.success(t('addProperty.toasts.preferenceAdded'))
     }
   }
 
@@ -60,7 +62,7 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-        Availability Settings
+        {t('addProperty.availabilityStep.title')}
       </h2>
 
       <div>
@@ -68,7 +70,7 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
           htmlFor="available-from"
           className="text-[#1a1a1a] mb-2 block"
         >
-          Available From
+          {t('addProperty.availabilityStep.availableFrom')}
         </Label>
         <Input
           id="available-from"
@@ -82,20 +84,21 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
 
       <div className="bg-white rounded-2xl p-6">
         <Label className="text-[#1a1a1a] mb-3 block">
-          Lease Duration
+          {t('addProperty.availabilityStep.leaseDuration')}
         </Label>
         <RadioGroup
           value={formData.leaseDuration}
           onValueChange={(val) => updateFormData({ leaseDuration: val })}
           className="space-y-3"
+          dir={i18n.dir()}
         >
           {[
-            { label: 'Daily', value: 'Daily' },
-            { label: 'Monthly', value: 'Monthly' },
-            { label: 'Yearly', value: 'Yearly' },
+            { label: t('addProperty.availabilityStep.daily'), value: 'Daily' },
+            { label: t('addProperty.availabilityStep.monthly'), value: 'Monthly' },
+            { label: t('addProperty.availabilityStep.yearly'), value: 'Yearly' },
           ].map((option) => (
-            <div key={option.value} className="flex items-center space-x-3">
-              <RadioGroupItem value={option.value} id={option.value} />
+            <div key={option.value} className="flex items-center gap-3">
+              <RadioGroupItem value={option.value} id={option.value} className="border-[#3A6EA5]/50 text-[#3A6EA5] data-[state=checked]:border-[#3A6EA5]" />
               <label
                 htmlFor={option.value}
                 className="text-[#1a1a1a] cursor-pointer"
@@ -109,7 +112,7 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
 
       <div className="bg-white rounded-2xl p-6">
         <Label className="text-[#1a1a1a] mb-3 block">
-          Tenant Preferences
+          {t('addProperty.availabilityStep.tenantPreferences')}
         </Label>
 
         {/* Input to add new preference */}
@@ -120,7 +123,7 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
             onKeyPress={(e) =>
               e.key === 'Enter' && addCustomPreference()
             }
-            placeholder="Enter new preference and press Enter"
+            placeholder={t('addProperty.availabilityStep.enterPreferencePlaceholder')}
             className="rounded-xl border-[#3A6EA5]/20"
           />
           <Button
@@ -150,9 +153,9 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
               />
               <label
                 htmlFor={preference}
-                className="ml-3 text-[#1a1a1a] cursor-pointer"
+                className="ms-3 text-[#1a1a1a] cursor-pointer"
               >
-                {preference}
+                {t(`addProperty.availabilityStep.preferences.${preference}`, { defaultValue: preference })}
               </label>
             </div>
           ))}
@@ -172,7 +175,7 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
                 />
                 <label
                   htmlFor={preference}
-                  className="ml-3 text-[#1a1a1a] cursor-pointer"
+                  className="ms-3 text-[#1a1a1a] cursor-pointer"
                 >
                   {preference}
                 </label>
@@ -188,8 +191,7 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
         </div>
 
         <p className="text-xs text-[#4a5565] mt-4">
-          Add custom preferences to attract the right tenants for your
-          property
+          {t('addProperty.availabilityStep.addPreferenceTip')}
         </p>
       </div>
 
@@ -198,12 +200,10 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
           <CheckCircle className="w-6 h-6 text-[#3A6EA5] flex-shrink-0 mt-1" />
           <div>
             <h3 className="font-semibold text-[#1a1a1a] mb-2">
-              Review Before Publishing
+              {t('addProperty.availabilityStep.reviewBeforePublishing')}
             </h3>
             <p className="text-sm text-[#4a5565]">
-              Your listing will be reviewed by our team within 24
-              hours. Once approved, it will be visible to potential
-              tenants.
+              {t('addProperty.availabilityStep.reviewDescription')}
             </p>
           </div>
         </div>

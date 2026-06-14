@@ -2,6 +2,7 @@ import { Upload, X, FileText } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
 import { PropertyFormData, FileData, TouchedFields } from '../types'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getImageUrl } from '@/constants/assets'
 
 interface LegalDocsStepProps {
@@ -11,6 +12,7 @@ interface LegalDocsStepProps {
 }
 
 export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsStepProps) {
+  const { t } = useTranslation('properties')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +56,7 @@ export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsSt
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-        Upload Legal Documents <span className="text-red-500">*</span>
+        {t('editProperty.legalDocsStep.title')} <span className="text-red-500">*</span>
       </h2>
 
       <div className="bg-white rounded-2xl p-8">
@@ -72,10 +74,10 @@ export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsSt
         >
           <Upload className="w-16 h-16 mx-auto mb-4 text-[#3A6EA5]" />
           <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">
-            Drag & drop documents here
+            {t('editProperty.legalDocsStep.dragDropDocs')}
           </h3>
           <p className="text-[#4a5565] mb-4">
-            or click to browse from your computer (PDF, DOC)
+            {t('editProperty.legalDocsStep.orClickToBrowse')}
           </p>
           <Button 
             type="button" 
@@ -85,14 +87,14 @@ export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsSt
               fileInputRef.current?.click()
             }}
           >
-            Choose Files
+            {t('editProperty.legalDocsStep.chooseFiles')}
           </Button>
         </div>
       </div>
 
       {formData.existingProofOfOwnershipUrl && (
         <div className="bg-white rounded-2xl p-6 mb-6 border border-[#3A6EA5]/20">
-          <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">Current Proof of Ownership</h3>
+          <h3 className="text-lg font-semibold text-[#1a1a1a] mb-4">{t('editProperty.legalDocsStep.currentProofOfOwnership')}</h3>
           <div className="flex items-center gap-3 p-4 rounded-xl bg-[#E5EBF0]">
             <div className="bg-[#9CBBDC]/20 p-2 rounded-lg text-[#3A6EA5]">
               <FileText className="w-6 h-6" />
@@ -104,11 +106,11 @@ export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsSt
                 rel="noreferrer"
                 className="text-sm font-medium text-[#3A6EA5] hover:underline"
               >
-                View Existing Document
+                {t('editProperty.legalDocsStep.viewExistingDocument')}
               </a>
             </div>
           </div>
-          <p className="text-sm text-[#4a5565] mt-3">Uploading a new document will replace the existing one.</p>
+          <p className="text-sm text-[#4a5565] mt-3">{t('editProperty.legalDocsStep.uploadingNewDocumentReplacesExisting')}</p>
         </div>
       )}
 
@@ -142,9 +144,7 @@ export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsSt
 
       <div className="bg-[#9CBBDC]/20 rounded-2xl p-4">
         <p className="text-sm text-[#1a1a1a]">
-          <strong>Tip:</strong> Uploading legal documents ensures
-          compliance and trustworthiness. Include lease agreements,
-          property deeds, and any other relevant documents.
+          {t('editProperty.legalDocsStep.tip')}
         </p>
       </div>
     </div>

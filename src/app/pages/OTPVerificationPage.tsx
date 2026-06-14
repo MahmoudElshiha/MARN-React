@@ -4,8 +4,10 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Link, useNavigate } from 'react-router'
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export function OTPVerificationPage() {
+  const { t, i18n } = useTranslation('auth')
   const navigate = useNavigate()
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [countdown, setCountdown] = useState(60)
@@ -90,8 +92,8 @@ export function OTPVerificationPage() {
               to="/login"
               className="inline-flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] mb-6 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to login
+              <ArrowLeft className={`w-4 h-4 ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
+              {t('otp.backToLogin')}
             </Link>
 
             {/* Logo and Title */}
@@ -100,10 +102,10 @@ export function OTPVerificationPage() {
                 <Mail className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-[#1a1a1a] mb-2 text-center">
-                Verify Your Email
+                {t('otp.title')}
               </h2>
               <p className="text-[#4a5565] text-center">
-                OTP sent to your email
+                {t('otp.sentTo')}
               </p>
               <p className="text-sm text-[#3A6EA5] font-semibold mt-1">
                 user@example.com
@@ -115,7 +117,7 @@ export function OTPVerificationPage() {
               {/* OTP Input */}
               <div>
                 <label className="text-[#1a1a1a] text-sm font-medium mb-3 block text-center">
-                  Enter 6-digit code
+                  {t('otp.enterCode')}
                 </label>
                 <div
                   className="flex gap-2 justify-center"
@@ -145,11 +147,11 @@ export function OTPVerificationPage() {
                     onClick={handleResend}
                     className="text-[#3A6EA5] hover:underline font-semibold"
                   >
-                    Resend OTP
+                    {t('otp.resend')}
                   </button>
                 ) : (
                   <p className="text-[#4a5565]">
-                    Resend OTP in{' '}
+                    {t('otp.resendIn')} {' '}
                     <span className="font-semibold text-[#3A6EA5]">
                       {countdown}s
                     </span>
@@ -164,19 +166,19 @@ export function OTPVerificationPage() {
                 disabled={otp.join('').length !== 6}
                 className="w-full bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-xl py-6 shadow-lg shadow-[#3A6EA5]/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Verify & Continue
+                {t('otp.verifyAndContinue')}
               </Button>
             </form>
 
             {/* Help Text */}
             <div className="mt-8 text-center">
               <p className="text-sm text-[#4a5565]">
-                Didn't receive the code?{' '}
+                {t('otp.didntReceive')} {' '}
                 <Link
                   to="/contact"
                   className="text-[#3A6EA5] hover:underline font-semibold"
                 >
-                  Contact support
+                  {t('otp.contactSupport')}
                 </Link>
               </p>
             </div>

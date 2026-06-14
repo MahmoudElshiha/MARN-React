@@ -27,8 +27,10 @@ import {
   ModerationReportsTab,
   ContractsModerationTab,
 } from './tabs'
+import { useTranslation } from 'react-i18next'
 
 export function AdminDashboardPage() {
+  const { t, i18n } = useTranslation('admin')
   const [searchParams, setSearchParams] = useSearchParams()
   const currentTab = searchParams.get('tab') || 'users'
 
@@ -49,7 +51,7 @@ export function AdminDashboardPage() {
   const stats = [
     {
       icon: Users,
-      label: 'Total Users',
+      label: t('stats.totalUsers'),
       value: statsLoading
         ? '…'
         : (apiStats?.totalUsers?.value ?? 0).toLocaleString(),
@@ -60,7 +62,7 @@ export function AdminDashboardPage() {
     },
     {
       icon: Building,
-      label: 'Total Listings',
+      label: t('stats.totalListings'),
       value: statsLoading
         ? '…'
         : (apiStats?.totalProperties?.value ?? 0).toLocaleString(),
@@ -71,7 +73,7 @@ export function AdminDashboardPage() {
     },
     {
       icon: Clock,
-      label: 'Pending Verifications',
+      label: t('stats.pendingVerifications'),
       value: statsLoading
         ? '…'
         : (apiStats?.pendingVerifications?.value ?? 0).toLocaleString(),
@@ -82,7 +84,7 @@ export function AdminDashboardPage() {
     },
     {
       icon: FileText,
-      label: 'Active Contracts',
+      label: t('stats.activeContracts'),
       value: statsLoading
         ? '…'
         : (apiStats?.revenueSummary?.activeContracts ?? 0).toLocaleString(),
@@ -104,10 +106,10 @@ export function AdminDashboardPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
-              Admin Dashboard
+              {t('header.title')}
             </h1>
             <p className="text-lg text-[#4a5565]">
-              Manage users, verify documents, and monitor platform activity
+              {t('header.subtitle')}
             </p>
           </div>
 
@@ -157,16 +159,16 @@ export function AdminDashboardPage() {
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a] flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-[#3A6EA5]" />
-                  Revenue & Sales Data
+                  {t('revenue.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-white rounded-2xl p-4">
-                  <p className="text-sm text-[#4a5565] mb-1">Total Revenue</p>
+                  <p className="text-sm text-[#4a5565] mb-1">{t('revenue.totalRevenue')}</p>
                   <p className="text-3xl font-bold text-[#3A6EA5]">
                     {statsLoading
                       ? '…'
-                      : `EGP ${(apiStats?.revenueSummary?.totalRevenue ?? 0).toLocaleString()}`}
+                      : `${(apiStats?.revenueSummary?.totalRevenue ?? 0).toLocaleString()} ${t('currency', { ns: 'common' })}`}
                   </p>
                   {!statsLoading &&
                     apiStats?.revenueSummary?.revenueTrendPercentage !=
@@ -181,13 +183,13 @@ export function AdminDashboardPage() {
                         {formatTrend(
                           apiStats.revenueSummary.revenueTrendPercentage,
                         )}{' '}
-                        from last period
+                        {t('revenue.fromLastPeriod')}
                       </p>
                     )}
                 </div>
                 <div className="bg-white rounded-2xl p-4">
                   <p className="text-sm text-[#4a5565] mb-1">
-                    Active Contracts
+                    {t('revenue.activeContracts')}
                   </p>
                   <p className="text-2xl font-bold text-[#1a1a1a]">
                     {statsLoading
@@ -199,7 +201,7 @@ export function AdminDashboardPage() {
                 </div>
                 <div className="bg-white rounded-2xl p-4">
                   <p className="text-sm text-[#4a5565] mb-1">
-                    New Users (This Month)
+                    {t('revenue.newUsersThisMonth')}
                   </p>
                   <p className="text-2xl font-bold text-[#1a1a1a]">
                     {statsLoading
@@ -215,11 +217,11 @@ export function AdminDashboardPage() {
             <Card className="lg:col-span-2 bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
               <CardHeader>
                 <CardTitle className="text-xl text-[#1a1a1a]">
-                  Monthly Revenue Graph
+                  {t('revenue.monthlyRevenueGraph')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64">
+                <div className="h-64" dir="ltr">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenueData}>
                       <CartesianGrid
@@ -227,7 +229,17 @@ export function AdminDashboardPage() {
                         stroke="#3A6EA5"
                         opacity={0.2}
                       />
-                      <XAxis dataKey="label" stroke="#4a5565" />
+                      <XAxis 
+                        dataKey="label" 
+                        stroke="#4a5565" 
+                        tickFormatter={(label: string) => {
+                          const monthMap: Record<string, string> = {
+                            'Jan': 'يناير', 'Feb': 'فبراير', 'Mar': 'مارس', 'Apr': 'أبريل', 'May': 'مايو', 'Jun': 'يونيو',
+                            'Jul': 'يوليو', 'Aug': 'أغسطس', 'Sep': 'سبتمبر', 'Oct': 'أكتوبر', 'Nov': 'نوفمبر', 'Dec': 'ديسمبر'
+                          }
+                          return i18n.language === 'ar' ? (monthMap[label] || label) : label
+                        }}
+                      />
                       <YAxis stroke="#4a5565" />
                       <Tooltip
                         contentStyle={{
@@ -236,10 +248,18 @@ export function AdminDashboardPage() {
                           borderRadius: '12px',
                         }}
                         formatter={(value: number) =>
-                          `EGP ${value.toLocaleString()}`
+                          [`${value.toLocaleString()} ${t('currency', { ns: 'common' })}`, t('revenue.totalRevenue', { defaultValue: 'Revenue' })]
                         }
+                        labelFormatter={(label: string) => {
+                          const monthMap: Record<string, string> = {
+                            'Jan': 'يناير', 'Feb': 'فبراير', 'Mar': 'مارس', 'Apr': 'أبريل', 'May': 'مايو', 'Jun': 'يونيو',
+                            'Jul': 'يوليو', 'Aug': 'أغسطس', 'Sep': 'سبتمبر', 'Oct': 'أكتوبر', 'Nov': 'نوفمبر', 'Dec': 'ديسمبر'
+                          }
+                          return i18n.language === 'ar' ? (monthMap[label] || label) : label
+                        }}
                       />
                       <Line
+                        name={t('revenue.totalRevenue', { defaultValue: 'Revenue' })}
                         type="monotone"
                         dataKey="revenue"
                         stroke="#3A6EA5"
@@ -254,37 +274,37 @@ export function AdminDashboardPage() {
           </div>
 
           {/* Main Content Tabs */}
-          <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-8">
+          <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-8" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
             <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 bg-[#F2F4F6] p-2 rounded-[2rem] gap-2 border border-[#3A6EA5]/20 shadow-lg shadow-[#3A6EA5]/15">
               <TabsTrigger
                 value="property-moderation"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
               >
-                Property Moderation
+                {t('tabs.properties')}
               </TabsTrigger>
               <TabsTrigger
                 value="users"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
               >
-                User Management
+                {t('tabs.users')}
               </TabsTrigger>
               <TabsTrigger
                 value="reports"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
               >
-                Analytics
+                {t('tabs.reports')}
               </TabsTrigger>
               <TabsTrigger
                 value="contracts"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
               >
-                Contracts Moderation
+                {t('tabs.contracts')}
               </TabsTrigger>
               <TabsTrigger
                 value="moderation"
                 className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
               >
-                Moderation Reports
+                {t('tabs.moderation')}
               </TabsTrigger>
             </TabsList>
 

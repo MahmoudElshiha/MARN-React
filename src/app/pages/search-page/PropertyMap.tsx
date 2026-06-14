@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import { Link } from 'react-router'
-import { MapPin, Star, BedDouble, Bath, Users, Loader2 } from 'lucide-react'
+import { MapPin, Star, BedDouble, Bath, Users, Loader2, MapIcon } from 'lucide-react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { SearchProperty } from '@/types/property'
 import { getImageUrl } from '@/constants/assets'
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback'
+import { useTranslation } from 'react-i18next'
 
 // Fix Leaflet's default icon issue in bundled React apps
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -133,12 +134,30 @@ function FitBounds({ positions }: { positions: [number, number][] }) {
   return null
 }
 
+function MapClickHandler({ isSelectMode, onMapClick }: { isSelectMode?: boolean, onMapClick?: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      if (isSelectMode && onMapClick) {
+        onMapClick(e.latlng.lat, e.latlng.lng)
+      }
+    }
+  })
+  return null
+}
+
 /* ── Main component ─────────────────────────────────────────────── */
 
 interface PropertyMapProps {
   properties: SearchProperty[]
   userLat?: number
   userLng?: number
+  radiusKm?: number
+  isSelectMode?: boolean
+  isShowingAll?: boolean
+  showFetchAllButton?: boolean
+  isFetchingAll?: boolean
+  onToggleShowAll?: () => void
+  onMapClick?: (lat: number, lng: number) => void
 }
 
 interface GeocodedProperty extends SearchProperty {
@@ -146,7 +165,8 @@ interface GeocodedProperty extends SearchProperty {
   lng: number
 }
 
-export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) {
+export function PropertyMap({ properties, userLat, userLng, radiusKm, isSelectMode, showFetchAllButton, isShowingAll, isFetchingAll, onToggleShowAll, onMapClick }: PropertyMapProps) {
+  const { t, i18n } = useTranslation(['properties', 'common'])
   const [geocoded, setGeocoded] = useState<GeocodedProperty[]>([])
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [geocodingProgress, setGeocodingProgress] = useState({ done: 0, total: 0 })
@@ -176,7 +196,16 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
         const geo = await geocodeAddress(p.address)
 
         if (geo) {
-          results.push({ ...p, lat: geo.lat, lng: geo.lng })
+          // If radius search is active, enforce the radius locally to fix frontend geocoding mismatches
+          // (e.g. Nominatim returning a far away city for a generic street address)
+          if (userLat !== undefined && userLng !== undefined && radiusKm !== undefined) {
+            const distance = L.latLng(userLat, userLng).distanceTo(L.latLng(geo.lat, geo.lng))
+            if (distance <= radiusKm * 1000) {
+              results.push({ ...p, lat: geo.lat, lng: geo.lng })
+            }
+          } else {
+            results.push({ ...p, lat: geo.lat, lng: geo.lng })
+          }
         }
 
         setGeocodingProgress({ done: i + 1, total: properties.length })
@@ -228,10 +257,10 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
     <div className="relative mb-8 rounded-3xl overflow-hidden shadow-lg shadow-black/5 border border-[#3A6EA5]/10">
       {/* Geocoding progress indicator */}
       {isGeocoding && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-[#3A6EA5]/20">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-[#3A6EA5]/20">
           <Loader2 className="w-4 h-4 text-[#3A6EA5] animate-spin" />
           <span className="text-sm text-[#4a5565] font-medium">
-            Locating properties… {geocodingProgress.done}/{geocodingProgress.total}
+            {t('search.locatingProperties', { done: geocodingProgress.done, total: geocodingProgress.total })}
           </span>
           <div className="w-20 h-1.5 bg-[#e8eef5] rounded-full overflow-hidden">
             <div
@@ -246,10 +275,10 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
 
       {/* Property count badge */}
       {geocoded.length > 0 && !isGeocoding && (
-        <div className="absolute top-4 left-4 z-[1000] flex items-center gap-1.5 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-[#3A6EA5]/15">
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-[#3A6EA5]/15">
           <MapPin className="w-3.5 h-3.5 text-[#3A6EA5]" />
           <span className="text-sm font-medium text-[#1a1a1a]">
-            {geocoded.length} {geocoded.length === 1 ? 'property' : 'properties'} on map
+            {geocoded.length === 1 ? t('search.onMap_one', { count: geocoded.length }) : t('search.onMap_other', { count: geocoded.length })}
           </span>
         </div>
       )}
@@ -259,8 +288,9 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
         zoom={6}
         scrollWheelZoom={true}
         style={{ height: 450, width: '100%' }}
-        className="z-0"
+        className={`z-0 ${isSelectMode ? 'map-select-mode' : ''}`}
       >
+        <MapClickHandler isSelectMode={isSelectMode} onMapClick={onMapClick} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
@@ -292,7 +322,7 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
                 to={`/property/${property.id}`}
                 className="block no-underline text-inherit"
               >
-                <div className="overflow-hidden rounded-xl -mx-[20px] -mt-[15px]">
+                <div className="overflow-hidden">
                   {/* Property image */}
                   <div className="relative h-[140px] overflow-hidden">
                     <ImageWithFallback
@@ -302,7 +332,7 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                     <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-[#1a1a1a]">
-                      {property.type}
+                      {t(`addProperty.detailsStep.types.${property.type?.toLowerCase()}`, { defaultValue: property.typeDisplayName || property.type })}
                     </span>
                   </div>
 
@@ -342,12 +372,14 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
                       )}
                     </div>
 
-                    <div className="flex items-baseline gap-1 pt-2 border-t border-[#e8eef5]">
+                    <div className="flex items-baseline gap-1 pt-2 border-t border-[#e8eef5]" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
                       <span className="text-lg font-bold text-[#3A6EA5]">
-                        {property.price.toLocaleString()} EGP
+                        {i18n.language === 'ar' 
+                          ? `${property.price.toLocaleString()} ${t('currency', { ns: 'common', defaultValue: 'EGP' })}` 
+                          : `${t('currency', { ns: 'common', defaultValue: 'EGP' })} ${property.price.toLocaleString()}`}
                       </span>
                       <span className="text-xs text-[#6a7282]">
-                        / {property.rentalUnit?.toLowerCase() ?? 'month'}
+                        / {property.rentalUnit === 'Monthly' ? t('editProperty.monthBased') : property.rentalUnit === 'Yearly' ? t('editProperty.yearBased') : t('editProperty.dayBased')}
                       </span>
                     </div>
                   </div>
@@ -376,6 +408,26 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
           </Marker>
         )}
       </MapContainer>
+
+      {/* Fetch All for Map Button */}
+      {showFetchAllButton && onToggleShowAll && (
+        <div className="absolute bottom-6 left-4 z-[1000]">
+          <button
+            onClick={onToggleShowAll}
+            disabled={isFetchingAll}
+            className="flex items-center gap-2 bg-white/95 backdrop-blur-sm text-[#3A6EA5] px-4 py-2 rounded-xl shadow-md border border-[#3A6EA5]/20 font-medium text-sm hover:bg-white transition-colors cursor-pointer disabled:cursor-not-allowed"
+          >
+            {isFetchingAll ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <MapIcon className="w-4 h-4" />
+            )}
+            {isShowingAll 
+              ? t('search.showCurrentPageOnly', { defaultValue: 'Show current page properties only' })
+              : t('search.showAllOnMap', { defaultValue: 'Show all properties on map' })}
+          </button>
+        </div>
+      )}
 
       {/* Inline styles for popup customization and marker animation */}
       <style>{`
@@ -426,6 +478,12 @@ export function PropertyMap({ properties, userLat, userLng }: PropertyMapProps) 
         }
         .user-location-popup .leaflet-popup-content {
           margin: 0;
+        }
+        .map-select-mode {
+          cursor: crosshair !important;
+        }
+        .map-select-mode .leaflet-interactive {
+          cursor: crosshair !important;
         }
       `}</style>
     </div>

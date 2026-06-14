@@ -5,7 +5,7 @@ import {
   TooltipTrigger,
 } from '../../components/ui/tooltip'
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || (import.meta.env.PROD ? 'https://marn.runasp.net' : '')
 
 export function buildImageUrl(path: string | null | undefined): string | undefined {
   if (!path) return undefined

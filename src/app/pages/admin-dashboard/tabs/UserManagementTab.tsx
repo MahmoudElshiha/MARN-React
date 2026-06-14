@@ -20,8 +20,10 @@ import { toast } from 'sonner'
 import { getStatusBadge, buildImageUrl, TruncatedTooltip } from '../utils'
 import { RoleManagementView } from './RoleManagementView'
 import { VerificationsTab } from './VerificationsTab'
+import { useTranslation } from 'react-i18next'
 
 export function UserManagementTab() {
+  const { t, i18n } = useTranslation('admin')
   const [selectedUser, setSelectedUser] = useState<AdminUserStatsItem | null>(null)
   const [pageSize, setPageSize] = useState(10)
   const [userSearch, setUserSearch] = useState('')
@@ -84,7 +86,7 @@ export function UserManagementTab() {
         restore: 'restored',
         delete: 'deleted',
       }
-      toast.success(`User ${labels[actionType!] ?? actionType} successfully`)
+      toast.success(t('toasts.userActionSuccess', { action: labels[actionType!] ?? actionType }))
       queryClient.invalidateQueries({ queryKey: ['adminUsers'] })
       queryClient.invalidateQueries({ queryKey: ['adminRoleUsers'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
@@ -93,7 +95,7 @@ export function UserManagementTab() {
       setPendingUserId(null)
       setSelectedUser(null)
     },
-    onError: () => toast.error('Action failed'),
+    onError: () => toast.error(t('toasts.actionFailed')),
   })
 
   const handleUserAction = (userId: string, action: 'ban' | 'unban' | 'restore' | 'delete') => {
@@ -122,16 +124,16 @@ export function UserManagementTab() {
 
   return (
     <div className="space-y-6">
-      <Tabs value={activeSubTab} onValueChange={handleSubTabChange} className="w-full">
+      <Tabs value={activeSubTab} onValueChange={handleSubTabChange} className="w-full" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
         <TabsList className="bg-[#E5E9F0] border-none rounded-xl p-1 mb-6 flex flex-wrap h-auto">
           <TabsTrigger value="verifications" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
-            Identity Verifications
+            {t('tabs.verifications')}
           </TabsTrigger>
           <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
-            All Users
+            {t('users.title')}
           </TabsTrigger>
           <TabsTrigger value="roles" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
-            Role Management
+            {t('roles.title')}
           </TabsTrigger>
         </TabsList>
 
@@ -140,11 +142,11 @@ export function UserManagementTab() {
             <CardHeader>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <CardTitle className="text-2xl text-[#1a1a1a]">
-                  User Management
+                  {t('users.title')}
                 </CardTitle>
                 <div className="flex w-full sm:w-auto items-center gap-2">
                   <Input
-                    placeholder="Search users..."
+                    placeholder={t('users.search')}
                     className="w-full sm:w-64 bg-white rounded-xl border-[#3A6EA5]/20"
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
@@ -170,7 +172,7 @@ export function UserManagementTab() {
                     className={statusFilter === status ? 'bg-[#3A6EA5] text-white rounded-xl' : 'rounded-xl border-[#3A6EA5]/20 text-[#4a5565]'}
                     onClick={() => setStatusFilter(status)}
                   >
-                    {status}
+                    {status === 'All' ? t('tabs.all') : t(`users.status.${status.toLowerCase()}`)}
                   </Button>
                 ))}
               </div>
@@ -179,18 +181,18 @@ export function UserManagementTab() {
               <TooltipProvider delayDuration={1000}>
               {!usersLoading && users.length === 0 ? (
                 <div className="py-10 text-center text-[#4a5565] border-b border-[#3A6EA5]/20">
-                  No users found.
+                  {t('users.noUsers')}
                 </div>
               ) : (
                 <div className="overflow-x-auto overflow-y-scroll max-h-[600px] border-b border-[#3A6EA5]/20">
                   <table className="w-full relative" style={{ tableLayout: 'fixed' }}>
                     <thead className="sticky top-0 bg-[#F2F4F6] z-10">
                       <tr className="border-b border-[#3A6EA5]/20">
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '30%' }}>User</th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '25%' }}>Roles</th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '20%' }}>Status</th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>Join Date</th>
-                        <th className="text-left py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>Actions</th>
+                        <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '30%' }}>{t('table.fullName')}</th>
+                        <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '25%' }}>{t('table.roles')}</th>
+                        <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '20%' }}>{t('table.status')}</th>
+                        <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '15%' }}>{t('table.joinDate')}</th>
+                        <th className="text-start py-4 px-4 text-[#1a1a1a] font-semibold" style={{ width: '10%' }}>{t('table.actions')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -233,7 +235,7 @@ export function UserManagementTab() {
                               {getStatusBadge(user.accountStatusDisplayName)}
                               {user.isDeleted && (
                                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                  Deleted
+                                  {t('userModal.deleted')}
                                 </span>
                               )}
                             </div>
@@ -256,7 +258,7 @@ export function UserManagementTab() {
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>View Details</p>
+                                    <p>{t('table.view')}</p>
                                   </TooltipContent>
                                 </Tooltip>
                                 {user.isDeleted ? (
@@ -272,7 +274,7 @@ export function UserManagementTab() {
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                      <p>Restore User</p>
+                                      <p>{t('table.restore')}</p>
                                     </TooltipContent>
                                   </Tooltip>
                                 ) : (
@@ -290,7 +292,7 @@ export function UserManagementTab() {
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          <p>Unban User</p>
+                                          <p>{t('table.unban')}</p>
                                         </TooltipContent>
                                       </Tooltip>
                                     ) : (
@@ -309,7 +311,7 @@ export function UserManagementTab() {
                                           </span>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          {user.roles.includes('Admin') ? <p>Admins cannot be banned</p> : <p>Ban User</p>}
+                                          {user.roles.includes('Admin') ? <p>{t('table.adminNoBan')}</p> : <p>{t('table.ban')}</p>}
                                         </TooltipContent>
                                       </Tooltip>
                                     )}
@@ -328,7 +330,7 @@ export function UserManagementTab() {
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent>
-                                        {user.roles.includes('Admin') ? <p>Admins cannot be deleted</p> : <p>Delete User</p>}
+                                        {user.roles.includes('Admin') ? <p>{t('table.adminNoDelete')}</p> : <p>{t('table.delete')}</p>}
                                       </TooltipContent>
                                     </Tooltip>
                                   </>
@@ -353,7 +355,7 @@ export function UserManagementTab() {
                                 className="rounded-xl border-[#3A6EA5]/20 text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                                 onClick={() => setPageSize((p) => p + 10)}
                               >
-                                Show More
+                                {t('table.showMore')}
                               </Button>
                             )}
                           </div>
@@ -412,7 +414,7 @@ export function UserManagementTab() {
                     )}
                     {selectedUser.isDeleted && (
                       <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                        Deleted
+                        {t('userModal.deleted')}
                       </span>
                     )}
                   </div>
@@ -425,35 +427,35 @@ export function UserManagementTab() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-sm">
               <div className="bg-[#F2F4F6] rounded-2xl p-4 sm:col-span-2">
-                <p className="text-[#4a5565] mb-1">Joined</p>
+                <p className="text-[#4a5565] mb-1">{t('userModal.joined')}</p>
                 <p className="font-semibold text-[#1a1a1a]">{new Date(selectedUser.createdAt).toLocaleDateString('en-GB')}</p>
               </div>
               <div className="bg-[#F2F4F6] rounded-2xl p-4 sm:col-span-2">
-                <p className="text-[#4a5565] mb-1">User ID</p>
+                <p className="text-[#4a5565] mb-1">{t('userModal.userId')}</p>
                 <p className="font-mono text-xs font-semibold text-[#1a1a1a] break-all">{selectedUser.userId}</p>
               </div>
               <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-[#4a5565] mb-1">Properties</p>
+                <p className="text-[#4a5565] mb-1">{t('userModal.properties')}</p>
                 <p className="font-semibold text-[#1a1a1a]">{selectedUser.ownedPropertiesCount}</p>
               </div>
               <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-[#4a5565] mb-1">Active Contracts</p>
+                <p className="text-[#4a5565] mb-1">{t('userModal.activeContracts')}</p>
                 <p className="font-semibold text-[#1a1a1a]">{selectedUser.activeContractsCount}</p>
               </div>
               <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-[#4a5565] mb-1">Total Paid</p>
-                <p className="font-semibold text-[#1a1a1a]">EGP {(selectedUser.totalPaidAmount ?? 0).toLocaleString()}</p>
+                <p className="text-[#4a5565] mb-1">{t('userModal.totalPaid')}</p>
+                <p className="font-semibold text-[#1a1a1a]">{t('currency', { ns: 'common' })} {(selectedUser.totalPaidAmount ?? 0).toLocaleString()}</p>
               </div>
               <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                <p className="text-[#4a5565] mb-1">Total Received</p>
-                <p className="font-semibold text-[#1a1a1a]">EGP {(selectedUser.totalReceivedAmount ?? 0).toLocaleString()}</p>
+                <p className="text-[#4a5565] mb-1">{t('userModal.totalReceived')}</p>
+                <p className="font-semibold text-[#1a1a1a]">{t('currency', { ns: 'common' })} {(selectedUser.totalReceivedAmount ?? 0).toLocaleString()}</p>
               </div>
             </div>
 
             {/* Identity Verification Details */}
             {(verificationDetailLoading || verificationDetail) && (
               <>
-                <h4 className="font-semibold text-lg text-[#1a1a1a] mb-4">Identity Verification</h4>
+                <h4 className="font-semibold text-lg text-[#1a1a1a] mb-4">{t('verificationModal.title')}</h4>
                 <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
                   {verificationDetailLoading ? (
                     Array.from({ length: 4 }).map((_, i) => (
@@ -465,25 +467,25 @@ export function UserManagementTab() {
                   ) : (
                     <>
                       <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                        <p className="text-[#4a5565] mb-1">National ID</p>
+                        <p className="text-[#4a5565] mb-1">{t('verificationModal.nationalId')}</p>
                         <p className="font-mono font-semibold text-[#1a1a1a]">{verificationDetail?.nationalIDNumber ?? '—'}</p>
                       </div>
                       <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                        <p className="text-[#4a5565] mb-1">Birth Date</p>
+                        <p className="text-[#4a5565] mb-1">{t('verificationModal.birthDate')}</p>
                         <p className="font-semibold text-[#1a1a1a]">
                           {verificationDetail?.birthDate ? new Date(verificationDetail.birthDate).toLocaleDateString('en-GB') : '—'}
                         </p>
                       </div>
                       <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                        <p className="text-[#4a5565] mb-1">Gender</p>
+                        <p className="text-[#4a5565] mb-1">{t('verificationModal.gender')}</p>
                         <p className="font-semibold text-[#1a1a1a] capitalize">{verificationDetail?.gender?.toLowerCase() ?? '—'}</p>
                       </div>
                       <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                        <p className="text-[#4a5565] mb-1">Arabic Address</p>
+                        <p className="text-[#4a5565] mb-1">{t('verificationModal.arabicAddress')}</p>
                         <p className="font-semibold text-[#1a1a1a]" dir="rtl">{verificationDetail?.arabicAddress ?? '—'}</p>
                       </div>
                       <div className="bg-[#F2F4F6] rounded-2xl p-4">
-                        <p className="text-[#4a5565] mb-1">Phone</p>
+                        <p className="text-[#4a5565] mb-1">{t('verificationModal.phone')}</p>
                         <p className="font-semibold text-[#1a1a1a]">{verificationDetail?.phoneNumber ?? '—'}</p>
                       </div>
                     </>
@@ -500,15 +502,15 @@ export function UserManagementTab() {
                     ))
                   ) : (
                     [
-                      { label: 'Front ID', src: buildImageUrl(verificationDetail?.frontIdPhoto ?? null) },
-                      { label: 'Back ID', src: buildImageUrl(verificationDetail?.backIdPhoto ?? null) },
+                      { label: t('verificationModal.frontId'), src: buildImageUrl(verificationDetail?.frontIdPhoto ?? null) },
+                      { label: t('verificationModal.backId'), src: buildImageUrl(verificationDetail?.backIdPhoto ?? null) },
                     ].map(({ label, src }) => (
                       <div key={label}>
                         <p className="text-sm text-[#4a5565] mb-2 font-medium">{label}</p>
                         {src ? (
                           <img src={src} alt={label} className="w-full rounded-2xl border border-[#3A6EA5]/20 object-cover max-h-48 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(src, '_blank')} />
                         ) : (
-                          <div className="w-full rounded-2xl border border-dashed border-[#3A6EA5]/30 bg-[#F2F4F6] flex items-center justify-center h-32 text-[#4a5565] text-sm">No image</div>
+                          <div className="w-full rounded-2xl border border-dashed border-[#3A6EA5]/30 bg-[#F2F4F6] flex items-center justify-center h-32 text-[#4a5565] text-sm">{t('verificationModal.noImage')}</div>
                         )}
                       </div>
                     ))
@@ -520,28 +522,28 @@ export function UserManagementTab() {
             <div className="flex gap-3">
               {selectedUser.isDeleted ? (
                 <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl" disabled={userAction.isPending} onClick={() => handleUserAction(selectedUser.userId, 'restore')}>
-                  <UserCheck className="w-4 h-4 mr-2" /> Restore
+                  <UserCheck className="w-4 h-4 mr-2" /> {t('table.restore')}
                 </Button>
               ) : (
                 <>
                   {selectedUser.accountStatus === 'Banned' ? (
                     <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl" disabled={userAction.isPending} onClick={() => handleUserAction(selectedUser.userId, 'unban')}>
-                      <UserCheck className="w-4 h-4 mr-2" /> Unban
+                      <UserCheck className="w-4 h-4 mr-2" /> {t('users.actions.unban')}
                     </Button>
                   ) : !selectedUser.roles.includes('Admin') ? (
                     <Button variant="outline" className="flex-1 border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl" disabled={userAction.isPending} onClick={() => handleUserAction(selectedUser.userId, 'ban')}>
-                      <Ban className="w-4 h-4 mr-2" /> Ban
+                      <Ban className="w-4 h-4 mr-2" /> {t('users.actions.ban')}
                     </Button>
                   ) : null}
                   {!selectedUser.roles.includes('Admin') && (
                     <Button variant="outline" className="flex-1 border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl" disabled={userAction.isPending} onClick={() => handleUserAction(selectedUser.userId, 'delete')}>
-                      <XCircle className="w-4 h-4 mr-2" /> Delete
+                      <XCircle className="w-4 h-4 mr-2" /> {t('table.delete')}
                     </Button>
                   )}
                 </>
               )}
               <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20" onClick={() => setSelectedUser(null)}>
-                Close
+                {t('userModal.close')}
               </Button>
             </div>
           </motion.div>
@@ -552,19 +554,19 @@ export function UserManagementTab() {
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">Confirm Action</h3>
+            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">{t('confirmModal.title')}</h3>
             <p className="text-[#4a5565] mb-6">
-              Are you sure you want to {actionType} this user?
-              {actionType === 'delete' && ' A standard notification will be shown.'}
-              {' '}This action can be reversed later.
+              {t('confirmModal.messageUser', { action: t(`confirmModal.actions.${actionType}`) })}
+              {actionType === 'delete' && ' ' + t('confirmModal.deleteWarning')}
+              {' '}{t('confirmModal.reversibleWarning')}
             </p>
             <div className="flex gap-4">
               <Button variant="outline" className="flex-1 rounded-xl border-[#3A6EA5]/20" onClick={() => setShowConfirmModal(false)}>
-                Cancel
+                {t('confirmModal.cancel')}
               </Button>
               <Button
                 className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl" disabled={userAction.isPending} onClick={confirmUserAction}>
-                {userAction.isPending ? 'Processing…' : 'Confirm'}
+                {userAction.isPending ? t('confirmModal.processing') : t('confirmModal.confirm')}
               </Button>
             </div>
           </motion.div>

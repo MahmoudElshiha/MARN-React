@@ -14,6 +14,14 @@ import {
   Flag,
   CheckCircle,
   XCircle,
+  Wallet,
+  Globe,
+  Star,
+  User as UserIcon,
+  CalendarDays,
+  AlertCircle,
+  CheckCircle2,
+  MessageSquare,
 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router'
 import { useState } from 'react'
@@ -31,6 +39,7 @@ import {
 import { Label } from '../components/ui/label'
 import { Textarea } from '../components/ui/textarea'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 
 export function ViewUserProfilePage() {
   const navigate = useNavigate()
@@ -42,10 +51,11 @@ export function ViewUserProfilePage() {
   const [reportReason, setReportReason] = useState('')
 
   const submitReport = useSubmitReport()
+  const { t, i18n } = useTranslation('pages')
 
   const handleReport = () => {
-    if (!id || !reportReason.trim()) {
-      toast.error('Please provide a reason for reporting')
+    if (!id || reportReason.trim().length < 5) {
+      toast.error(t('viewUserProfile.toasts.reportReasonRequired', 'Please provide a reason of at least 5 characters for reporting'))
       return
     }
 
@@ -57,12 +67,18 @@ export function ViewUserProfilePage() {
       },
       {
         onSuccess: () => {
-          toast.success('Report submitted successfully. We will review it shortly.')
+          toast.success(t('viewUserProfile.toasts.reportSubmitted', 'Report submitted successfully. We will review it shortly.'))
           setShowReportDialog(false)
           setReportReason('')
         },
-        onError: () => {
-          toast.error('Failed to submit report. Please try again.')
+        onError: (error: any) => {
+          let msg = 'Failed to submit report. Please try again.';
+          if (error?.data?.errors) {
+            msg = Object.values(error.data.errors).flat().join(', ');
+          } else if (error?.message) {
+            msg = error.message;
+          }
+          toast.error(msg);
         }
       }
     )
@@ -93,7 +109,10 @@ export function ViewUserProfilePage() {
           onClick={() => navigate(-1)}
           className="mb-6 rounded-xl hover:bg-[#E5EBF0]/50"
         >
-          ← Back
+          <span className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'}>
+            {i18n.language === 'ar' ? '→' : '←'}
+          </span>
+          {t('viewUserProfile.back')}
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -120,7 +139,7 @@ export function ViewUserProfilePage() {
                 {profile.accountStatus === 'Active' && (
                   <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 rounded-full text-green-700 text-sm font-medium mb-4">
                     <CheckCircle className="w-4 h-4" />
-                    Active User
+                    {t('viewUserProfile.verifiedUser')}
                   </div>
                 )}
 
@@ -129,16 +148,70 @@ export function ViewUserProfilePage() {
                     <Mail className="w-4 h-4 text-[#3A6EA5]" />
                     <span>{profile.email}</span>
                   </div>
+                  {profile.gender && (
+                    <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
+                      <UserIcon className="w-4 h-4 text-[#3A6EA5]" />
+                      <span>{profile.gender}</span>
+                    </div>
+                  )}
+                  {profile.dateOfBirth && (
+                    <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
+                      <CalendarDays className="w-4 h-4 text-[#3A6EA5]" />
+                      <span>
+                        {Math.floor((new Date().getTime() - new Date(profile.dateOfBirth).getTime()) / 3.15576e+10)} years old
+                      </span>
+                    </div>
+                  )}
+                  {profile.country && (
+                    <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
+                      <Globe className="w-4 h-4 text-[#3A6EA5]" />
+                      <span>{profile.country}</span>
+                    </div>
+                  )}
+                  {profile.memberSince && (
+                    <div className="flex items-center gap-3 text-sm text-[#1a1a1a]">
+                      <Calendar className="w-4 h-4 text-[#3A6EA5]" />
+                      <span>Joined {new Date(profile.memberSince).getFullYear()}</span>
+                    </div>
+                  )}
                 </div>
 
+                {profile.isOwner && (
+                  <div className="mt-6 pt-6 border-t border-[#3A6EA5]/20 flex justify-around text-[#1a1a1a]">
+                    <div className="text-center">
+                      <div className="flex justify-center items-center gap-1 font-bold text-lg">
+                        <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+                        {profile.averageRating ? profile.averageRating.toFixed(1) : 'N/A'}
+                      </div>
+                      <p className="text-xs text-[#6B7280]">
+                        {profile.ratingsCount || 0} Ratings
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="flex justify-center items-center gap-1 font-bold text-lg">
+                        <Home className="w-5 h-5 text-[#3A6EA5]" />
+                        {profile.ownedPropertiesCount || 0}
+                      </div>
+                      <p className="text-xs text-[#6B7280]">Properties</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-6 pt-6 border-t border-[#3A6EA5]/20">
+                  <Button
+                    className="w-full rounded-xl bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white shadow-md mb-3"
+                    onClick={() => navigate('/messages')}
+                  >
+                    <MessageSquare className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                    Message
+                  </Button>
                   <Button
                     variant="destructive"
                     className="w-full rounded-xl bg-red-500 hover:bg-red-600"
                     onClick={() => setShowReportDialog(true)}
                   >
-                    <Flag className="w-4 h-4 mr-2" />
-                    Report User
+                    <Flag className={`w-4 h-4 ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                    {t('viewUserProfile.reportUser')}
                   </Button>
                 </div>
               </CardContent>
@@ -150,7 +223,7 @@ export function ViewUserProfilePage() {
             {/* About */}
             <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1a1a1a]">About</CardTitle>
+                <CardTitle className="text-2xl text-[#1a1a1a]">{t('viewUserProfile.about')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-[#1a1a1a] leading-relaxed">
@@ -159,13 +232,88 @@ export function ViewUserProfilePage() {
               </CardContent>
             </Card>
 
+            {/* Compatibility Analysis (Only shown if we have match data) */}
+            {profile.matchingPercentage !== undefined && profile.matchingPercentage !== null && (
+              <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-6">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-400 text-white font-bold text-lg px-4 py-2 rounded-full shadow-md flex items-center gap-1">
+                    {profile.matchingPercentage}% Match
+                  </div>
+                </div>
+                <CardHeader>
+                  <CardTitle className="text-2xl text-[#1a1a1a]">Compatibility Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {profile.topMatchingTraits && profile.topMatchingTraits.length > 0 && (
+                      <div className="bg-white p-4 rounded-2xl">
+                        <h4 className="text-sm font-bold text-[#1a1a1a] uppercase tracking-wider mb-3 flex items-center gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-green-500" />
+                          Top Matches
+                        </h4>
+                        <ul className="space-y-2">
+                          {profile.topMatchingTraits.map((trait, idx) => {
+                            let displayTrait = trait;
+                            if (trait === 'Both Non-Smokers') displayTrait = "You're both non-smokers";
+                            else if (trait.startsWith('Both prefer')) displayTrait = trait.replace('Both prefer', 'You both prefer');
+                            else if (trait.startsWith('Both ')) displayTrait = trait.replace('Both ', 'You both are ');
+
+                            return (
+                              <li key={idx} className="text-sm text-[#4a5565] flex items-start gap-2">
+                                <span className="text-green-500 mt-1 flex-shrink-0">•</span>
+                                <span>{displayTrait}</span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </div>
+                    )}
+
+                    {profile.mismatchedTraits && profile.mismatchedTraits.length > 0 && (
+                      <div className="bg-white p-4 rounded-2xl">
+                        <h4 className="text-sm font-bold text-[#1a1a1a] uppercase tracking-wider mb-3 flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-amber-500" />
+                          Differences
+                        </h4>
+                        <ul className="space-y-2">
+                          {profile.mismatchedTraits.map((trait, idx) => (
+                            <li key={idx} className="text-sm text-[#4a5565] flex items-start gap-2">
+                              <span className="text-amber-500 mt-1 flex-shrink-0">•</span>
+                              <span>{trait}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {profile.dealbreakersFound && profile.dealbreakersFound.length > 0 && (
+                      <div className="bg-white p-4 rounded-2xl md:col-span-2">
+                        <h4 className="text-sm font-bold text-[#1a1a1a] uppercase tracking-wider mb-3 flex items-center gap-2">
+                          <XCircle className="w-5 h-5 text-red-500" />
+                          Dealbreakers
+                        </h4>
+                        <ul className="space-y-2">
+                          {profile.dealbreakersFound.map((trait, idx) => (
+                            <li key={idx} className="text-sm text-red-600 font-medium flex items-start gap-2">
+                              <span className="text-red-500 mt-1 flex-shrink-0">•</span>
+                              <span>{trait}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Roommate Status */}
             <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <Users className="w-6 h-6 text-[#3A6EA5]" />
                   <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Roommate Status
+                    {t('viewUserProfile.roommateStatus')}
                   </CardTitle>
                 </div>
               </CardHeader>
@@ -176,10 +324,10 @@ export function ViewUserProfilePage() {
                       <CheckCircle className="w-6 h-6 text-green-500" />
                       <div>
                         <p className="font-semibold text-[#1a1a1a]">
-                          Accepts Roommates
+                          {t('viewUserProfile.acceptsRoommates')}
                         </p>
                         <p className="text-sm text-[#6B7280]">
-                          This user is open to sharing accommodation
+                          {t('viewUserProfile.acceptsRoommatesDesc')}
                         </p>
                       </div>
                     </>
@@ -188,10 +336,10 @@ export function ViewUserProfilePage() {
                       <XCircle className="w-6 h-6 text-red-500" />
                       <div>
                         <p className="font-semibold text-[#1a1a1a]">
-                          Does Not Accept Roommates
+                          {t('viewUserProfile.doesNotAcceptRoommates')}
                         </p>
                         <p className="text-sm text-[#6B7280]">
-                          This user prefers to live alone
+                          {t('viewUserProfile.doesNotAcceptRoommatesDesc')}
                         </p>
                       </div>
                     </>
@@ -201,104 +349,119 @@ export function ViewUserProfilePage() {
             </Card>
 
             {/* Lifestyle & Preferences */}
-            <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <Home className="w-6 h-6 text-[#3A6EA5]" />
-                  <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Lifestyle & Preferences
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">Smoking</p>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.smoking === null ? 'Unspecified' : (profile.smoking ? 'Yes' : 'No')}
-                    </p>
+            {profile.roommatePreferencesEnabled && (
+              <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Home className="w-6 h-6 text-[#3A6EA5]" />
+                    <CardTitle className="text-2xl text-[#1a1a1a]">
+                      {t('viewUserProfile.lifestyle')}
+                    </CardTitle>
                   </div>
-                  <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">Pets</p>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.pets === null ? 'Unspecified' : (profile.pets ? 'Yes' : 'No')}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">
-                      Sleep Schedule
-                    </p>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.sleepSchedule || 'Unspecified'}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-white rounded-2xl">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Volume2 className="w-4 h-4 text-[#6B7280]" />
-                      <p className="text-sm text-[#6B7280]">Noise Tolerance</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-white rounded-2xl">
+                      <p className="text-sm text-[#6B7280] mb-1">{t('viewUserProfile.lifestyle_fields.smoking', 'Smoking')}</p>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.smoking === null ? 'Unspecified' : (profile.smoking ? 'Yes' : 'No')}
+                      </p>
                     </div>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.noiseTolerance !== null ? profile.noiseTolerance + '/5' : 'Unspecified'}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">
-                      Guests Frequency
-                    </p>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.guestsFrequency || 'Unspecified'}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-white rounded-2xl">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Briefcase className="w-4 h-4 text-[#6B7280]" />
-                      <p className="text-sm text-[#6B7280]">Work Schedule</p>
+                    <div className="p-4 bg-white rounded-2xl">
+                      <p className="text-sm text-[#6B7280] mb-1">{t('viewUserProfile.lifestyle_fields.pets', 'Pets')}</p>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.pets === null ? 'Unspecified' : (profile.pets ? 'Yes' : 'No')}
+                      </p>
                     </div>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.workSchedule || 'Unspecified'}
-                    </p>
+                    <div className="p-4 bg-white rounded-2xl">
+                      <p className="text-sm text-[#6B7280] mb-1">
+                        {t('viewUserProfile.lifestyle_fields.sleepSchedule', 'Sleep Schedule')}
+                      </p>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.sleepSchedule ? (profile.sleepScheduleDisplayName || profile.sleepSchedule) : 'Unspecified'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-2xl">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Volume2 className="w-4 h-4 text-[#6B7280]" />
+                        <p className="text-sm text-[#6B7280]">{t('viewUserProfile.lifestyle_fields.noiseTolerance', 'Noise Tolerance')}</p>
+                      </div>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.noiseTolerance !== null ? profile.noiseTolerance + '/5' : 'Unspecified'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-2xl">
+                      <p className="text-sm text-[#6B7280] mb-1">
+                        {t('viewUserProfile.lifestyle_fields.guestsFrequency', 'Guests Frequency')}
+                      </p>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.guestsFrequency ? (profile.guestsFrequencyDisplayName || profile.guestsFrequency) : 'Unspecified'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-2xl">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Briefcase className="w-4 h-4 text-[#6B7280]" />
+                        <p className="text-sm text-[#6B7280]">{t('viewUserProfile.lifestyle_fields.workSchedule', 'Work Schedule')}</p>
+                      </div>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.workSchedule ? (profile.workScheduleDisplayName || profile.workSchedule) : 'Unspecified'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-2xl md:col-span-2">
+                      <p className="text-sm text-[#6B7280] mb-1">{t('viewUserProfile.lifestyle_fields.sharingLevel', 'Sharing Level')}</p>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.sharingLevel ? (profile.sharingLevelDisplayName || profile.sharingLevel) : 'Unspecified'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-2xl md:col-span-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Wallet className="w-4 h-4 text-[#6B7280]" />
+                        <p className="text-sm text-[#6B7280]">Budget Range</p>
+                      </div>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {(profile.budgetRangeMin !== null && profile.budgetRangeMax !== null)
+                          ? `${profile.budgetRangeMin} EGP - ${profile.budgetRangeMax} EGP`
+                          : 'Unspecified'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-4 bg-white rounded-2xl md:col-span-2">
-                    <p className="text-sm text-[#6B7280] mb-1">Sharing Level</p>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.sharingLevel || 'Unspecified'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Education */}
-            <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <GraduationCap className="w-6 h-6 text-[#3A6EA5]" />
-                  <CardTitle className="text-2xl text-[#1a1a1a]">
-                    Education
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">
-                      Education Level
-                    </p>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.educationLevel || 'Unspecified'}
-                    </p>
+            {profile.roommatePreferencesEnabled && (
+              <Card className="bg-[#E5EBF0] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <GraduationCap className="w-6 h-6 text-[#3A6EA5]" />
+                    <CardTitle className="text-2xl text-[#1a1a1a]">
+                      {t('viewUserProfile.education')}
+                    </CardTitle>
                   </div>
-                  <div className="p-4 bg-white rounded-2xl">
-                    <p className="text-sm text-[#6B7280] mb-1">
-                      Field of Study
-                    </p>
-                    <p className="font-semibold text-[#1a1a1a]">
-                      {profile.fieldOfStudy || 'Unspecified'}
-                    </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-white rounded-2xl">
+                      <p className="text-sm text-[#6B7280] mb-1">
+                        {t('viewUserProfile.lifestyle_fields.educationLevel', 'Education Level')}
+                      </p>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.educationLevel ? (profile.educationLevelDisplayName || profile.educationLevel) : 'Unspecified'}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-2xl">
+                      <p className="text-sm text-[#6B7280] mb-1">
+                        {t('viewUserProfile.lifestyle_fields.fieldOfStudy', 'Field of Study')}
+                      </p>
+                      <p className="font-semibold text-[#1a1a1a]">
+                        {profile.fieldOfStudy ? (profile.fieldOfStudyDisplayName || profile.fieldOfStudy) : 'Unspecified'}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
@@ -308,11 +471,10 @@ export function ViewUserProfilePage() {
         <DialogContent className="bg-white rounded-3xl">
           <DialogHeader>
             <DialogTitle className="text-2xl text-[#1a1a1a]">
-              Report User
+              {t('viewUserProfile.report.title', 'Report User')}
             </DialogTitle>
             <DialogDescription className="text-[#6B7280]">
-              Please provide details about why you're reporting this user. Our
-              team will review your report.
+              {t('viewUserProfile.reportDialogDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -321,15 +483,20 @@ export function ViewUserProfilePage() {
                 htmlFor="report-reason"
                 className="text-[#1a1a1a] mb-2 block"
               >
-                Reason for Reporting
+                {t('viewUserProfile.reasonForReporting')}
               </Label>
               <Textarea
                 id="report-reason"
                 value={reportReason}
                 onChange={(e) => setReportReason(e.target.value)}
-                placeholder="Describe the issue..."
+                placeholder={t('viewUserProfile.report.reasonPlaceholder', 'Describe the issue...')}
                 className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
               />
+              {reportReason.trim().length > 0 && reportReason.trim().length < 5 && (
+                <p className="text-xs text-red-500 mt-2">
+                  {t('viewUserProfile.report.minChars', 'Please enter at least 5 characters.')} ({reportReason.trim().length}/5)
+                </p>
+              )}
             </div>
           </div>
           <div className="flex gap-3 justify-end">
@@ -341,15 +508,15 @@ export function ViewUserProfilePage() {
               }}
               className="rounded-xl border-[#3A6EA5]/20"
             >
-              Cancel
+              {t('viewUserProfile.report.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleReport}
-              disabled={!reportReason.trim() || submitReport.isPending}
+              disabled={reportReason.trim().length < 5 || submitReport.isPending}
               className="bg-red-500 hover:bg-red-600 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Submit Report
+              {t('viewUserProfile.report.submit', 'Submit Report')}
             </Button>
           </div>
         </DialogContent>

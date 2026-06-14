@@ -21,9 +21,11 @@ import { NotificationsPage } from './pages/NotificationsPage'
 import { LoginPage } from './pages/LoginPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { ProfileSettingsPage } from './pages/ProfileSettingsPage'
+import { ProfilePage } from './pages/ProfilePage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ChatbotPage } from './pages/ChatbotPage'
 import { AdminDashboardPage } from './pages/admin-dashboard/AdminDashboardPage'
+import { AdminPropertyDetailsPage } from './pages/admin-dashboard/AdminPropertyDetailsPage'
 import { OTPVerificationPage } from './pages/OTPVerificationPage'
 import { TwoFactorPage } from './pages/TwoFactorPage'
 import { ConfirmEmailPage } from './pages/ConfirmEmailPage'
@@ -36,6 +38,8 @@ import { EditPropertyPage } from './pages/edit-property/EditPropertyPage'
 import { PropertyByOwnerPage } from './pages/PropertyByOwnerPage'
 import { ModalTestPage } from './pages/ModalTestPage'
 import { SavedPropertiesPage } from './pages/SavedPropertiesPage'
+import { RoommateMatchingPage } from './pages/RoommateMatchingPage'
+import EmailTestPage from './pages/EmailTestPage'
 import { Toaster } from './components/ui/sonner'
 
 export default function App() {
@@ -113,7 +117,7 @@ export default function App() {
           <Route
             path="/tenant-dashboard"
             element={
-              <ProtectedRoute roles={['tenant', 'owner']}>
+              <ProtectedRoute roles={['tenant', 'owner', 'admin']}>
                 <TenantDashboard />
               </ProtectedRoute>
             }
@@ -123,7 +127,7 @@ export default function App() {
           <Route
             path="/owner-dashboard"
             element={
-              <ProtectedRoute roles={['owner']}>
+              <ProtectedRoute roles={['owner', 'admin']}>
                 <OwnerDashboard />
               </ProtectedRoute>
             }
@@ -131,7 +135,7 @@ export default function App() {
           <Route
             path="/add-property"
             element={
-              <ProtectedRoute roles={['owner']}>
+              <ProtectedRoute roles={['owner', 'admin']}>
                 <AddPropertyPage />
               </ProtectedRoute>
             }
@@ -139,7 +143,7 @@ export default function App() {
           <Route
             path="/edit-property/:id"
             element={
-              <ProtectedRoute roles={['owner']}>
+              <ProtectedRoute roles={['owner', 'admin']}>
                 <EditPropertyPage />
               </ProtectedRoute>
             }
@@ -147,7 +151,7 @@ export default function App() {
           <Route
             path="/property-by-owner/:id"
             element={
-              <ProtectedRoute roles={['owner']}>
+              <ProtectedRoute roles={['owner', 'admin']}>
                 <PropertyByOwnerPage />
               </ProtectedRoute>
             }
@@ -159,6 +163,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={['admin']}>
                 <AdminDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/property/:id"
+            element={
+              <ProtectedRoute roles={['admin']}>
+                <AdminPropertyDetailsPage />
               </ProtectedRoute>
             }
           />
@@ -181,7 +193,15 @@ export default function App() {
             }
           />
           <Route
-            path="/profile-settings"
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
             element={
               <ProtectedRoute>
                 <ProfileSettingsPage />
@@ -193,6 +213,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <SavedPropertiesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/roommate-matching"
+            element={
+              <ProtectedRoute>
+                <RoommateMatchingPage />
               </ProtectedRoute>
             }
           />
@@ -218,6 +246,7 @@ export default function App() {
           {/* Misc */}
           <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/modal-test" element={<ModalTestPage />} />
+          <Route path="/emailTest" element={<EmailTestPage />} />
 
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />

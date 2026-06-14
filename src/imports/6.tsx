@@ -167,7 +167,7 @@ function Span2() {
     <div className="h-[20px] relative shrink-0 w-[80.912px]" data-name="span">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid relative size-full">
         <p className="absolute font-['Inter:Regular',sans-serif] font-normal leading-[20px] left-0 not-italic text-[#4a5565] text-[14px] top-[0.6px] whitespace-nowrap">
-          Cairo, Egypt
+          New Damietta, Egypt
         </p>
       </div>
     </div>
@@ -3828,8 +3828,8 @@ function Span41() {
       className="absolute font-['Inter:Regular',sans-serif] font-normal h-[48px] leading-[24px] left-[24px] not-italic text-[#99a1af] text-[16px] top-0 w-[132.425px] whitespace-nowrap"
       data-name="span"
     >
-      <p className="absolute left-0 top-[-0.6px]">123 Tahrir Square</p>
-      <p className="absolute left-0 top-[23.4px]">Cairo, Egypt</p>
+      <p className="absolute left-0 top-[-0.6px]">Besides new Damietta University</p>
+      <p className="absolute left-0 top-[23.4px]">New Damietta, Egypt</p>
     </div>
   )
 }
