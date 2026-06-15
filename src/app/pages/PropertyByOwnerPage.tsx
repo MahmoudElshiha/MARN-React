@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams, Link } from 'react-router'
 import {
   Bath,
   Bed,
@@ -23,13 +23,15 @@ import { Skeleton } from '../components/ui/skeleton'
 import { useProperty } from '@/hooks/useProperty'
 import { useOwnerDashboard } from '@/hooks/useOwnerDashboard'
 import { useBookingMutations } from '@/hooks/useBookingRequests'
-import { usePropertyRatingSummary, usePropertyComments, useUpdatePropertyComment } from '@/hooks/usePropertyFeedback'
+import { usePropertyFeedback, useUpdatePropertyComment } from '@/hooks/usePropertyFeedback'
 import { ImageWithFallback } from '../components/figma/ImageWithFallback'
 import { getImageUrl } from '@/constants/assets'
 import { formatDistanceToNow } from 'date-fns'
 import { useAuth } from '@/hooks/useAuth'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/userService'
+import { propertyService } from '@/services/propertyService'
+import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
@@ -74,15 +76,26 @@ export function PropertyByOwnerPage() {
   const { data: dashboardResponse, isLoading: requestsLoading } = useOwnerDashboard()
   const { accept, reject } = useBookingMutations()
 
-  const { data: ratingSummaryData } = usePropertyRatingSummary(id)
-  const ratingSummary = ratingSummaryData?.data
-
-  const { data: commentsData } = usePropertyComments(id)
-  const comments = commentsData?.data?.items || []
+  const { data: feedbackData } = usePropertyFeedback(id)
+  const ratingSummary = feedbackData?.data
+  const comments = feedbackData?.data?.feedback?.items || []
 
   const property = propertyData?.data ?? null
   const allRequests = dashboardResponse?.data?.pendingBookingRequests ?? []
   const requests = allRequests.filter((r) => r.propertyId.toString() === id)
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const queryClient = useQueryClient()
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: () => propertyService.deactivateProperty(id!),
+    onSuccess: () => {
+      toast.success(property?.isActive !== false ? t('propertyByOwner.deactivatedSuccess', 'Property deactivated successfully') : t('propertyByOwner.reactivatedSuccess', 'Property reactivated successfully'))
+      queryClient.invalidateQueries({ queryKey: ['property', id] })
+      setShowConfirmModal(false)
+    },
+    onError: () => toast.error(t('propertyByOwner.actionFailed', 'Action failed')),
+  })
 
   const images: string[] = useMemo(() => {
     const p = property as any
@@ -203,7 +216,7 @@ export function PropertyByOwnerPage() {
                   <div className="flex items-center gap-1">
                     <Star className="w-5 h-5 fill-[#FFB800] text-[#FFB800]" />
                     <span className="font-semibold text-[#1a1a1a]">
-                      {property.rating}
+                      {Math.round((property.rating ?? 0) * 10) / 10}
                     </span>
                     <span className="text-[#6B7280]">
                       ({property.reviews} {t('details.reviewsCount')})
@@ -403,7 +416,7 @@ export function PropertyByOwnerPage() {
                 <div className="flex items-center gap-2">
                   <Star className="w-6 h-6 fill-[#FFB800] text-[#FFB800]" />
                   <span className="text-2xl font-bold text-[#1a1a1a]">
-                    {ratingSummary?.averageRating || property?.rating || 0}
+                    {Math.round((ratingSummary?.averageRating || property?.rating || 0) * 10) / 10}
                   </span>
                 </div>
               </div>
@@ -411,19 +424,23 @@ export function PropertyByOwnerPage() {
               <div className="space-y-4">
                 {comments.length > 0 ? (
                   comments.map((comment: any) => (
-                    <div key={comment.commentId} className="p-4 bg-white rounded-2xl relative">
+                    <div key={comment.commentId || comment.feedbackId} className="p-4 bg-white rounded-2xl relative">
                       <div className="flex items-start gap-4 mb-3">
-                        <Avatar className="w-12 h-12">
-                          {comment.userProfileImage && <AvatarImage src={getImageUrl(comment.userProfileImage)} />}
-                          <AvatarFallback>
-                            {comment.userDisplayName?.slice(0, 2).toUpperCase() || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
+                        <Link to={`/user/${comment.commenterId || comment.userId}`}>
+                          <Avatar className="w-12 h-12 hover:ring-2 hover:ring-[#3A6EA5] transition-all cursor-pointer">
+                            {comment.userProfileImage && <AvatarImage src={getImageUrl(comment.userProfileImage)} />}
+                            <AvatarFallback>
+                              {comment.userDisplayName?.slice(0, 2).toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                        </Link>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <h4 className="font-semibold text-[#1a1a1a]">
-                              {comment.userDisplayName || 'Guest'}
-                            </h4>
+                            <Link to={`/user/${comment.commenterId || comment.userId}`} className="hover:underline">
+                              <h4 className="font-semibold text-[#1a1a1a]">
+                                {comment.userDisplayName || 'Guest'}
+                              </h4>
+                            </Link>
                             <div className="flex items-center gap-3">
                               <span className="text-sm text-[#4a5565]">
                                 {comment.createdAt ? formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true }) : ''}
@@ -433,16 +450,16 @@ export function PropertyByOwnerPage() {
                                   variant="ghost"
                                   size="icon"
                                   className="w-8 h-8 rounded-full"
-                                  onClick={() => setOpenDropdownId(openDropdownId === comment.commentId ? null : comment.commentId)}
+                                  onClick={() => setOpenDropdownId(openDropdownId === (comment.commentId || comment.feedbackId) ? null : (comment.commentId || comment.feedbackId))}
                                 >
                                   <MoreVertical className="w-4 h-4 text-[#4a5565]" />
                                 </Button>
-                                {openDropdownId === comment.commentId && (
+                                {openDropdownId === (comment.commentId || comment.feedbackId) && (
                                   <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-10">
                                     {comment.userId === user?.id && (
                                       <button
                                         onClick={() => {
-                                          setEditingCommentId(comment.commentId)
+                                          setEditingCommentId(comment.commentId || comment.feedbackId)
                                           setEditContent(comment.content)
                                           setOpenDropdownId(null)
                                         }}
@@ -453,7 +470,7 @@ export function PropertyByOwnerPage() {
                                     )}
                                     <button
                                       onClick={() => {
-                                        reportMutation.mutate(comment.commentId)
+                                        reportMutation.mutate(comment.commentId || comment.feedbackId)
                                         setOpenDropdownId(null)
                                       }}
                                       className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
@@ -465,7 +482,7 @@ export function PropertyByOwnerPage() {
                               </div>
                             </div>
                           </div>
-                          {editingCommentId === comment.commentId ? (
+                          {editingCommentId === (comment.commentId || comment.feedbackId) ? (
                             <div className="mt-2 flex flex-col gap-2">
                               <textarea
                                 className="w-full p-2 border border-gray-200 rounded-xl resize-none text-sm focus:outline-none focus:ring-1 focus:ring-[#3A6EA5]"
@@ -484,7 +501,7 @@ export function PropertyByOwnerPage() {
                                 </Button>
                                 <Button
                                   size="sm"
-                                  onClick={() => handleEditSubmit(comment.commentId)}
+                                  onClick={() => handleEditSubmit(comment.commentId || comment.feedbackId)}
                                   disabled={updateComment.isPending}
                                   className="bg-[#3A6EA5] hover:bg-[#2C5580] text-white rounded-xl h-8 text-xs"
                                 >
@@ -533,6 +550,14 @@ export function PropertyByOwnerPage() {
 
                   <Button
                     variant="outline"
+                    className={`w-full rounded-xl ${property.isActive !== false ? 'border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white' : 'border-[#00A650] text-[#00A650] hover:bg-[#00A650] hover:text-white'}`}
+                    onClick={() => setShowConfirmModal(true)}
+                  >
+                    {property.isActive !== false ? t('propertyByOwner.deactivateProperty', 'Deactivate Property') : t('propertyByOwner.reactivateProperty', 'Reactivate Property')}
+                  </Button>
+
+                  <Button
+                    variant="outline"
                     className="w-full rounded-xl border-[#3A6EA5]/20"
                     onClick={() => navigate('/owner-dashboard')}
                   >
@@ -564,6 +589,27 @@ export function PropertyByOwnerPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">{t('confirmModal.title', 'Confirm Action')}</h3>
+            <p className="text-[#4a5565] mb-6">
+              {property.isActive !== false ? t('propertyByOwner.deactivateWarning', 'Are you sure you want to deactivate this property? It will no longer be searchable or visible to renters.') : t('propertyByOwner.reactivateWarning', 'Are you sure you want to reactivate this property? It will become searchable and visible to renters again.')}
+            </p>
+            <div className="flex gap-4">
+              <Button variant="outline" className="flex-1 rounded-xl border-[#3A6EA5]/20" onClick={() => setShowConfirmModal(false)}>
+                {t('confirmModal.cancel', 'Cancel')}
+              </Button>
+              <Button
+                className={`flex-1 text-white rounded-xl ${property.isActive !== false ? 'bg-[#FF4D4F] hover:bg-[#E04343]' : 'bg-[#00A650] hover:bg-[#008A42]'}`} disabled={toggleActiveMutation.isPending} onClick={() => toggleActiveMutation.mutate()}>
+                {toggleActiveMutation.isPending ? t('confirmModal.processing', 'Processing...') : t('confirmModal.confirm', 'Confirm')}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

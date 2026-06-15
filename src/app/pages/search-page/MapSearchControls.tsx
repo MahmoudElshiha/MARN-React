@@ -5,13 +5,15 @@ import {
   MapPin,
   X,
   Loader2,
+  ChevronDown,
 } from 'lucide-react'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/components/ui/tooltip'
+import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover'
 import { useTranslation } from 'react-i18next'
 
-const RADIUS_OPTIONS = [5, 10, 25, 50] as const
+const RADIUS_OPTIONS = [10, 25, 50] as const
 
 interface MapSearchControlsProps {
   userLat: number | undefined
@@ -40,7 +42,10 @@ export function MapSearchControls({
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
   const [error, setError] = useState('')
+  const [customRadiusInput, setCustomRadiusInput] = useState('')
+  const [isCustomOpen, setIsCustomOpen] = useState(false)
 
+  const isCustomRadius = !RADIUS_OPTIONS.includes(radiusKm as any)
   const hasLocation = userLat !== undefined
 
   /* ── Postal‑code geocode via Nominatim ──────────────────────────── */
@@ -206,7 +211,7 @@ export function MapSearchControls({
                   key={r}
                   onClick={() => onRadiusChange(r)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                    radiusKm === r
+                    radiusKm === r && !isCustomRadius
                       ? 'bg-[#3A6EA5] text-white shadow-sm'
                       : 'bg-[#f5f7fa] text-[#4a5565] hover:bg-[#3A6EA5]/10'
                   }`}
@@ -214,6 +219,64 @@ export function MapSearchControls({
                   {r}km
                 </button>
               ))}
+
+              <Popover open={isCustomOpen} onOpenChange={setIsCustomOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                      isCustomRadius
+                        ? 'bg-[#3A6EA5] text-white shadow-sm'
+                        : 'bg-[#f5f7fa] text-[#4a5565] hover:bg-[#3A6EA5]/10'
+                    }`}
+                  >
+                    {isCustomRadius ? `${radiusKm}km` : t('mapInput.customRadius', { defaultValue: 'Custom' })}
+                    <ChevronDown className="w-3 h-3 opacity-70" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-3" align="center">
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm text-[#1a1a1a]">{t('mapInput.enterCustomRadius', { defaultValue: 'Custom Distance' })}</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          type="number"
+                          min="1"
+                          max="1000"
+                          placeholder="e.g. 15"
+                          value={customRadiusInput}
+                          onChange={(e) => setCustomRadiusInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const val = parseInt(customRadiusInput);
+                              if (!isNaN(val) && val > 0) {
+                                onRadiusChange(val);
+                                setIsCustomOpen(false);
+                              }
+                            }
+                          }}
+                          className="h-8 text-sm pr-7"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-[#6a7282]">
+                          km
+                        </span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        className="h-8 px-3 bg-[#3A6EA5] hover:bg-[#2a5a8a]"
+                        onClick={() => {
+                          const val = parseInt(customRadiusInput);
+                          if (!isNaN(val) && val > 0) {
+                            onRadiusChange(val);
+                            setIsCustomOpen(false);
+                          }
+                        }}
+                      >
+                        {t('common.apply', { defaultValue: 'Apply' })}
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </>
         )}

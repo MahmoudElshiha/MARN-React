@@ -3,8 +3,6 @@ import type { ApiResponse, PaginatedResponse } from '@/types/common'
 import type { BookingRequest, Contract } from '@/types/rental'
 
 export const rentalService = {
-  getBookingRequests: () =>
-    apiClient.get<PaginatedResponse<BookingRequest>>('/api/Rentals/requests'),
 
   acceptRequest: (requestId: string) =>
     apiClient.post<ApiResponse<any>>(
@@ -17,8 +15,6 @@ export const rentalService = {
       `/api/BookingRequest/cancel/${requestId}`,
     ),
 
-  getContracts: () =>
-    apiClient.get<PaginatedResponse<Contract>>('/api/Rentals/contracts'),
 
   getContractById: (id: string) =>
     apiClient.get<ApiResponse<Contract>>(`/api/contracts/${id}`),

@@ -352,18 +352,13 @@ export function ContractsModerationTab() {
             )}
 
             <div className="flex gap-3">
-              <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl" onClick={() => {
-                toast.info('Approve functionality pending backend integration');
-              }}>
-                <CheckCircle className="w-4 h-4 mr-2" /> {t('table.approve', { defaultValue: 'Approve' })}
-              </Button>
-              <Button variant="outline" className="flex-1 border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl" onClick={() => {
-                toast.info('Reject functionality pending backend integration');
-              }}>
-                <XCircle className="w-4 h-4 mr-2" /> {t('table.reject', { defaultValue: 'Reject' })}
-              </Button>
+              {selectedContract.canCancel && (
+                <Button variant="outline" className="flex-1 border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl" onClick={() => handleCancelContract(selectedContract.contractId)}>
+                  <XCircle className="w-4 h-4 mr-2" /> {t('modals.cancel', { defaultValue: 'Cancel Contract' })}
+                </Button>
+              )}
               <Button variant="outline" className="flex-1 rounded-xl border-[#3A6EA5]/20" onClick={() => setSelectedContract(null)}>
-                {t('confirmModal.cancel', { defaultValue: 'Cancel' })}
+                {t('confirmModal.close', { defaultValue: 'Close' })}
               </Button>
             </div>
           </motion.div>

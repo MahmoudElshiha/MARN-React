@@ -41,6 +41,12 @@ import {
   PopoverTrigger,
 } from '../components/ui/popover'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../components/ui/tooltip'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -65,8 +71,7 @@ import {
 } from '../components/ui/select'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  usePropertyRatingSummary,
-  usePropertyComments,
+  usePropertyFeedback,
   useAddPropertyFeedback,
   useUpdatePropertyComment,
   useDeletePropertyFeedback,
@@ -127,11 +132,10 @@ export function PropertyDetailsPage() {
       }
     }
   }, [property, user, id, navigate]);
-  const { data: ratingSummaryData } = usePropertyRatingSummary(id)
-  const ratingSummary = ratingSummaryData?.data
+  const { data: feedbackData } = usePropertyFeedback(id)
+  const ratingSummary = feedbackData?.data
 
-  const { data: commentsData } = usePropertyComments(id)
-  const rawComments = commentsData?.data?.items || property?.comments || []
+  const rawComments = feedbackData?.data?.feedback?.items || property?.comments || []
   const displayComments = useMemo(() => {
     return [...rawComments].sort((a, b) => {
       const isAUser = (a.commenterId || a.userId) === user?.id;
@@ -198,12 +202,11 @@ export function PropertyDetailsPage() {
 
   const executeSubmitComment = () => {
     setIsSubmittingComment(true)
-    const finalRating = newCommentRating === 0 ? 5 : newCommentRating;
+    const finalRating = newCommentRating;
     
     addFeedbackMutation.mutate({
       propertyId: id!,
-      commentData: { content: newCommentText },
-      ratingData: { rating: finalRating },
+      feedbackData: { rating: finalRating, content: newCommentText },
       _optimistic: {
         userId: user!.id,
         displayName: (user as any)?.fullName || (user as any)?.displayName || user!.email || 'You',
@@ -215,7 +218,6 @@ export function PropertyDetailsPage() {
         setNewCommentRating(0)
         setIsSubmittingComment(false)
         toast.success('Review added successfully!')
-        window.location.reload()
       },
       onError: (error: any) => {
         setIsSubmittingComment(false)
@@ -226,7 +228,7 @@ export function PropertyDetailsPage() {
   }
 
   const handleSubmitComment = () => {
-    if (!newCommentText.trim() || !id) return
+    if (!newCommentText.trim() || newCommentRating === 0 || !id) return
 
     // Check if user already has a review locally
     if (userExistingComment) {
@@ -602,7 +604,7 @@ export function PropertyDetailsPage() {
                         <div className="flex items-center gap-1">
                           <Star className="w-5 h-5 fill-[#3A6EA5] text-[#3A6EA5]" />
                           <span className="font-semibold text-[#1a1a1a]">
-                            {property.rating}
+                            {Math.round(property.rating * 10) / 10}
                           </span>
                           {property.reviews !== undefined && (
                             <span className="text-[#4a5565]">
@@ -747,7 +749,7 @@ export function PropertyDetailsPage() {
                     </Link>
                     <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                       <Star className="w-4 h-4 fill-[#3A6EA5] text-[#3A6EA5]" />
-                      <span>{effectiveOwnerRating} {t('details.rating', { ns: 'properties', defaultValue: 'rating' })} • {effectiveOwnerPropertiesCount} {t('details.properties', { ns: 'properties', defaultValue: 'properties' })}</span>
+                      <span>{Math.round(effectiveOwnerRating * 10) / 10} {t('details.rating', { ns: 'properties', defaultValue: 'rating' })} • {effectiveOwnerPropertiesCount} {t('details.properties', { ns: 'properties', defaultValue: 'properties' })}</span>
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -794,7 +796,7 @@ export function PropertyDetailsPage() {
                 <div className="flex items-center gap-2">
                   <Star className="w-6 h-6 fill-[#FFB800] text-[#FFB800]" />
                   <span className="text-2xl font-bold text-[#1a1a1a]">
-                    {ratingSummary?.averageRating || property?.rating || 0}
+                    {Math.round((ratingSummary?.averageRating || property?.rating || 0) * 10) / 10}
                   </span>
                 </div>
               </div>
@@ -826,13 +828,26 @@ export function PropertyDetailsPage() {
                     className="mb-3 resize-none bg-[#f5f7fa] border-none"
                     rows={3}
                   />
-                  <Button
-                    onClick={handleSubmitComment}
-                    disabled={isSubmittingComment || !newCommentText.trim()}
-                    className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white"
-                  >
-                    {isSubmittingComment ? t('details.submitting', { ns: 'properties', defaultValue: 'Submitting...' }) : t('details.postReview', { ns: 'properties', defaultValue: 'Post Review' })}
-                  </Button>
+                  <TooltipProvider delayDuration={1000}>
+                    <Tooltip delayDuration={1000}>
+                      <TooltipTrigger asChild>
+                        <span className="inline-block w-full">
+                          <Button
+                            onClick={handleSubmitComment}
+                            disabled={isSubmittingComment || !newCommentText.trim() || newCommentRating === 0}
+                            className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white w-full disabled:pointer-events-auto"
+                          >
+                            {isSubmittingComment ? t('details.submitting', { ns: 'properties', defaultValue: 'Submitting...' }) : t('details.postReview', { ns: 'properties', defaultValue: 'Post Review' })}
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      {(!newCommentText.trim() || newCommentRating === 0) && (
+                        <TooltipContent>
+                          <p>{t('details.selectRatingAndComment', { ns: 'properties', defaultValue: 'Please choose a rating and type a comment before posting' })}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               ) : (
                 <div className="p-4 bg-white rounded-2xl mb-6 flex flex-col items-center justify-center text-center">
@@ -849,28 +864,32 @@ export function PropertyDetailsPage() {
                     const isCurrentUser = (comment.commenterId || comment.userId) === user?.id;
                     const profileImage = comment.commenterProfileImage || comment.userProfileImage;
                     const displayName = comment.commenterFullName || comment.userDisplayName || 'Guest';
-                    const commentRating = isCurrentUser ? (comment.rating || ratingSummary?.currentUserRating) : comment.rating;
+                    const commentRating = isCurrentUser ? (comment.rating || ratingSummary?.currentUserFeedback?.rating) : comment.rating;
 
                     return (
-                    <div key={comment.commentId} className="p-4 bg-white rounded-2xl">
+                    <div key={comment.commentId || comment.feedbackId} className="p-4 bg-white rounded-2xl">
                       <div className="flex items-start gap-4 mb-3">
-                        <Avatar className="w-12 h-12">
-                          {profileImage && <AvatarImage src={getImageUrl(profileImage)} />}
-                          <AvatarFallback>
-                            {displayName?.slice(0, 2).toUpperCase() || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
+                        <Link to={`/user/${comment.commenterId || comment.userId}`}>
+                          <Avatar className="w-12 h-12 hover:ring-2 hover:ring-[#3A6EA5] transition-all cursor-pointer">
+                            {profileImage && <AvatarImage src={getImageUrl(profileImage)} />}
+                            <AvatarFallback>
+                              {displayName?.slice(0, 2).toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                        </Link>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex flex-col gap-1">
-                              <h4 className="font-semibold text-[#1a1a1a] flex items-center gap-2">
-                                {displayName}
-                                {isCurrentUser && (
-                                  <span className="text-xs bg-[#3A6EA5]/10 text-[#3A6EA5] px-2 py-0.5 rounded-full font-medium">
-                                    {t('details.yourReview', { ns: 'properties', defaultValue: 'Your review' })}
-                                  </span>
-                                )}
-                              </h4>
+                              <Link to={`/user/${comment.commenterId || comment.userId}`} className="hover:underline">
+                                <h4 className="font-semibold text-[#1a1a1a] flex items-center gap-2">
+                                  {displayName}
+                                  {isCurrentUser && (
+                                    <span className="text-xs bg-[#3A6EA5]/10 text-[#3A6EA5] px-2 py-0.5 rounded-full font-medium no-underline">
+                                      {t('details.yourReview', { ns: 'properties', defaultValue: 'Your review' })}
+                                    </span>
+                                  )}
+                                </h4>
+                              </Link>
                               {commentRating !== undefined && commentRating > 0 && (
                                 <div className="flex items-center gap-0.5">
                                   {Array.from({ length: 5 }).map((_, i) => (
@@ -903,7 +922,7 @@ export function PropertyDetailsPage() {
                                         <DropdownMenuItem
                                           className="text-[#1a1a1a] focus:bg-gray-50 cursor-pointer"
                                           onClick={() => {
-                                            setEditingCommentId(comment.commentId)
+                                            setEditingCommentId(comment.feedbackId)
                                             setEditContent(comment.content)
                                           }}
                                         >
@@ -912,7 +931,7 @@ export function PropertyDetailsPage() {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                           className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
-                                          onClick={() => setDeleteCommentId(comment.commentId)}
+                                          onClick={() => setDeleteCommentId(comment.feedbackId)}
                                           disabled={deleteFeedback.isPending}
                                         >
                                           <ShieldAlert className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
@@ -936,7 +955,7 @@ export function PropertyDetailsPage() {
                               )}
                             </div>
                           </div>
-                          {editingCommentId === comment.commentId ? (
+                          {editingCommentId === comment.feedbackId ? (
                             <div className="mt-2 flex flex-col gap-2">
                               <Textarea
                                 className="w-full p-2 border border-gray-200 rounded-xl resize-none text-sm focus:outline-none focus:ring-1 focus:ring-[#3A6EA5]"
@@ -955,7 +974,7 @@ export function PropertyDetailsPage() {
                                 </Button>
                                 <Button
                                   size="sm"
-                                  onClick={() => handleEditSubmit(comment.commentId)}
+                                  onClick={() => handleEditSubmit(comment.feedbackId)}
                                   disabled={updateComment.isPending}
                                   className="bg-[#3A6EA5] hover:bg-[#2C5580] text-white rounded-xl h-8 text-xs"
                                 >
@@ -1278,11 +1297,10 @@ export function PropertyDetailsPage() {
                 className="flex-1 bg-[#FF4D4F] hover:bg-[#E04343] text-white rounded-xl"
                 disabled={deleteFeedback.isPending}
                 onClick={() => {
-                  deleteFeedback.mutate({ propertyId: id!, commentId: deleteCommentId.toString() }, {
+                  deleteFeedback.mutate({ propertyId: id! }, {
                     onSuccess: () => {
                       setDeleteCommentId(null)
                       toast.success('Review deleted successfully')
-                      window.location.reload()
                     },
                     onError: () => {
                       setDeleteCommentId(null)
@@ -1317,7 +1335,7 @@ export function PropertyDetailsPage() {
             <div className="p-4 bg-[#f5f7fa] rounded-2xl mb-6">
               <div className="flex items-center gap-0.5 mb-2">
                 {Array.from({ length: 5 }).map((_, i) => {
-                  const existingRating = existingUserComment.rating || ratingSummary?.currentUserRating || 0;
+                  const existingRating = existingUserComment.rating || ratingSummary?.currentUserFeedback?.rating || 0;
                   return (
                     <Star
                       key={i}
@@ -1351,7 +1369,7 @@ export function PropertyDetailsPage() {
                 disabled={deleteFeedback.isPending}
                 onClick={() => {
                   deleteFeedback.mutate(
-                    { propertyId: id!, commentId: existingUserComment.commentId.toString() },
+                    { propertyId: id! },
                     {
                       onSuccess: () => {
                         setShowExistingReviewModal(false)

@@ -8,3 +8,10 @@ export function useProperties(filters: PropertyFilters = {}) {
     queryFn: () => propertyService.getProperties(filters),
   })
 }
+
+export function useRecommendations() {
+  return useQuery({
+    queryKey: ['recommendations'],
+    queryFn: () => propertyService.getRecommendations(),
+  })
+}
