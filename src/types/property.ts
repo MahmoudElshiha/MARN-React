@@ -135,6 +135,9 @@ export interface Property {
     profilePhoto?: string
     matchingPercentage?: number
   }>
+  comments?: any[]
+  ownerEmail?: string
+  hostEmail?: string
 }
 
 /** Lightweight shape returned by GET /api/Property/search */
@@ -143,6 +146,8 @@ export interface SearchProperty {
   imagePath: string
   title: string
   address: string
+  latitude?: number
+  longitude?: number
   bedrooms: number
   bathrooms: number
   maxOccupants: number

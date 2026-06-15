@@ -19,6 +19,32 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { rentalService } from '@/services/rentalService'
 
+export interface ContractDetail {
+  contractId: number | string;
+  contractStatus: string;
+  contractStatusDisplayName?: string;
+  totalContractValue: number;
+  propertyInfo?: {
+    id?: string;
+    name?: string;
+  };
+  ownerInfo?: {
+    id?: string;
+    fullName?: string;
+  };
+  renterInfo?: {
+    id?: string;
+    fullName?: string;
+  };
+  startDate: string;
+  endDate?: string;
+  isAnchoredToBlockChain?: boolean;
+  anchoringStatus?: string;
+  anchoringStatusDisplayName?: string;
+  transactionId?: string;
+  merkleRoot?: string;
+}
+
 export function ContractPage() {
   const { t, i18n } = useTranslation('contracts')
   const navigate = useNavigate()
@@ -27,7 +53,7 @@ export function ContractPage() {
   const { user } = useAuth()
 
   const { data: contractData, isLoading } = useContract(id)
-  const contract = contractData?.data ?? null
+  const contract = (contractData?.data as any as ContractDetail) ?? null
 
   const isCompleted = contract?.contractStatus === 'Active'
 
@@ -51,6 +77,48 @@ export function ContractPage() {
       toast.error('Failed to download contract');
     } finally {
       setIsDownloading(false);
+    }
+  }
+
+  const [isDownloadingProof, setIsDownloadingProof] = useState(false)
+  const handleDownloadProof = async () => {
+    if (!contract?.contractId) return;
+    try {
+      setIsDownloadingProof(true);
+      const res = await rentalService.downloadOTS(contract.contractId.toString());
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Contract_${contract.contractId}_proof.ots`);
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error(t('toasts.downloadProofError', { defaultValue: 'Failed to download proof' }));
+    } finally {
+      setIsDownloadingProof(false);
+    }
+  }
+
+  const [isVerifying, setIsVerifying] = useState(false)
+  const handleVerifyContract = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !contract?.contractId) return;
+
+    try {
+      setIsVerifying(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('contractId', contract.contractId.toString());
+      await rentalService.verifyContract(formData);
+      toast.success(t('toasts.verifySuccess', { defaultValue: 'Contract verified successfully' }));
+    } catch (error) {
+      toast.error(t('toasts.verifyError', { defaultValue: 'Failed to verify contract or mismatch' }));
+    } finally {
+      setIsVerifying(false);
+      if (e.target) {
+         e.target.value = '';
+      }
     }
   }
 
@@ -119,9 +187,8 @@ export function ContractPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    isCompleted ? 'bg-green-100' : 'bg-yellow-100'
-                  }`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center ${isCompleted ? 'bg-green-100' : 'bg-yellow-100'
+                    }`}
                 >
                   {isCompleted ? (
                     <CheckCircle className="w-6 h-6 text-green-600" />
@@ -142,11 +209,10 @@ export function ContractPage() {
                 </div>
               </div>
               <div
-                className={`px-4 py-2 rounded-full text-sm font-medium ${
-                  isCompleted
+                className={`px-4 py-2 rounded-full text-sm font-medium ${isCompleted
                     ? 'bg-green-100 text-green-700'
                     : 'bg-yellow-100 text-yellow-700'
-                }`}
+                  }`}
               >
                 {contract.contractStatusDisplayName || contract.contractStatus}
               </div>
@@ -350,14 +416,46 @@ export function ContractPage() {
                     <p className="text-sm text-[#6B7280] mb-4">
                       {t('rentalAgreementDesc')}
                     </p>
-                    <Button
-                      onClick={handleDownload}
-                      disabled={isDownloading}
-                      className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      {isDownloading ? t('downloading', { defaultValue: 'Downloading...' }) : t('download')}
-                    </Button>
+                    <div className="flex flex-wrap gap-3">
+                      <Button
+                        onClick={handleDownload}
+                        disabled={isDownloading}
+                        className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2C5580] hover:to-[#3A6EA5] text-white rounded-xl"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        {isDownloading ? t('downloading', { defaultValue: 'Downloading...' }) : t('download')}
+                      </Button>
+
+                      <Button
+                        onClick={handleDownloadProof}
+                        disabled={isDownloadingProof}
+                        variant="outline"
+                        className="rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5]/10"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        {isDownloadingProof ? t('downloading', { defaultValue: 'Downloading...' }) : t('downloadProof', { defaultValue: 'Download Proof' })}
+                      </Button>
+
+                      <div>
+                        <input
+                          type="file"
+                          id="verify-contract"
+                          className="hidden"
+                          onChange={handleVerifyContract}
+                          accept=".pdf"
+                        />
+                        <Button
+                          asChild
+                          variant="outline"
+                          className={`rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5]/10 ${isVerifying ? 'opacity-50 pointer-events-none' : ''}`}
+                        >
+                          <label htmlFor="verify-contract" className="cursor-pointer">
+                            <Upload className="w-4 h-4 mr-2" />
+                            {isVerifying ? t('verifying', { defaultValue: 'Verifying...' }) : t('verifyContract', { defaultValue: 'Verify Contract' })}
+                          </label>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
