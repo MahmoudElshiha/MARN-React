@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router'
-import type { PropertyFilters, PropertyType, RentalUnit } from '@/types/property'
+import type { PropertyFilters, PropertyType, RentalUnit, SortBy } from '@/types/property'
 import { AMENITY_OPTIONS } from '@/types/property'
 import { SORT_OPTIONS, PAGE_SIZE } from './constants'
 
@@ -34,8 +34,8 @@ export function useSearchFilters() {
   const [isShared, setIsShared] = useState<string>('')
 
   // ── price ──────────────────────────────────────────────────────────────────
-  const [priceRange, setPriceRange] = useState([500, 10000])
-  const [committedPriceRange, setCommittedPriceRange] = useState([500, 10000])
+  const [priceRange, setPriceRange] = useState([0, 100000])
+  const [committedPriceRange, setCommittedPriceRange] = useState([0, 100000])
 
   // ── rooms ──────────────────────────────────────────────────────────────────
   const [selectedBeds, setSelectedBeds] = useState('Any')
@@ -75,8 +75,8 @@ export function useSearchFilters() {
     type: (propertyType as PropertyType) || undefined,
     rentalUnit: (rentalUnit as RentalUnit) || undefined,
     isShared: isShared === '' ? undefined : isShared === 'true',
-    minPrice: committedPriceRange[0],
-    maxPrice: committedPriceRange[1],
+    minPrice: committedPriceRange[0] === 0 ? undefined : committedPriceRange[0],
+    maxPrice: committedPriceRange[1] === 100000 ? undefined : committedPriceRange[1],
     minBedrooms:
       selectedBeds !== 'Any'
         ? parseInt(selectedBeds.replace('+', ''))
@@ -117,8 +117,8 @@ export function useSearchFilters() {
     setPropertyType('')
     setRentalUnit('')
     setIsShared('')
-    setPriceRange([500, 10000])
-    setCommittedPriceRange([500, 10000])
+    setPriceRange([0, 100000])
+    setCommittedPriceRange([0, 100000])
     setSelectedBeds('Any')
     setSelectedBaths('Any')
     setMinArea('')
@@ -184,6 +184,7 @@ export function useSearchFilters() {
     minArea,
     maxArea,
     minRating,
+    (committedPriceRange[0] > 0 || committedPriceRange[1] < 100000),
     ...selectedAmenities,
   ].filter(Boolean).length
 

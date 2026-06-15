@@ -10,7 +10,9 @@ const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || (i
 export function buildImageUrl(path: string | null | undefined): string | undefined {
   if (!path) return undefined
   if (path.startsWith('http')) return path
-  return `${BASE_URL}${path}`
+  const base = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL
+  const p = path.startsWith('/') ? path : `/${path}`
+  return `${base}${p}`
 }
 
 export const formatTrend = (pct?: number) => {

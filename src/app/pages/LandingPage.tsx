@@ -12,7 +12,7 @@ import { Input } from '../components/ui/input'
 import { PropertyCard } from '../components/PropertyCard'
 import { motion } from 'motion/react'
 import { Link, useNavigate } from 'react-router'
-import { useProperties } from '@/hooks/useProperties'
+import { useRecommendations } from '@/hooks/useProperties'
 import { getImageUrl } from '@/constants/assets'
 import { Skeleton } from '../components/ui/skeleton'
 import { useTranslation } from 'react-i18next'
@@ -115,7 +115,7 @@ const TESTIMONIALS = [
 export function LandingPage() {
   const { t, i18n } = useTranslation('landing')
   const navigate = useNavigate()
-  const { data, isLoading } = useProperties({ pageSize: 8, sortBy: 'Rating' })
+  const { data, isLoading } = useRecommendations()
   const rawProperties = data?.data?.items ?? []
 
   // Deduplicate properties (fix for backend join bug returning duplicates for saved properties)

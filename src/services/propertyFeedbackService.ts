@@ -1,52 +1,32 @@
 import { axiosInstance } from '@/services/apiClient'
 import type { ApiResponse } from '@/types/common'
 import type {
-  PropertyRatingSummaryDto,
-  PropertyCommentDto,
+  PropertyFeedbackDto,
+  PropertyFeedbackItemDto,
   CreatePropertyCommentDto,
-  PropertyCommentDtoPagedResult,
   CreatePropertyRatingDto,
+  CreatePropertyFeedbackDto,
 } from '@/types/propertyFeedback'
 
 export const propertyFeedbackService = {
-  getRatingSummary: async (
-    propertyId: string,
-  ): Promise<ApiResponse<PropertyRatingSummaryDto>> => {
-    const response = await axiosInstance.get(
-      `/api/properties/${propertyId}/ratings/summary`,
-    )
-    return response.data
-  },
-
-  getComments: async (
+  getFeedback: async (
     propertyId: string,
     pageNumber: number = 1,
     pageSize: number = 20,
-  ): Promise<ApiResponse<PropertyCommentDtoPagedResult>> => {
+  ): Promise<ApiResponse<PropertyFeedbackDto>> => {
     const response = await axiosInstance.get(
-      `/api/properties/${propertyId}/comments`,
-      { params: { pageNumber, pageSize } },
+      `/api/properties/${propertyId}/feedback`,
+      { params: { pageNumber, pageSize } }
     )
     return response.data
   },
 
-  addComment: async (
+  addFeedback: async (
     propertyId: string,
-    payload: CreatePropertyCommentDto,
-  ): Promise<ApiResponse<PropertyCommentDto>> => {
+    payload: CreatePropertyFeedbackDto,
+  ): Promise<ApiResponse<PropertyFeedbackItemDto>> => {
     const response = await axiosInstance.post(
-      `/api/properties/${propertyId}/comments`,
-      payload,
-    )
-    return response.data
-  },
-
-  addRating: async (
-    propertyId: string,
-    payload: CreatePropertyRatingDto,
-  ): Promise<ApiResponse<any>> => {
-    const response = await axiosInstance.post(
-      `/api/properties/${propertyId}/ratings`,
+      `/api/properties/${propertyId}/feedback`,
       payload,
     )
     return response.data
@@ -56,7 +36,7 @@ export const propertyFeedbackService = {
     propertyId: string,
     commentId: string,
     payload: CreatePropertyCommentDto,
-  ): Promise<ApiResponse<PropertyCommentDto>> => {
+  ): Promise<ApiResponse<PropertyFeedbackItemDto>> => {
     const response = await axiosInstance.put(
       `/api/properties/${propertyId}/comments/${commentId}`,
       payload,
@@ -64,21 +44,11 @@ export const propertyFeedbackService = {
     return response.data
   },
 
-  deleteComment: async (
-    propertyId: string,
-    commentId: string,
-  ): Promise<ApiResponse<any>> => {
-    const response = await axiosInstance.delete(
-      `/api/properties/${propertyId}/comments/${commentId}`,
-    )
-    return response.data
-  },
-
-  deleteRating: async (
+  deleteFeedback: async (
     propertyId: string,
   ): Promise<ApiResponse<any>> => {
     const response = await axiosInstance.delete(
-      `/api/properties/${propertyId}/ratings/me`,
+      `/api/properties/${propertyId}/feedback/me`,
     )
     return response.data
   },

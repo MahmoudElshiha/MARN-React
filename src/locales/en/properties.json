@@ -121,7 +121,9 @@
     "notChargedYet": "You won't be charged yet",
     "lookingForRoommates": "Looking for Roommates?",
     "roommateMatchingDesc": "Use our roommate matching feature to find compatible housemates",
-    "noReviews": "No reviews yet."
+    "noReviews": "No reviews yet.",
+    "reportReview": "Report Review",
+    "editReview": "Edit Review"
   },
   "propertyByOwner": {
     "rentalRequests": "Rental Requests",
@@ -135,7 +137,20 @@
     "editProperty": "Edit Property",
     "backToDashboard": "Back to Dashboard",
     "quickStats": "Quick Stats",
-    "totalRequests": "Total Requests"
+    "totalRequests": "Total Requests",
+    "deactivatedSuccess": "Property deactivated successfully",
+    "reactivatedSuccess": "Property reactivated successfully",
+    "actionFailed": "Action failed",
+    "deactivateProperty": "Deactivate Property",
+    "reactivateProperty": "Reactivate Property",
+    "deactivateWarning": "Are you sure you want to deactivate this property? It will no longer be searchable or visible to renters.",
+    "reactivateWarning": "Are you sure you want to reactivate this property? It will become searchable and visible to renters again."
+  },
+  "confirmModal": {
+    "title": "Confirm Action",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "processing": "Processing..."
   },
   "mapInput": {
     "goToMyLocation": "Go to my location",
@@ -330,6 +345,9 @@
       "next": "Next",
       "saveChanges": "Save Changes"
     },
+    "monthBased": "month",
+    "yearBased": "year",
+    "dayBased": "day",
     "validation": {
       "fieldMissing": "Step {{step}} ({{stepName}}): {{label}} is missing!",
       "thisFieldRequired": "This field is required",

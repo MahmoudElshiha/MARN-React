@@ -143,7 +143,9 @@
     "sharedSpaceAvailable": "هذا العقار يتيح مساحات مشتركة ويوجد مكان شاغر حالياً! يمكنك حجزه.",
     "sharedSpaceFull": "هذا العقار المشترك ممتلئ حالياً.",
     "deleteReview": "حذف التقييم",
-    "confirmDeleteReview": "هل أنت متأكد أنك تريد حذف تقييمك؟"
+    "confirmDeleteReview": "هل أنت متأكد أنك تريد حذف تقييمك؟",
+    "reportReview": "الإبلاغ عن التقييم",
+    "editReview": "تعديل التقييم"
   },
   "propertyByOwner": {
     "rentalRequests": "طلبات الإيجار",
@@ -157,7 +159,20 @@
     "editProperty": "تعديل العقار",
     "backToDashboard": "العودة للوحة التحكم",
     "quickStats": "إحصائيات سريعة",
-    "totalRequests": "إجمالي الطلبات"
+    "totalRequests": "إجمالي الطلبات",
+    "deactivatedSuccess": "تم إلغاء تنشيط العقار بنجاح",
+    "reactivatedSuccess": "تم إعادة تنشيط العقار بنجاح",
+    "actionFailed": "فشلت العملية",
+    "deactivateProperty": "إلغاء تنشيط العقار",
+    "reactivateProperty": "إعادة تنشيط العقار",
+    "deactivateWarning": "هل أنت متأكد أنك تريد إلغاء تنشيط هذا العقار؟ لن يظهر في نتائج البحث أو للمستأجرين.",
+    "reactivateWarning": "هل أنت متأكد أنك تريد إعادة تنشيط هذا العقار؟ سيصبح مرئياً ومتاحاً للبحث مرة أخرى."
+  },
+  "confirmModal": {
+    "title": "تأكيد الإجراء",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "processing": "جارٍ المعالجة..."
   },
   "mapInput": {
     "goToMyLocation": "انتقل إلى موقعي",
@@ -352,6 +367,9 @@
       "next": "التالي",
       "saveChanges": "حفظ التغييرات"
     },
+    "monthBased": "شهر",
+    "yearBased": "سنة",
+    "dayBased": "يوم",
     "validation": {
       "fieldMissing": "الخطوة {{step}} ({{stepName}}): الحقل {{label}} مفقود!",
       "thisFieldRequired": "هذا الحقل مطلوب",

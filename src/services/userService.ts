@@ -480,7 +480,7 @@ export const userService = {
     const form = new FormData()
     form.append('avatar', file)
     return apiClient.post<ApiResponse<{ avatarUrl: string }>>(
-      '/Users/avatar',
+      '/api/Users/avatar',
       form,
     )
   },

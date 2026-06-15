@@ -301,17 +301,17 @@ export function FilterSidebar({
             {t('search.priceRange')}
           </Label>
           <Slider
-            min={500}
-            max={50000}
-            step={100}
+            min={0}
+            max={100000}
+            step={500}
             value={priceRange}
             onValueChange={onPriceRangeChange}
             onValueCommit={onPriceRangeCommit}
             className="mb-3"
           />
           <div className="flex justify-between text-sm text-[#6a7282]">
-            <span>{priceRange[0].toLocaleString()} EGP</span>
-            <span>{priceRange[1].toLocaleString()} EGP</span>
+            <span>{priceRange[0] === 0 ? '0' : priceRange[0].toLocaleString()} EGP</span>
+            <span>{priceRange[1] === 100000 ? '100,000+ EGP' : `${priceRange[1].toLocaleString()} EGP`}</span>
           </div>
         </div>
 

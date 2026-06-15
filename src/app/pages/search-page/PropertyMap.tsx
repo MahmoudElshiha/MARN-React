@@ -84,52 +84,27 @@ const userLocationIcon = new L.DivIcon({
   popupAnchor: [0, -14],
 })
 
-/* ── Geocoding cache & rate-limited fetcher ────────────────────────── */
-
-interface GeoResult {
-  lat: number
-  lng: number
-}
-
-const geocodeCache = new Map<string, GeoResult | null>()
-
-async function geocodeAddress(address: string): Promise<GeoResult | null> {
-  if (geocodeCache.has(address)) return geocodeCache.get(address)!
-
-  // Append ", Egypt" to improve results for Egyptian properties
-  const query = address.includes('Egypt') ? address : `${address}, Egypt`
-
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
-      { headers: { 'User-Agent': 'MARN-PropertyApp/1.0' } }
-    )
-    const data = await res.json()
-    if (data.length > 0) {
-      const result = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
-      geocodeCache.set(address, result)
-      return result
-    }
-  } catch {
-    // Geocoding failure — just skip this property
-  }
-  geocodeCache.set(address, null)
-  return null
-}
+/* ── Geocoding logic removed (using API coordinates) ───────────────── */
 
 /* ── Auto-fit map bounds to markers ─────────────────────────────── */
 
-function FitBounds({ positions }: { positions: [number, number][] }) {
+function FitBounds({ positions, userLat, userLng, radiusKm }: { positions: [number, number][], userLat?: number, userLng?: number, radiusKm?: number }) {
   const map = useMap()
   const prevLength = useRef(0)
 
   useEffect(() => {
-    if (positions.length > 0 && positions.length !== prevLength.current) {
+    if (userLat !== undefined && userLng !== undefined && radiusKm !== undefined) {
+      // Fit to the precise circular bounds of the selected radius
+      const bounds = L.latLng(userLat, userLng).toBounds(radiusKm * 1000)
+      map.fitBounds(bounds, { padding: [20, 20] })
+      prevLength.current = positions.length
+    } else if (positions.length > 0 && positions.length !== prevLength.current) {
+      // Fallback: fit to property markers
       const bounds = L.latLngBounds(positions.map(([lat, lng]) => [lat, lng]))
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 })
       prevLength.current = positions.length
     }
-  }, [positions, map])
+  }, [positions, userLat, userLng, radiusKm, map])
 
   return null
 }
@@ -167,72 +142,33 @@ interface GeocodedProperty extends SearchProperty {
 
 export function PropertyMap({ properties, userLat, userLng, radiusKm, isSelectMode, showFetchAllButton, isShowingAll, isFetchingAll, onToggleShowAll, onMapClick }: PropertyMapProps) {
   const { t, i18n } = useTranslation(['properties', 'common'])
-  const [geocoded, setGeocoded] = useState<GeocodedProperty[]>([])
-  const [isGeocoding, setIsGeocoding] = useState(false)
-  const [geocodingProgress, setGeocodingProgress] = useState({ done: 0, total: 0 })
+  const isGeocoding = false // Removed geocoding progress state
+  const geocodingProgress = { done: 0, total: 0 }
 
   // Egypt center as default
   const defaultCenter: [number, number] = [26.8206, 30.8025]
 
-  useEffect(() => {
-    let cancelled = false
-
-    async function geocodeAll() {
-      if (properties.length === 0) {
-        setGeocoded([])
-        return
-      }
-
-      setIsGeocoding(true)
-      setGeocodingProgress({ done: 0, total: properties.length })
-
-      const results: GeocodedProperty[] = []
-
-      // Process in small batches to respect Nominatim rate limits (1 req/sec)
-      for (let i = 0; i < properties.length; i++) {
-        if (cancelled) return
-
-        const p = properties[i]
-        const geo = await geocodeAddress(p.address)
-
-        if (geo) {
-          // If radius search is active, enforce the radius locally to fix frontend geocoding mismatches
-          // (e.g. Nominatim returning a far away city for a generic street address)
-          if (userLat !== undefined && userLng !== undefined && radiusKm !== undefined) {
-            const distance = L.latLng(userLat, userLng).distanceTo(L.latLng(geo.lat, geo.lng))
-            if (distance <= radiusKm * 1000) {
-              results.push({ ...p, lat: geo.lat, lng: geo.lng })
-            }
-          } else {
-            results.push({ ...p, lat: geo.lat, lng: geo.lng })
+  const geocoded = useMemo(() => {
+    const results: GeocodedProperty[] = []
+    
+    for (const p of properties) {
+      const lat = p.latitude
+      const lng = p.longitude
+      
+      if (lat !== undefined && lng !== undefined) {
+        if (userLat !== undefined && userLng !== undefined && radiusKm !== undefined) {
+          const distance = L.latLng(userLat, userLng).distanceTo(L.latLng(lat, lng))
+          if (distance <= radiusKm * 1000) {
+            results.push({ ...p, lat, lng })
           }
-        }
-
-        setGeocodingProgress({ done: i + 1, total: properties.length })
-
-        // Update results as they come in for a responsive feel
-        if (geo) {
-          setGeocoded([...results])
-        }
-
-        // Rate limit: 1 request per second for Nominatim
-        if (i < properties.length - 1 && !geocodeCache.has(properties[i + 1]?.address)) {
-          await new Promise((r) => setTimeout(r, 1100))
+        } else {
+          results.push({ ...p, lat, lng })
         }
       }
-
-      if (!cancelled) {
-        setGeocoded(results)
-        setIsGeocoding(false)
-      }
     }
-
-    geocodeAll()
-
-    return () => {
-      cancelled = true
-    }
-  }, [properties])
+    
+    return results
+  }, [properties, userLat, userLng, radiusKm])
 
   const positions = useMemo<[number, number][]>(
     () => geocoded.map((p) => [p.lat, p.lng]),
@@ -296,7 +232,7 @@ export function PropertyMap({ properties, userLat, userLng, radiusKm, isSelectMo
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
 
-        {allPositions.length > 0 && <FitBounds positions={allPositions} />}
+        {allPositions.length > 0 && <FitBounds positions={allPositions} userLat={userLat} userLng={userLng} radiusKm={radiusKm} />}
 
         {geocoded.map((property) => (
           <Marker

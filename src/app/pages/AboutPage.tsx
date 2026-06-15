@@ -40,32 +40,38 @@ export function AboutPage() {
       name: 'Abd Alrahman Eissa',
       role: 'AI Developer',
       image: abdoImg,
+      linkedin: 'https://www.linkedin.com/in/abd-alrahman-eissa/',
     },
     {
       name: 'Fares Eldagen',
       role: 'Team leader & Back-end Developer',
       image: faresImg,
+      linkedin: 'https://www.linkedin.com/in/fares-eldagen/',
     },
     {
       name: 'Mazin Rabie',
       role: 'Back-end Developer',
       image: mazinImg,
+      linkedin: 'https://eg.linkedin.com/in/mazin-el-fatairy',
     },
     {
       name: 'Mahmoud Elshiha',
       role: 'Front-end Developer',
       image: mahmoudImg,
+      linkedin: 'https://linkedin.com/in/mahmoud-elshiha',
     },
     {
       name: 'Kareem Foda',
       role: 'Front-end Developer & UI Designer',
       image: kareemImg,
       imageClass: 'scale-125',
+      linkedin: 'https://eg.linkedin.com/in/kareem-foda',
     },
     {
       name: 'Ahmed Makled',
       role: 'Mobile App Developer',
       image: ahmedImg,
+      linkedin: 'https://www.linkedin.com/in/ahmed1makled1/',
     },
 
   ]
@@ -216,7 +222,7 @@ export function AboutPage() {
                 className="text-center"
               >
                 <div className="relative mb-6 group">
-                  <div className="w-48 h-48 mx-auto rounded-3xl overflow-hidden shadow-lg shadow-[#3A6EA5]/10 group-hover:shadow-2xl group-hover:shadow-[#3A6EA5]/30 transition-all">
+                  <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="block w-48 h-48 mx-auto rounded-3xl overflow-hidden shadow-lg shadow-[#3A6EA5]/10 group-hover:shadow-2xl group-hover:shadow-[#3A6EA5]/30 transition-all cursor-pointer">
                     <div className="w-full h-full group-hover:scale-110 transition-transform duration-500">
                       <img
                         src={member.image}
@@ -224,7 +230,7 @@ export function AboutPage() {
                         className={`w-full h-full object-cover ${member.imageClass || ''}`}
                       />
                     </div>
-                  </div>
+                  </a>
                 </div>
                 <h3 className="text-xl font-semibold text-[#1a1a1a] mb-2">
                   {member.name}

@@ -38,6 +38,7 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { messageService } from '@/services/messageService'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import type { Conversation, Message } from '@/types/message'
 
 export function MessagesPage() {
   const navigate = useNavigate()
@@ -60,6 +61,7 @@ export function MessagesPage() {
   const [reportReason, setReportReason] = useState('')
   const [reportTarget, setReportTarget] = useState<'User' | 'Message'>('User')
   const [reportedMessage, setReportedMessage] = useState<Message | null>(null)
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
 
   const openReportModal = (type: 'User' | 'Message', msg?: Message) => {
     setReportTarget(type)
@@ -168,6 +170,30 @@ export function MessagesPage() {
     window.addEventListener('chat-message-received', handleMessage)
     return () => window.removeEventListener('chat-message-received', handleMessage)
   }, [queryClient])
+
+  // Track online users
+  useEffect(() => {
+    const handleUserOnline = (e: Event) => {
+      const customEvent = e as CustomEvent<string>
+      setOnlineUsers(prev => new Set(prev).add(customEvent.detail))
+    }
+    const handleUserOffline = (e: Event) => {
+      const customEvent = e as CustomEvent<string>
+      setOnlineUsers(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(customEvent.detail)
+        return newSet
+      })
+    }
+    
+    window.addEventListener('chat-user-online', handleUserOnline)
+    window.addEventListener('chat-user-offline', handleUserOffline)
+    
+    return () => {
+      window.removeEventListener('chat-user-online', handleUserOnline)
+      window.removeEventListener('chat-user-offline', handleUserOffline)
+    }
+  }, [])
 
   // Manage active chat state for read receipts and notifications
   useEffect(() => {
@@ -345,12 +371,17 @@ export function MessagesPage() {
                             : ''
                         }`}
                       >
-                        <Avatar className="w-12 h-12 flex-shrink-0">
-                          <AvatarImage src={conversation.participant.avatarUrl} />
-                          <AvatarFallback>
-                            {conversation.participant.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <Avatar className="w-12 h-12 flex-shrink-0">
+                            <AvatarImage src={conversation.participant.avatarUrl} />
+                            <AvatarFallback>
+                              {conversation.participant.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {onlineUsers.has(conversation.participant.id) && (
+                            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></span>
+                          )}
+                        </div>
                         <div className="flex-1 text-left min-w-0">
                           <div className="flex items-start justify-between mb-1">
                             <h3 className="font-semibold text-[#1a1a1a] truncate">
@@ -422,12 +453,17 @@ export function MessagesPage() {
                             : ''
                         }`}
                       >
-                        <Avatar className="w-12 h-12 flex-shrink-0">
-                          <AvatarImage src={user.participant.avatarUrl} />
-                          <AvatarFallback>
-                            {user.participant.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <Avatar className="w-12 h-12 flex-shrink-0">
+                            <AvatarImage src={user.participant.avatarUrl} />
+                            <AvatarFallback>
+                              {user.participant.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {onlineUsers.has(user.participant.id) && (
+                            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></span>
+                          )}
+                        </div>
                         <div className="flex-1 text-left min-w-0 flex flex-col justify-center">
                           <h3 className="font-semibold text-[#1a1a1a] truncate">
                             {user.participant.name}
@@ -477,14 +513,19 @@ export function MessagesPage() {
                         >
                           <ChevronLeft className={`w-6 h-6 text-[#1a1a1a] ${i18n.language === 'ar' ? 'rotate-180' : ''}`} />
                         </button>
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage
-                            src={effectiveConversation.participant.avatarUrl}
-                          />
-                          <AvatarFallback>
-                            {effectiveConversation.participant.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="relative">
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage
+                              src={effectiveConversation.participant.avatarUrl}
+                            />
+                            <AvatarFallback>
+                              {effectiveConversation.participant.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          {onlineUsers.has(effectiveConversation.participant.id) && (
+                            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                          )}
+                        </div>
                         <div 
                           className="cursor-pointer hover:underline"
                           onClick={() => navigate(`/user/${effectiveConversation.participant.id}`)}

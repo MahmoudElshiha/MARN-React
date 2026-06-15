@@ -90,6 +90,21 @@ export const propertyService = {
         return res
       }),
 
+  getRecommendations: () =>
+    apiClient
+      .get<ApiResponse<SearchPaginatedResponse<SearchProperty>>>(
+        '/api/Homepage/recommendations'
+      )
+      .then((res) => {
+        if (res.data?.items) {
+          res.data.items = res.data.items.map((p: any) => ({
+            ...p,
+            imagePath: getImageUrl(p.imagePath),
+          }))
+        }
+        return res
+      }),
+
   getPropertyById: (id: string) =>
     apiClient.get<ApiResponse<Property>>(`/api/Property/${id}`),
 
@@ -99,8 +114,7 @@ export const propertyService = {
   createProperty: (data: FormData) =>
     apiClient.post<ApiResponse<Property>>('/api/Property/add', data),
 
-  updateProperty: (id: string, data: FormData) =>
-    apiClient.put<ApiResponse<Property>>(`/api/Property/${id}`, data),
+
 
   getPropertyForEdit: (id: string) =>
     apiClient.get<ApiResponse<any>>(`/api/Property/edit/${id}`),
@@ -109,11 +123,14 @@ export const propertyService = {
     apiClient.put<ApiResponse<any>>(`/api/Property/edit/${id}`, data),
 
   deleteProperty: (id: string) =>
-    apiClient.delete<ApiResponse<void>>(`/api/Property/${id}`),
+    apiClient.delete<ApiResponse<void>>(`/api/Property/delete/${id}`),
 
   becomeOwner: () =>
     apiClient.post<ApiResponse<string>>('/api/Property/become-owner'),
 
   toggleSaveProperty: (id: string) =>
     apiClient.post<ApiResponse<void>>(`/api/Property/save/${id}`),
+
+  deactivateProperty: (id: string) =>
+    apiClient.put<ApiResponse<void>>(`/api/Property/deactivate/${id}`),
 }

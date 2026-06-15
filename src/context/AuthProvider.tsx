@@ -7,6 +7,7 @@ const TOKEN_KEY = 'token'
 const USER_KEY = 'user'
 
 import { decodeUserFromToken } from '@/utils/tokenUtils'
+import { resetImageCache } from '@/constants/assets'
 
 function readToken(): string | null {
   return localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY)
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear all cached queries from the previous session so the new user
       // never sees stale data belonging to another account.
       queryClient.clear()
+      resetImageCache()
       writeStorage(newToken, newUser, remember)
       setToken(newToken)
       setUser(newUser)
@@ -67,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Nuke the entire React Query cache — prevents a subsequent login
     // from briefly showing the old user's cached data.
     queryClient.clear()
+    resetImageCache()
     setToken(null)
     setUser(null)
   }, [queryClient])
