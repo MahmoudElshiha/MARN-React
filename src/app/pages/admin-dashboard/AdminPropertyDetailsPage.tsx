@@ -117,7 +117,7 @@ export function AdminPropertyDetailsPage() {
         </div>
 
         {/* Image Gallery */}
-        <div className="mb-8 relative rounded-3xl overflow-hidden bg-white shadow-xl shadow-[#3A6EA5]/10 aspect-[21/9] lg:aspect-[21/7]">
+        <div className="mb-8 relative rounded-3xl overflow-hidden bg-white shadow-xl shadow-[#3A6EA5]/10 aspect-[21/9]">
           {images.length > 0 ? (
             <>
               <ImageWithFallback

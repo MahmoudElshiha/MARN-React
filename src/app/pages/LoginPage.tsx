@@ -72,10 +72,9 @@ export function LoginPage() {
           className="hidden lg:block"
         >
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-3xl">M</span>
-            </div>
-            <span className="text-4xl font-bold text-[#1a1a1a]">MARN</span>
+            <Link to="/" className="flex items-center gap-2">
+              <img src="/Logo-Signup.svg" alt={t('logoAlt', { defaultValue: 'MARN Logo' })} className="h-16 w-auto" />
+            </Link>
           </div>
           <h1 className="text-5xl font-bold text-[#1a1a1a] mb-6">
             {t('login.heading')}

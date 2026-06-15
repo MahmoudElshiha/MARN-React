@@ -526,86 +526,49 @@ export function PropertyDetailsPage() {
         </div>
 
         {/* Image Gallery */}
-        <div className="mb-8">
-          <div className="relative rounded-3xl overflow-hidden bg-[#f5f7fa] shadow-2xl shadow-[#3A6EA5]/20">
-            <div className="aspect-[21/9] relative">
-              {isLoading ? (
-                <Skeleton className="w-full h-full" />
-              ) : images.length > 0 ? (
-                /* Sliding window: only mount current + prev + next to cut DOM nodes from N→3 */
-                (() => {
-                  const len = images.length
-                  const windowIndices =
-                    len <= 3
-                      ? images.map((_, i) => i)
-                      : [
-                        ...new Set([
-                          (currentImageIndex - 1 + len) % len,
-                          currentImageIndex,
-                          (currentImageIndex + 1) % len,
-                        ]),
-                      ]
-                  return windowIndices.map((index) => {
-                    const isActive = index === currentImageIndex
-                    return (
-                      <div
-                        key={images[index]}
-                        className={`absolute inset-0 transition-opacity duration-300 ${isActive
-                          ? 'opacity-100 z-10'
-                          : 'opacity-0 z-0 pointer-events-none'
-                          }`}
-                        style={isActive ? { willChange: 'opacity' } : undefined}
-                      >
-                        <ImageWithFallback
-                          src={getImageUrl(images[index])}
-                          alt={`Property ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          loading={isActive ? 'eager' : 'lazy'}
-                          decoding={isActive ? 'sync' : 'async'}
-                        />
-                      </div>
-                    )
-                  })
-                })()
-              ) : (
-                <div className="w-full h-full bg-[#9CBBDC]/20 flex items-center justify-center text-[#4a5565]">
-                  {t('details.noImages', { ns: 'properties', defaultValue: 'No images available' })}
-                </div>
-              )}
-
+        <div className="mb-8 relative rounded-3xl overflow-hidden bg-white shadow-xl shadow-[#3A6EA5]/10 aspect-[21/9]">
+          {isLoading ? (
+            <Skeleton className="w-full h-full" />
+          ) : images.length > 0 ? (
+            <>
+              <ImageWithFallback
+                src={getImageUrl(images[currentImageIndex])}
+                alt={`Property image ${currentImageIndex + 1}`}
+                className="w-full h-full object-cover"
+              />
               {images.length > 1 && (
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all"
+                    className="absolute ltr:left-4 rtl:right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all shadow-md"
                   >
-                    <ChevronLeft className="w-6 h-6 text-[#1a1a1a]" />
+                    <ChevronLeft className="w-6 h-6 text-[#1a1a1a] rtl:rotate-180" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all"
+                    className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all shadow-md"
                   >
-                    <ChevronRight className="w-6 h-6 text-[#1a1a1a]" />
+                    <ChevronRight className="w-6 h-6 text-[#1a1a1a] rtl:rotate-180" />
                   </button>
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                    {images.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`h-2 rounded-full transition-all ${
+                          index === currentImageIndex ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/75 w-2'
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </>
               )}
+            </>
+          ) : (
+            <div className="w-full h-full bg-[#9CBBDC]/20 flex items-center justify-center text-[#4a5565]">
+              {t('details.noImages', { ns: 'properties', defaultValue: 'No images available' })}
             </div>
-
-            {images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {images.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`h-2 rounded-full transition-all ${index === currentImageIndex
-                      ? 'bg-white w-8'
-                      : 'bg-white/50 hover:bg-white/75 w-2'
-                      }`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { Link } from 'react-router-dom'
 import {
   FileText,
   Download,
   XCircle,
   Loader2,
   Search,
+  Eye,
+  CheckCircle,
 } from 'lucide-react'
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
@@ -17,9 +20,10 @@ import {
   useAdminContracts,
   useCancelContract,
 } from '@/hooks/useAdminStats'
-import { adminService } from '@/services/adminService'
+import { adminService, type AdminContractStatsItem } from '@/services/adminService'
 import { getStatusBadge, TruncatedTooltip } from '../utils'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 export function ContractsModerationTab() {
   const { t, i18n } = useTranslation('admin')
@@ -47,6 +51,8 @@ export function ContractsModerationTab() {
   } = useAdminContracts(1, pageSize, activeContractSearch || undefined, contractStatus)
 
   const cancelContractMutation = useCancelContract()
+
+  const [selectedContract, setSelectedContract] = useState<AdminContractStatsItem | null>(null)
 
   const contracts = contractsData?.data?.contracts?.items ?? []
   const totalCount = contractsData?.data?.contracts?.totalCount ?? 0
@@ -176,7 +182,9 @@ export function ContractsModerationTab() {
                           <FileText className="w-5 h-5 text-[#3A6EA5]" />
                         </div>
                         <div className="min-w-0">
-                          <TruncatedTooltip text={item.propertyTitle} className="font-medium" />
+                          <Link to={`/contract/${item.contractId}`} target="_blank" className="block min-w-0">
+                            <TruncatedTooltip text={item.propertyTitle} className="font-medium hover:underline text-[#3A6EA5] cursor-pointer" />
+                          </Link>
                           <div className="text-xs text-[#4a5565] truncate">
                             {new Date(item.leaseStartDate).toLocaleDateString('en-GB')} - {new Date(item.leaseEndDate).toLocaleDateString('en-GB')}
                           </div>
@@ -208,6 +216,14 @@ export function ContractsModerationTab() {
                     <td className="py-4 px-4">
                       <TooltipProvider delayDuration={700}>
                         <div className="flex gap-2 justify-start">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="icon" variant="outline" className="rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0" onClick={() => setSelectedContract(item)}>
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent><p>{t('table.view')}</p></TooltipContent>
+                          </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button size="icon" variant="outline" className="rounded-xl border-[#3A6EA5]/20 w-8 h-8 shrink-0" onClick={() => handleDownload(item.contractId)}>
@@ -255,6 +271,104 @@ export function ContractsModerationTab() {
           )}
           </TooltipProvider>
       </CardContent>
+
+      {/* Contract Detail Modal */}
+      {selectedContract && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setSelectedContract(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] flex items-center justify-center shrink-0">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-[#1a1a1a]">
+                    {t('table.contract')} #{selectedContract.contractId}
+                  </h3>
+                  <p className="text-sm text-[#4a5565] mt-0.5">
+                    {selectedContract.propertyTitle}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {getStatusBadge(selectedContract.statusDisplayName)}
+                    {selectedContract.isAnchoredToBlockChain && (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                        {t('contractsModeration.anchored', { defaultValue: 'Anchored' })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" className="rounded-xl border-[#3A6EA5]/20 shrink-0" onClick={() => setSelectedContract(null)}>
+                <XCircle className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-sm">
+              <div className="bg-[#F2F4F6] rounded-2xl p-4 sm:col-span-2">
+                <p className="text-[#4a5565] mb-1">{t('table.owner')}</p>
+                <p className="font-semibold text-[#1a1a1a]">{selectedContract.ownerName}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4 sm:col-span-2">
+                <p className="text-[#4a5565] mb-1">{t('table.renter')}</p>
+                <p className="font-semibold text-[#1a1a1a]">{selectedContract.renterName}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">{t('contractsModeration.startDate', { defaultValue: 'Start Date' })}</p>
+                <p className="font-semibold text-[#1a1a1a]">{new Date(selectedContract.leaseStartDate).toLocaleDateString('en-GB')}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">{t('contractsModeration.endDate', { defaultValue: 'End Date' })}</p>
+                <p className="font-semibold text-[#1a1a1a]">{new Date(selectedContract.leaseEndDate).toLocaleDateString('en-GB')}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">{t('table.value')}</p>
+                <p className="font-semibold text-[#1a1a1a]">{t('currency', { ns: 'common' })} {(selectedContract.totalContractAmount ?? 0).toLocaleString()}</p>
+              </div>
+              <div className="bg-[#F2F4F6] rounded-2xl p-4">
+                <p className="text-[#4a5565] mb-1">{t('contractsModeration.frequency', { defaultValue: 'Frequency' })}</p>
+                <p className="font-semibold text-[#1a1a1a]">{selectedContract.paymentFrequencyDisplayName}</p>
+              </div>
+            </div>
+
+            {selectedContract.isAnchoredToBlockChain && (
+              <>
+                <h4 className="font-semibold text-lg text-[#1a1a1a] mb-4">{t('contractsModeration.blockchainDetails', { defaultValue: 'Blockchain Details' })}</h4>
+                <div className="bg-[#F2F4F6] rounded-2xl p-4 space-y-4 mb-6 text-sm">
+                  <div>
+                    <p className="text-[#4a5565] mb-1">{t('contractsModeration.transactionId', { defaultValue: 'Transaction ID' })}</p>
+                    <p className="font-mono text-xs font-semibold text-[#1a1a1a] break-all">{selectedContract.transactionId ?? '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#4a5565] mb-1">{t('contractsModeration.merkleRoot', { defaultValue: 'Merkle Root' })}</p>
+                    <p className="font-mono text-xs font-semibold text-[#1a1a1a] break-all">{selectedContract.merkleRoot ?? '—'}</p>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="flex gap-3">
+              <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl" onClick={() => {
+                toast.info('Approve functionality pending backend integration');
+              }}>
+                <CheckCircle className="w-4 h-4 mr-2" /> {t('table.approve', { defaultValue: 'Approve' })}
+              </Button>
+              <Button variant="outline" className="flex-1 border-[#FF4D4F] text-[#FF4D4F] hover:bg-[#FF4D4F] hover:text-white rounded-xl" onClick={() => {
+                toast.info('Reject functionality pending backend integration');
+              }}>
+                <XCircle className="w-4 h-4 mr-2" /> {t('table.reject', { defaultValue: 'Reject' })}
+              </Button>
+              <Button variant="outline" className="flex-1 rounded-xl border-[#3A6EA5]/20" onClick={() => setSelectedContract(null)}>
+                {t('confirmModal.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {showContractCancelConfirmModal && (

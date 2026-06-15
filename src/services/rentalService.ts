@@ -29,6 +29,16 @@ export const rentalService = {
   downloadContract: (id: string) =>
     axiosInstance.get(`/api/contracts/${id}/download`, { responseType: 'blob' }),
 
+  downloadOTS: (id: string) =>
+    axiosInstance.get(`/api/contracts/${id}/proof`, { responseType: 'blob' }),
+
+  verifyContract: (formData: FormData) =>
+    axiosInstance.post(`/api/contracts/verify`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
+
   addBookingRequest: (payload: any) =>
     apiClient.post<ApiResponse<any>>('/api/BookingRequest/add', payload),
 }
