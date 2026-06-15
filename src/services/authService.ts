@@ -15,6 +15,11 @@ export interface LoginResult {
   externalProvider: string | null
 }
 
+export interface GoogleLoginPayload {
+  idToken: string
+  rememberMe: boolean
+}
+
 export interface TwoFactorPayload {
   email: string
   code: string
@@ -63,6 +68,12 @@ export const authService = {
 
   register: (payload: RegisterPayload) =>
     apiClient.post<RegisterResult>('/api/Account/register', payload),
+
+  googleLogin: (payload: GoogleLoginPayload) =>
+    apiClient.post<ApiResponse<LoginResult>>(
+      '/api/Account/external/google',
+      payload,
+    ),
 
   forgotPassword: (payload: ForgotPasswordPayload) =>
     apiClient.post<ApiResponse<{ message: string }>>(
