@@ -123,12 +123,12 @@ export function RoommateMatchingPage() {
                 <p className="text-[#4a5565] text-lg max-w-lg mb-8">
                     To start finding compatible roommates, you need to enable your roommate preferences and fill out your lifestyle details. This helps us find the best matches for you.
                 </p>
-                <Button 
+                <Button
                     size="lg"
                     className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl text-lg px-8 py-6 h-auto"
                     asChild
                 >
-                    <Link to="/profile-settings">
+                    <Link to="/profile-settings#roommate">
                         Set Up Roommate Preferences
                     </Link>
                 </Button>
@@ -160,7 +160,7 @@ export function RoommateMatchingPage() {
                         We couldn't find any close matches right now. Try expanding your budget range or making your preferences less strict.
                     </p>
                     <Button variant="outline" className="rounded-xl border-[#3A6EA5] text-[#3A6EA5]" asChild>
-                        <Link to="/profile-settings">Tweak Preferences</Link>
+                        <Link to="/profile-settings#roommate">Tweak Preferences</Link>
                     </Button>
                 </Card>
             ) : (
