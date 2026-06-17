@@ -125,14 +125,14 @@ export function UserManagementTab() {
   return (
     <div className="space-y-6">
       <Tabs value={activeSubTab} onValueChange={handleSubTabChange} className="w-full" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-        <TabsList className="bg-[#E5E9F0] border-none rounded-xl p-1 mb-6 flex flex-wrap h-auto">
-          <TabsTrigger value="verifications" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+        <TabsList className="bg-[#EEF3F9] border border-[#3A6EA5]/20 rounded-2xl p-1.5 mb-6 gap-1 shadow-md shadow-[#3A6EA5]/15 flex flex-wrap h-auto">
+          <TabsTrigger value="verifications" className="rounded-xl py-2 px-5 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
             {t('tabs.verifications')}
           </TabsTrigger>
-          <TabsTrigger value="users" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+          <TabsTrigger value="users" className="rounded-xl py-2 px-5 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
             {t('users.title')}
           </TabsTrigger>
-          <TabsTrigger value="roles" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+          <TabsTrigger value="roles" className="rounded-xl py-2 px-5 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
             {t('roles.title')}
           </TabsTrigger>
         </TabsList>

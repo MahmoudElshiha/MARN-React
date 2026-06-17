@@ -351,11 +351,11 @@ export function MessagesPage() {
             <div className={`border-r border-[#3A6EA5]/15 flex flex-col bg-white ${isMobileView && selectedConversation ? 'hidden lg:flex' : ''}`}>
               <div className="p-4 border-b border-[#3A6EA5]/10 bg-gradient-to-b from-white to-[#f5f7fa]/60">
                 <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as 'recent' | 'global')} className="w-full mb-3">
-                  <TabsList className="grid w-full grid-cols-2 bg-[#f5f7fa] rounded-xl p-1">
-                    <TabsTrigger value="recent" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#3A6EA5] transition-all">
+                  <TabsList className="grid w-full grid-cols-2 bg-[#EEF3F9] border border-[#3A6EA5]/20 rounded-2xl p-1.5 gap-1 shadow-md shadow-[#3A6EA5]/15 h-auto">
+                    <TabsTrigger value="recent" className="rounded-xl py-2 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
                       {t('recent')}
                     </TabsTrigger>
-                    <TabsTrigger value="global" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-[#3A6EA5] transition-all">
+                    <TabsTrigger value="global" className="rounded-xl py-2 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
                       {t('global')}
                     </TabsTrigger>
                   </TabsList>

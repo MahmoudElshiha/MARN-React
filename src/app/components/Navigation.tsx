@@ -223,10 +223,20 @@ export function Navigation() {
       <nav className="sticky top-0 z-50 bg-white border-b border-[#3A6EA5]/20 shadow-sm">
         <div className="max-w-[1440px] mx-auto px-8 py-4">
           <div className="flex items-center justify-between gap-8">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 lg:ml-6">
-              <img src="/Logo-header.png" alt={t('logoAlt', 'MARN Logo')} className="h-16 w-auto rounded bg-white p-1" />
-            </Link>
+            {/* Menu button + Logo grouped so Menu is at the logical start (left LTR / right RTL) */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
+                onClick={() => setIsMenuOpen(true)}
+              >
+                <Menu className="w-5 h-5 text-[#1a1a1a] transition-colors group-hover:text-[#3A6EA5]" />
+              </Button>
+              <Link to="/" className="flex items-center gap-2">
+                <img src="/Logo-header.png" alt={t('logoAlt', 'MARN Logo')} className="h-16 w-auto rounded bg-white p-1" />
+              </Link>
+            </div>
 
             {/* Search Bar - Hidden on Home and Mobile */}
             {!isHome && (
@@ -335,14 +345,6 @@ export function Navigation() {
                   </>
                 )}
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="group rounded-xl hover:bg-[#3A6EA5]/10 transition-all"
-                  onClick={() => setIsMenuOpen(true)}
-                >
-                  <Menu className="w-5 h-5 text-[#1a1a1a] transition-colors group-hover:text-[#3A6EA5]" />
-                </Button>
               </div>
             </div>
           </div>
@@ -363,13 +365,13 @@ export function Navigation() {
               onClick={() => setIsMenuOpen(false)}
             />
 
-            {/* Drawer */}
+            {/* Drawer — slides from right in Arabic, left in English */}
             <motion.div
-              initial={{ x: lang === 'ar' ? '-100%' : '100%' }}
+              initial={{ x: lang === 'ar' ? '100%' : '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: lang === 'ar' ? '-100%' : '100%' }}
+              exit={{ x: lang === 'ar' ? '100%' : '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`fixed top-0 ${lang === 'ar' ? 'left-0' : 'right-0'} h-full w-80 bg-white shadow-2xl z-50 flex flex-col`}
+              className={`fixed top-0 ${lang === 'ar' ? 'right-0' : 'left-0'} h-full w-80 bg-white shadow-2xl z-50 flex flex-col`}
             >
               {/* Drawer Header */}
               <div className="bg-gradient-to-br from-[#3A6EA5] to-[#9CBBDC] p-6 shrink-0">
@@ -418,7 +420,7 @@ export function Navigation() {
                     return (
                       <motion.div
                         key={item.path}
-                        initial={{ opacity: 0, x: 20 }}
+                        initial={{ opacity: 0, x: lang === 'ar' ? 20 : -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
                       >
@@ -444,7 +446,7 @@ export function Navigation() {
                 {/* Account Section */}
                 <div className="space-y-2">
                   <motion.div
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: lang === 'ar' ? 20 : -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 }}
                   >

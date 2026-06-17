@@ -275,34 +275,34 @@ export function AdminDashboardPage() {
 
           {/* Main Content Tabs */}
           <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-8" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-            <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 bg-[#F2F4F6] p-2 rounded-[2rem] gap-2 border border-[#3A6EA5]/20 shadow-lg shadow-[#3A6EA5]/15">
+            <TabsList className="w-full h-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 bg-[#EEF3F9] p-2 rounded-[2rem] gap-2 border border-[#3A6EA5]/20 shadow-lg shadow-[#3A6EA5]/15">
               <TabsTrigger
                 value="property-moderation"
-                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
+                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md h-auto whitespace-normal text-center"
               >
                 {t('tabs.properties')}
               </TabsTrigger>
               <TabsTrigger
                 value="users"
-                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
+                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md h-auto whitespace-normal text-center"
               >
                 {t('tabs.users')}
               </TabsTrigger>
               <TabsTrigger
                 value="reports"
-                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
+                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md h-auto whitespace-normal text-center"
               >
                 {t('tabs.reports')}
               </TabsTrigger>
               <TabsTrigger
                 value="contracts"
-                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
+                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md h-auto whitespace-normal text-center"
               >
                 {t('tabs.contracts')}
               </TabsTrigger>
               <TabsTrigger
                 value="moderation"
-                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-md border border-transparent data-[state=active]:border-[#3A6EA5]/20 h-auto whitespace-normal text-center"
+                className="w-full rounded-2xl py-3 px-2 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md h-auto whitespace-normal text-center"
               >
                 {t('tabs.moderation')}
               </TabsTrigger>

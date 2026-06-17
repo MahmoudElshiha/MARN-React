@@ -10,7 +10,7 @@ import { RoommateTab } from './profile-settings/RoommateTab'
 import { useTranslation } from 'react-i18next'
 
 const TAB_TRIGGER_CLASS =
-  'px-6 py-2.5 rounded-full text-sm font-medium text-[#4a5565] transition-all hover:text-[#3A6EA5] data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm'
+  'px-6 py-2.5 rounded-full text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md'
 
 const VALID_TABS = ['profile', 'security', 'documents', 'roommate']
 
@@ -46,7 +46,7 @@ export function ProfileSettingsPage() {
           </p>
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8" dir={isRTL ? 'rtl' : 'ltr'}>
-            <TabsList className="w-fit h-auto bg-[#E5E7EB] p-1.5 rounded-full gap-1">
+            <TabsList className="w-fit h-auto bg-[#EEF3F9] border border-[#3A6EA5]/20 p-1.5 rounded-full gap-1 shadow-md shadow-[#3A6EA5]/15">
               <TabsTrigger value="profile" className={TAB_TRIGGER_CLASS}>
                 {t('tabs.profile')}
               </TabsTrigger>

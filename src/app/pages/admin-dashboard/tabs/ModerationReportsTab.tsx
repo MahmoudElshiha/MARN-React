@@ -128,17 +128,17 @@ export function ModerationReportsTab() {
           </div>
           <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <Tabs value={activeStatusTab} onValueChange={setActiveStatusTab} className="w-full sm:w-auto flex-1" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
-              <TabsList className="bg-[#E5E9F0] border-none rounded-xl p-1">
-                <TabsTrigger value="InReview" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+              <TabsList className="bg-[#EEF3F9] border border-[#3A6EA5]/20 rounded-2xl p-1.5 gap-1 shadow-md shadow-[#3A6EA5]/15 h-auto">
+                <TabsTrigger value="InReview" className="rounded-xl py-2 px-4 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
                   {t('moderationReports.inReview')}
                 </TabsTrigger>
-                <TabsTrigger value="Resolved" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+                <TabsTrigger value="Resolved" className="rounded-xl py-2 px-4 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
                   {t('moderationReports.resolved')}
                 </TabsTrigger>
-                <TabsTrigger value="Rejected" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+                <TabsTrigger value="Rejected" className="rounded-xl py-2 px-4 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
                   {t('moderationReports.rejected')}
                 </TabsTrigger>
-                <TabsTrigger value="All" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#3A6EA5] data-[state=active]:shadow-sm">
+                <TabsTrigger value="All" className="rounded-xl py-2 px-4 text-sm font-medium text-[#4a5565] transition-all hover:bg-white/70 hover:text-[#3A6EA5] data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#3A6EA5] data-[state=active]:to-[#9CBBDC] data-[state=active]:text-white data-[state=active]:shadow-md">
                   {t('tabs.all')}
                 </TabsTrigger>
               </TabsList>
