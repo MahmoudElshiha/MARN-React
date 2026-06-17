@@ -88,7 +88,7 @@ export function RoommateMatchingPage() {
                 className="mt-6 border-white/30 text-[#3A6EA5] bg-white hover:bg-white/90 rounded-xl"
                 asChild
             >
-                <Link to="/profile-settings#roommate">Update Preferences</Link>
+                <Link to="/settings#roommate">Update Preferences</Link>
             </Button>
           )}
         </div>
@@ -128,7 +128,7 @@ export function RoommateMatchingPage() {
                     className="bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white rounded-2xl text-lg px-8 py-6 h-auto"
                     asChild
                 >
-                    <Link to="/profile-settings#roommate">
+                    <Link to="/settings#roommate">
                         Set Up Roommate Preferences
                     </Link>
                 </Button>
@@ -160,7 +160,7 @@ export function RoommateMatchingPage() {
                         We couldn't find any close matches right now. Try expanding your budget range or making your preferences less strict.
                     </p>
                     <Button variant="outline" className="rounded-xl border-[#3A6EA5] text-[#3A6EA5]" asChild>
-                        <Link to="/profile-settings#roommate">Tweak Preferences</Link>
+                        <Link to="/settings#roommate">Tweak Preferences</Link>
                     </Button>
                 </Card>
             ) : (

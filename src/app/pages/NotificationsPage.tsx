@@ -90,7 +90,7 @@ export const getNotificationRoute = (actionType: string | null, actionId: string
     case 'ChatUser':
       return actionId ? `/messages?user=${actionId}` : '/messages';
     case 'EditProfile':
-      return '/profile-settings';
+      return '/settings';
     case 'RenterDashboard':
       return '/tenant-dashboard';
     case 'OwnerDashboard':
