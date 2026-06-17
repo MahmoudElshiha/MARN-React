@@ -169,18 +169,20 @@ export function RoommateMatchingPage() {
                 {matches.map((match) => (
                   <Card key={match.userId} className="bg-white border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10 hover:shadow-xl transition-shadow overflow-hidden flex flex-col">
                     {/* Header: Avatar & Basic Info */}
-                    <div className="p-6 bg-[#F2F4F6] relative">
-                      {/* Compatibility Badge */}
-                      <div className="absolute top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-400 text-white font-bold text-sm px-3 py-1.5 rounded-full shadow-md flex items-center gap-1">
-                          {match.compatibilityScore ? `${match.compatibilityScore}%` : 'Match'}
-                      </div>
-                        
+                    <div className="p-6 bg-[#F2F4F6]">
                       <div className="flex items-center gap-4">
-                        <img 
-                            src={getImageUrl(match.profileImage || '') || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=300&auto=format&fit=crop'} 
+                        <div className="relative flex-shrink-0">
+                          <img
+                            src={getImageUrl(match.profileImage || '') || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=300&auto=format&fit=crop'}
                             alt={match.fullName}
                             className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-sm"
-                        />
+                          />
+                          {match.compatibilityScore != null && (
+                            <div className="absolute -bottom-2 -right-2 bg-gradient-to-br from-green-500 to-emerald-400 text-white font-bold text-xs px-2 py-0.5 rounded-full shadow-md ring-2 ring-[#F2F4F6]">
+                              {match.compatibilityScore}%
+                            </div>
+                          )}
+                        </div>
                         <div>
                             <h3 className="text-xl font-bold text-[#1a1a1a] leading-tight">{match.fullName}</h3>
                             {match.governorate && (
@@ -188,9 +190,9 @@ export function RoommateMatchingPage() {
                                     <MapPin className="w-3 h-3" /> {match.governorate}
                                 </p>
                             )}
-                            {match.searchStatus && (
+                            {(match.searchStatusDisplayName || match.searchStatus) && (
                                 <Badge variant="outline" className="mt-2 bg-white border-[#3A6EA5]/20 text-[#3A6EA5] text-xs font-medium">
-                                    {match.searchStatus}
+                                    {match.searchStatusDisplayName ?? match.searchStatus}
                                 </Badge>
                             )}
                         </div>
