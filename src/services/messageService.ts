@@ -54,14 +54,8 @@ export const startChatConnection = async () => {
 }
 
 export const messageService = {
-  getConversations: async (search?: string): Promise<PaginatedResponse<Conversation>> => {
-    let url = '/api/Chat/users'
-    if (search) {
-      const params = new URLSearchParams()
-      params.append('Search', search)
-      url += `?${params.toString()}`
-    }
-    const response = await apiClient.get<ApiResponse<any[]>>(url)
+  getConversations: async (): Promise<PaginatedResponse<Conversation>> => {
+    const response = await apiClient.get<ApiResponse<any[]>>('/api/Chat/users')
     const users = response.data || []
     
     const mapped: Conversation[] = users.map(u => ({

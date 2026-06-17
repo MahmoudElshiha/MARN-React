@@ -35,7 +35,7 @@ import {
 } from '../components/ui/tabs'
 import { toast } from 'sonner'
 import { useDebounce } from '@/hooks/useDebounce'
-import { messageService } from '@/services/messageService'
+import { messageService, startChatConnection } from '@/services/messageService'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { Conversation, Message } from '@/types/message'
@@ -75,6 +75,7 @@ export function MessagesPage() {
   const propertyName = searchParams.get('propertyName')
   const propertyImage = searchParams.get('propertyImage')
   const ownerName = searchParams.get('ownerName')
+  const ownerAvatar = searchParams.get('avatarUrl')
   const autoText = searchParams.get('text')
 
   const { data: conversationsData, isLoading: conversationsLoading } =
@@ -161,6 +162,8 @@ export function MessagesPage() {
     }
   }, [conversationsLoading, messagesLoading, effectiveConversation])
 
+  useEffect(() => { startChatConnection() }, [])
+
   // Real-time updates from SignalR
   useEffect(() => {
     const handleMessage = () => {
@@ -242,7 +245,7 @@ export function MessagesPage() {
           participant: {
             id: recipientId,
             name: ownerName || 'Owner',
-            avatarUrl: ''
+            avatarUrl: ownerAvatar || ''
           },
           lastMessage: '',
           lastMessageTime: '',
@@ -257,7 +260,18 @@ export function MessagesPage() {
         setNewMessage(autoText)
       }
     }
-  }, [recipientId, autoSend, autoText, conversationsData, setSearchParams, ownerName, propertyId, propertyName])
+  }, [recipientId, autoSend, autoText, conversationsData, setSearchParams, ownerName, ownerAvatar, propertyId, propertyName])
+
+  useEffect(() => {
+    if (!tempConversation || !conversations.length) return
+    const realConv = conversations.find(
+      c => c.participant.id === tempConversation.participant.id
+    )
+    if (realConv) {
+      setSelectedConversation(realConv)
+      setTempConversation(null)
+    }
+  }, [conversations, tempConversation])
 
   const handleResend = (message: any) => {
     queryClient.setQueryData(['messages', message.conversationId], (old: any) => {

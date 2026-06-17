@@ -277,7 +277,7 @@ export function RoommateMatchingPage() {
                               </Link>
                           </Button>
                           <Button className="rounded-xl bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white shadow-md shadow-[#3A6EA5]/20" asChild>
-                             <Link to="/messages">
+                             <Link to={`/messages?recipientId=${match.userId}&ownerName=${encodeURIComponent(match.fullName)}&avatarUrl=${encodeURIComponent(getImageUrl(match.profileImage || ''))}`}>
                                 <MessageSquare className="w-4 h-4 mr-2" /> Message
                              </Link>
                           </Button>

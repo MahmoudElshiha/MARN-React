@@ -24,7 +24,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/useAuth'
 import { propertyService } from '@/services/propertyService'
 import { decodeUserFromToken } from '@/utils/tokenUtils'
-import { notificationService } from '@/services/notificationService'
+import { notificationService, startNotificationConnection } from '@/services/notificationService'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/config'
 import {
@@ -143,6 +143,8 @@ export function Navigation() {
 
   useEffect(() => {
     if (!isAuthenticated) return
+
+    startNotificationConnection()
 
     let mounted = true
     notificationService.getNotifications().then(data => {

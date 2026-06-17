@@ -2,10 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { messageService } from '@/services/messageService'
 import type { SendMessagePayload } from '@/services/messageService'
 
-export function useConversations(search?: string) {
+export function useConversations() {
   return useQuery({
-    queryKey: ['conversations', search],
-    queryFn: () => messageService.getConversations(search),
+    queryKey: ['conversations'],
+    queryFn: () => messageService.getConversations(),
   })
 }
 
