@@ -738,5 +738,41 @@
     "signContract": "Sign Contract",
     "replyToMessage": "Reply to Message",
     "contactSupport": "Contact Support"
+  },
+  "roommateMatching": {
+    "hero": {
+      "title": "Find Your Perfect Roommate",
+      "subtitle": "Discover compatible roommates based on your lifestyle, preferences, and habits. We use your profile settings to find the best matches for you.",
+      "updatePreferences": "Update Preferences"
+    },
+    "disabled": {
+      "title": "Roommate Matching is Disabled",
+      "description": "To start finding compatible roommates, you need to enable your roommate preferences and fill out your lifestyle details. This helps us find the best matches for you.",
+      "cta": "Set Up Roommate Preferences"
+    },
+    "matches": {
+      "heading": "Your Top Matches",
+      "count": "{{count}} matches found",
+      "topMatches": "Top Matches",
+      "differences": "Differences",
+      "dealbreakers": "Dealbreakers",
+      "viewProfile": "View Profile",
+      "message": "Message"
+    },
+    "empty": {
+      "title": "No matches found yet",
+      "description": "We couldn't find any close matches right now. Try expanding your budget range or making your preferences less strict.",
+      "tweakPreferences": "Tweak Preferences"
+    },
+    "errors": {
+      "authRequired": "Authentication is required to find roommates.",
+      "loadFailed": "Failed to load roommate matches.",
+      "unexpected": "An unexpected error occurred while loading matches."
+    },
+    "traits": {
+      "bothNonSmokers": "You're both non-smokers",
+      "bothPrefer": "You both prefer",
+      "bothAre": "You both are"
+    }
   }
 }

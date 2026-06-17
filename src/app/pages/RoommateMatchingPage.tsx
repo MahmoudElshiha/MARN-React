@@ -3,7 +3,7 @@ import { useProfile } from '@/hooks/useProfile'
 import { useRoommateMatches } from '@/hooks/useRoommateMatches'
 import { motion } from 'motion/react'
 import { Link, useNavigate } from 'react-router'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Skeleton } from '../components/ui/skeleton'
 import { Badge } from '../components/ui/badge'
@@ -22,8 +22,10 @@ import {
 import { HttpError } from '@/services/httpErrors'
 import { toast } from 'sonner'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export function RoommateMatchingPage() {
+  const { t } = useTranslation('pages')
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
@@ -46,13 +48,13 @@ export function RoommateMatchingPage() {
       if (matchesError instanceof HttpError) {
         // If it's a 401, we know they aren't authenticated properly
         if (matchesError.status === 401) {
-            toast.error('Authentication is required to find roommates.')
+            toast.error(t('roommateMatching.errors.authRequired'))
             navigate('/login')
         } else {
-            toast.error(matchesError.message || 'Failed to load roommate matches.')
+            toast.error(matchesError.message || t('roommateMatching.errors.loadFailed'))
         }
       } else {
-        toast.error('An unexpected error occurred while loading matches.')
+        toast.error(t('roommateMatching.errors.unexpected'))
       }
     }
   }, [matchesError, navigate])
@@ -76,19 +78,18 @@ export function RoommateMatchingPage() {
             <HeartHandshake className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Find Your Perfect Roommate
+            {t('roommateMatching.hero.title')}
           </h1>
           <p className="text-white/90 text-lg max-w-2xl">
-            Discover compatible roommates based on your lifestyle, preferences, and habits. We use your profile settings to find the best matches for you.
+            {t('roommateMatching.hero.subtitle')}
           </p>
-          
+
           {isPreferencesEnabled && (
-             <Button
-                variant="outline"
-                className="mt-6 border-white/30 text-[#3A6EA5] bg-white hover:bg-white/90 rounded-xl"
-                asChild
+            <Button
+              className="mt-6 bg-white text-[#3A6EA5] hover:bg-white/90 rounded-2xl font-semibold shadow-md"
+              asChild
             >
-                <Link to="/settings#roommate">Update Preferences</Link>
+                <Link to="/settings#roommate">{t('roommateMatching.hero.updatePreferences')}</Link>
             </Button>
           )}
         </div>
@@ -118,10 +119,10 @@ export function RoommateMatchingPage() {
                     <Users className="w-10 h-10 text-[#3A6EA5]" />
                 </div>
                 <h2 className="text-3xl font-bold text-[#1a1a1a] mb-4">
-                    Roommate Matching is Disabled
+                    {t('roommateMatching.disabled.title')}
                 </h2>
                 <p className="text-[#4a5565] text-lg max-w-lg mb-8">
-                    To start finding compatible roommates, you need to enable your roommate preferences and fill out your lifestyle details. This helps us find the best matches for you.
+                    {t('roommateMatching.disabled.description')}
                 </p>
                 <Button
                     size="lg"
@@ -129,7 +130,7 @@ export function RoommateMatchingPage() {
                     asChild
                 >
                     <Link to="/settings#roommate">
-                        Set Up Roommate Preferences
+                        {t('roommateMatching.disabled.cta')}
                     </Link>
                 </Button>
              </div>
@@ -138,9 +139,9 @@ export function RoommateMatchingPage() {
           // Matches Grid
           <div className="space-y-8">
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-[#1a1a1a]">Your Top Matches</h2>
+                <h2 className="text-2xl font-bold text-[#1a1a1a]">{t('roommateMatching.matches.heading')}</h2>
                 {!matchesLoading && (
-                    <p className="text-[#4a5565]">{matches.length} matches found</p>
+                    <p className="text-[#4a5565]">{t('roommateMatching.matches.count', { count: matches.length })}</p>
                 )}
             </div>
 
@@ -155,12 +156,12 @@ export function RoommateMatchingPage() {
                     <div className="flex justify-center mb-6">
                         <Search className="w-16 h-16 text-[#9CBBDC]" />
                     </div>
-                    <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">No matches found yet</h3>
+                    <h3 className="text-2xl font-bold text-[#1a1a1a] mb-2">{t('roommateMatching.empty.title')}</h3>
                     <p className="text-[#4a5565] max-w-md mx-auto mb-6">
-                        We couldn't find any close matches right now. Try expanding your budget range or making your preferences less strict.
+                        {t('roommateMatching.empty.description')}
                     </p>
                     <Button variant="outline" className="rounded-xl border-[#3A6EA5] text-[#3A6EA5]" asChild>
-                        <Link to="/settings#roommate">Tweak Preferences</Link>
+                        <Link to="/settings#roommate">{t('roommateMatching.empty.tweakPreferences')}</Link>
                     </Button>
                 </Card>
             ) : (
@@ -211,14 +212,14 @@ export function RoommateMatchingPage() {
                             <div>
                               <h4 className="text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                 <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                Top Matches
+                                {t('roommateMatching.matches.topMatches')}
                               </h4>
                               <ul className="space-y-1.5">
                                 {match.topMatchingTraits.map((trait, idx) => {
                                   let displayTrait = trait;
-                                  if (trait === 'Both Non-Smokers') displayTrait = "You're both non-smokers";
-                                  else if (trait.startsWith('Both prefer')) displayTrait = trait.replace('Both prefer', 'You both prefer');
-                                  else if (trait.startsWith('Both ')) displayTrait = trait.replace('Both ', 'You both are ');
+                                  if (trait === 'Both Non-Smokers') displayTrait = t('roommateMatching.traits.bothNonSmokers');
+                                  else if (trait.startsWith('Both prefer')) displayTrait = trait.replace('Both prefer', t('roommateMatching.traits.bothPrefer'));
+                                  else if (trait.startsWith('Both ')) displayTrait = trait.replace('Both ', t('roommateMatching.traits.bothAre') + ' ');
 
                                   return (
                                     <li key={idx} className="text-sm text-[#4a5565] flex items-start gap-2">
@@ -236,7 +237,7 @@ export function RoommateMatchingPage() {
                             <div>
                               <h4 className="text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                 <AlertCircle className="w-4 h-4 text-amber-500" />
-                                Differences
+                                {t('roommateMatching.matches.differences')}
                               </h4>
                               <ul className="space-y-1.5">
                                 {match.mismatchedTraits.map((trait, idx) => (
@@ -254,7 +255,7 @@ export function RoommateMatchingPage() {
                             <div>
                               <h4 className="text-xs font-bold text-[#1a1a1a] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                 <XCircle className="w-4 h-4 text-red-500" />
-                                Dealbreakers
+                                {t('roommateMatching.matches.dealbreakers')}
                               </h4>
                               <ul className="space-y-1.5">
                                 {match.dealbreakersFound.map((trait, idx) => (
@@ -273,12 +274,12 @@ export function RoommateMatchingPage() {
                       <div className="grid grid-cols-2 gap-3 mt-auto pt-4 border-t border-[#F2F4F6]">
                           <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20 hover:bg-[#F2F4F6] text-[#4a5565]" asChild>
                               <Link to={`/user/${match.userId}`}>
-                                <User className="w-4 h-4 mr-2" /> View Profile
+                                <User className="w-4 h-4 mr-2" /> {t('roommateMatching.matches.viewProfile')}
                               </Link>
                           </Button>
                           <Button className="rounded-xl bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] hover:from-[#2a5a8a] hover:to-[#3A6EA5] text-white shadow-md shadow-[#3A6EA5]/20" asChild>
                              <Link to={`/messages?recipientId=${match.userId}&ownerName=${encodeURIComponent(match.fullName)}&avatarUrl=${encodeURIComponent(getImageUrl(match.profileImage || ''))}`}>
-                                <MessageSquare className="w-4 h-4 mr-2" /> Message
+                                <MessageSquare className="w-4 h-4 mr-2" /> {t('roommateMatching.matches.message')}
                              </Link>
                           </Button>
                       </div>
