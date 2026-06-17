@@ -31,7 +31,7 @@ export function ContactPage() {
   const contactMutation = useMutation({
     mutationFn: () => supportService.contactUs(formData),
     onSuccess: () => {
-      toast.success('Your message has been sent successfully!')
+      toast.success(t('contact.toast.success'))
       setFormData({
         fullName: '',
         email: '',
@@ -40,7 +40,7 @@ export function ContactPage() {
         message: '',
       })
     },
-    onError: () => toast.error('Failed to send message. Please try again later.'),
+    onError: () => toast.error(t('contact.toast.error')),
   })
 
   const handleSubmit = (e: React.FormEvent) => {

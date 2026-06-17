@@ -66,6 +66,10 @@
       "gettingStarted": "كيف أبدأ؟",
       "contactSupport": "تواصل مع الدعم"
     },
+    "newChat": "محادثة جديدة",
+    "noSessions": "لا توجد محادثات سابقة. ابدأ الدردشة!",
+    "errorSend": "فشل إرسال الرسالة",
+    "errorRename": "فشل تغيير اسم الجلسة",
     "loginRequired": "يجب تسجيل الدخول",
     "loginRequiredDescription": "يجب أن تكون مسجلاً للدخول للتحدث مع مساعد MARN.",
     "loginButton": "تسجيل الدخول للمتابعة"

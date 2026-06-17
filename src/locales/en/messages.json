@@ -66,6 +66,10 @@
       "gettingStarted": "Getting started",
       "contactSupport": "Contact support"
     },
+    "newChat": "New Chat",
+    "noSessions": "No past sessions yet. Start chatting!",
+    "errorSend": "Failed to send message",
+    "errorRename": "Failed to rename session",
     "loginRequired": "Login required",
     "loginRequiredDescription": "You need to be logged in to chat with the MARN Assistant.",
     "loginButton": "Log in to continue"

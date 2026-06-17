@@ -147,14 +147,14 @@ export function ChatbotPage() {
           className="w-full flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#3A6EA5] to-[#9CBBDC] text-white rounded-xl hover:from-[#2a5a8a] hover:to-[#3A6EA5] transition-all shadow-sm"
         >
           <Plus className="w-4 h-4" />
-          <span className="font-medium text-sm">New Chat</span>
+          <span className="font-medium text-sm">{t('chatbot.newChat')}</span>
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto py-2">
         {sessions.length === 0 && (
           <p className="text-xs text-[#4a5565] text-center mt-6 px-4">
-            No past sessions yet. Start chatting!
+            {t('chatbot.noSessions')}
           </p>
         )}
         {sessions.map((session) => {
@@ -193,8 +193,8 @@ export function ChatbotPage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-[#1a1a1a] truncate">
                       {session.sessionName === session.sessionId
-                        ? t('chatbot.newChat', 'Chat')
-                        : session.sessionName || 'Chat'}
+                        ? t('chatbot.newChat')
+                        : session.sessionName || t('chatbot.newChat')}
                     </p>
                     <p className="text-xs text-[#4a5565]">
                       {formatSessionDate(session.createdAt)}

@@ -144,6 +144,10 @@
       "visitDesc": "New Damietta, Egypt 11511",
       "hoursDetails": "Monday - Friday: 8am - 6pm",
       "hoursDesc": "Saturday - Sunday: Closed"
+    },
+    "toast": {
+      "success": "Your message has been sent successfully!",
+      "error": "Failed to send message. Please try again later."
     }
   },
   "faq": {

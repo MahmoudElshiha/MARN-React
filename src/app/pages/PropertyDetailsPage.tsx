@@ -420,9 +420,7 @@ export function PropertyDetailsPage() {
       autoSend: 'true',
       recipientId: effectiveOwnerId,
       ownerName: effectiveOwnerName,
-      propertyId: property?.id || id || '',
-      propertyName: property?.title || 'Property',
-      propertyImage: images[0] ? getImageUrl(images[0]) : '',
+      avatarUrl: effectiveOwnerAvatar || '',
       text: message
     })
 
@@ -760,9 +758,7 @@ export function PropertyDetailsPage() {
                         const params = new URLSearchParams({
                           recipientId: effectiveOwnerId,
                           ownerName: effectiveOwnerName,
-                          propertyId: property?.id || id || '',
-                          propertyName: property?.title || 'Property',
-                          propertyImage: images[0] ? getImageUrl(images[0]) : '',
+                          avatarUrl: effectiveOwnerAvatar || '',
                         })
                         navigate(`/messages?${params.toString()}`)
                       }}
