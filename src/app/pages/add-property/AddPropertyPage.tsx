@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, CheckCircle, RotateCcw } from 'lucide-react'
+import { motion } from 'motion/react'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent } from '../../components/ui/card'
 import {
@@ -283,6 +284,7 @@ export function AddPropertyPage() {
   }
 
   return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
     <div className="min-h-screen pb-20">
       <div className="max-w-[1200px] mx-auto px-8 py-8">
         {/* Header */}
@@ -291,7 +293,7 @@ export function AddPropertyPage() {
             onClick={() => navigate('/owner-dashboard')}
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors mb-4"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5 rtl:rotate-180" />
             {t('addProperty.backToDashboard')}
           </button>
           <h1 className="text-4xl font-bold text-[#1a1a1a] mb-2">
@@ -304,11 +306,17 @@ export function AddPropertyPage() {
 
         {/* Progress Steps */}
         <div className="mb-12">
-          <div className="flex items-center justify-between relative">
-            {/* Progress Line */}
-            <div className="absolute top-6 left-0 right-0 h-1 bg-[#f5f7fa] -z-10">
+          <div className="flex items-start relative">
+            {/* Track — inset by half a column so it runs center-to-center */}
+            <div
+              className="absolute top-6 h-1 bg-[#dce6f0]"
+              style={{
+                left: `${100 / (2 * STEPS.length)}%`,
+                right: `${100 / (2 * STEPS.length)}%`,
+              }}
+            >
               <div
-                className="h-full bg-[#3A6EA5] transition-all duration-300"
+                className="h-full bg-[#3A6EA5] transition-all duration-500"
                 style={{
                   width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%`,
                 }}
@@ -321,19 +329,19 @@ export function AddPropertyPage() {
               const isCompleted = step.id < currentStep
 
               return (
-                <div key={step.id} className="flex flex-col items-center">
+                <div key={step.id} className="relative flex-1 flex flex-col items-center gap-2">
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all ${isActive
+                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isActive
                         ? 'bg-[#3A6EA5] text-white shadow-lg shadow-[#3A6EA5]/30'
                         : isCompleted
                           ? 'bg-[#9CBBDC] text-white'
-                          : 'bg-white border-2 border-[#f5f7fa] text-[#4a5565]'
+                          : 'bg-white border-2 border-[#dce6f0] text-[#4a5565]'
                       }`}
                   >
-                    <Icon className="w-6 h-6" />
+                    <Icon className="w-5 h-5" />
                   </div>
                   <span
-                    className={`text-sm ${isActive
+                    className={`text-xs text-center leading-tight px-1 ${isActive
                         ? 'text-[#3A6EA5] font-semibold'
                         : 'text-[#4a5565]'
                       }`}
@@ -354,7 +362,7 @@ export function AddPropertyPage() {
         </div>
 
         {/* Form Content */}
-        <Card className="bg-[#f5f7fa] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
+        <Card className="bg-[#F2F4F6] border-none rounded-3xl shadow-lg shadow-[#3A6EA5]/10">
           <CardContent className="p-8">
             {currentStep === 1 && (
               <PropertyDetailsStep
@@ -466,5 +474,6 @@ export function AddPropertyPage() {
         </Card>
       </div>
     </div>
+    </motion.div>
   )
 }
