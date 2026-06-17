@@ -20,7 +20,7 @@ const enTermsSections = {
   s11: { title: "11. Indemnification", content: "You agree to indemnify and hold harmless MARN, its affiliates, and their respective officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses arising out of your use of the platform, violation of these terms, or infringement of any third-party rights." },
   s12: { title: "12. Dispute Resolution", content: "Any disputes arising from these terms or use of the platform shall be resolved through binding arbitration in accordance with the rules of the Cairo Regional Centre for International Commercial Arbitration (CRCICA). The arbitration shall take place in Cairo, Egypt. You waive your right to participate in class action lawsuits or class-wide arbitration." },
   s13: { title: "13. Governing Law", content: "These Terms of Service are governed by the laws of the Arab Republic of Egypt, without regard to its conflict of law provisions. Any legal action or proceeding shall be brought exclusively in the courts located in Cairo, Egypt." },
-  s14: { title: "14. Contact Information", content: "If you have questions about these Terms of Service, please contact us at: Email: legal@marn.com, Phone: 010 1234 5678, Address: Besides new Damietta University, New Damietta, Egypt" }
+  s14: { title: "14. Contact Information", content: "If you have questions about these Terms of Service, please contact us at: Email: legal@marn.com, Phone: 01012345678, Address: Besides new Damietta University, New Damietta, Egypt" }
 };
 
 const arTermsSections = {
@@ -37,7 +37,7 @@ const arTermsSections = {
   s11: { title: "١١. التعويض", content: "أنت توافق على تعويض وحماية مارن والشركات التابعة لها ومسؤوليها ومديريها وموظفيها ووكلائها من أي مطالبات وأضرار وخسائر ومسؤوليات ونفقات تنشأ عن استخدامك للمنصة أو انتهاك هذه الشروط أو التعدي على حقوق أي طرف ثالث." },
   s12: { title: "١٢. حل النزاعات", content: "سيتم حل أي نزاعات تنشأ عن هذه الشروط أو استخدام المنصة من خلال التحكيم الملزم وفقًا لقواعد مركز دمياط الإقليمي للتحكيم التجاري الدولي (CRCICA). سيُعقد التحكيم في دمياط، مصر. أنت تتنازل عن حقك في المشاركة في دعاوى جماعية أو تحكيم جماعي." },
   s13: { title: "١٣. القانون الحاكم", content: "تخضع شروط الخدمة هذه لقوانين جمهورية مصر العربية، دون اعتبار لأحكام تعارض القوانين. يجب رفع أي إجراء قانوني أو دعوى قضائية حصريًا في المحاكم الموجودة في دمياط، مصر." },
-  s14: { title: "١٤. معلومات الاتصال", content: "إذا كان لديك أي أسئلة حول شروط الخدمة هذه، يرجى الاتصال بنا على: البريد الإلكتروني: legal@marn.com، الهاتف: 010 1234 5678، العنوان: بجوار جامعة دمياط الجديدة، دمياط الجديدة، مصر" }
+  s14: { title: "١٤. معلومات الاتصال", content: "إذا كان لديك أي أسئلة حول شروط الخدمة هذه، يرجى الاتصال بنا على: البريد الإلكتروني: legal@marn.com، الهاتف: 01012345678، العنوان: بجوار جامعة دمياط الجديدة، دمياط الجديدة، مصر" }
 };
 
 const enPrivacySections = {

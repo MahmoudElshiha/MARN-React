@@ -107,7 +107,7 @@
       "emailAddress": "البريد الإلكتروني",
       "emailPlaceholder": "ahmed@example.com",
       "phoneNumber": "رقم الهاتف",
-      "phonePlaceholder": "010 1234 5678",
+      "phonePlaceholder": "01012345678",
       "subject": "الموضوع",
       "message": "الرسالة",
       "messagePlaceholder": "أخبرنا كيف يمكننا مساعدتك...",
@@ -542,7 +542,7 @@
       },
       "s14": {
         "title": "١٤. معلومات الاتصال",
-        "content": "إذا كان لديك أي أسئلة حول شروط الخدمة هذه، يرجى الاتصال بنا على: البريد الإلكتروني: legal@marn.com، الهاتف: 010 1234 5678، العنوان: بجوار جامعة دمياط الجديدة، دمياط الجديدة، مصر"
+        "content": "إذا كان لديك أي أسئلة حول شروط الخدمة هذه، يرجى الاتصال بنا على: البريد الإلكتروني: legal@marn.com، الهاتف: 01012345678، العنوان: بجوار جامعة دمياط الجديدة، دمياط الجديدة، مصر"
       }
     }
   },
@@ -687,6 +687,22 @@
     "yearsOld": "عاماً",
     "myProfile": "ملفي الشخصي",
     "editProfile": "تعديل الملف الشخصي",
+    "notFound": "المستخدم غير موجود",
+    "goBack": "رجوع",
+    "noBio": "لم تتم إضافة نبذة.",
+    "ratings": "تقييم",
+    "properties": "عقار",
+    "message": "مراسلة",
+    "notAvailable": "غير متاح",
+    "joinedYear": "انضم {{year}}",
+    "budgetRangeValue": "{{min}} ج.م – {{max}} ج.م",
+    "compatibility": {
+      "title": "تحليل التوافق",
+      "match": "توافق",
+      "topMatches": "أبرز التوافقات",
+      "differences": "الاختلافات",
+      "dealbreakers": "نقاط الخلاف"
+    },
     "lifestyle_fields": {
       "smoking": "التدخين",
       "pets": "الحيوانات الأليفة",
@@ -707,13 +723,14 @@
     "report": {
       "button": "الإبلاغ",
       "title": "الإبلاغ عن مستخدم",
-      "reasonPlaceholder": "أدخل سبب الإبلاغ...",
+      "reasonPlaceholder": "صف المشكلة...",
+      "minChars": "يرجى إدخال 5 أحرف على الأقل.",
       "submit": "إرسال الإبلاغ",
       "cancel": "إلغاء"
     },
     "toasts": {
       "reportSubmitted": "تم إرسال الإبلاغ بنجاح. سنراجعه قريباً.",
-      "reportReasonRequired": "يرجى تقديم سبب للإبلاغ"
+      "reportReasonRequired": "يرجى تقديم سبب من 5 أحرف على الأقل"
     }
   },
   "notifications": {

@@ -107,7 +107,7 @@
       "emailAddress": "Email Address",
       "emailPlaceholder": "ahmed@example.com",
       "phoneNumber": "Phone Number",
-      "phonePlaceholder": "010 1234 5678",
+      "phonePlaceholder": "01012345678",
       "subject": "Subject",
       "message": "Message",
       "messagePlaceholder": "Tell us how we can help you...",
@@ -542,7 +542,7 @@
       },
       "s14": {
         "title": "14. Contact Information",
-        "content": "If you have questions about these Terms of Service, please contact us at: Email: legal@marn.com, Phone: 010 1234 5678, Address: Besides new Damietta University, New Damietta, Egypt"
+        "content": "If you have questions about these Terms of Service, please contact us at: Email: legal@marn.com, Phone: 01012345678, Address: Besides new Damietta University, New Damietta, Egypt"
       }
     }
   },
@@ -687,6 +687,22 @@
     "yearsOld": "years old",
     "myProfile": "My Profile",
     "editProfile": "Edit Profile",
+    "notFound": "User not found",
+    "goBack": "Go Back",
+    "noBio": "No bio provided.",
+    "ratings": "Ratings",
+    "properties": "Properties",
+    "message": "Message",
+    "notAvailable": "N/A",
+    "joinedYear": "Joined {{year}}",
+    "budgetRangeValue": "{{min}} EGP – {{max}} EGP",
+    "compatibility": {
+      "title": "Compatibility Analysis",
+      "match": "Match",
+      "topMatches": "Top Matches",
+      "differences": "Differences",
+      "dealbreakers": "Dealbreakers"
+    },
     "lifestyle_fields": {
       "smoking": "Smoking",
       "pets": "Pets",
@@ -707,13 +723,14 @@
     "report": {
       "button": "Report",
       "title": "Report User",
-      "reasonPlaceholder": "Enter reason for report...",
+      "reasonPlaceholder": "Describe the issue...",
+      "minChars": "Please enter at least 5 characters.",
       "submit": "Submit Report",
       "cancel": "Cancel"
     },
     "toasts": {
       "reportSubmitted": "Report submitted successfully. We will review it shortly.",
-      "reportReasonRequired": "Please provide a reason for reporting"
+      "reportReasonRequired": "Please provide a reason of at least 5 characters for reporting"
     }
   },
   "notifications": {
