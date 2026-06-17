@@ -198,6 +198,17 @@ export function MessagesPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!conversations.length) return
+    setOnlineUsers(prev => {
+      const next = new Set(prev)
+      conversations.forEach(c => {
+        if (c.isOnline) next.add(c.participant.id)
+      })
+      return next
+    })
+  }, [conversations])
+
   // Manage active chat state for read receipts and notifications
   useEffect(() => {
     if (effectiveConversation?.id) {
@@ -392,9 +403,7 @@ export function MessagesPage() {
                               {conversation.participant.name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          {onlineUsers.has(conversation.participant.id) && (
-                            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></span>
-                          )}
+                          <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-white rounded-full ${onlineUsers.has(conversation.participant.id) ? 'bg-green-500' : 'bg-red-500'}`}></span>
                         </div>
                         <div className="flex-1 text-left min-w-0">
                           <div className="flex items-start justify-between mb-1">
@@ -474,9 +483,7 @@ export function MessagesPage() {
                               {user.participant.name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          {onlineUsers.has(user.participant.id) && (
-                            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></span>
-                          )}
+                          <span className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-white rounded-full ${onlineUsers.has(user.participant.id) ? 'bg-green-500' : 'bg-red-500'}`}></span>
                         </div>
                         <div className="flex-1 text-left min-w-0 flex flex-col justify-center">
                           <h3 className="font-semibold text-[#1a1a1a] truncate">
@@ -536,9 +543,7 @@ export function MessagesPage() {
                               {effectiveConversation.participant.name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          {onlineUsers.has(effectiveConversation.participant.id) && (
-                            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-                          )}
+                          <span className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${onlineUsers.has(effectiveConversation.participant.id) ? 'bg-green-500' : 'bg-red-500'}`}></span>
                         </div>
                         <div 
                           className="cursor-pointer hover:underline"

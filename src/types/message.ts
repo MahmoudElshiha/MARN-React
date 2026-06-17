@@ -22,6 +22,7 @@ export interface ConversationParticipant {
 export interface Conversation {
   id: string
   participant: ConversationParticipant
+  isOnline?: boolean
   property?: {
     id?: string
     name: string

@@ -65,9 +65,10 @@ export const messageService = {
         name: u.userName || 'User',
         avatarUrl: u.profileImage
       },
+      isOnline: u.isOnline ?? false,
       lastMessage: u.lastMessage?.content || '',
-      lastMessageTime: u.lastMessage?.timestamp 
-        ? new Date(u.lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      lastMessageTime: u.lastMessage?.timestamp
+        ? new Date(u.lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         : '',
       unreadCount: u.unreadCount || 0
     }))
@@ -90,6 +91,7 @@ export const messageService = {
         name: u.userName || 'User',
         avatarUrl: u.profileImage
       },
+      isOnline: u.isOnline ?? false,
       lastMessage: '',
       lastMessageTime: '',
       unreadCount: 0
