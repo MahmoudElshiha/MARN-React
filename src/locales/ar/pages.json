@@ -654,18 +654,29 @@
     "chatWithOwner": "محادثة مع المالك",
     "reportOwner": "الإبلاغ عن المالك",
     "back": "رجوع",
+    "notFound": "المالك غير موجود",
+    "goBack": "رجوع",
+    "new": "جديد",
+    "noBio": "لم تتم إضافة نبذة من قِبل هذا المالك.",
+    "noProperties": "لا توجد عقارات لهذا المالك.",
+    "showMore": "عرض المزيد",
+    "showAll": "عرض الكل",
+    "egp": "جنيه",
     "reportDialogDesc": "يرجى تقديم تفاصيل عن سبب الإبلاغ عن هذا المالك. سيراجع فريقنا إبلاغك.",
     "reasonForReporting": "سبب الإبلاغ",
     "report": {
       "button": "الإبلاغ",
       "title": "الإبلاغ عن مستخدم",
+      "reasonForReporting": "سبب الإبلاغ",
       "reasonPlaceholder": "أدخل سبب الإبلاغ...",
+      "minCharsWithCount": "يرجى إدخال 5 أحرف على الأقل. ({{current}}/5)",
       "submit": "إرسال الإبلاغ",
       "cancel": "إلغاء"
     },
     "toasts": {
       "reportSubmitted": "تم إرسال الإبلاغ بنجاح. سنراجعه قريباً.",
       "reportReasonRequired": "يرجى تقديم سبب للإبلاغ",
+      "reportFailed": "فشل إرسال الإبلاغ. يرجى المحاولة مرة أخرى.",
       "openingChat": "جارٍ فتح المحادثة مع المالك..."
     }
   },

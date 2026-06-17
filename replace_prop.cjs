@@ -57,7 +57,7 @@ content = content.replace(
 // 5. handleShare toast
 content = content.replace(
   `toast.success('Link copied to clipboard!')`,
-  `toast.success(t('copied', { ns: 'properties' }) || 'Copied successfully')`
+  `toast.success(t('details.linkCopied', { ns: 'properties' }))`
 );
 
 // 6. location string

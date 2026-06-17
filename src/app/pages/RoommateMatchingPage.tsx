@@ -274,7 +274,7 @@ export function RoommateMatchingPage() {
 
                       {/* Actions */}
                       <div className="grid grid-cols-2 gap-3 mt-auto pt-4 border-t border-[#F2F4F6]">
-                          <Button variant="outline" className="rounded-xl border-[#3A6EA5]/20 hover:bg-[#F2F4F6] text-[#4a5565]" asChild>
+                          <Button variant="outline" className="rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white" asChild>
                               <Link to={`/user/${match.userId}`}>
                                 <User className="w-4 h-4 mr-2" /> {t('roommateMatching.matches.viewProfile')}
                               </Link>

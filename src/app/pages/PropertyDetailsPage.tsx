@@ -172,9 +172,9 @@ export function PropertyDetailsPage() {
       {
         onSuccess: () => {
           setEditingCommentId(null)
-          toast.success('Comment updated successfully')
+          toast.success(t('details.commentUpdatedSuccess', { ns: 'properties' }))
         },
-        onError: () => toast.error('Failed to update comment'),
+        onError: () => toast.error(t('details.failedToUpdateComment', { ns: 'properties' })),
       }
     )
   }
@@ -217,11 +217,11 @@ export function PropertyDetailsPage() {
         setNewCommentText('')
         setNewCommentRating(0)
         setIsSubmittingComment(false)
-        toast.success('Review added successfully!')
+        toast.success(t('details.reviewAddedSuccess', { ns: 'properties' }))
       },
       onError: (error: any) => {
         setIsSubmittingComment(false)
-        const msg = error?.message || 'Failed to add review'
+        const msg = error?.message || t('details.failedToSubmitReport', { ns: 'properties' })
         toast.error(msg)
       }
     })
@@ -251,12 +251,12 @@ export function PropertyDetailsPage() {
       },
       {
         onSuccess: () => {
-          toast.success('Property reported successfully')
+          toast.success(t('details.propertyReportedSuccess', { ns: 'properties' }))
           setIsReportModalOpen(false)
           setReportReason('')
         },
         onError: () => {
-          toast.error('Failed to submit report. Please try again.')
+          toast.error(t('details.failedToSubmitReport', { ns: 'properties' }))
         }
       }
     )
@@ -276,13 +276,13 @@ export function PropertyDetailsPage() {
       },
       {
         onSuccess: () => {
-          toast.success('Review reported successfully')
+          toast.success(t('details.reviewReportedSuccess', { ns: 'properties' }))
           setIsReviewReportModalOpen(false)
           setReviewReportReason('')
           setSelectedReviewToReport(null)
         },
         onError: () => {
-          toast.error('Failed to submit report. Please try again.')
+          toast.error(t('details.failedToSubmitReport', { ns: 'properties' }))
         }
       }
     )
@@ -296,13 +296,13 @@ export function PropertyDetailsPage() {
   const isInactive = property?.status === 'inactive' || property?.isActive === false
   const canBook = isAvailable || (isShared && hasSpace && !isInactive)
 
-  let unavailableText = t('details.unavailable', { ns: 'properties', defaultValue: 'Property Unavailable' })
+  let unavailableText = t('details.unavailable', { ns: 'properties' })
   const isOccupied = property?.status === 'rented' || property?.status === 'Occupied' || property?.status === 'occupied' || (isShared && !hasSpace) || property?.availability === false
   if (isOccupied) {
     if (isShared && currentOccupantsCount > 0 && maxOccupants > 1) {
-      unavailableText = t('details.occupiedCount', { ns: 'properties', count: currentOccupantsCount, max: maxOccupants, defaultValue: `Occupied ${currentOccupantsCount}/${maxOccupants}` })
+      unavailableText = t('details.occupiedCount', { ns: 'properties', count: currentOccupantsCount, max: maxOccupants })
     } else {
-      unavailableText = t('details.full', { ns: 'properties', defaultValue: 'Full' })
+      unavailableText = t('details.full', { ns: 'properties' })
     }
   }
 
@@ -329,12 +329,12 @@ export function PropertyDetailsPage() {
 
   const handleBookNow = () => {
     if (!isAuthenticated) {
-      toast.error('Please log in to book this property')
+      toast.error(t('details.loginToBook', { ns: 'properties' }))
       navigate('/login')
       return
     }
     if (!checkIn || !calculatedCheckOut) {
-      toast.error('Please select a move-in date and duration')
+      toast.error(t('details.selectDateAndDuration', { ns: 'properties' }))
       return
     }
 
@@ -350,17 +350,17 @@ export function PropertyDetailsPage() {
       paymentFrequency,
     }, {
       onSuccess: () => {
-        toast.success('Booking request sent successfully!')
+        toast.success(t('details.bookingRequestSent', { ns: 'properties' }))
         navigate('/tenant-dashboard')
       },
       onError: (error: any) => {
         const code = error?.response?.data?.code || error?.code;
         if (code === 'START_AND_END_DATE_MUST_ALIGN_WITH_THE_RENTAL_DURATION_UNIT_E_G_COMPLETE_MONTHS_YEARS') {
-          toast.error('Your booking duration must align with exact rental units (e.g. full months). Please adjust your duration.')
+          toast.error(t('details.bookingDurationError', { ns: 'properties' }))
         } else if (code === 'PROPERTY_IS_NOT_AVAILABLE_AS_IT_IS_ALREADY_OCCUPIED') {
-          toast.error('This property is already occupied during your selected dates.')
+          toast.error(t('details.propertyOccupiedError', { ns: 'properties' }))
         } else {
-          toast.error(error?.message || 'Failed to send booking request')
+          toast.error(error?.message || t('details.failedToSendBookingRequest', { ns: 'properties' }))
         }
       }
     })
@@ -383,11 +383,11 @@ export function PropertyDetailsPage() {
         queryClient.invalidateQueries({ queryKey: ['renterDashboard'] })
       }),
       {
-        loading: wasFavorite ? 'Removing from saved...' : 'Adding to saved...',
-        success: wasFavorite ? 'Removed from saved properties' : 'Added to saved properties',
+        loading: wasFavorite ? t('details.removingFromSaved', { ns: 'properties' }) : t('details.addingToSaved', { ns: 'properties' }),
+        success: wasFavorite ? t('details.removedFromSaved', { ns: 'properties' }) : t('details.addedToSaved', { ns: 'properties' }),
         error: () => {
           setIsFavorite(wasFavorite)
-          return 'Failed to update saved properties'
+          return t('details.failedToUpdateSaved', { ns: 'properties' })
         },
       }
     )
@@ -395,7 +395,7 @@ export function PropertyDetailsPage() {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href)
-    toast.success('Link copied to clipboard!')
+    toast.success(t('details.linkCopied', { ns: 'properties' }))
   }
 
   const hostedBy = (property as any)?.hostedBy;
@@ -410,7 +410,7 @@ export function PropertyDetailsPage() {
   const copyToClipboard = (text: string) => {
     if (!text) return
     navigator.clipboard.writeText(text)
-    toast.success(t('details.copied', { ns: 'properties', defaultValue: 'Copied successfully' }))
+    toast.success(t('copied', { ns: 'properties' }))
   }
 
   const handleScheduleTour = () => {
@@ -465,9 +465,9 @@ export function PropertyDetailsPage() {
   if (isError) {
     return (
       <div className="min-h-screen flex items-center justify-center text-[#4a5565]">
-        {t('details.notFound', { ns: 'properties', defaultValue: 'Property not found.' })}{' '}
+        {t('details.notFound', { ns: 'properties' })}{' '}
         <Link to="/search" className="text-[#3A6EA5] hover:underline ml-1">
-          {t('details.backToSearch', { ns: 'properties', defaultValue: 'Back to search' })}
+          {t('details.backToSearch', { ns: 'properties' })}
         </Link>
       </div>
     )
@@ -483,7 +483,7 @@ export function PropertyDetailsPage() {
             className="flex items-center gap-2 text-[#4a5565] hover:text-[#3A6EA5] transition-colors"
           >
             <ChevronLeft className="w-5 h-5 rtl:rotate-180" />
-            {t('details.backToSearch', { ns: 'properties', defaultValue: 'Back to Search' })}
+            {t('details.backToSearch', { ns: 'properties' })}
           </Link>
           <div className="flex gap-3">
             <Button
@@ -520,7 +520,7 @@ export function PropertyDetailsPage() {
                   onClick={() => setIsReportModalOpen(true)}
                 >
                   <ShieldAlert className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                  {t('details.reportProperty', { ns: 'properties', defaultValue: 'Report Property' })}
+                  {t('details.reportProperty', { ns: 'properties' })}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -568,7 +568,7 @@ export function PropertyDetailsPage() {
             </>
           ) : (
             <div className="w-full h-full bg-[#9CBBDC]/20 flex items-center justify-center text-[#4a5565]">
-              {t('details.noImages', { ns: 'properties', defaultValue: 'No images available' })}
+              {t('details.noImages', { ns: 'properties' })}
             </div>
           )}
         </div>
@@ -608,7 +608,7 @@ export function PropertyDetailsPage() {
                           </span>
                           {property.reviews !== undefined && (
                             <span className="text-[#4a5565]">
-                              ({property.reviews} {t('details.reviews', { ns: 'properties', defaultValue: 'reviews' })})
+                              ({property.reviews} {t('details.reviews', { ns: 'properties' })})
                             </span>
                           )}
                         </div>
@@ -620,8 +620,8 @@ export function PropertyDetailsPage() {
                     </span>
                     <span className="text-[#4a5565]">•</span>
                     <span className="text-[#1a1a1a]">
-                      {(property as any)?.bedrooms ?? property?.beds} {((property as any)?.bedrooms ?? property?.beds) === 1 ? t('details.bed', { ns: 'properties', defaultValue: 'bed' }) : t('details.beds', { ns: 'properties', defaultValue: 'beds' })} • {(property as any)?.bathrooms ?? property?.baths} {((property as any)?.bathrooms ?? property?.baths) === 1 ? t('details.bath', { ns: 'properties', defaultValue: 'bath' }) : t('details.baths', { ns: 'properties', defaultValue: 'baths' })}
-                      {property?.area ? ` • ${property.area} ${t('details.sqft', { ns: 'properties', defaultValue: 'sq ft' })}` : ''}
+                      {(property as any)?.bedrooms ?? property?.beds} {((property as any)?.bedrooms ?? property?.beds) === 1 ? t('details.bed', { ns: 'properties' }) : t('details.beds', { ns: 'properties' })} • {(property as any)?.bathrooms ?? property?.baths} {((property as any)?.bathrooms ?? property?.baths) === 1 ? t('details.bath', { ns: 'properties' }) : t('details.baths', { ns: 'properties' })}
+                      {property?.area ? ` • ${property.area} ${t('details.sqft', { ns: 'properties' })}` : ''}
                     </span>
                   </div>
                 </>
@@ -639,7 +639,7 @@ export function PropertyDetailsPage() {
             ) : property?.description ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-4">
-                  {t('details.aboutProperty', { ns: 'properties', defaultValue: 'About This Property' })}
+                  {t('details.aboutProperty', { ns: 'properties' })}
                 </h2>
                 <p dir="auto" className="text-[#1a1a1a] leading-relaxed">
                   {property.description}
@@ -651,7 +651,7 @@ export function PropertyDetailsPage() {
             {!isLoading && property?.amenities?.length ? (
               <div className="mb-8 p-6 bg-[#f5f7fa] rounded-3xl">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  {t('details.amenities', { ns: 'properties', defaultValue: 'Amenities' })}
+                  {t('details.amenities', { ns: 'properties' })}
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {property.amenities.map((amenityItem: any) => {
@@ -687,11 +687,11 @@ export function PropertyDetailsPage() {
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-semibold text-[#1a1a1a]">
-                    {t('details.currentTenants', { ns: 'properties', defaultValue: 'Current Tenants' })}
+                    {t('details.currentTenants', { ns: 'properties' })}
                   </h2>
                   {isShared && (
                     <span className="px-3 py-1 bg-[#3A6EA5]/10 text-[#3A6EA5] rounded-full text-sm font-medium">
-                      {currentOccupantsCount} / {maxOccupants} {t('details.occupied', { ns: 'properties', defaultValue: 'Occupied' })}
+                      {currentOccupantsCount} / {maxOccupants} {t('details.occupied', { ns: 'properties' })}
                     </span>
                   )}
                 </div>
@@ -711,7 +711,7 @@ export function PropertyDetailsPage() {
                   <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-green-800">
-                      {t('details.sharedSpaceAvailable', { ns: 'properties', defaultValue: 'This property allows multiple renters and currently has space available! You can still book a spot.' })}
+                      {t('details.sharedSpaceAvailable', { ns: 'properties' })}
                     </p>
                   </div>
                 )}
@@ -719,7 +719,7 @@ export function PropertyDetailsPage() {
                   <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
                     <ShieldAlert className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-red-800">
-                      {t('details.sharedSpaceFull', { ns: 'properties', defaultValue: 'This shared property is currently full.' })}
+                      {t('details.sharedSpaceFull', { ns: 'properties' })}
                     </p>
                   </div>
                 )}
@@ -730,7 +730,7 @@ export function PropertyDetailsPage() {
             {!isLoading && (
               <div className="p-6 bg-[#f5f7fa] rounded-3xl mb-8">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a] mb-6">
-                  {t('details.hostedBy', { ns: 'properties', defaultValue: 'Hosted By' })}
+                  {t('details.hostedBy', { ns: 'properties' })}
                 </h2>
                 <div className="flex items-center gap-4 mb-4">
                   <Avatar className="w-16 h-16">
@@ -749,7 +749,7 @@ export function PropertyDetailsPage() {
                     </Link>
                     <div className="flex items-center gap-2 text-sm text-[#4a5565]">
                       <Star className="w-4 h-4 fill-[#3A6EA5] text-[#3A6EA5]" />
-                      <span>{Math.round(effectiveOwnerRating * 10) / 10} {t('details.rating', { ns: 'properties', defaultValue: 'rating' })} • {effectiveOwnerPropertiesCount} {t('details.properties', { ns: 'properties', defaultValue: 'properties' })}</span>
+                      <span>{Math.round(effectiveOwnerRating * 10) / 10} {t('details.rating', { ns: 'properties' })} • {effectiveOwnerPropertiesCount} {t('details.properties', { ns: 'properties' })}</span>
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -768,7 +768,7 @@ export function PropertyDetailsPage() {
                       }}
                     >
                       <MessageSquare className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                      {t('details.message', { ns: 'properties', defaultValue: 'Message' })}
+                      {t('details.message', { ns: 'properties' })}
                     </Button>
                     {effectiveOwnerEmail && (
                       <button
@@ -791,7 +791,7 @@ export function PropertyDetailsPage() {
             <div className="p-6 bg-[#f5f7fa] rounded-3xl mt-8 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold text-[#1a1a1a]">
-                  Reviews ({ratingSummary?.ratingsCount || property?.reviews || 0})
+                  {t('details.reviews', { ns: 'properties' })} ({ratingSummary?.ratingsCount || property?.reviews || 0})
                 </h2>
                 <div className="flex items-center gap-2">
                   <Star className="w-6 h-6 fill-[#FFB800] text-[#FFB800]" />
@@ -804,7 +804,7 @@ export function PropertyDetailsPage() {
               {/* Add Review Form */}
               {isAuthenticated ? (
                 <div className="p-4 bg-white rounded-2xl mb-6">
-                  <h4 className="font-semibold text-[#1a1a1a] mb-3">{t('details.leaveReview', { ns: 'properties', defaultValue: 'Leave a Review' })}</h4>
+                  <h4 className="font-semibold text-[#1a1a1a] mb-3">{t('details.leaveReview', { ns: 'properties' })}</h4>
                   <div className="flex items-center gap-2 mb-3">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -822,7 +822,7 @@ export function PropertyDetailsPage() {
                     ))}
                   </div>
                   <Textarea
-                    placeholder={t('details.shareExperience', { ns: 'properties', defaultValue: 'Share your experience...' })}
+                    placeholder={t('details.shareExperience', { ns: 'properties' })}
                     value={newCommentText}
                     onChange={(e) => setNewCommentText(e.target.value)}
                     className="mb-3 resize-none bg-[#f5f7fa] border-none"
@@ -837,13 +837,13 @@ export function PropertyDetailsPage() {
                             disabled={isSubmittingComment || !newCommentText.trim() || newCommentRating === 0}
                             className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white w-full disabled:pointer-events-auto"
                           >
-                            {isSubmittingComment ? t('details.submitting', { ns: 'properties', defaultValue: 'Submitting...' }) : t('details.postReview', { ns: 'properties', defaultValue: 'Post Review' })}
+                            {isSubmittingComment ? t('details.submitting', { ns: 'properties' }) : t('details.postReview', { ns: 'properties' })}
                           </Button>
                         </span>
                       </TooltipTrigger>
                       {(!newCommentText.trim() || newCommentRating === 0) && (
                         <TooltipContent>
-                          <p>{t('details.selectRatingAndComment', { ns: 'properties', defaultValue: 'Please choose a rating and type a comment before posting' })}</p>
+                          <p>{t('details.selectRatingAndComment', { ns: 'properties' })}</p>
                         </TooltipContent>
                       )}
                     </Tooltip>
@@ -851,7 +851,7 @@ export function PropertyDetailsPage() {
                 </div>
               ) : (
                 <div className="p-4 bg-white rounded-2xl mb-6 flex flex-col items-center justify-center text-center">
-                  <p className="text-[#4a5565] mb-4">{t('details.loginToReview', { ns: 'properties', defaultValue: 'Please log in to leave a review.' })}</p>
+                  <p className="text-[#4a5565] mb-4">{t('details.loginToReview', { ns: 'properties' })}</p>
                   <Button onClick={() => navigate('/login')} className="bg-[#3A6EA5] hover:bg-[#2a5a8a] text-white">
                     {t('details.login', { ns: 'common', defaultValue: 'Login' })}
                   </Button>
@@ -885,7 +885,7 @@ export function PropertyDetailsPage() {
                                   {displayName}
                                   {isCurrentUser && (
                                     <span className="text-xs bg-[#3A6EA5]/10 text-[#3A6EA5] px-2 py-0.5 rounded-full font-medium no-underline">
-                                      {t('details.yourReview', { ns: 'properties', defaultValue: 'Your review' })}
+                                      {t('details.yourReview', { ns: 'properties' })}
                                     </span>
                                   )}
                                 </h4>
@@ -927,7 +927,7 @@ export function PropertyDetailsPage() {
                                           }}
                                         >
                                           <Edit className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                                          {t('details.editReview', { ns: 'properties', defaultValue: 'Edit Review' })}
+                                          {t('details.editReview', { ns: 'properties' })}
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                           className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
@@ -935,7 +935,7 @@ export function PropertyDetailsPage() {
                                           disabled={deleteFeedback.isPending}
                                         >
                                           <ShieldAlert className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                                          {t('details.deleteReview', { ns: 'properties', defaultValue: 'Delete Review' })}
+                                          {t('details.deleteReview', { ns: 'properties' })}
                                         </DropdownMenuItem>
                                       </>
                                     ) : (
@@ -947,7 +947,7 @@ export function PropertyDetailsPage() {
                                         }}
                                       >
                                         <ShieldAlert className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                                        {t('details.reportReview', { ns: 'properties', defaultValue: 'Report Review' })}
+                                        {t('details.reportReview', { ns: 'properties' })}
                                       </DropdownMenuItem>
                                     )}
                                   </DropdownMenuContent>
@@ -994,7 +994,7 @@ export function PropertyDetailsPage() {
                   })
                 ) : (
                   <p className="text-center text-[#4a5565] py-4">
-                    {t('details.noReviews', { ns: 'properties', defaultValue: 'No reviews yet. Be the first to leave one!' })}
+                    {t('details.noReviews', { ns: 'properties' })}
                   </p>
                 )}
               </div>
@@ -1017,9 +1017,9 @@ export function PropertyDetailsPage() {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-2 mb-1">
                         <span className="text-4xl font-bold text-[#3A6EA5]">
-                          {property?.price?.toLocaleString()} {t('egp', { ns: 'properties', defaultValue: 'EGP' })}
+                          {property?.price?.toLocaleString()} {t('egp', { ns: 'properties' })}
                         </span>
-                        <span className="text-[#4a5565]">/ {t('details.month', { ns: 'properties', defaultValue: 'month' })}</span>
+                        <span className="text-[#4a5565]">/ {t('details.month', { ns: 'properties' })}</span>
                       </div>
                       {property?.rating !== undefined && (
                         <div className="flex items-center gap-1 text-sm">
@@ -1027,7 +1027,7 @@ export function PropertyDetailsPage() {
                           <span className="text-[#1a1a1a]">
                             {property.rating}{' '}
                             {property.reviews !== undefined &&
-                              `(${property.reviews} ${t('details.reviews', { ns: 'properties', defaultValue: 'reviews' })})`}
+                              `(${property.reviews} ${t('details.reviews', { ns: 'properties' })})`}
                           </span>
                         </div>
                       )}
@@ -1037,7 +1037,7 @@ export function PropertyDetailsPage() {
                     <div className="space-y-4 mb-6">
                       <div>
                         <label className="text-sm text-[#1a1a1a] mb-2 block">
-                          {t('details.moveInDate', { ns: 'properties', defaultValue: 'Move-in Date' })}
+                          {t('details.moveInDate', { ns: 'properties' })}
                         </label>
                         <Popover>
                           <PopoverTrigger asChild>
@@ -1046,7 +1046,7 @@ export function PropertyDetailsPage() {
                               className="w-full justify-start text-start rounded-xl border-[#3A6EA5]/20 hover:bg-white"
                             >
                               <Calendar className="mr-2 h-4 w-4 text-[#3A6EA5]" />
-                              {checkIn ? format(checkIn, 'PPP') : t('details.selectDate', { ns: 'properties', defaultValue: 'Select date' })}
+                              {checkIn ? format(checkIn, 'PPP') : t('details.selectDate', { ns: 'properties' })}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -1061,11 +1061,11 @@ export function PropertyDetailsPage() {
                       </div>
                       <div>
                         <label className="text-sm text-[#1a1a1a] mb-2 block">
-                          {t('details.duration', { ns: 'properties', defaultValue: 'Duration' })}
+                          {t('details.duration', { ns: 'properties' })}
                         </label>
                         <Select value={duration} onValueChange={setDuration}>
                           <SelectTrigger className="w-full rounded-xl border-[#3A6EA5]/20 bg-white">
-                            <SelectValue placeholder={t('details.selectDuration', { ns: 'properties', defaultValue: 'Select duration' })} />
+                            <SelectValue placeholder={t('details.selectDuration', { ns: 'properties' })} />
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from(
@@ -1073,10 +1073,10 @@ export function PropertyDetailsPage() {
                               (_, i) => i + 1
                             ).map((num) => {
                               const unitLabel = property?.rentalUnit === 'Daily' 
-                                ? t('details.days', { count: num, ns: 'properties', defaultValue: num === 1 ? 'Day' : 'Days' })
+                                ? t('details.days', { count: num, ns: 'properties' })
                                 : property?.rentalUnit === 'Yearly'
-                                ? t('details.years', { count: num, ns: 'properties', defaultValue: num === 1 ? 'Year' : 'Years' })
-                                : t('details.months', { count: num, ns: 'properties', defaultValue: num === 1 ? 'Month' : 'Months' });
+                                ? t('details.years', { count: num, ns: 'properties' })
+                                : t('details.months', { count: num, ns: 'properties' });
                               return (
                                 <SelectItem key={num} value={num.toString()}>
                                   {num} {unitLabel}
@@ -1092,29 +1092,29 @@ export function PropertyDetailsPage() {
                     {/* Price Summary */}
                     <div className="space-y-3 mb-6 p-4 bg-white rounded-2xl">
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>{t('details.monthlyRent', { ns: 'properties', defaultValue: 'Monthly rent' })}</span>
-                        <span>{property?.price?.toLocaleString()} {t('egp', { ns: 'properties', defaultValue: 'EGP' })}</span>
+                        <span>{t('details.monthlyRent', { ns: 'properties' })}</span>
+                        <span>{property?.price?.toLocaleString()} {t('egp', { ns: 'properties' })}</span>
                       </div>
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>{t('details.securityDeposit', { ns: 'properties', defaultValue: 'Security deposit' })}</span>
-                        <span>{property?.price?.toLocaleString()} {t('egp', { ns: 'properties', defaultValue: 'EGP' })}</span>
+                        <span>{t('details.securityDeposit', { ns: 'properties' })}</span>
+                        <span>{property?.price?.toLocaleString()} {t('egp', { ns: 'properties' })}</span>
                       </div>
                       <div className="flex justify-between text-[#1a1a1a]">
-                        <span>{t('details.serviceFee', { ns: 'properties', defaultValue: 'Service fee' })}</span>
+                        <span>{t('details.serviceFee', { ns: 'properties' })}</span>
                         <span>
                           {Math.round(
                             (property?.price ?? 0) * 0.05,
                           ).toLocaleString()}{' '}
-                          {t('egp', { ns: 'properties', defaultValue: 'EGP' })}
+                          {t('egp', { ns: 'properties' })}
                         </span>
                       </div>
                       <div className="border-t border-[#3A6EA5]/20 pt-3 flex justify-between font-semibold text-[#1a1a1a]">
-                        <span>{t('details.totalFirstMonth', { ns: 'properties', defaultValue: 'Total (First Month)' })}</span>
+                        <span>{t('details.totalFirstMonth', { ns: 'properties' })}</span>
                         <span className="text-[#3A6EA5]">
                           {Math.round(
                             (property?.price ?? 0) * 2.05,
                           ).toLocaleString()}{' '}
-                          {t('egp', { ns: 'properties', defaultValue: 'EGP' })}
+                          {t('egp', { ns: 'properties' })}
                         </span>
                       </div>
                     </div>
@@ -1128,12 +1128,12 @@ export function PropertyDetailsPage() {
                       {bookMutation.isPending ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          {t('details.sendingRequest', { ns: 'properties', defaultValue: 'Sending Request...' })}
+                          {t('details.sendingRequest', { ns: 'properties' })}
                         </>
                       ) : !canBook ? (
                         unavailableText
                       ) : (
-                        t('details.bookNow', { ns: 'properties', defaultValue: 'Book Now' })
+                        t('details.bookNow', { ns: 'properties' })
                       )}
                     </Button>
 
@@ -1143,11 +1143,11 @@ export function PropertyDetailsPage() {
                       className="w-full rounded-xl border-[#3A6EA5] text-[#3A6EA5] hover:bg-[#3A6EA5] hover:text-white"
                       onClick={handleScheduleTour}
                     >
-                      {t('details.scheduleTour', { ns: 'properties', defaultValue: 'Schedule Tour' })}
+                      {t('details.scheduleTour', { ns: 'properties' })}
                     </Button>
 
                     <p className="text-xs text-center text-[#4a5565] mt-4">
-                      {t('details.wontBeChargedYet', { ns: 'properties', defaultValue: "You won't be charged yet" })}
+                      {t('details.wontBeChargedYet', { ns: 'properties' })}
                     </p>
                   </>
                 )}
@@ -1159,10 +1159,10 @@ export function PropertyDetailsPage() {
                   <Users className="w-5 h-5 text-[#3A6EA5] flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-semibold text-[#1a1a1a] mb-1">
-                      {t('details.lookingForRoommates', { ns: 'properties', defaultValue: 'Looking for Roommates?' })}
+                      {t('details.lookingForRoommates', { ns: 'properties' })}
                     </h4>
                     <Link to="/roommate-matching" className="text-sm text-[#3A6EA5] hover:underline font-medium">
-                      {t('details.roommateFeature', { ns: 'properties', defaultValue: 'Use our roommate matching feature to find compatible housemates' })}
+                      {t('details.roommateFeature', { ns: 'properties' })}
                     </Link>
                   </div>
                 </div>
@@ -1178,14 +1178,14 @@ export function PropertyDetailsPage() {
       }}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>{t('details.reportProperty', { ns: 'properties', defaultValue: 'Report Property' })}</DialogTitle>
+            <DialogTitle>{t('details.reportProperty', { ns: 'properties' })}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-[#4a5565] mb-4">
-              {t('details.reportPropertyReason', { ns: 'properties', defaultValue: 'Please provide a reason for reporting this property. Our moderation team will review this report shortly.' })}
+              {t('details.reportPropertyReason', { ns: 'properties' })}
             </p>
             <Textarea
-              placeholder={t('details.reasonForReport', { ns: 'properties', defaultValue: 'Reason for report...' })}
+              placeholder={t('details.reasonForReport', { ns: 'properties' })}
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
               className="min-h-[100px] rounded-xl resize-none"
@@ -1201,7 +1201,7 @@ export function PropertyDetailsPage() {
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Submit Report
+              {t('details.submitReport', { ns: 'properties' })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1216,14 +1216,14 @@ export function PropertyDetailsPage() {
       }}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Report Review</DialogTitle>
+            <DialogTitle>{t('details.reportReview', { ns: 'properties' })}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-[#4a5565] mb-4">
-              Please provide a reason for reporting this review. Our moderation team will review this report shortly.
+              {t('details.reportReviewReason', { ns: 'properties' })}
             </p>
             <Textarea
-              placeholder="Reason for report..."
+              placeholder={t('details.reasonForReport', { ns: 'properties' })}
               value={reviewReportReason}
               onChange={(e) => setReviewReportReason(e.target.value)}
               className="min-h-[100px] rounded-xl resize-none"
@@ -1239,7 +1239,7 @@ export function PropertyDetailsPage() {
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
             >
               {submitReport.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              {t('details.submitReport', { ns: 'properties', defaultValue: 'Submit Report' })}
+              {t('details.submitReport', { ns: 'properties' })}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1248,7 +1248,7 @@ export function PropertyDetailsPage() {
       <Dialog open={isTenantModalOpen} onOpenChange={setIsTenantModalOpen}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>{t('details.tenantProfile', { ns: 'properties', defaultValue: 'Tenant Profile' })}</DialogTitle>
+            <DialogTitle>{t('details.tenantProfile', { ns: 'properties' })}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center py-4">
             <Link to={`/user/${selectedTenant?.userId || selectedTenant?.id}`} className="flex flex-col items-center hover:opacity-80 transition-opacity">
@@ -1260,11 +1260,11 @@ export function PropertyDetailsPage() {
             </Link>
             {selectedTenant?.matchingPercentage !== undefined && selectedTenant?.matchingPercentage !== null ? (
               <div className="px-4 py-2 bg-[#9CBBDC]/20 text-[#3A6EA5] rounded-full text-sm font-medium">
-                {t('details.matchRate', { ns: 'properties', defaultValue: 'Match Rate' })}: {selectedTenant.matchingPercentage}%
+                {t('details.matchRate', { ns: 'properties' })}: {selectedTenant.matchingPercentage}%
               </div>
             ) : (
               <div className="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm">
-                {t('details.matchRateHidden', { ns: 'properties', defaultValue: 'Match rate hidden' })}
+                {t('details.matchRateHidden', { ns: 'properties' })}
               </div>
             )}
           </div>
@@ -1280,10 +1280,10 @@ export function PropertyDetailsPage() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-              {t('details.deleteReview', { ns: 'properties', defaultValue: 'Delete Review' })}
+              {t('details.deleteReview', { ns: 'properties' })}
             </h3>
             <p className="text-[#4a5565] mb-6">
-              {t('details.confirmDeleteReview', { ns: 'properties', defaultValue: 'Are you sure you want to delete your review?' })}
+              {t('details.confirmDeleteReview', { ns: 'properties' })}
             </p>
             <div className="flex gap-4">
               <Button
@@ -1300,16 +1300,16 @@ export function PropertyDetailsPage() {
                   deleteFeedback.mutate({ propertyId: id! }, {
                     onSuccess: () => {
                       setDeleteCommentId(null)
-                      toast.success('Review deleted successfully')
+                      toast.success(t('details.reviewDeletedSuccess', { ns: 'properties' }))
                     },
                     onError: () => {
                       setDeleteCommentId(null)
-                      toast.error('Failed to delete review. Please try again.')
+                      toast.error(t('details.failedToDeleteReview', { ns: 'properties' }))
                     },
                   })
                 }}
               >
-                {deleteFeedback.isPending ? t('details.sendingRequest', { ns: 'properties', defaultValue: 'Sending Request...' }) : t('details.deleteReview', { ns: 'properties', defaultValue: 'Delete Review' })}
+                {deleteFeedback.isPending ? t('details.sendingRequest', { ns: 'properties' }) : t('details.deleteReview', { ns: 'properties' })}
               </Button>
             </div>
           </motion.div>
@@ -1325,10 +1325,10 @@ export function PropertyDetailsPage() {
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
             <h3 className="text-2xl font-bold text-[#1a1a1a] mb-4">
-              {t('details.existingReview', { ns: 'properties', defaultValue: 'You Already Have a Review' })}
+              {t('details.existingReview', { ns: 'properties' })}
             </h3>
             <p className="text-[#4a5565] mb-4">
-              {t('details.existingReviewMessage', { ns: 'properties', defaultValue: 'You can only leave one review per property. Would you like to delete your existing review first?' })}
+              {t('details.existingReviewMessage', { ns: 'properties' })}
             </p>
 
             {/* Show existing review details */}
@@ -1374,21 +1374,21 @@ export function PropertyDetailsPage() {
                       onSuccess: () => {
                         setShowExistingReviewModal(false)
                         setExistingUserComment(null)
-                        toast.success('Previous review deleted. Submitting new review...')
+                        toast.success(t('details.previousReviewDeleted', { ns: 'properties' }))
                         executeSubmitComment()
                       },
                       onError: () => {
                         setShowExistingReviewModal(false)
                         setExistingUserComment(null)
-                        toast.error('Failed to delete review. Please try again.')
+                        toast.error(t('details.failedToDeleteReview', { ns: 'properties' }))
                       },
                     }
                   )
                 }}
               >
                 {deleteFeedback.isPending
-                  ? t('details.sendingRequest', { ns: 'properties', defaultValue: 'Sending Request...' })
-                  : t('details.deleteReview', { ns: 'properties', defaultValue: 'Delete Review' })}
+                  ? t('details.sendingRequest', { ns: 'properties' })
+                  : t('details.deleteReview', { ns: 'properties' })}
               </Button>
             </div>
           </motion.div>

@@ -654,18 +654,29 @@
     "chatWithOwner": "Chat with Owner",
     "reportOwner": "Report Owner",
     "back": "Back",
+    "notFound": "Owner not found",
+    "goBack": "Go Back",
+    "new": "New",
+    "noBio": "No bio provided by this owner.",
+    "noProperties": "No properties found for this owner.",
+    "showMore": "Show More",
+    "showAll": "Show All",
+    "egp": "EGP",
     "reportDialogDesc": "Please provide details about why you're reporting this owner. Our team will review your report.",
     "reasonForReporting": "Reason for Reporting",
     "report": {
       "button": "Report",
       "title": "Report User",
+      "reasonForReporting": "Reason for Reporting",
       "reasonPlaceholder": "Enter reason for report...",
+      "minCharsWithCount": "Please enter at least 5 characters. ({{current}}/5)",
       "submit": "Submit Report",
       "cancel": "Cancel"
     },
     "toasts": {
       "reportSubmitted": "Report submitted successfully. We will review it shortly.",
       "reportReasonRequired": "Please provide a reason for reporting",
+      "reportFailed": "Failed to submit report. Please try again.",
       "openingChat": "Opening chat with owner..."
     }
   },

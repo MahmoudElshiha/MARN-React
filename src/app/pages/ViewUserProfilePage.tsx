@@ -142,7 +142,7 @@ export function ViewUserProfilePage() {
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6 rounded-xl hover:bg-[#E5EBF0]/70 gap-2"
+          className="mb-6 rounded-xl hover:bg-[#3A6EA5]/10 hover:text-[#3A6EA5]"
         >
           {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
           {t('viewUserProfile.back')}

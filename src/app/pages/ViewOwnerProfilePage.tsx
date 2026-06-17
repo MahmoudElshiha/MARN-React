@@ -46,7 +46,7 @@ export function ViewOwnerProfilePage() {
 
   const handleReport = () => {
     if (!id || reportReason.trim().length < 5) {
-      toast.error(t('viewUserProfile.toasts.reportReasonRequired', 'Please provide a reason of at least 5 characters for reporting'))
+      toast.error(t('viewUserProfile.toasts.reportReasonRequired'))
       return
     }
 
@@ -63,7 +63,7 @@ export function ViewOwnerProfilePage() {
           setReportReason('')
         },
         onError: () => {
-          toast.error('Failed to submit report. Please try again.')
+          toast.error(t('viewOwnerProfile.toasts.reportFailed'))
         }
       }
     )
@@ -85,8 +85,8 @@ export function ViewOwnerProfilePage() {
   if (isError || !profile) {
     return (
       <div className="min-h-screen py-20 flex flex-col items-center justify-center text-[#1a1a1a]">
-        <h2 className="text-2xl font-bold mb-4">Owner not found</h2>
-        <Button onClick={() => navigate(-1)} variant="outline">Go Back</Button>
+        <h2 className="text-2xl font-bold mb-4">{t('viewOwnerProfile.notFound')}</h2>
+        <Button onClick={() => navigate(-1)} variant="outline">{t('viewOwnerProfile.goBack')}</Button>
       </div>
     )
   }
@@ -99,7 +99,7 @@ export function ViewOwnerProfilePage() {
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6 rounded-xl hover:bg-[#E5EBF0]/50"
+          className="mb-6 rounded-xl hover:bg-[#3A6EA5]/10 hover:text-[#3A6EA5]"
         >
           <span className={i18n.language === 'ar' ? 'ml-2' : 'mr-2'}>
             {i18n.language === 'ar' ? '→' : '←'}
@@ -133,7 +133,7 @@ export function ViewOwnerProfilePage() {
                 {profile.accountStatus === 'Active' && (
                   <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 rounded-full text-green-700 text-sm font-medium mb-4">
                     <CheckCircle className="w-4 h-4" />
-                    {t('viewOwnerProfile.verifiedUser')}
+                    {t('viewOwnerProfile.verifiedOwner')}
                   </div>
                 )}
 
@@ -142,7 +142,7 @@ export function ViewOwnerProfilePage() {
                   <div className="flex items-center gap-1">
                     <Star className="w-5 h-5 fill-[#FFB800] text-[#FFB800]" />
                     <span className="font-bold text-[#1a1a1a]">
-                      {profile.averageRating?.toFixed(1) || 'New'}
+                      {profile.averageRating?.toFixed(1) || t('viewOwnerProfile.new')}
                     </span>
                   </div>
                   <span className="text-sm text-[#6B7280]">
@@ -203,7 +203,7 @@ export function ViewOwnerProfilePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-[#1a1a1a] leading-relaxed">
-                  {profile.bio || 'No bio provided by this owner.'}
+                  {profile.bio || t('viewOwnerProfile.noBio')}
                 </p>
               </CardContent>
             </Card>
@@ -227,7 +227,7 @@ export function ViewOwnerProfilePage() {
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Star className="w-5 h-5 fill-[#FFB800] text-[#FFB800]" />
                       <p className="text-3xl font-bold text-[#3A6EA5]">
-                        {profile.averageRating?.toFixed(1) || 'New'}
+                        {profile.averageRating?.toFixed(1) || t('viewOwnerProfile.new')}
                       </p>
                     </div>
                     <p className="text-sm text-[#6B7280]">{t('viewOwnerProfile.averageRating')}</p>
@@ -269,12 +269,12 @@ export function ViewOwnerProfilePage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <p className="text-lg font-bold text-[#3A6EA5]">
-                            EGP {property.price?.toLocaleString()}/{property.rentalUnitDisplayName || property.rentalUnit}
+                            {t('viewOwnerProfile.egp')} {property.price?.toLocaleString()}/{property.rentalUnitDisplayName || property.rentalUnit}
                           </p>
                           <div className="flex items-center gap-1">
                             <Star className="w-4 h-4 fill-[#FFB800] text-[#FFB800]" />
                             <span className="text-sm font-medium text-[#1a1a1a]">
-                              {property.averageRating?.toFixed(1) || 'New'}
+                              {property.averageRating?.toFixed(1) || t('viewOwnerProfile.new')}
                             </span>
                           </div>
                         </div>
@@ -283,7 +283,7 @@ export function ViewOwnerProfilePage() {
                   ))}
                   {properties.length === 0 && (
                     <div className="col-span-2 py-8 text-center text-[#6B7280]">
-                      No properties found for this owner.
+                      {t('viewOwnerProfile.noProperties')}
                     </div>
                   )}
                 </div>
@@ -295,14 +295,14 @@ export function ViewOwnerProfilePage() {
                       className="rounded-xl border-[#3A6EA5]/20 hover:bg-[#3A6EA5]/5"
                       onClick={() => setVisibleCount((prev) => prev + 10)}
                     >
-                      Show More
+                      {t('viewOwnerProfile.showMore')}
                     </Button>
                     <Button
                       variant="ghost"
                       className="rounded-xl text-[#3A6EA5] hover:bg-[#3A6EA5]/5"
                       onClick={() => setVisibleCount(properties.length)}
                     >
-                      Show All
+                      {t('viewOwnerProfile.showAll')}
                     </Button>
                   </div>
                 )}
@@ -329,18 +329,18 @@ export function ViewOwnerProfilePage() {
                 htmlFor="report-reason"
                 className="text-[#1a1a1a] mb-2 block"
               >
-                {t('viewOwnerProfile.report.reasonForReporting', 'Reason for Reporting')}
+                {t('viewOwnerProfile.report.reasonForReporting')}
               </Label>
               <Textarea
                 id="report-reason"
                 value={reportReason}
                 onChange={(e) => setReportReason(e.target.value)}
-                placeholder={t('viewOwnerProfile.report.reasonPlaceholder', 'Describe the issue...')}
+                placeholder={t('viewOwnerProfile.report.reasonPlaceholder')}
                 className="bg-[#F2F4F6] rounded-xl border-[#3A6EA5]/20 min-h-[120px]"
               />
               {reportReason.trim().length > 0 && reportReason.trim().length < 5 && (
                 <p className="text-xs text-red-500 mt-2">
-                  Please enter at least 5 characters. ({reportReason.trim().length}/5)
+                  {t('viewOwnerProfile.report.minCharsWithCount', { current: reportReason.trim().length })}
                 </p>
               )}
             </div>
