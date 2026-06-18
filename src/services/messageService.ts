@@ -53,6 +53,11 @@ export const startChatConnection = async () => {
   return chatConnection
 }
 
+export const stopChatConnection = async () => {
+  await chatConnection?.stop()
+  chatConnection = null
+}
+
 export const messageService = {
   getConversations: async (): Promise<PaginatedResponse<Conversation>> => {
     const response = await apiClient.get<ApiResponse<any[]>>('/api/Chat/users')

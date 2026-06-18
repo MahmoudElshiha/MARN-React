@@ -52,6 +52,11 @@ export const startNotificationConnection = async () => {
   return notificationConnection
 }
 
+export const stopNotificationConnection = async () => {
+  await notificationConnection?.stop()
+  notificationConnection = null
+}
+
 export const notificationService = {
   getNotifications: async (): Promise<AppNotification[]> => {
     // The endpoint doesn't wrap it in an ApiResponse based on api.generated.ts, but let's see.

@@ -8,6 +8,8 @@ const USER_KEY = 'user'
 
 import { decodeUserFromToken } from '@/utils/tokenUtils'
 import { resetImageCache } from '@/constants/assets'
+import { stopNotificationConnection } from '@/services/notificationService'
+import { stopChatConnection } from '@/services/messageService'
 
 function readToken(): string | null {
   return localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY)
@@ -65,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   const logout = useCallback(() => {
+    Promise.allSettled([stopNotificationConnection(), stopChatConnection()])
     clearStorage()
     // Nuke the entire React Query cache — prevents a subsequent login
     // from briefly showing the old user's cached data.
