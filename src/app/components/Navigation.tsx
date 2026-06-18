@@ -147,25 +147,36 @@ export function Navigation() {
     startNotificationConnection()
 
     let mounted = true
-    notificationService.getNotifications().then(data => {
-      if (mounted) {
+    const activeListeners: Array<[string, EventListener]> = []
+
+    notificationService.getNotifications()
+      .then(data => {
+        if (!mounted) return
         setUnreadNotificationCount(data.filter(n => !n.isRead).length)
-      }
-    }).catch(console.error)
 
-    const handleReceived = () => setUnreadNotificationCount(prev => prev + 1)
-    const handleAllRead = () => setUnreadNotificationCount(0)
-    const handleMarkedRead = () => setUnreadNotificationCount(prev => Math.max(0, prev - 1))
+        // Register listeners only after the fetch settles so a notification
+        // that arrives during the request isn't double-counted (it is already
+        // included in the fetch result).
+        const handleReceived = () => setUnreadNotificationCount(prev => prev + 1)
+        const handleAllRead = () => setUnreadNotificationCount(0)
+        const handleMarkedRead = () => setUnreadNotificationCount(prev => Math.max(0, prev - 1))
 
-    window.addEventListener('notification-received', handleReceived)
-    window.addEventListener('notifications-all-read', handleAllRead)
-    window.addEventListener('notification-marked-read', handleMarkedRead)
+        activeListeners.push(
+          ['notification-received', handleReceived],
+          ['notifications-all-read', handleAllRead],
+          ['notification-marked-read', handleMarkedRead],
+        )
+        for (const [event, handler] of activeListeners) {
+          window.addEventListener(event, handler)
+        }
+      })
+      .catch(console.error)
 
     return () => {
       mounted = false
-      window.removeEventListener('notification-received', handleReceived)
-      window.removeEventListener('notifications-all-read', handleAllRead)
-      window.removeEventListener('notification-marked-read', handleMarkedRead)
+      for (const [event, handler] of activeListeners) {
+        window.removeEventListener(event, handler)
+      }
     }
   }, [isAuthenticated])
 
