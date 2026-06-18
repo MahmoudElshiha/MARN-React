@@ -67,14 +67,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   const logout = useCallback(() => {
-    Promise.allSettled([stopNotificationConnection(), stopChatConnection()])
-    clearStorage()
-    // Nuke the entire React Query cache — prevents a subsequent login
-    // from briefly showing the old user's cached data.
-    queryClient.clear()
-    resetImageCache()
-    setToken(null)
-    setUser(null)
+    // Stop SignalR first so the server receives the disconnect event
+    // and marks the user offline before we wipe the token from storage.
+    Promise.allSettled([stopNotificationConnection(), stopChatConnection()]).then(() => {
+      clearStorage()
+      queryClient.clear()
+      resetImageCache()
+      setToken(null)
+      setUser(null)
+    })
   }, [queryClient])
 
   useEffect(() => {
