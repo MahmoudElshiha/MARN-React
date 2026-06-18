@@ -6,7 +6,7 @@ import { Card } from '../components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog'
 import { Skeleton } from '../components/ui/skeleton'
 import { Link } from 'react-router'
-import { notificationService, startNotificationConnection, AppNotification } from '@/services/notificationService'
+import { notificationService, AppNotification } from '@/services/notificationService'
 import { toast } from 'sonner'
 import { contractService } from '@/services/contractService'
 import { rentalService } from '@/services/rentalService'
@@ -206,7 +206,6 @@ export function NotificationsPage() {
     }
 
     fetchNotifications()
-    startNotificationConnection()
 
     const handleReceived = (e: Event) => {
       const customEvent = e as CustomEvent<AppNotification>
