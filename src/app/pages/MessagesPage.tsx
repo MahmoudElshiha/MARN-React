@@ -214,12 +214,22 @@ export function MessagesPage() {
       const participantId = effectiveConversation.participant.id || effectiveConversation.id
       messageService.setChatActive(participantId)
       messageService.markAsRead(participantId)
-      
+
+      queryClient.setQueryData(['conversations'], (old: any) => {
+        if (!old) return old
+        return {
+          ...old,
+          data: old.data.map((c: Conversation) =>
+            c.id === effectiveConversation.id ? { ...c, unreadCount: 0 } : c
+          ),
+        }
+      })
+
       return () => {
         messageService.setChatInactive(participantId)
       }
     }
-  }, [effectiveConversation?.id])
+  }, [effectiveConversation?.id, queryClient])
 
   useEffect(() => {
     if (messagesEndRef.current) {
