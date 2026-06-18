@@ -25,6 +25,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { propertyService } from '@/services/propertyService'
 import { decodeUserFromToken } from '@/utils/tokenUtils'
 import { notificationService, startNotificationConnection } from '@/services/notificationService'
+import { startChatConnection } from '@/services/messageService'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/config'
 import {
@@ -145,6 +146,7 @@ export function Navigation() {
     if (!isAuthenticated) return
 
     startNotificationConnection()
+    startChatConnection()
 
     let mounted = true
     const activeListeners: Array<[string, EventListener]> = []

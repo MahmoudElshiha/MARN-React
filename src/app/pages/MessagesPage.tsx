@@ -35,7 +35,7 @@ import {
 } from '../components/ui/tabs'
 import { toast } from 'sonner'
 import { useDebounce } from '@/hooks/useDebounce'
-import { messageService, startChatConnection } from '@/services/messageService'
+import { messageService } from '@/services/messageService'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
@@ -162,8 +162,6 @@ export function MessagesPage() {
       }
     }
   }, [conversationsLoading, messagesLoading, effectiveConversation])
-
-  useEffect(() => { startChatConnection() }, [])
 
   // Real-time updates from SignalR
   useEffect(() => {

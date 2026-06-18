@@ -67,15 +67,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   const logout = useCallback(() => {
-    // Stop SignalR first so the server receives the disconnect event
-    // and marks the user offline before we wipe the token from storage.
-    Promise.allSettled([stopNotificationConnection(), stopChatConnection()]).then(() => {
-      clearStorage()
-      queryClient.clear()
-      resetImageCache()
-      setToken(null)
-      setUser(null)
-    })
+    clearStorage()
+    queryClient.clear()
+    resetImageCache()
+    setToken(null)
+    setUser(null)
+    // Fire-and-forget: close frames sent to server → OnDisconnectedAsync → user goes offline
+    Promise.allSettled([stopNotificationConnection(), stopChatConnection()])
   }, [queryClient])
 
   useEffect(() => {
