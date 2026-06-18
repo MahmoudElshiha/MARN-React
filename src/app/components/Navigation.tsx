@@ -24,7 +24,8 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/useAuth'
 import { propertyService } from '@/services/propertyService'
 import { decodeUserFromToken } from '@/utils/tokenUtils'
-import { notificationService, startNotificationConnection } from '@/services/notificationService'
+import { notificationService, startNotificationConnection, AppNotification } from '@/services/notificationService'
+import { toast } from 'sonner'
 import { startChatConnection } from '@/services/messageService'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/i18n/config'
@@ -159,7 +160,11 @@ export function Navigation() {
         // Register listeners only after the fetch settles so a notification
         // that arrives during the request isn't double-counted (it is already
         // included in the fetch result).
-        const handleReceived = () => setUnreadNotificationCount(prev => prev + 1)
+        const handleReceived = (e: Event) => {
+          setUnreadNotificationCount(prev => prev + 1)
+          const notification = (e as CustomEvent<AppNotification>).detail
+          if (notification) toast.info(notification.title, { description: notification.body })
+        }
         const handleAllRead = () => setUnreadNotificationCount(0)
         const handleMarkedRead = () => setUnreadNotificationCount(prev => Math.max(0, prev - 1))
 
