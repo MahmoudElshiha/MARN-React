@@ -339,9 +339,7 @@ export function Navigation() {
                       <Link to="/notifications" className="relative">
                         <Bell className="w-5 h-5 transition-colors group-hover:text-[#3A6EA5]" />
                         {unreadNotificationCount > 0 && (
-                          <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full">
-                            {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
-                          </span>
+                          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full" />
                         )}
                       </Link>
                     </Button>
