@@ -769,7 +769,9 @@
     "signing": "Signing...",
     "signContract": "Sign Contract",
     "replyToMessage": "Reply to Message",
-    "contactSupport": "Contact Support"
+    "contactSupport": "Contact Support",
+    "markAsReadError": "Failed to mark notification as read",
+    "markAllAsReadError": "Failed to mark all notifications as read"
   },
   "roommateMatching": {
     "hero": {

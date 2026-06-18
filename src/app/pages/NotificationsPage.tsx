@@ -239,24 +239,24 @@ export function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.isRead).length
 
   const markAllAsRead = async () => {
+    const snapshot = notifications
+    setNotifications(prev => prev.map((n) => ({ ...n, isRead: true })))
     try {
-      // Optimistic update
-      setNotifications(notifications.map((n) => ({ ...n, isRead: true })))
       await notificationService.markAllAsRead()
     } catch (err) {
-      console.error('Failed to mark all as read', err)
+      setNotifications(snapshot)
+      toast.error(t('notifications.markAllAsReadError'))
     }
   }
 
   const markAsRead = async (id: string) => {
+    const snapshot = notifications
+    setNotifications(prev => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)))
     try {
-      // Optimistic update
-      setNotifications(
-        notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      )
       await notificationService.markAsRead(id)
     } catch (err) {
-      console.error('Failed to mark as read', err)
+      setNotifications(snapshot)
+      toast.error(t('notifications.markAsReadError'))
     }
   }
 

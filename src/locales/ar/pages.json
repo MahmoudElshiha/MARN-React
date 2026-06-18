@@ -772,7 +772,9 @@
     "signing": "جاري التوقيع...",
     "signContract": "توقيع العقد",
     "replyToMessage": "الرد على الرسالة",
-    "contactSupport": "التواصل مع الدعم"
+    "contactSupport": "التواصل مع الدعم",
+    "markAsReadError": "فشل تحديد الإشعار كمقروء",
+    "markAllAsReadError": "فشل تحديد جميع الإشعارات كمقروءة"
   },
   "roommateMatching": {
     "hero": {
