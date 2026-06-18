@@ -163,7 +163,9 @@ export function Navigation() {
         const handleReceived = (e: Event) => {
           setUnreadNotificationCount(prev => prev + 1)
           const notification = (e as CustomEvent<AppNotification>).detail
-          if (notification) toast.info(notification.title, { description: notification.body })
+          if (notification && !location.pathname.startsWith('/messages')) {
+            toast.info(notification.title, { description: notification.body })
+          }
         }
         const handleAllRead = () => setUnreadNotificationCount(0)
         const handleMarkedRead = () => setUnreadNotificationCount(prev => Math.max(0, prev - 1))
