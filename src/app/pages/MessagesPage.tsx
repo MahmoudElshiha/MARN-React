@@ -167,11 +167,25 @@ export function MessagesPage() {
   useEffect(() => {
     const handleMessage = () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] })
-      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      queryClient.invalidateQueries({ queryKey: ['conversations'] }).then(() => {
+        if (effectiveConversation?.id) {
+          const participantId = effectiveConversation.participant.id || effectiveConversation.id
+          messageService.markAsRead(participantId)
+          queryClient.setQueryData(['conversations'], (old: any) => {
+            if (!old) return old
+            return {
+              ...old,
+              data: old.data?.map((c: Conversation) =>
+                c.id === effectiveConversation.id ? { ...c, unreadCount: 0 } : c
+              ),
+            }
+          })
+        }
+      })
     }
     window.addEventListener('chat-message-received', handleMessage)
     return () => window.removeEventListener('chat-message-received', handleMessage)
-  }, [queryClient])
+  }, [queryClient, effectiveConversation])
 
   // Track online users
   useEffect(() => {
