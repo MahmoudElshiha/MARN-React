@@ -127,7 +127,7 @@ export function Navigation() {
   const [isLanguageChanging, setIsLanguageChanging] = useState(false)
   const [targetLanguage, setTargetLanguage] = useState<string | null>(null)
   const { t } = useTranslation('navigation')
-  const [unreadNotificationCount, setFUnreadNotificationCount] = useState(0)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
 
   const handleLanguageChange = (lng: string) => {
     if (lng === i18n.language) return
