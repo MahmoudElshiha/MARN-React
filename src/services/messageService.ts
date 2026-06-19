@@ -125,11 +125,12 @@ export const messageService = {
   sendMessage: async (payload: SendMessagePayload): Promise<ApiResponse<Message>> => {
     const connection = await startChatConnection()
     const receiverId = payload.recipientId || payload.conversationId
-    
+
     if (!receiverId) {
       throw new Error("No recipient specified for the message")
     }
 
+    if (connection.state !== 'Connected') return Promise.reject(new Error('Chat not connected'))
     await connection.invoke("SendMessage", receiverId, payload.text)
 
     const newMessage: Message = {
@@ -147,16 +148,19 @@ export const messageService = {
 
   markAsRead: async (userId: string) => {
     const connection = await startChatConnection()
+    if (connection.state !== 'Connected') return
     await connection.invoke("MarkChatAsRead", userId)
   },
 
   setChatActive: async (userId: string) => {
     const connection = await startChatConnection()
+    if (connection.state !== 'Connected') return
     await connection.invoke("InActiveChatWith", userId)
   },
 
   setChatInactive: async (userId: string) => {
     const connection = await startChatConnection()
+    if (connection.state !== 'Connected') return
     await connection.invoke("LeaveActiveChat", userId)
   }
 }
