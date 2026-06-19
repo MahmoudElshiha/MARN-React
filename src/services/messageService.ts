@@ -108,12 +108,15 @@ export const messageService = {
   getMessages: async (conversationId: string): Promise<PaginatedResponse<Message>> => {
     const response = await apiClient.get<ApiResponse<any[]>>(`/api/Chat/history/${conversationId}`)
     const messages = response.data || []
-    
+
+    const userRaw = localStorage.getItem('user') ?? sessionStorage.getItem('user') ?? '{}'
+    const currentUserId = (JSON.parse(userRaw) as { id?: string })?.id
+
     const mapped: Message[] = messages.map(m => ({
       id: m.id,
       conversationId: conversationId,
       senderId: m.senderId,
-      sender: m.senderId === conversationId ? 'them' : 'me',
+      sender: m.senderId === currentUserId ? 'me' : 'them',
       text: m.content || m.text || m.message || '',
       time: m.sentAt ? new Date(m.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
       read: m.isRead
