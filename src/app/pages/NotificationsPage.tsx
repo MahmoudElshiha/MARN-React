@@ -210,7 +210,6 @@ export function NotificationsPage() {
     const handleReceived = (e: Event) => {
       const customEvent = e as CustomEvent<AppNotification>
       setNotifications((prev) => [mapNotification(customEvent.detail), ...prev])
-      toast.info(customEvent.detail.title, { description: customEvent.detail.body })
     }
 
     const handleAllRead = () => {
