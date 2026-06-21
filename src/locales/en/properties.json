@@ -605,5 +605,15 @@
     "replace": "Replace"
   },
   "egp": "EGP",
-  "copied": "Copied successfully"
+  "copied": "Copied successfully",
+  "savedProperties": {
+    "title": "Saved Properties",
+    "subtitle": "Properties you've saved for later",
+    "savedCount_one": "{{count}} saved property",
+    "savedCount_other": "{{count}} saved properties",
+    "loading": "Loading your saved properties...",
+    "noSaved": "No saved properties yet",
+    "noSavedDesc": "Start exploring properties and save the ones you like to revisit them later.",
+    "explore": "Explore Properties"
+  }
 }
