@@ -109,8 +109,7 @@ export function ContractPage() {
       setIsVerifying(true);
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('contractId', contract.contractId.toString());
-      await rentalService.verifyContract(formData);
+      await rentalService.verifyContract(contract.contractId.toString(), formData);
       toast.success(t('toasts.verifySuccess', { defaultValue: 'Contract verified successfully' }));
     } catch (error) {
       toast.error(t('toasts.verifyError', { defaultValue: 'Failed to verify contract or mismatch' }));

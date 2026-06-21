@@ -28,8 +28,8 @@ export const rentalService = {
   downloadOTS: (id: string) =>
     axiosInstance.get(`/api/contracts/${id}/proof`, { responseType: 'blob' }),
 
-  verifyContract: (formData: FormData) =>
-    axiosInstance.post(`/api/contracts/verify`, formData, {
+  verifyContract: (contractId: string, formData: FormData) =>
+    axiosInstance.post(`/api/contracts/verify?contractId=${contractId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
