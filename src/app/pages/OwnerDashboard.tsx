@@ -43,6 +43,7 @@ import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog'
 import { NotificationUI, mapNotification, getIcon, getBgColor } from './NotificationsPage'
 import { notificationService } from '@/services/notificationService'
+import { getImageUrl } from '@/constants/assets'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -824,7 +825,7 @@ export function OwnerDashboard() {
                       >
                         <div className="flex gap-4">
                           <img
-                            src={property.imagePath ?? ''}
+                            src={getImageUrl(property.imagePath)}
                             alt={property.title}
                             className="w-32 h-32 rounded-xl object-cover"
                           />

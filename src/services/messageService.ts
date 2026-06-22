@@ -2,6 +2,7 @@ import { apiClient } from './apiClient'
 import type { ApiResponse, PaginatedResponse } from '@/types/common'
 import type { Conversation, Message } from '@/types/message'
 import { HubConnectionBuilder, HubConnection, LogLevel } from '@microsoft/signalr'
+import { getImageUrl } from '@/constants/assets'
 
 export interface SendMessagePayload {
   conversationId?: string
@@ -68,7 +69,7 @@ export const messageService = {
       participant: {
         id: u.id,
         name: u.userName || 'User',
-        avatarUrl: u.profileImage
+        avatarUrl: getImageUrl(u.profileImage)
       },
       isOnline: u.isOnline ?? false,
       lastMessage: u.lastMessage?.content || '',
@@ -94,7 +95,7 @@ export const messageService = {
       participant: {
         id: u.id,
         name: u.userName || 'User',
-        avatarUrl: u.profileImage
+        avatarUrl: getImageUrl(u.profileImage)
       },
       isOnline: u.isOnline ?? false,
       lastMessage: '',
