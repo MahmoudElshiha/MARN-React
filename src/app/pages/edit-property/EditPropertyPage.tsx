@@ -9,6 +9,7 @@ import { PROPERTY_AMENITIES, PROPERTY_STEPS as STEPS } from '@/constants/propert
 import { PropertyFormData, TouchedFields } from './types'
 import { validateForm } from './validation'
 import { propertyService } from '@/services/propertyService'
+import { HttpError } from '@/services/httpErrors'
 
 // Import Steps
 import { PropertyDetailsStep } from './steps/PropertyDetailsStep'
@@ -22,8 +23,8 @@ const DEFAULT_FORM_DATA: PropertyFormData = {
   title: '', type: '', address: '', city: '', governorate: '', zip: '',
   bedrooms: '', beds: '', baths: '', sqm: '', description: '', numPeople: '', occupancyPreference: '',
   mapLocation: { lat: 37.7749, lng: -122.4194 },
-  selectedAmenities: [], additionalAmenities: [], price: '', deposit: '',
-  utilities: [], availableFrom: '', leaseDuration: 'Monthly',
+  selectedAmenities: [], additionalAmenities: [], price: '',
+  leaseDuration: 'Monthly',
   tenantPreferences: ['Students Welcome', 'Professionals Only', 'Families Welcome', 'No Smoking', 'Pets Allowed'],
   customPreferences: [],
   photos: [],
@@ -32,7 +33,7 @@ const DEFAULT_FORM_DATA: PropertyFormData = {
 
 export function EditPropertyPage() {
   const navigate = useNavigate()
-  const { t } = useTranslation('properties')
+  const { t, i18n } = useTranslation('properties')
   const { id } = useParams<{ id: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const stepParam = parseInt(searchParams.get('step') || '1', 10)
@@ -263,26 +264,24 @@ export function EditPropertyPage() {
       const apiData = new FormData()
 
       const mapPropertyType = (type: string) => {
-        const t = type.toLowerCase()
-        if (t === 'apartment') return 'Apartment'
-        if (t === 'house') return 'House'
-        if (t === 'room') return 'Room'
-        if (t === 'bed') return 'SharedRoom'
+        const t_val = type.toLowerCase()
+        if (t_val === 'apartment') return 'Apartment'
+        if (t_val === 'house') return 'House'
+        if (t_val === 'room') return 'Room'
+        if (t_val === 'bed') return 'SharedRoom'
         return 'Apartment'
       }
 
-      const mapGovernorate = (gov: string) => {
-        if (!gov) return 'CairoGovernorate'
-        const g = gov.replace(/\s+/g, '')
-        const valid = ['CairoGovernorate', 'GizaGovernorate', 'AlexandriaGovernorate', 'QalyubiaGovernorate', 'PortSaidGovernorate', 'SuezGovernorate', 'DakhaliaGovernorate', 'SharkiaGovernorate', 'GharbiaGovernorate', 'MonufiaGovernorate', 'BehiraGovernorate', 'KafrElSheikhGovernorate', 'DamiettaGovernorate', 'IsmailiaGovernorate', 'FaiyumGovernorate', 'BeniSuefGovernorate', 'MiniaGovernorate', 'AsyutGovernorate', 'SohagGovernorate', 'QenaGovernorate', 'LuxorGovernorate', 'AswanGovernorate', 'RedSeaGovernorate', 'NewValleyGovernorate', 'MarsaMatruhGovernorate', 'NorthSinaiGovernorate', 'SouthSinaiGovernorate']
-        if (g.toLowerCase().endsWith('governorate')) {
-          const match = valid.find(v => v.toLowerCase() === g.toLowerCase())
-          return match || 'CairoGovernorate'
-        }
-        const withSuffix = g + 'Governorate'
-        const match = valid.find(v => v.toLowerCase() === withSuffix.toLowerCase())
-        return match || 'CairoGovernorate'
+      const formatNum = (val: string | number) => {
+        if (val === '' || val === null || val === undefined) return ''
+        const str = val.toString()
+        // Use the official Arabic Decimal Separator (U+066B) instead of a comma or native toLocaleString digits
+        // to ensure ASP.NET Core parses the decimal correctly without digit conversion issues.
+        if (i18n.language.startsWith('ar')) return str.replace(/\./g, '٫')
+        return str
       }
+
+
 
       const mapAmenity = (amenity: string) => {
         const a = amenity.toLowerCase()
@@ -313,18 +312,18 @@ export function EditPropertyPage() {
       apiData.append('Bathrooms', formData.baths)
 
       // Pricing Logic
-      apiData.append('Price', formData.price)
+      apiData.append('Price', formatNum(formData.price))
       apiData.append('RentalUnit', formData.leaseDuration || 'Monthly')
 
       // Location & Property Data
       apiData.append('Address', formData.address)
       apiData.append('City', formData.city)
-      apiData.append('Governorate', mapGovernorate(formData.governorate))
+      apiData.append('Governorate', formData.governorate || 'CairoGovernorate')
       apiData.append('ZipCode', formData.zip)
-      apiData.append('SquareMeters', formData.sqm)
+      apiData.append('SquareMeters', formatNum(formData.sqm))
       
-      apiData.append('Latitude', formData.mapLocation.lat.toString())
-      apiData.append('Longitude', formData.mapLocation.lng.toString())
+      apiData.append('Latitude', formatNum(formData.mapLocation.lat))
+      apiData.append('Longitude', formatNum(formData.mapLocation.lng))
 
       // Legal Docs
       if (formData.legalDocs && formData.legalDocs.length > 0) {
@@ -356,7 +355,7 @@ export function EditPropertyPage() {
       }
 
       // Amenities
-      const finalAmenities = [...(formData.selectedAmenities || []), ...(formData.additionalAmenities || []), ...(formData.utilities || [])]
+      const finalAmenities = [...(formData.selectedAmenities || []), ...(formData.additionalAmenities || [])]
       
       const reverseAmenityMap: Record<string, string> = {
         'wifi': 'WiFi',
@@ -432,7 +431,11 @@ export function EditPropertyPage() {
       navigate('/owner-dashboard')
     } catch (error) {
       console.error('Failed to update property', error)
-      toast.error(t('editProperty.toasts.failed'))
+      if (error instanceof HttpError && error.message) {
+        toast.error(error.message)
+      } else {
+        toast.error(t('editProperty.toasts.failed'))
+      }
     }
   }
 

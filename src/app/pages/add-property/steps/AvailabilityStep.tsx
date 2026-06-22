@@ -16,12 +16,7 @@ interface AvailabilityStepProps {
 
 export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepProps) {
   const { t, i18n } = useTranslation('properties')
-  const [localAvailableFrom, setLocalAvailableFrom] = useState(formData.availableFrom)
   const [newPreference, setNewPreference] = useState('')
-
-  useEffect(() => {
-    setLocalAvailableFrom(formData.availableFrom)
-  }, [formData])
 
   // toggleLeaseDuration removed since we use RadioGroup
 
@@ -65,22 +60,7 @@ export function AvailabilityStep({ formData, updateFormData }: AvailabilityStepP
         {t('addProperty.availabilityStep.title')}
       </h2>
 
-      <div>
-        <Label
-          htmlFor="available-from"
-          className="text-[#1a1a1a] mb-2 block"
-        >
-          {t('addProperty.availabilityStep.availableFrom')}
-        </Label>
-        <Input
-          id="available-from"
-          type="date"
-          className="rounded-xl bg-white border-[#3A6EA5]/20"
-          value={localAvailableFrom}
-          onChange={(e) => setLocalAvailableFrom(e.target.value)}
-          onBlur={() => updateFormData({ availableFrom: localAvailableFrom })}
-        />
-      </div>
+
 
       <div className="bg-white rounded-2xl p-6">
         <Label className="text-[#1a1a1a] mb-3 block">
