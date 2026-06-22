@@ -110,7 +110,7 @@ export function LegalDocsStep({ formData, updateFormData, touched }: LegalDocsSt
               </a>
             </div>
           </div>
-          <p className="text-sm text-[#4a5565] mt-3">{t('editProperty.legalDocsStep.uploadingNewDocumentReplacesExisting')}</p>
+          <p className="text-sm text-[#4a5565] mt-3">{t('editProperty.legalDocsStep.uploadingNewReplacesExisting')}</p>
         </div>
       )}
 

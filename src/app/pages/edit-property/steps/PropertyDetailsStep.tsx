@@ -15,6 +15,7 @@ import { Button } from '../../../components/ui/button'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { PropertyFormData, TouchedFields } from '../types'
+import { useEnumOptions } from '@/hooks/useEnumOptions'
 
 interface PropertyDetailsStepProps {
   formData: PropertyFormData
@@ -24,11 +25,10 @@ interface PropertyDetailsStepProps {
 }
 
 export function PropertyDetailsStep({ formData, updateFormData, touched, updateTouched }: PropertyDetailsStepProps) {
-  const { t } = useTranslation('properties')
+  const { t, i18n } = useTranslation('properties')
   const [localTitle, setLocalTitle] = useState(formData.title)
   const [localAddress, setLocalAddress] = useState(formData.address)
   const [localCity, setLocalCity] = useState(formData.city)
-  const [localGovernorate, setLocalGovernorate] = useState(formData.governorate)
   const [localZip, setLocalZip] = useState(formData.zip)
   const [localSqm, setLocalSqm] = useState(formData.sqm)
   const [localDescription, setLocalDescription] = useState(formData.description)
@@ -37,7 +37,6 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
     setLocalTitle(formData.title)
     setLocalAddress(formData.address)
     setLocalCity(formData.city)
-    setLocalGovernorate(formData.governorate)
     setLocalZip(formData.zip)
     setLocalSqm(formData.sqm)
     setLocalDescription(formData.description)
@@ -60,6 +59,8 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
     const error = getFieldError(field, value)
     return `rounded-xl bg-white ${error ? 'border-red-500 bg-red-50' : 'border-[#3A6EA5]/20'}`
   }
+
+  const { options: governorates, loading: governoratesLoading } = useEnumOptions('governorates')
 
   return (
     <div className="space-y-6">
@@ -96,16 +97,17 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             {t('editProperty.detailsStep.propertyType')} <span className="text-red-500">*</span>
           </Label>
           <Select
+            dir={i18n.dir()}
             value={formData.type}
             onValueChange={(val) => {
               updateFormData({ type: val })
               updateTouched('type')
             }}
           >
-            <SelectTrigger className={getInputClass('type', formData.type)} onBlur={() => updateTouched('type')}>
+            <SelectTrigger dir={i18n.dir()} className={getInputClass('type', formData.type)} onBlur={() => updateTouched('type')}>
               <SelectValue placeholder={t('editProperty.detailsStep.selectType')} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent dir={i18n.dir()}>
               <SelectItem value="bed">{t('editProperty.detailsStep.types.bed')}</SelectItem>
               <SelectItem value="room">{t('editProperty.detailsStep.types.room')}</SelectItem>
               <SelectItem value="apartment">{t('editProperty.detailsStep.types.apartment')}</SelectItem>
@@ -153,17 +155,25 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
           <Label htmlFor="governorate" className="text-[#1a1a1a] mb-2 block">
             {t('editProperty.detailsStep.governorate')} <span className="text-red-500">*</span>
           </Label>
-          <Input
-            id="governorate"
-            placeholder={t('editProperty.detailsStep.governoratePlaceholder')}
-            className={getInputClass('governorate', formData.governorate)}
-            value={localGovernorate}
-            onChange={(e) => setLocalGovernorate(e.target.value)}
-            onBlur={() => {
-              updateFormData({ governorate: localGovernorate })
+          <Select
+            dir={i18n.dir()}
+            value={formData.governorate}
+            onValueChange={(val) => {
+              updateFormData({ governorate: val })
               updateTouched('governorate')
             }}
-          />
+          >
+            <SelectTrigger dir={i18n.dir()} className={getInputClass('governorate', formData.governorate)} onBlur={() => updateTouched('governorate')}>
+              <SelectValue placeholder={governoratesLoading ? t('editProperty.loading') : t('editProperty.detailsStep.governoratePlaceholder')} />
+            </SelectTrigger>
+            <SelectContent dir={i18n.dir()}>
+              {governorates.map((gov) => (
+                <SelectItem key={gov.id} value={gov.name}>
+                  {gov.displayName || gov.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="zip" className="text-[#1a1a1a] mb-2 block">
@@ -206,16 +216,17 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             {t('editProperty.detailsStep.bedrooms')} <span className="text-red-500">*</span>
           </Label>
           <Select
+            dir={i18n.dir()}
             value={formData.bedrooms}
             onValueChange={(val) => {
               updateFormData({ bedrooms: val })
               updateTouched('bedrooms')
             }}
           >
-            <SelectTrigger className={getInputClass('bedrooms', formData.bedrooms)} onBlur={() => updateTouched('bedrooms')}>
+            <SelectTrigger dir={i18n.dir()} className={getInputClass('bedrooms', formData.bedrooms)} onBlur={() => updateTouched('bedrooms')}>
               <SelectValue placeholder={t('editProperty.detailsStep.select')} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent dir={i18n.dir()}>
               {[1, 2, 3, 4, 5, 6].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num}
@@ -229,16 +240,17 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             {t('editProperty.detailsStep.beds')} <span className="text-red-500">*</span>
           </Label>
           <Select
+            dir={i18n.dir()}
             value={formData.beds}
             onValueChange={(val) => {
               updateFormData({ beds: val })
               updateTouched('beds')
             }}
           >
-            <SelectTrigger className={getInputClass('beds', formData.beds)} onBlur={() => updateTouched('beds')}>
+            <SelectTrigger dir={i18n.dir()} className={getInputClass('beds', formData.beds)} onBlur={() => updateTouched('beds')}>
               <SelectValue placeholder={t('editProperty.detailsStep.select')} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent dir={i18n.dir()}>
               {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num}
@@ -252,17 +264,18 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             {t('editProperty.detailsStep.bathrooms')} <span className="text-red-500">*</span>
           </Label>
           <Select
+            dir={i18n.dir()}
             value={formData.baths}
             onValueChange={(val) => {
               updateFormData({ baths: val })
               updateTouched('baths')
             }}
           >
-            <SelectTrigger className={getInputClass('baths', formData.baths)} onBlur={() => updateTouched('baths')}>
+            <SelectTrigger dir={i18n.dir()} className={getInputClass('baths', formData.baths)} onBlur={() => updateTouched('baths')}>
               <SelectValue placeholder={t('editProperty.detailsStep.select')} />
             </SelectTrigger>
-            <SelectContent>
-              {[1, 1.5, 2, 2.5, 3, 3.5, 4].map((num) => (
+            <SelectContent dir={i18n.dir()}>
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num}
                 </SelectItem>
@@ -322,16 +335,17 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             {t('editProperty.detailsStep.maxOccupants')} <span className="text-red-500">*</span>
           </Label>
           <Select
+            dir={i18n.dir()}
             value={formData.numPeople}
             onValueChange={(val) => {
               updateFormData({ numPeople: val })
               updateTouched('numPeople')
             }}
           >
-            <SelectTrigger id="num-people" className={getInputClass('numPeople', formData.numPeople)} onBlur={() => updateTouched('numPeople')}>
+            <SelectTrigger dir={i18n.dir()} id="num-people" className={getInputClass('numPeople', formData.numPeople)} onBlur={() => updateTouched('numPeople')}>
               <SelectValue placeholder={t('editProperty.detailsStep.selectMaxOccupants')} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent dir={i18n.dir()}>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                 <SelectItem key={num} value={num.toString()}>
                   {num} {num === 1 ? t('editProperty.detailsStep.person') : t('editProperty.detailsStep.people')}
@@ -349,16 +363,17 @@ export function PropertyDetailsStep({ formData, updateFormData, touched, updateT
             {t('editProperty.detailsStep.howWouldYouLike')}
           </p>
           <Select
+            dir={i18n.dir()}
             value={formData.occupancyPreference}
             onValueChange={(val) => {
               updateFormData({ occupancyPreference: val })
               updateTouched('occupancyPreference')
             }}
           >
-            <SelectTrigger id="occupancy-preference" className={getInputClass('occupancyPreference', formData.occupancyPreference)} onBlur={() => updateTouched('occupancyPreference')}>
+            <SelectTrigger dir={i18n.dir()} id="occupancy-preference" className={getInputClass('occupancyPreference', formData.occupancyPreference)} onBlur={() => updateTouched('occupancyPreference')}>
               <SelectValue placeholder={t('editProperty.detailsStep.selectOccupancyPreference')} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent dir={i18n.dir()}>
               <SelectItem value="shared">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />

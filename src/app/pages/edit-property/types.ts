@@ -49,11 +49,8 @@ export interface PropertyFormData {
 
   // Step 4: Pricing
   price: string
-  deposit: string
-  utilities: string[]
 
   // Step 5: Availability
-  availableFrom: string
   leaseDuration: string
   tenantPreferences: string[]
   customPreferences: string[]
